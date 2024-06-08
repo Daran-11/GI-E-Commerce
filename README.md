@@ -1,6 +1,8 @@
 # GI Pineapple
 
-
+## Responsibility
+Thanapat - Login
+Teem - UI Display
 
 ## Getting started
 
