@@ -1,8 +1,10 @@
 # GI Pineapple
 
 ## Responsibility
-Thanapat - Login
-Teem - UI Display
+Thanapat - Login,
+Teem - UI Display,
+Gold - cutomer searching,
+Golf - Customer payment
 
 ## Getting started
 
