@@ -1,19 +1,19 @@
 
 export default function Home() {
   return (
-    <main>    
+    /* อย่าลบตัว main ไม่งั้น navbar จะไม่ขึ้น เพราะตั้งเอาไว้ใน layout.js */
+    <>     
     
-    <div class="bg-pineapple w-full h-[400px] bg-no-repeat bg-cover bg-scroll bg-center ">
+    <div className="image bg-pineapple w-full h-[450px] bg-no-repeat bg-cover bg-scroll bg-center ">
     </div>
 
-    <div>
-      <div class="h-4/5">
+    
+      <div className="container mt-10">
         <a>
           hello
         </a>
       </div>
-   </div>
-  </main>
+  </>
   )
 
 }

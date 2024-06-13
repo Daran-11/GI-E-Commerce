@@ -6,15 +6,21 @@ const prompt = Prompt ({
     weight: '400',
 });
 
-
+// เป็น layout ที่จะใช้สำหรับทุกหน้า ทุกฟ้อนจะเปลี่ยนเมื่อมันอยู่ในตัว body กับ main ถ้าไม่ได้ครอบด้วย main ไว้ในหน้า page.js navbar ก็จะไม่ขึ้น
 export default function RootLayout({ children }) {
   return (
     
     <html lang="th">
-        <body className={prompt.className}>
+        <body className={prompt.className }>
         <Navbar/>
-        <main className={prompt.className}>{children}
-                </main>
+
+        
+          <main className={prompt.className}>
+            {children}
+
+          </main> 
+        
+
         </body>
 
     </html>

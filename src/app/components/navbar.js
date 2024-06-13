@@ -3,18 +3,18 @@ import SearchBar from "./searchbar";
 export const Navbar = () => {
     return (
 
-        <div>
+        <div className="fixed top-0 left-0 w-full bg-white shadow-lg z-50">
             <div className="header flex w-[80%] justify-between m-auto pt-[20px] pb-[15px]">
-                <div className="logo m-auto">
-                    <h2 className="text-2xl text-[#4EAC14]">GI Pineapple</h2>
+                <div className="logo mr-10 mb-auto mt-auto">
+                    <h2 className=" text-2xl text-[#4EAC14]">GI Pineapple</h2>
                 </div>
 
-                <div className="search  w-[500px]">
+                <div className="search w-[500px]">
                     <SearchBar/>
                 </div>
-                <div className="menu m-auto">
+                <div className="menu mt-auto mb-auto ml-10">
                     <nav>
-                        <ul className="text-base text-[#595959] flex gap-[40px]">
+                        <ul className="menulist text-lg text-[#595959] flex gap-[40px]">
                             <li>
                                 <Link href=''>หน้าแรก</Link>
                             </li>
