@@ -15,7 +15,7 @@ export async function GET(request) {
     try {
       // Execute SQL query to fetch products
       const [results, fields] = await connection.query(
-        'SELECT * FROM `product` WHERE `ProductName` = "สับปะรด"'
+        'SELECT * FROM `product` '
       );
   
       console.log(results); // Log the results to console for testing
