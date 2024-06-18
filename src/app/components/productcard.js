@@ -8,7 +8,6 @@ export async function getServerSideProps(context) {
     // Fetch data based on ProductID from an API or database
     const res = await fetch(`http://localhost:3000/api/product/${ProductID}`);
     const products = await res.json();
-   
     // Pass fetched data as props to the page component
     return {
       props: {
@@ -21,24 +20,30 @@ const ProductCard = ({ products = [] }) => {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-[30px] ">
         {products.map((product) => (
-             <Link key={product.ProductID} href={`/product/${product.ProductID}`}>
-                    <div key={product.ProductName} className="Card flex-col justify-center w-full h-[390px] rounded-2xl bg-[#FBFBFB] shadow-lg transition duration-500 ease-in-out transform hover:scale-105">
-                        <div className="w-full h-[200px] justify-center">
-                            <img className="w-full h-full object-cover rounded-t-2xl" src="/phulae.jpg" alt="Card Image" />
-                        </div>
-                        <div className="px-[18px]">
-                            <div className="text-2xl mt-3">
-                                <p>{product.ProductName} ของแทร่</p>
-                            </div>
-                            <div className="mt-[10px]">
-                                <p>ผู้ขาย: Ajarn Oil zaza</p>
-                                <p>ราคา  {product.Price} B / KG </p>
-                            </div>
-                        </div>
-                    </div> 
-             </Link>
+          <Link key={product.ProductID} href={`/product/${product.ProductID}`}>
+              <div key={product.ProductName} className="Card flex-col justify-center w-full h-[390px] rounded-2xl bg-[#FBFBFB] shadow-lg transition duration-500 ease-in-out transform hover:scale-105">
+                  
+                  <div className="w-full h-[200px] justify-center">
+                      <img className="w-full h-full object-cover rounded-t-2xl" src="/phulae.jpg" alt="Card Image" />
+                  </div>
 
-        ))}
+                  <div className="px-[18px]">
+
+                      <div className="text-2xl mt-3">
+                          <p>{product.ProductName} ของแทร่</p>
+                      </div>
+
+                      <div className="mt-[10px]">
+                          <p>ผู้ขาย: Ajarn Oil zaza</p>
+                          <p>ราคา  {product.Price} B / KG </p>
+                      </div>
+
+                  </div>
+              </div>
+          </Link>
+        )
+      )
+      }
       </div>
     );
   };
