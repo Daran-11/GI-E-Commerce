@@ -1,0 +1,19 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model product {
+  ProductID   Int      @id @unique(map: "ProductID") @default(autoincrement())
+  ProductName String   @db.VarChar(11)
+  ProductType String   @db.VarChar(11)
+  Description String?  @db.VarChar(200)
+  Price       Int      @db.SmallInt
+  Amount      Int      @db.MediumInt
+  ProductPic  Bytes?   @db.Blob
+  DateCreated DateTime @default(now()) @db.Timestamp(0)
+}
