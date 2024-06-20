@@ -1,6 +1,6 @@
-import Head from 'next/head'
+"use client"
+
 import { useState } from 'react';
-import { useRouter } from 'next/router';
 
 export default function Form() {
   const [formData, setFormData] = useState({
