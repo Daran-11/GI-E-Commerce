@@ -1,6 +1,7 @@
 import ProductCard from "./components/productcard";
 
-
+// หน้าหลัก
+// fetchproduct ดึงข้อมูล ID Name Price ของสินค้ามา
 async function fetchProducts() {
   const res = await fetch('http://localhost:3000/api/product?fields=ProductID,ProductName,Price');
   if (!res.ok) {
@@ -14,8 +15,8 @@ async function fetchProducts() {
 export default async function Home() {
   const products = await fetchProducts();
   return (
-    /* อย่าลบตัว main ไม่งั้น navbar จะไม่ขึ้น เพราะตั้งเอาไว้ใน layout.js */
-    <>     
+    
+    <>
     
     <div className="image bg-pineapple w-full h-[430px] bg-no-repeat bg-cover bg-scroll bg-center ">
     </div>
