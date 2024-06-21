@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,4 +5,29 @@ generator client {
 datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
+}
+
+
+//ข้างล่างคือ table ข้อมูล  เราสามารถเขียนตรงนี้ได้เลยแล้วมันจะไปเพิ่มให้ใน database
+//ถ้ามี table ใน database อยู่แล้วก็ลองพิม npx prisma db pull ใน terminal ดู มันจะได้ดึงมาให้เหมือนกับข้างล่าง
+//ทุกครั้งที่สร้าง table ใหม่ต้องพิม npx prisma migrate dev --name ตามด้วยชื่อmigrate
+//อย่างเช่น npx prisma migrate dev --name add-user-table
+//อย่างเช่น npx prisma migrate dev --name add-role
+
+model product {
+  ProductID   Int      @id @unique(map: "ProductID") @default(autoincrement())
+  ProductName String   @db.VarChar(11)
+  ProductType String   @db.VarChar(11)
+  Description String?  @db.VarChar(200)
+  Price       Int      @db.SmallInt
+  Amount      Int      @db.MediumInt
+  ProductPic  Bytes?   @db.Blob
+  DateCreated DateTime @default(now()) @db.Timestamp(0)
+}
+
+model User {
+  id      Int      @id @default(autoincrement())
+  email   String   @unique
+  name    String?
+  role    String   @default("Customer")
 }
