@@ -14,7 +14,6 @@ function RegisterPage() {
     const [passwordError, setPasswordError] = useState("");
     const [confirmPasswordError, setConfirmPasswordError] = useState("");
     const [phoneError, setPhoneError] = useState("");
-    const [isCorrect, setIsCorrect] = useState(false);
 
     const validateName = (name) => {
         if (!name) {
