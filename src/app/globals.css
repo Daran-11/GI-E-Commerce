@@ -3,3 +3,14 @@
 @tailwind utilities;
 
 
+.top-container {
+    margin-top: 150px;
+    max-width: 80%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+
+.input-box {
+   @apply block bg-white border-2 border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent
+}
