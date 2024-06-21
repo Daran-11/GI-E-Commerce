@@ -23,6 +23,12 @@ function RegisterPage() {
     };
 
     const validateEmail = (email) => {
+       let regex = /^[a-zA-Z0-9_.±]+@[a-zA-Z0-9-]+.[a-zA-Z0-9-.]+$/;
+        if(regex.test(email) == false) {
+            return "โปรดกรอกอีกเมลให้ถูกต้อง"
+        }
+
+
         if (!email.includes('@')) {
             return "อีเมลต้องมี '@' เช่น gipine@gmail.com";
         }
@@ -168,6 +174,7 @@ function RegisterPage() {
                         type="email"
                         name="email"
                         placeholder="กรอกอีเมล"
+                        maxLength={350}
                         required
                     />
                     {emailError && <div className="input-error">{emailError}</div>}
@@ -184,6 +191,7 @@ function RegisterPage() {
                         type="password"
                         name="password"
                         placeholder="กรอกรหัสผ่าน"
+                        maxLength={130}
                         required
                     />
                     {passwordError && <div className="input-error">{passwordError}</div>}                        
@@ -199,6 +207,7 @@ function RegisterPage() {
                         type="password"
                         name="confirmPassword"
                         placeholder="ยืนยันรหัสผ่าน"
+                        maxLength={130}
                         required
                     />
                     {confirmPasswordError && <div className="input-error">{confirmPasswordError}</div>}                        
@@ -214,7 +223,7 @@ function RegisterPage() {
                         type="tel"
                         name="phone"
                         placeholder="กรอกเบอร์โทร"
-                        maxlength="10"
+                        maxlength={10}
                         required
                     />
                     {phoneError && <div className="input-error">{phoneError}</div>}                        
