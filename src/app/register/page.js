@@ -14,6 +14,7 @@ function RegisterPage() {
     const [passwordError, setPasswordError] = useState("");
     const [confirmPasswordError, setConfirmPasswordError] = useState("");
     const [phoneError, setPhoneError] = useState("");
+    const [isCorrect, setIsCorrect] = useState(false);
 
     const validateName = (name) => {
         if (!name) {
@@ -52,10 +53,31 @@ function RegisterPage() {
 
     const validatePhone = (phone) => {
         let regex = /^[a-zA-Zก-ฮ]+$/;
-        if (regex.test(phone) || !phone)
-            return "โปรดกรอกเบอร์โทร";
-        if (phone.length < 10)
-            return "โปรดกรอกเลขเบอร์โทรให้ครบถ้วน"
+        const checkChar = (phone) => {
+            for (let i = 0; i < phone.length; i++) {
+                // Check if the character is alphanumeric
+                if (/[a-zA-Zก-ฮ]/.test(phone[i])) {
+                    return true; // Return true if any character is a letter
+                }
+            }
+            return false; // Return false if no alphabetic character is found            
+        } 
+        if (checkChar(phone)==true) {
+            return "เบอร์โทรไม่สามารถมีตัวอักษร"
+        }
+        
+
+        if (!phone) {
+            return "โปรดกรอกเบอร์โทร 10 หลัก"
+        } 
+
+        if (regex.test(phone) || !phone) {
+            return "โปรดกรอกเบอร์โทร";            
+        }
+        if (phone.length < 10) {
+            return "โปรดกรอกเลขเบอร์โทรให้ครบถ้วน 10 หลัก"            
+        }
+        return "";
     };
 
     const handleSubmit = async (e) => {
@@ -82,6 +104,7 @@ function RegisterPage() {
         setPasswordError("");
         setConfirmPasswordError("");
         setPhoneError("");
+
         // Proceed with the form submission
         console.log('Form is valid. Submit the form.');
     };
@@ -126,14 +149,14 @@ function RegisterPage() {
                         <input
                             onChange={handleChange}
                             value={name}
-                            className="input-box p-2  w-[500px] h-15"
+                            className={`input-box p-2 w-[500px] h-15 ${nameError ? 'border-red-500' : 'border-gray-300'}`}
                             type="text"
                             name="name"
                             placeholder="กรอกชื่อ"
                             required
 
                         />
-                            {nameError && <div className="input-error">{nameError}</div>}           
+                            {nameError && <div className="input-error isCorrect ? 'border-green-500' : 'border-red-500'">{nameError}</div>}           
                     </div>
 
 
@@ -142,7 +165,7 @@ function RegisterPage() {
                     <input
                         onChange={handleChange}
                         value={email}
-                        className="input-box p-2  w-[500px] h-15"
+                        className={`input-box p-2 w-[500px] h-15 ${emailError ? 'border-red-500' : 'border-gray-300'}`}
                         type="email"
                         name="email"
                         placeholder="กรอกอีเมล"
@@ -158,7 +181,7 @@ function RegisterPage() {
                     <input
                         onChange={handleChange}
                         value={password}
-                        className="input-box p-2  w-[500px] h-15"
+                        className={`input-box p-2 w-[500px] h-15 ${passwordError ? 'border-red-500' : 'border-gray-300'}`}
                         type="password"
                         name="password"
                         placeholder="กรอกรหัสผ่าน"
@@ -173,7 +196,7 @@ function RegisterPage() {
                     <input
                         onChange={handleChange}
                         value={confirmPassword}
-                        className="input-box p-2  w-[500px] h-15"
+                        className={`input-box p-2 w-[500px] h-15 ${confirmPasswordError ? 'border-red-500' : 'border-gray-300'}`}
                         type="password"
                         name="confirmPassword"
                         placeholder="ยืนยันรหัสผ่าน"
@@ -188,7 +211,7 @@ function RegisterPage() {
                     <input
                         onChange={handleChange}
                         value={phone}
-                        className="input-box p-2  w-[500px] h-15"
+                        className={`input-box p-2 w-[500px] h-15 ${phoneError ? 'border-red-500' : 'border-gray-300'}`}
                         type="tel"
                         name="phone"
                         placeholder="กรอกเบอร์โทร"
