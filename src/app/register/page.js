@@ -3,6 +3,7 @@
 
 import { useState } from 'react';
 
+
 import {
     validateConfirmPassword,
     validateEmail,
@@ -22,6 +23,8 @@ function RegisterPage() {
     const [passwordError, setPasswordError] = useState("");
     const [confirmPasswordError, setConfirmPasswordError] = useState("");
     const [phoneError, setPhoneError] = useState("");
+    const [successMessage, setSuccessMessage] = useState("");
+    const [error, setError] = useState("");
 
 
 
@@ -51,7 +54,24 @@ function RegisterPage() {
         setPhoneError("");
 
         // Proceed with the form submission
-        console.log('Form is valid. Submit the form.');
+        //console.log('Form is valid. Submit the form.');
+
+            // Call the registration API
+    const res = await fetch('/api/register', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name, email, password, phone }),
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+        console.log('Registration successful:', data);
+    } else {
+        setError(data.error || 'An error occurred during registration');
+    }
     };
 
     const handleChange = (e) => {
@@ -81,6 +101,8 @@ function RegisterPage() {
             default:
                 break;
         }
+
+        
     };
 
     return (
@@ -168,8 +190,8 @@ function RegisterPage() {
                     />
                     {phoneError && <div className="input-error">{phoneError}</div>}                        
                     </div>
-
-
+                    {error && <div className='bg-red-500 text-sm text-white py-1 px-3'>{error}</div>}
+                    {successMessage && <div className='bg-green-500 text-sm text-white py-1 px-3'>{successMessage}</div>}
                     <button className="bg-[#4EAC14] text-white p-2 my-2 rounded w-[75px]" type="submit"> สมัคร </button>
                 </form>
             </div>
