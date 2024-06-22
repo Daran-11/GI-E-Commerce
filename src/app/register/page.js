@@ -1,9 +1,8 @@
 "use client"
 
 
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-
-
 import {
     validateConfirmPassword,
     validateEmail,
@@ -12,7 +11,7 @@ import {
     validatePhone
 } from '../components/formValidation';
 
-function RegisterPage() {
+export default function RegisterPage() {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -25,7 +24,7 @@ function RegisterPage() {
     const [phoneError, setPhoneError] = useState("");
     const [successMessage, setSuccessMessage] = useState("");
     const [error, setError] = useState("");
-
+    const router = useRouter()
 
 
     const handleSubmit = async (e) => {
@@ -57,7 +56,7 @@ function RegisterPage() {
         //console.log('Form is valid. Submit the form.');
 
             // Call the registration API
-    const res = await fetch('/api/register', {
+    const res = await fetch('/api/auth/register', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -66,11 +65,21 @@ function RegisterPage() {
     });
 
     const data = await res.json();
+    
 
     if (res.ok) {
-        console.log('Registration successful:', data);
+        setSuccessMessage('สมัครสมาชิกสำเร็จ', data);
+        setError('');
+
+        function myGeeks() {
+            console.log("navigating to mainpage in 3 secs");
+            router.push('/');
+        }  
+        setTimeout(myGeeks, 3000);
+        
     } else {
-        setError(data.error || 'An error occurred during registration');
+        setSuccessMessage('');
+        setError(data.error || 'เกิดข้อผิดพลาดระหว่างการสมัครสมาชิก');
     }
     };
 
@@ -192,11 +201,10 @@ function RegisterPage() {
                     </div>
                     {error && <div className='bg-red-500 text-sm text-white py-1 px-3'>{error}</div>}
                     {successMessage && <div className='bg-green-500 text-sm text-white py-1 px-3'>{successMessage}</div>}
-                    <button className="bg-[#4EAC14] text-white p-2 my-2 rounded w-[75px]" type="submit"> สมัคร </button>
+                    <button className="bg-[#4EAC14] text-white p-2 my-2 rounded-2xl w-[90px]" type="submit"> สมัคร </button>
                 </form>
             </div>
         </div>
     );
 }
 
-export default RegisterPage;
