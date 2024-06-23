@@ -28,7 +28,8 @@ export const authOptions = {
             return {
               id: user.id,
               name: user.name,
-              email: user.email
+              email: user.email,
+              role: user.role
             }
           } else {
             throw new Error('Invalid email or password')
@@ -44,12 +45,14 @@ export const authOptions = {
       jwt: async ({ token, user }) => {
         if (user) {
           token.id = user.id
+          token.role = user.role
         }
         return token
       },
       session: async ({ session, token }) => {
         if (session.user) {
           session.user.id = token.id
+          session.user.role = token.role
         }
         return session
       }
