@@ -1,6 +1,9 @@
+'use client'
+import { signOut, useSession } from 'next-auth/react';
 import Link from "next/link";
 import SearchBar from "./searchbar";
 export const Navbar = () => {
+    const { data: session, status } = useSession()
     return (
 
         <div className="fixed top-0 left-0 w-full bg-white shadow-lg z-50">
@@ -21,17 +24,32 @@ export const Navbar = () => {
                                 <Link href='/'>หน้าแรก</Link>
                             </li>
                             <li>
-                                <Link href=''>เกี่ยวกับเรา</Link>
+                                <Link href='/about'>เกี่ยวกับเรา</Link>
                             </li>
                             <li>
-                                <Link href=''>สมัครสมาชิก</Link>
+                                <Link href='/register'>สมัครสมาชิก</Link>
+                            </li>
+                            {status === 'unauthenticated' ? (
+                            <li>
+                            <Link href='/Login'>เข้าสู่ระบบ</Link>
+                            </li>
+                        ) : status === 'authenticated' && session?.user ? (
+                            <>
+                            <li>
+                                <Link href='/profile'>โปรไฟล์</Link>
                             </li>
                             <li>
-                                <Link href=''>เข้าสู่ระบบ</Link>
-                            </li>
-                            <li>
-                                <Link href=''>ตะกร้าสินค้า</Link>
-                            </li>
+                            <button onClick={() => signOut({ callbackUrl: '/' })} >
+                                    ออกจากระบบ
+                            </button>
+                                
+                            </li>                            
+                            </>
+
+                            
+                        ) : (
+                            <li>Loading...</li>
+                        )}
                         </ul>
                     </nav>
             
