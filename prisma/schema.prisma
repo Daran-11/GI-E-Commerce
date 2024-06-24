@@ -7,6 +7,12 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+//ข้างล่างคือ table ข้อมูล  เราสามารถเขียนตรงนี้ได้เลยแล้วมันจะไปเพิ่มให้ใน database
+//ถ้ามี table ใน database อยู่แล้วก็ลองพิม npx prisma db pull ใน terminal ดู มันจะได้ดึงมาให้เหมือนกับข้างล่าง
+//ทุกครั้งที่สร้าง table ใหม่ต้องพิม npx prisma migrate dev --name ตามด้วยชื่อmigrate
+//อย่างเช่น npx prisma migrate dev --name add-user-table
+//อย่างเช่น npx prisma migrate dev --name add-role
+
 model product {
   ProductID   Int      @id @unique(map: "ProductID") @default(autoincrement())
   ProductName String   @db.VarChar(11)
@@ -16,4 +22,15 @@ model product {
   Amount      Int      @db.MediumInt
   ProductPic  Bytes?   @db.Blob
   DateCreated DateTime @default(now()) @db.Timestamp(0)
+}
+
+model user {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  name      String
+  role      String   @default("Customer")
+  phone     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
