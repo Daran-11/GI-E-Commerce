@@ -43,7 +43,7 @@ export const Navbar = () => {
                                     ออกจากระบบ
                             </button>
                                 
-                            </li>                            
+                            </li>
                             </>
 
                             
