@@ -19,8 +19,10 @@ export default async function Home() {
   return (
     
     <>
-    
-    <div className="image bg-pineapple w-full h-[430px] bg-no-repeat bg-cover bg-scroll bg-center ">
+    <div className="">
+          <div className="image bg-pineapple  w-full h-[460px] bg-no-repeat bg-cover bg-scroll bg-center ">
+    </div>
+
     </div>
 
     
