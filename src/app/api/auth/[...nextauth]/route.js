@@ -38,7 +38,11 @@ export const authOptions = {
       })
     ],
     adapter: PrismaAdapter(prisma),
-    session: {
+    session: { 
+          // Set session timeout (maxAge) to 30 days (in seconds)
+    maxAge: 30 * 24 * 60 * 60, // 30 days in seconds
+    // Set session update interval (updateAge) to 1 day (in seconds)
+    updateAge: 24 * 60 * 60, // 1 day in seconds
       strategy: 'jwt',
     },
     callbacks: {
