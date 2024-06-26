@@ -12,24 +12,33 @@ export const authOptions = {
       CredentialsProvider({
         name: 'Credentials',
         credentials: {
-          email: { label: 'Email', type: 'email', placeholder: 'john@doe.com' },
+          email: { label: 'Phone or Email ', type: 'text', placeholder: 'john@doe.com' },
           password: { label: 'Password', type: 'password' },
         },
         async authorize(credentials, req) {
           if (!credentials) return null
-          const user = await prisma.user.findUnique({
-            where: { email: credentials.email },
-          })
   
-          if (
-            user &&
-            (await bcrypt.compare(credentials.password, user.password))
-          ) {
+          let user = null
+          // Check if the identifier is an email or username
+          const isEmail = credentials.identifier.includes('@')
+  
+          if (isEmail) {
+            user = await prisma.user.findUnique({
+              where: { email: credentials.identifier },
+            })
+          } else  {
+            user = await prisma.user.findUnique({
+              where: { phone: credentials.identifier },
+            })
+          }
+  
+          if (user && (await bcrypt.compare(credentials.password, user.password))) {
             return {
               id: user.id,
+              phone: user.phone,
               name: user.name,
               email: user.email,
-              role: user.role
+              role: user.role,
             }
           } else {
             throw new Error('Invalid email or password')

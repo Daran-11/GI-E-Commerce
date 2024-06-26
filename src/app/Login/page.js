@@ -6,7 +6,7 @@ import { useState } from 'react'
 
 export default function Login() {
   const router = useRouter()
-  const [email, setEmail] = useState('')
+  const [identifier, setIdentifier] = useState('')
   const [password, setPassword] = useState('') 
 
   const handleSubmit = async (e) => {
@@ -14,11 +14,10 @@ export default function Login() {
     // ทำงานบางอย่าง เช่น ตรวจสอบฟอร์ม
     // แล้วนำทางไปยังหน้า dashboard
     try {
-      console.log('email', email)
       console.log('password', password)
       const result = await signIn('credentials',{
         redirect: false,
-        email,
+        identifier, 
         password,
       })
 
@@ -45,10 +44,9 @@ export default function Login() {
         <h2 className="text-4xl font-light mb-6">GI Pineapple :)</h2>
         <input 
           className="textbox mb-4 p-3 w-64 text-center rounded-lg border border-gray-300 outline-none focus:border-teal-500 transition" 
-          type="email" 
-          value={email}
-          placeholder="กรอกอีเมล" 
-          onChange={(e) => setEmail(e.target.value)}
+          value={identifier}
+          placeholder="กรอกอีเมล หรือ เบอร์โทร" 
+          onChange={(e) => setIdentifier(e.target.value)}
           required
         />
         <input 
@@ -62,7 +60,9 @@ export default function Login() {
         <button 
           className="btn-submit h-[50px] p-3 w-64 bg-teal-500 text-white rounded-lg cursor-pointer hover:bg-teal-600 transition" 
           type="submit" 
-          value="Login" >
+          value="Login"
+          onClick={handleSubmit}
+          >
 
           เข้าสู่ระบบ
 
