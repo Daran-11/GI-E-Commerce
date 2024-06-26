@@ -3,20 +3,8 @@
 import Link from 'next/link';
 
 
-export async function getServerSideProps(context) {
-    const { ProductID } = context.params;
-    // Fetch data based on ProductID from an API or database
-    const res = await fetch(`http://localhost:3000/api/product/${ProductID}`);
-    const products = await res.json();
-    // Pass fetched data as props to the page component
-    return {
-      props: {
-        products,
-      },
-    };
-  }
 
-const ProductCard = ({ products = [] }) => {
+const ProductCard = ({products}) => {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-[30px] ">
         {products.map((product) => (
