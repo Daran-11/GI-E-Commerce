@@ -1,8 +1,10 @@
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
+export const revalidate = 60
 
 export async function generateStaticParams() {
   const products = await prisma.product.findMany({
+    
     select: {
       ProductID: true,
     },
@@ -17,6 +19,7 @@ export default async function ProductDetails({ params }) {
   const { ProductID } = params;
 
   const product = await prisma.product.findUnique({
+    
     where: {
       ProductID: parseInt(ProductID, 10), // Ensure ProductID is an integer
     },

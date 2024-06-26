@@ -29,6 +29,7 @@ export const Navbar = () => {
                             <li>
                                 <Link href='/register'>สมัครสมาชิก</Link>
                             </li>
+                            
                             {status === 'unauthenticated' ? (
                             <li>
                             <Link href='/Login'>เข้าสู่ระบบ</Link>

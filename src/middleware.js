@@ -30,6 +30,7 @@ export async function middleware(req) {
     return NextResponse.redirect(new URL('/', req.url))
   }
 
+  //สำหรับ farmer
   /*if (url.startsWith('/farmer') && role !== 'farmer' ) {
     console.log('User is not authorized, redirecting to homepage')
     return NextResponse.redirect(new URL('/', req.url))
