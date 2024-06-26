@@ -1,15 +1,19 @@
-import { PrismaClient } from '@prisma/client';
+// app/api/product/[ProductID]/route.js
 import { NextResponse } from 'next/server';
+import prisma from '../../../../../lib/prisma';
 
-const prisma = new PrismaClient();
 
-export async function GET(request, { params }) {
+export async function GET(request,{ params }) {
   const { ProductID } = params;
+
+  if (!ProductID) {
+    return NextResponse.json({ error: 'ProductID is required' }, { status: 400 });
+  }
 
   try {
     const product = await prisma.product.findUnique({
       where: {
-        ProductID: parseInt(ProductID, 10), // Ensure ProductID is an integer
+        ProductID: parseInt(ProductID, 10),
       },
     });
 
@@ -21,7 +25,5 @@ export async function GET(request, { params }) {
   } catch (error) {
     console.error('Error fetching product details:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
-  } finally {
-    await prisma.$disconnect();
   }
 }

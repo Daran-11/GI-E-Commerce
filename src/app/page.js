@@ -6,6 +6,7 @@ import prisma from "../../lib/prisma";
 
 // หน้าหลัก
 // fetchproduct ดึงข้อมูล ID Name Price ของสินค้ามา
+
 async function fetchProducts() {
   try {
     const products = await prisma.product.findMany({
@@ -16,6 +17,7 @@ async function fetchProducts() {
       },
     });
     return products;
+    
   } catch (error) {
     throw new Error('Failed to fetch data');
   } finally {
