@@ -1,7 +1,7 @@
 import { getServerSession } from 'next-auth';
 import { Prompt } from "next/font/google";
-import SessionProvider from '../../components/SessionProvider';
-import Navbar from "../../components/navbar";
+import SessionProvider from '../components/SessionProvider';
+import Navbar from "../components/navbar";
 import "./globals.css";
 
 const prompt = Prompt ({

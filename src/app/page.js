@@ -1,6 +1,6 @@
 
 
-import ProductCard from "../../components/productcard";
+import ProductCard from "../components/productcard";
 
 import prisma from "../../lib/prisma";
 

@@ -9,7 +9,7 @@ import {
     validateName,
     validatePassword,
     validatePhone
-} from '../../../components/formValidation';
+} from '../../components/formValidation';
 
 export default function RegisterPage() {
     const [name, setName] = useState("");
