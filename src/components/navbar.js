@@ -1,8 +1,11 @@
 'use client'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from '@nextui-org/react';
 import { signOut, useSession } from 'next-auth/react';
 import Link from "next/link";
-import DropdownMenu from './dropdownMenu';
+import '../../lib/fontAwesome';
 import SearchBar from "./searchbar";
+
 export const Navbar = () => {
     const { data: session, status } = useSession()
     return (
@@ -30,22 +33,44 @@ export const Navbar = () => {
                             <li>
                                 <Link href='/register'>สมัครสมาชิก</Link>
                             </li>
-                            <DropdownMenu/>
+
                             {status === 'unauthenticated' ? (
                             <li>
                             <Link href='/Login'>เข้าสู่ระบบ</Link>
                             </li>
                         ) : status === 'authenticated' && session?.user ? (
                             <>
-                            <li>
-                                <Link href='/profile'>โปรไฟล์</Link>
-                            </li>
-                            <li>
-                            <button onClick={() => signOut({ callbackUrl: '/' })} >
-                                    ออกจากระบบ
-                            </button>
-                                
-                            </li>
+                            <Dropdown
+                                showArrow ='true'
+                            >
+                                <DropdownTrigger>
+                                    <Button 
+                                    variant="bordered" 
+                                    disableRipple="true"
+                                    >
+                                   <FontAwesomeIcon icon="fa-solid fa-bars" size="xl" style={{color: "#4eac14",}} />
+                                    </Button>
+                                </DropdownTrigger>
+                                <DropdownMenu 
+                                    aria-label="Static Actions"
+                                    className='pt-10 w-[300px] h-[500px] bg-white border shadow-lg rounded-lg flex-auto '
+                                >
+                                    <DropdownItem key="profile" className='dropdown-item '>
+                                        <Link href='/profile'>โปรไฟล์</Link>
+                                    </DropdownItem>
+
+                                    <DropdownItem key="farmer register " className='dropdown-item'>
+                                            ลงทะเบียนเกษตรกร
+                                    </DropdownItem>   
+                                    
+                                    <DropdownItem key="signout" className='dropdown-item text-red-500 hover:text-red-500'>
+                                        <button onClick={() => signOut({ callbackUrl: '/' })}>
+                                            ออกจากระบบ
+                                        </button>
+                                    </DropdownItem>
+                                    
+                                </DropdownMenu>
+                                </Dropdown>
                             </>
 
                             
