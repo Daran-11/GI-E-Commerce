@@ -8,6 +8,7 @@ export default function Login() {
   const router = useRouter()
   const [identifier, setIdentifier] = useState('')
   const [password, setPassword] = useState('') 
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -17,12 +18,13 @@ export default function Login() {
       console.log('password', password)
       const result = await signIn('credentials',{
         redirect: false,
-        identifier, 
+        identifier,
         password,
       })
 
+  
       if (result.error) {
-        console.error(result.error)
+        setError(result.error)
         return false
       }
     
@@ -63,10 +65,11 @@ export default function Login() {
           value="Login"
           onClick={handleSubmit}
           >
-
+            
           เข้าสู่ระบบ
 
         </button>
+        {error && <div className='bg-red-500 text-sm text-white py-1 px-3'>{error}</div>}
       </form>
     </div>
   )
