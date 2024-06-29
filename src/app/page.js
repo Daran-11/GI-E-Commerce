@@ -1,50 +1,63 @@
+"use client";
 
-
+import { useEffect, useState } from "react";
 import ProductCard from "../components/productcard";
-
-import prisma from "../../lib/prisma";
-
-// หน้าหลัก
-// fetchproduct ดึงข้อมูล ID Name Price ของสินค้ามา
 
 async function fetchProducts() {
   try {
-    const products = await prisma.product.findMany({
-      select: {
-        ProductID: true,
-        ProductName: true,
-        Price: true,
-      },
-    });
-    return products;
-    
+    const res = await fetch('http://localhost:3000/api/product');
+    if (!res.ok) {
+      throw new Error('Failed to fetch data');
+    }
+    const products = await res.json();
+    return { products, error: null };
   } catch (error) {
-    throw new Error('Failed to fetch data');
-  } finally {
-    await prisma.$disconnect();
+    return { products: [], error: 'ไม่พบข้อมูล' };
   }
 }
 
+export default function Home() {
+  const [products, setProducts] = useState([]);
+  const [error, setError] = useState(null);
 
-export default async function Home() {
-  const products = await fetchProducts();
+  useEffect(() => {
+    async function loadProducts() {
+      const { products, error } = await fetchProducts();
+      if (error) {
+        setError(error);
+      } else {
+        setProducts(products);
+      }
+    }
+    loadProducts();
+  }, []);
+
   return (
-    
     <>
-    <div className="">
-          <div className="image bg-pineapple  w-full h-[460px] bg-no-repeat bg-cover bg-scroll bg-center ">
-    </div>
-
-    </div>
-
-    
-      <div className="container mt-10">
-        
-          
-          <ProductCard products={products} />
-        
+      <div className="">
+        <div className="image bg-pineapple w-full h-[460px] bg-no-repeat bg-cover bg-scroll bg-center ">
+        </div>
       </div>
-  </>
-  )
+      <div className="">
 
+      </div>
+      <div className="container mt-10">
+        <div className="my-5">
+          <p>
+            filter here
+          </p>          
+        </div>
+        <div>
+          {error ? (
+            <div className="alert alert-error justify-center flex items-center text-gray-500">
+              <p>{error}</p>
+            </div>
+          ) : (
+            <ProductCard products={products} />
+          )}          
+        </div>
+
+      </div>
+    </>
+  );
 }

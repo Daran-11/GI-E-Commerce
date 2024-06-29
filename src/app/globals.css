@@ -34,6 +34,9 @@
 }
 
 .dropdown-item {
-   @apply pb-4 pl-10 hover:text-[#4EAC14]
+   @apply w-full h-[40px] pb-4 pl-[50px] hover:text-[#4EAC14]
 }
 
+.icon-hover {
+  @apply text-[#595959] hover:text-[#4EAC14]
+}
