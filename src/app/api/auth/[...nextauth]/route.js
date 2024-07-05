@@ -16,35 +16,41 @@ export const authOptions = {
           password: { label: 'Password', type: 'password' },
         },
         async authorize(credentials, req) {
-          if (!credentials) return null
+          if (!credentials) return null;
   
-          let user = null
-          // Check if the identifier is an email or username
-          const isEmail = credentials.identifier.includes('@')
+          let user = null;
+          try {
+            const isEmail = credentials.identifier.includes('@');
   
-          if (isEmail) {
-            user = await prisma.user.findUnique({
-              where: { email: credentials.identifier },
-            })
-          } else  {
-            user = await prisma.user.findUnique({
-              where: { phone: credentials.identifier },
-            })
-          }
-  
-          if (user && (await bcrypt.compare(credentials.password, user.password))) {
-            return {
-              id: user.id,
-              phone: user.phone,
-              name: user.name,
-              email: user.email,
-              role: user.role,
+            if (isEmail) {
+              user = await prisma.user.findUnique({
+                where: { email: credentials.identifier },
+              });
+            } else {
+              user = await prisma.user.findUnique({
+                where: { phone: credentials.identifier },
+              });
             }
-          } else {
-            throw new Error('Invalid email or password')
+  
+            if (user && (await bcrypt.compare(credentials.password, user.password))) {
+              return {
+                id: user.id,
+                phone: user.phone,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+              };
+            } else {
+              throw new Error('Invalid email or password');
+            }
+          } catch (error) {
+            if (error.message.includes("Can't reach database server")) {
+              throw new Error("Unable to connect to server");
+            }
+            throw new Error(error.message);
           }
         },
-      })
+      }),
     ],
     adapter: PrismaAdapter(prisma),
     session: { 

@@ -7,7 +7,7 @@ async function fetchProducts() {
   try {
     const res = await fetch('http://localhost:3000/api/product');
     if (!res.ok) {
-      throw new Error('Failed to fetch data');
+    return {error:'ไม่สามรถเชื่อมต่อข้อมูลได้ในขณะนี้'};
     }
     const products = await res.json();
     return { products, error: null };
@@ -33,14 +33,11 @@ export default function Home() {
   }, []);
 
   return (
-    <>
-      <div className="">
-        <div className="image bg-pineapple w-full h-[460px] bg-no-repeat bg-cover bg-scroll bg-center ">
-        </div>
-      </div>
-      <div className="">
+    <div>
 
-      </div>
+        <div className="image bg-pineapple w-auto h-[500px] bg-no-repeat bg-cover bg-scroll bg-center ">
+        </div>
+
       <div className="container mt-10">
         <div className="my-5">
           <p>
@@ -58,6 +55,6 @@ export default function Home() {
         </div>
 
       </div>
-    </>
+    </div>
   );
 }
