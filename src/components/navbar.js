@@ -3,13 +3,14 @@
 import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from '@nextui-org/react';
 import { signOut, useSession } from 'next-auth/react';
 import Link from "next/link";
+import { usePathname } from 'next/navigation';
 import '../../lib/fontAwesome';
 import SearchBar from "./searchbar";
 
 
 export const Navbar = () => {
     const { data: session, status } = useSession()
-
+    const currentPath = usePathname();
     return (
 
         <div className="fixed top-0 left-0 w-full bg-white shadow-lg z-50">
@@ -27,13 +28,22 @@ export const Navbar = () => {
                     <nav>
                         <ul className="menulist text-lg text-[#595959] flex xl:gap-x-[40px] md:gap-x-[20px]">
                             <li>
-                                <Link href='/'>หน้าแรก</Link>
+                                <Link 
+                                    href='/'
+                                    className={currentPath === "/" ? "text-[#4EAC14]": "text-[#595959]"}
+                                    >
+                                    หน้าแรก
+                                </Link>
                             </li>
                             <li>
-                                <Link href='/about'>เกี่ยวกับเรา</Link>
+                                <Link href='/about'
+                                className={currentPath === "/about" ? "text-[#4EAC14]": "text-[#595959]"}
+                                >เกี่ยวกับเรา</Link>
                             </li>
                             <li>
-                                <Link href='/register'>สมัครสมาชิก</Link>
+                                <Link href='/register'
+                                className={currentPath === "/register" ? "text-[#4EAC14]": "text-[#595959]"}
+                                >สมัครสมาชิก</Link>
                             </li>
 
                             {status === 'unauthenticated' ? (
