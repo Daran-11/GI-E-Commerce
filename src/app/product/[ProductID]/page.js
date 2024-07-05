@@ -36,6 +36,9 @@ export default async function ProductDetails({ params }) {
         <p>Product Name: {product.ProductName}</p>
         <p>Price: ${product.Price}</p>
         {/* Other product details */}
+        <button className='bg-green-500 rounded w-[100px]'>
+          สั่งซื้อ
+        </button>
       </div>
     </main>
   );

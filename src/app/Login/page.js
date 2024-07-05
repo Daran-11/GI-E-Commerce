@@ -31,9 +31,9 @@ export default function Login() {
       router.push('/')
 
     } catch (error) {
-      console.log('error', error)
+      setError("Unable to connect to server");
+      console.log("error", error);
     }
-    
   }
   return (
     <div className="flex items-center justify-center min-h-screen ">
