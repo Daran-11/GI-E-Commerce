@@ -4,7 +4,6 @@ import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from '@
 import { signOut, useSession } from 'next-auth/react';
 import Link from "next/link";
 import { usePathname } from 'next/navigation';
-import '../../lib/fontAwesome';
 import SearchBar from "./searchbar";
 
 
@@ -14,16 +13,20 @@ export const Navbar = () => {
     return (
 
         <div className="fixed top-0 left-0 w-full bg-white shadow-lg z-50">
-            <div className="header flex w-[80%] justify-between m-auto pt-[20px] pb-[15px]">
-                <div className="logo mr-10 mb-auto mt-auto text-2xl text-[#4EAC14]">
-                    
-                    <a href ='/'>GI Pineapple</a>
-                    
+            <div className="header flex  w-[80%] justify-between m-auto pt-[20px] pb-[15px]">
+                <div className='flex justify-start'>
+                    <div className="logo mr-10 mb-auto mt-auto text-3xl text-[#4EAC14]">
+                        
+                        <a href ='/'>GI Pineapple</a>
+                        
+                        
+                    </div>
+
+                    <div className="search w-[550px] ml-5">
+                        <SearchBar/>
+                    </div>                    
                 </div>
 
-                <div className="search w-[500px]">
-                    <SearchBar/>
-                </div>
                 <div className="menu mt-auto mb-auto ml-10">
                     <nav>
                         <ul className="menulist text-lg text-[#595959] flex xl:gap-x-[40px] md:gap-x-[20px]">

@@ -1,3 +1,4 @@
+import { SearchProvider } from '@/context/searchcontext';
 import { getServerSession } from 'next-auth';
 import { Prompt } from "next/font/google";
 import SessionProvider from '../components/SessionProvider';
@@ -15,11 +16,12 @@ export default async function RootLayout({ children }) {
   return (
     
     <html lang="th">
-        <body className={prompt.className }>
+      <SearchProvider>
+        <body className={`${prompt.className} bg-[#fafafa]`}>
         
         <main>
         <SessionProvider session={session}>
-          <Navbar/>
+          <Navbar />
           {children}
           </SessionProvider>
 
@@ -27,7 +29,10 @@ export default async function RootLayout({ children }) {
 
         
 
-        </body>
+        </body>             
+      </SearchProvider>
+   
+
 
     </html>
   )
