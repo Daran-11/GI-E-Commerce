@@ -1,8 +1,8 @@
 "use client";
 
+import { useSearch } from "@/context/searchcontext";
 import { useEffect, useState } from "react";
 import ProductCard from "../components/productcard";
-
 async function fetchProducts() {
   try {
     const res = await fetch('http://localhost:3000/api/product');
@@ -17,7 +17,9 @@ async function fetchProducts() {
 }
 
 export default function Home() {
+  const { searchQuery } = useSearch();
   const [products, setProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -27,10 +29,32 @@ export default function Home() {
         setError(error);
       } else {
         setProducts(products);
+        setFilteredProducts(products);
       }
     }
     loadProducts();
   }, []);
+
+
+
+  useEffect(() => {
+    if (searchQuery) {
+      const queryParts = searchQuery.toLowerCase().split(' ').filter(part => part);
+
+      const filtered = products.filter(product => {
+        return queryParts.every(part => {
+        const nameMatch = product.ProductName && product.ProductName.toLowerCase().includes(part);
+        const priceMatch = product.Price && product.Price.toString().includes(part);
+        const typeMatch = product.ProductType && product.ProductType.toLowerCase().includes(part)
+        return nameMatch || priceMatch || typeMatch;
+        });
+      });
+      setFilteredProducts(filtered);
+    } else {
+      setFilteredProducts(products);
+    }
+  }, [searchQuery, products]);
+
 
   return (
     <div>
@@ -50,7 +74,7 @@ export default function Home() {
               <p>{error}</p>
             </div>
           ) : (
-            <ProductCard products={products} />
+            <ProductCard products={filteredProducts} />
           )}          
         </div>
 
