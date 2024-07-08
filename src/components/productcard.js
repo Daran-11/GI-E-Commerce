@@ -3,7 +3,6 @@
 import Link from 'next/link';
 
 
-
 const ProductCard = ({products}) => {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-[30px] ">
@@ -18,7 +17,7 @@ const ProductCard = ({products}) => {
                   <div className="px-[18px]">
 
                       <div className="text-2xl mt-3">
-                          <p>{product.ProductName} ของแทร่</p>
+                          <p>{product.ProductName} {product.ProductType} </p>
                       </div>
 
                       <div className="mt-[10px]">
