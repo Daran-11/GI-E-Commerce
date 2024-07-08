@@ -7,6 +7,7 @@ export async function GET() {
       select: {
         ProductID: true,
         ProductName: true,
+        ProductType: true,
         Price: true,
       },
     });
