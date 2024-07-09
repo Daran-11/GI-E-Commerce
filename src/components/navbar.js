@@ -51,7 +51,9 @@ export const Navbar = () => {
 
                             {status === 'unauthenticated' ? (
                             <li>
-                            <Link href='/Login'>เข้าสู่ระบบ</Link>
+                            <Link href='/Login'
+                             className={currentPath === "/Login" ? "text-[#4EAC14]": "text-[#595959]"}
+                            >เข้าสู่ระบบ</Link>
                             </li>
                         ) : status === 'authenticated' && session?.user ? (
                             <>
