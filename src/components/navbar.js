@@ -10,6 +10,7 @@ import SearchBar from "./searchbar";
 export const Navbar = () => {
     const { data: session, status } = useSession()
     const currentPath = usePathname();
+    const cartItems = (10); //จำนวนสินค้าในตะกร้าตอนนี้
     return (
 
         <div className="fixed top-0 left-0 w-full bg-white shadow-lg z-50">
@@ -47,6 +48,16 @@ export const Navbar = () => {
                                 <Link href='/register'
                                 className={currentPath === "/register" ? "text-[#4EAC14]": "text-[#595959]"}
                                 >สมัครสมาชิก</Link>
+                            </li>
+
+                            <li>
+                                <Link href='/cart'
+                                className={currentPath === "/cart" ? "text-[#4EAC14]": "text-[#595959]"}
+                                >ตะกร้า </Link>
+                                <span className='bg-[#4EAC14] text-white text-base rounded-full px-1 '>
+                                    {cartItems}                                    
+                                </span>
+
                             </li>
 
                             {status === 'unauthenticated' ? (
@@ -101,6 +112,8 @@ export const Navbar = () => {
                         ) : (
                             <li>Loading...</li>
                         )}
+
+
                         </ul>
                     </nav>
             
