@@ -7,7 +7,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model product {
+model Product {
   ProductID   Int      @id @unique(map: "ProductID") @default(autoincrement())
   ProductName String   @db.VarChar(11)
   ProductType String   @db.VarChar(11)
@@ -16,15 +16,36 @@ model product {
   Amount      Int      @db.MediumInt
   ProductPic  Bytes?   @db.Blob
   DateCreated DateTime @default(now()) @db.Timestamp(0)
+  cartItems CartItem[]
+  
 }
 
-model user {
+model User {
   id        Int      @id @default(autoincrement())
   email     String   @unique
   name      String
-  role      String   @default("Customer")
+  role      Role   @default(customer)
   password  String
   createdAt DateTime @default(now())
   phone     String   @unique
   updatedAt DateTime @updatedAt
+  cartItems CartItem[]
+}
+
+model CartItem {
+  id        Int     @id @default(autoincrement())
+  quantity  Int
+  userId    Int
+  productId Int
+  user      User    @relation(fields: [userId], references: [id])
+  product   Product @relation(fields: [productId], references: [ProductID])
+
+  @@unique([userId, productId])
+}
+
+
+enum Role {
+  customer
+  farmer
+  admin
 }
