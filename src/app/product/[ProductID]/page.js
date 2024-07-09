@@ -1,3 +1,4 @@
+import Counter from '@/components/counter';
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 export const revalidate = 60
@@ -34,8 +35,10 @@ export default async function ProductDetails({ params }) {
       <div className="top-container">
         <h1>Product ID: {product.ProductID}</h1>
         <p>Product Name: {product.ProductName}</p>
-        <p>Price: ${product.Price}</p>
+        <p>ราคา: ${product.Price}</p>
+        <p>มีสินค้า: {product.Amount}</p>
         {/* Other product details */}
+        <Counter productAmount= {product.Amount}/>
         <button className='bg-green-500 rounded w-[100px]'>
           สั่งซื้อ
         </button>

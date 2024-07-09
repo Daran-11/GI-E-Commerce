@@ -8,6 +8,7 @@ export async function GET() {
         ProductID: true,
         ProductName: true,
         ProductType: true,
+        Amount: true,
         Price: true,
       },
     });
