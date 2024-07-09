@@ -30,7 +30,7 @@ export const Navbar = () => {
 
                 <div className="menu mt-auto mb-auto ml-10">
                     <nav>
-                        <ul className="menulist text-lg text-[#595959] flex xl:gap-x-[40px] md:gap-x-[20px]">
+                        <ul className="menulist text-lg items-center text-[#595959] flex xl:gap-x-[40px] md:gap-x-[20px]">
                             <li>
                                 <Link 
                                     href='/'

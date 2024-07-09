@@ -21,7 +21,7 @@ export default function Counter({productAmount}) {
 
     
     <div className=''>
-        <div className='flex place-items-center '>
+        <div className='flex items-center '>
             <button className='btn w-10 h-10 border-2' onClick={decrement}>
                 -
             </button>
