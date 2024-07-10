@@ -1,8 +1,8 @@
-import { SearchProvider } from '@/context/searchcontext';
+
 import { getServerSession } from 'next-auth';
 import { Prompt } from "next/font/google";
-import SessionProvider from '../components/SessionProvider';
 import Navbar from "../components/navbar";
+import SessionProvider from '../components/SessionProvider';
 import "./globals.css";
 
 const prompt = Prompt ({
@@ -16,24 +16,12 @@ export default async function RootLayout({ children }) {
   return (
     
     <html lang="th">
-      <SearchProvider>
-        <body className={`${prompt.className} bg-[#fafafa]`}>
-        
-        <main>
-        <SessionProvider session={session}>
-          <Navbar />
-          {children}
+      <body className={`${prompt.className} bg-[#fafafa]`}>
+          <SessionProvider session={session}>
+            <Navbar />
+            <main>{children}</main>
           </SessionProvider>
-
-        </main>
-
-        
-
-        </body>             
-      </SearchProvider>
-   
-
-
+      </body>
     </html>
   )
 }

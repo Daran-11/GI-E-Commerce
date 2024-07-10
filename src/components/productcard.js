@@ -21,7 +21,7 @@ const ProductCard = ({products}) => {
                       </div>
 
                       <div className="mt-[10px]">
-                          <p>ผู้ขาย: Ajarn Oil zaza</p>
+                          <p>ผู้ขาย: สวนลุงพล</p>
                           <p>ราคา  {product.Price} B / KG </p>
                       </div>
 

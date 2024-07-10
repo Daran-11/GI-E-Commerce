@@ -1,13 +1,15 @@
 "use client";
 
-import { useSearch } from "@/context/searchcontext";
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from "react";
 import ProductCard from "../components/productcard";
+
 async function fetchProducts() {
+  console.log('Fetching products...');
   try {
     const res = await fetch('http://localhost:3000/api/product');
     if (!res.ok) {
-    return {error:'ไม่สามรถเชื่อมต่อข้อมูลได้ในขณะนี้'};
+      return { error: 'ไม่สามารถเชื่อมต่อข้อมูลได้ในขณะนี้' };
     }
     const products = await res.json();
     return { products, error: null };
@@ -17,10 +19,11 @@ async function fetchProducts() {
 }
 
 export default function Home() {
-  const { searchQuery } = useSearch();
   const [products, setProducts] = useState([]);
-  const [filteredProducts, setFilteredProducts] = useState([]);
   const [error, setError] = useState(null);
+  const searchParams = useSearchParams();
+  const query = searchParams.get('query');
+  const router = useRouter();
 
   useEffect(() => {
     async function loadProducts() {
@@ -29,44 +32,31 @@ export default function Home() {
         setError(error);
       } else {
         setProducts(products);
-        setFilteredProducts(products);
       }
     }
     loadProducts();
   }, []);
 
-
-
-  useEffect(() => {
-    if (searchQuery) {
-      const queryParts = searchQuery.toLowerCase().split(' ').filter(part => part);
-
-      const filtered = products.filter(product => {
-        return queryParts.every(part => {
-        const nameMatch = product.ProductName && product.ProductName.toLowerCase().includes(part);
-        const priceMatch = product.Price && product.Price.toString().includes(part);
-        const typeMatch = product.ProductType && product.ProductType.toLowerCase().includes(part)
-        return nameMatch || priceMatch || typeMatch;
-        });
-      });
-      setFilteredProducts(filtered);
-    } else {
-      setFilteredProducts(products);
+  const filteredProducts = products.filter(product => {
+    if (!query) {
+      return true; // Return all products if no query is provided
     }
-  }, [searchQuery, products]);
 
+    const queryParts = query.toLowerCase().split(' ').filter(part => part);
+    return queryParts.every(part => {
+      const nameMatch = product.ProductName && product.ProductName.toLowerCase().includes(part);
+      const priceMatch = product.Price && product.Price.toString().includes(part);
+      const typeMatch = product.ProductType && product.ProductType.toLowerCase().includes(part);
+      return nameMatch || priceMatch || typeMatch;
+    });
+  });
 
   return (
     <div>
-
-        <div className="image bg-pineapple w-auto h-[500px] bg-no-repeat bg-cover bg-scroll bg-center ">
-        </div>
-
+      <div className="image bg-pineapple w-auto h-[500px] bg-no-repeat bg-cover bg-scroll bg-center"></div>
       <div className="container mt-10">
         <div className="my-5">
-          <p>
-            filter here
-          </p>          
+          <p>Filter products here:</p>
         </div>
         <div>
           {error ? (
@@ -75,9 +65,8 @@ export default function Home() {
             </div>
           ) : (
             <ProductCard products={filteredProducts} />
-          )}          
+          )}
         </div>
-
       </div>
     </div>
   );

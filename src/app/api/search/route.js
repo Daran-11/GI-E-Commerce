@@ -8,7 +8,7 @@ export default async function handler(req, res) {
   try {
     const products = await prisma.product.findMany({
       where: {
-        name: {
+        ProductName: {
           contains: query,
           mode: 'insensitive', // Optional: makes the search case-insensitive
         },
