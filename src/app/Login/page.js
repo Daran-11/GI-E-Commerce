@@ -21,7 +21,7 @@ export default function Login() {
         identifier,
         password,
       })
-
+      console.log(result);
   
       if (result.error) {
         setError(result.error)
