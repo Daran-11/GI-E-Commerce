@@ -17,12 +17,12 @@ export const CartProvider = ({ children }) => {
         if (response.ok) {
           const data = await response.json();
           setCartItems(data);
-          setCartItemCount(data.length); // Counting unique items
+          setCartItemCount(Math.min(data.length, 99)); // Counting unique items not over than 999
         }
       } else {
         const localCart = JSON.parse(localStorage.getItem('cart')) || [];
         setCartItems(localCart);
-        setCartItemCount(localCart.length); // Counting unique items
+        setCartItemCount(Math.min(localCart.length, 99)); // Counting unique items
       }
     };
 
