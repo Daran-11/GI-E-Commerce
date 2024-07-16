@@ -23,7 +23,6 @@ export default async function RootLayout({ children }) {
               <Navbar />
               <main>{children}</main>              
             </CartProvider>
-
           </SessionProvider>
       </body>
     </html>
