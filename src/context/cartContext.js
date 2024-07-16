@@ -1,0 +1,124 @@
+"use client"
+
+import { useSession } from 'next-auth/react';
+import { createContext, useContext, useEffect, useState } from 'react';
+
+const CartContext = createContext();
+
+export const CartProvider = ({ children }) => {
+  const { data: session, status } = useSession();
+  const [cartItems, setCartItems] = useState([]);
+  const [cartItemCount, setCartItemCount] = useState(0);
+
+  useEffect(() => {
+    const fetchCartItems = async () => {
+      if (status === 'authenticated') {
+        const response = await fetch('http://localhost:3000/api/auth/cart');
+        if (response.ok) {
+          const data = await response.json();
+          setCartItems(data);
+          setCartItemCount(data.length); // Counting unique items
+        }
+      } else {
+        const localCart = JSON.parse(localStorage.getItem('cart')) || [];
+        setCartItems(localCart);
+        setCartItemCount(localCart.length); // Counting unique items
+      }
+    };
+
+    fetchCartItems();
+  }, [status]);
+
+  useEffect(() => {
+    if (session) {
+      syncCartWithServer(session);
+    }
+  }, [session]);
+
+  const syncCartWithServer = async (session) => {
+    const localCart = JSON.parse(localStorage.getItem('cart')) || [];
+    for (const item of localCart) {
+      await fetch('http://localhost:3000/api/auth/cart/add', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.token}`,
+        },
+        body: JSON.stringify(item),
+      });
+    }
+    localStorage.removeItem('cart');
+  };
+
+  const addItemToCart = (item) => {
+    if (status === 'authenticated') {
+      // Add item to the server cart
+      fetch('http://localhost:3000/api/auth/cart/add', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(item),
+      }).then((response) => {
+        if (response.ok) {
+          setCartItems(prevItems => {
+            const existingItem = prevItems.find(i => i.productId === item.productId);
+            if (existingItem) {
+              existingItem.quantity += item.quantity; // Update quantity
+              return [...prevItems]; // Return updated items
+            }
+            return [...prevItems, item]; // Add new item
+          });
+          setCartItemCount(prevCount => prevCount + item.quantity); // Update count
+        }
+      });
+    } else {
+      // Add item to the local cart
+      const localCart = JSON.parse(localStorage.getItem('cart')) || [];
+      const existingItem = localCart.find(i => i.productId === item.productId);
+      
+      if (existingItem) {
+        existingItem.quantity += item.quantity; // Update quantity
+      } else {
+        localCart.push(item); // Add new item
+      }
+      
+      localStorage.setItem('cart', JSON.stringify(localCart));
+      setCartItems(localCart);
+      setCartItemCount(localCart.length); // Count unique items
+    }
+  };
+
+  const removeItemFromCart = (productId) => {
+    if (status === 'authenticated') {
+      // Remove item from the server cart
+      fetch('http://localhost:3000/api/auth/cart/delete', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ productId }),
+      }).then((response) => {
+        if (response.ok) {
+          setCartItems(prevItems => prevItems.filter(item => item.productId !== productId));
+          setCartItemCount(prevCount => prevCount - 1);
+        }
+      });
+    } else {
+      // Remove item from the local cart
+      const localCart = JSON.parse(localStorage.getItem('cart')) || [];
+      const updatedCart = localCart.filter(item => item.productId !== productId);
+      localStorage.setItem('cart', JSON.stringify(updatedCart));
+      setCartItems(updatedCart);
+      setCartItemCount(updatedCart.length);
+    }
+  };
+
+  return (
+    <CartContext.Provider value={{ cartItems, cartItemCount, setCartItems, setCartItemCount, addItemToCart, removeItemFromCart }}>
+      {children}
+    </CartContext.Provider>
+  );
+};
+
+export const useCart = () => useContext(CartContext);

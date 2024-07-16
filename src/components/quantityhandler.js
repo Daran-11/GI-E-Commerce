@@ -1,9 +1,10 @@
 "use client";
-import { getSession } from 'next-auth/react';
+import { useCart } from '@/context/cartContext';
 import { useState } from 'react';
 
 export default function QuantityHandler({ productAmount, productId}) {
   const [quantity, setQuantity] = useState(1);
+  const { addItemToCart } = useCart();
 
   const handleQuantityChange = (newQuantity) => {
     setQuantity(newQuantity);
@@ -22,53 +23,22 @@ export default function QuantityHandler({ productAmount, productId}) {
   };
 
 
-  // Add to cart handler
-  const handleAddToCart = async () => {
-    const session = await getSession();
-    
-    const productResponse = await fetch(`http://localhost:3000/api/product/${productId}`);
-    const productData = await productResponse.json();
-
-    let cart = JSON.parse(localStorage.getItem('cart')) || []; // User is not logged in, store cart in local storage
-    const existingItem = cart.find(item => item.productId === productId);
-
-
-
-    if (session) {
-      // User is logged in, store cart in database
-      const response = await fetch('http://localhost:3000/api/auth/cart/add', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ productId, quantity }),
-      });
-
-
-
-      if (response.ok) {
-        alert('Product added to cart');
-      } else {
-        alert('Failed to add product to cart');
-      }
-    } else {
-
-      //store it in local if not logged in
-      if (existingItem) {
-        existingItem.quantity += quantity;
-      } else {
-        cart.push({ productId , 
-                    quantity , 
-                    productName: productData.ProductName , 
-                    productType: productData.ProductType,
-                    productPrice: productData.Price,
-                  });
-      }
-
-      localStorage.setItem('cart', JSON.stringify(cart));
+    // Add to cart handler
+    const handleAddToCart = async () => {
+      const productResponse = await fetch(`http://localhost:3000/api/product/${productId}`);
+      const productData = await productResponse.json();
+  
+      const item = {
+        productId,
+        quantity,
+        productName: productData.ProductName,
+        productType: productData.ProductType,
+        productPrice: productData.Price,
+      };
+  
+      addItemToCart(item); // Update cart context
       alert('Product added to cart');
-    }
-  };
+    };
 
   return (
     <div>
@@ -87,7 +57,7 @@ export default function QuantityHandler({ productAmount, productId}) {
         </div>
 
 
-      <button className='bg-green-500 rounded w-[100px]'onClick={handleAddToCart}>
+      <button className='bg-green-500 rounded w-[100px]'onClick={handleAddToCart} >
         สั่งซื้อ
       </button>
     </div>
