@@ -1,4 +1,5 @@
 
+import { CartProvider } from '@/context/cartContext';
 import { getServerSession } from 'next-auth';
 import { Prompt } from "next/font/google";
 import Navbar from "../components/navbar";
@@ -18,8 +19,11 @@ export default async function RootLayout({ children }) {
     <html lang="th">
       <body className={`${prompt.className} bg-[#f1f1f1]`}>
           <SessionProvider session={session}>
-            <Navbar />
-            <main>{children}</main>
+            <CartProvider>
+              <Navbar />
+              <main>{children}</main>              
+            </CartProvider>
+
           </SessionProvider>
       </body>
     </html>
