@@ -1,10 +1,9 @@
+import dynamic from 'next/dynamic';
 
-function page() {
-  return (
-    <div className="top-container">
-        cart page :)
-    </div>
-  )
+const CartPageClient = dynamic(() => import('@/components/cartPageClient'), {
+  ssr: false,
+});
+
+export default function CartPage() {
+  return <CartPageClient />;
 }
-
-export default page

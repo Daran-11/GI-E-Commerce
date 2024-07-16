@@ -1,16 +1,43 @@
 'use client';
-
 import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from '@nextui-org/react';
 import { signOut, useSession } from 'next-auth/react';
 import Link from "next/link";
 import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { syncCartWithServer } from '../../lib/cart';
 import SearchBar from "./searchbar";
-
 
 export const Navbar = () => {
     const { data: session, status } = useSession()
     const currentPath = usePathname();
-    const cartItems = (10); //จำนวนสินค้าในตะกร้าตอนนี้
+    //const cartItems = (10);
+    const [cartItemCount, setCartItemCount] = useState(0); //จำนวนสินค้าในตะกร้าตอนนี้
+    
+
+
+    useEffect(() => {
+        const fetchCartItemCount = async () => {
+          if (status === 'authenticated') {
+            const response = await fetch('http://localhost:3000/api/auth/cart/count');
+            if (response.ok) {
+              const data = await response.json();
+              syncCartWithServer(session);
+              setCartItemCount(data.count);
+              
+            }
+          }
+        };
+    
+        fetchCartItemCount();
+      }, [status]);
+
+
+      useEffect(() => {
+        if (session) {
+          syncCartWithServer(session);
+        }
+      }, [session]);
+
     return (
 
         <div className="fixed top-0 left-0 w-full bg-white shadow-lg z-50">
@@ -55,7 +82,7 @@ export const Navbar = () => {
                                 className={currentPath === "/cart" ? "text-[#4EAC14]": "text-[#595959]"}
                                 >ตะกร้า </Link>
                                 <span className='bg-[#4EAC14] text-white text-base rounded-full px-1 '>
-                                    {cartItems}                                    
+                                {cartItemCount}                                   
                                 </span>
 
                             </li>

@@ -41,3 +41,7 @@
   @apply text-[#595959] hover:text-[#4EAC14]
 }
 
+table, th, td {
+  @apply bg-[#ffffff] border-black border-2
+}
+

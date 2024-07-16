@@ -16,7 +16,7 @@ export default async function RootLayout({ children }) {
   return (
     
     <html lang="th">
-      <body className={`${prompt.className} bg-[#fafafa]`}>
+      <body className={`${prompt.className} bg-[#f1f1f1]`}>
           <SessionProvider session={session}>
             <Navbar />
             <main>{children}</main>
