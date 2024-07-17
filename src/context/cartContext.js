@@ -17,18 +17,21 @@ export const CartProvider = ({ children }) => {
         if (response.ok) {
           const data = await response.json();
           setCartItems(data);
-          setCartItemCount(Math.min(data.length, 99)); // Counting unique items not over than 999
+          const uniqueItemsCount = new Set(data.map(item => item.productId)).size;
+          setCartItemCount(Math.min(uniqueItemsCount, 99)); // Counting unique items not over than 999
         }
       } else {
         const localCart = JSON.parse(localStorage.getItem('cart')) || [];
         setCartItems(localCart);
-        setCartItemCount(Math.min(localCart.length, 99)); // Counting unique items
+        const uniqueItemsCount = new Set(localCart.map(item => item.productId)).size;
+        setCartItemCount(Math.min(uniqueItemsCount, 99)); // Counting unique items
       }
     };
 
     fetchCartItems();
   }, [status]);
 
+  
   useEffect(() => {
     if (session) {
       syncCartWithServer(session);
@@ -50,44 +53,52 @@ export const CartProvider = ({ children }) => {
     localStorage.removeItem('cart');
   };
 
-  const addItemToCart = (item) => {
-    if (status === 'authenticated') {
-      // Add item to the server cart
-      fetch('http://localhost:3000/api/auth/cart/add', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(item),
-      }).then((response) => {
-        if (response.ok) {
-          setCartItems(prevItems => {
-            const existingItem = prevItems.find(i => i.productId === item.productId);
-            if (existingItem) {
-              existingItem.quantity += item.quantity; // Update quantity
-              return [...prevItems]; // Return updated items
-            }
-            return [...prevItems, item]; // Add new item
-          });
-          setCartItemCount(prevCount => prevCount + item.quantity); // Update count
-        }
-      });
-    } else {
-      // Add item to the local cart
-      const localCart = JSON.parse(localStorage.getItem('cart')) || [];
-      const existingItem = localCart.find(i => i.productId === item.productId);
-      
-      if (existingItem) {
-        existingItem.quantity += item.quantity; // Update quantity
-      } else {
-        localCart.push(item); // Add new item
+ const addItemToCart = (item) => {
+  if (status === 'authenticated') {
+    // Add item to the server cart
+    fetch('http://localhost:3000/api/auth/cart/add', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(item),
+    }).then((response) => {
+      if (response.ok) {
+        setCartItems(prevItems => {
+          const updatedItems = Array.isArray(prevItems) ? [...prevItems] : [];
+          const existingItem = updatedItems.find(i => i.productId === item.productId);
+          if (existingItem) {
+            existingItem.quantity += item.quantity; // Update quantity
+          } else {
+            updatedItems.push(item); // Add new item
+          }
+          setCartItemCount(updatedItems.length, 99);
+          return updatedItems;
+        });
+        setCartItemCount(prevItems => {
+          const updatedItems = Array.isArray(prevItems) ? prevItems : [];
+          const uniqueItems = new Set(updatedItems.map(i => i.productId)).size;
+          return Math.min(uniqueItems, 1000); // Count unique items
+        });
       }
-      
-      localStorage.setItem('cart', JSON.stringify(localCart));
-      setCartItems(localCart);
-      setCartItemCount(localCart.length); // Count unique items
+    });
+  } else {
+    // Add item to the local cart
+    const localCart = JSON.parse(localStorage.getItem('cart')) || [];
+    const existingItem = localCart.find(i => i.productId === item.productId);
+
+    if (existingItem) {
+      existingItem.quantity += item.quantity; // Update quantity
+    } else {
+      localCart.push(item); // Add new item
     }
-  };
+
+    localStorage.setItem('cart', JSON.stringify(localCart));
+    setCartItems(localCart);
+    const uniqueItems = new Set(localCart.map(i => i.productId)).size;
+    setCartItemCount(Math.min(uniqueItems, 1000)); // Count unique items
+  }
+};
 
   const removeItemFromCart = (productId) => {
     if (status === 'authenticated') {
