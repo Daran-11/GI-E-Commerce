@@ -1,5 +1,4 @@
-"use client"
-
+"use client";
 import { useSession } from 'next-auth/react';
 import { createContext, useContext, useEffect, useState } from 'react';
 
@@ -13,25 +12,30 @@ export const CartProvider = ({ children }) => {
   useEffect(() => {
     const fetchCartItems = async () => {
       if (status === 'authenticated') {
-        const response = await fetch('http://localhost:3000/api/auth/cart');
+        const response = await fetch('http://localhost:3000/api/auth/cart', {
+          headers: {
+            'Cache-Control': 'no-cache',
+          },
+        });
         if (response.ok) {
           const data = await response.json();
+          
           setCartItems(data);
+          
           const uniqueItemsCount = new Set(data.map(item => item.productId)).size;
-          setCartItemCount(Math.min(uniqueItemsCount, 99)); // Counting unique items not over than 999
+          setCartItemCount(Math.min(uniqueItemsCount, 99));
         }
       } else {
         const localCart = JSON.parse(localStorage.getItem('cart')) || [];
         setCartItems(localCart);
         const uniqueItemsCount = new Set(localCart.map(item => item.productId)).size;
-        setCartItemCount(Math.min(uniqueItemsCount, 99)); // Counting unique items
+        setCartItemCount(Math.min(uniqueItemsCount, 99));
       }
     };
 
     fetchCartItems();
   }, [status]);
 
-  
   useEffect(() => {
     if (session) {
       syncCartWithServer(session);
@@ -50,59 +54,82 @@ export const CartProvider = ({ children }) => {
         body: JSON.stringify(item),
       });
     }
+
     localStorage.removeItem('cart');
+
+    // Fetch updated cart items from server
+    if (status === 'authenticated') {
+      const response = await fetch('http://localhost:3000/api/auth/cart', {
+        headers: {
+          'Cache-Control': 'no-cache',
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setCartItems(data); // Update state with server data
+        const uniqueItemsCount = new Set(data.map(item => item.productId)).size;
+        setCartItemCount(Math.min(uniqueItemsCount, 99)); // Update count
+      }
+    }
   };
 
- const addItemToCart = (item) => {
-  if (status === 'authenticated') {
-    // Add item to the server cart
-    fetch('http://localhost:3000/api/auth/cart/add', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(item),
-    }).then((response) => {
+  const addItemToCart = async (item) => {
+    
+    if (status === 'authenticated') {
+      const response = await fetch('http://localhost:3000/api/auth/cart/add', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(item),
+      });
+
       if (response.ok) {
         setCartItems(prevItems => {
-          const updatedItems = Array.isArray(prevItems) ? [...prevItems] : [];
-          const existingItem = updatedItems.find(i => i.productId === item.productId);
-          if (existingItem) {
-            existingItem.quantity += item.quantity; // Update quantity
+          const updatedItems = [...prevItems];
+          const existingItemIndex = updatedItems.findIndex(i => i.productId === item.productId);
+
+          if (existingItemIndex !== -1) {
+            const existingItem = updatedItems[existingItemIndex];
+            const newQuantity = existingItem.quantity + item.quantity;
+
+            if (newQuantity <= existingItem.productAmount) {
+              updatedItems[existingItemIndex] = { ...existingItem, quantity: newQuantity };
+            }
           } else {
-            updatedItems.push(item); // Add new item
+            updatedItems.push(item);
           }
-          setCartItemCount(updatedItems.length, 99);
+
+          const uniqueItems = new Set(updatedItems.map(i => i.productId)).size;
+          setCartItemCount(Math.min(uniqueItems, 99));
           return updatedItems;
         });
-        setCartItemCount(prevItems => {
-          const updatedItems = Array.isArray(prevItems) ? prevItems : [];
-          const uniqueItems = new Set(updatedItems.map(i => i.productId)).size;
-          return Math.min(uniqueItems, 1000); // Count unique items
-        });
       }
-    });
-  } else {
-    // Add item to the local cart
-    const localCart = JSON.parse(localStorage.getItem('cart')) || [];
-    const existingItem = localCart.find(i => i.productId === item.productId);
-
-    if (existingItem) {
-      existingItem.quantity += item.quantity; // Update quantity
     } else {
-      localCart.push(item); // Add new item
-    }
+      const localCart = JSON.parse(localStorage.getItem('cart')) || [];
+      const existingItem = localCart.find(i => i.productId === item.productId);
 
-    localStorage.setItem('cart', JSON.stringify(localCart));
-    setCartItems(localCart);
-    const uniqueItems = new Set(localCart.map(i => i.productId)).size;
-    setCartItemCount(Math.min(uniqueItems, 1000)); // Count unique items
-  }
-};
+      if (existingItem) {
+        const newQuantity = existingItem.quantity + item.quantity;
+
+        if (newQuantity <= item.productAmount) {
+          existingItem.quantity = newQuantity;
+          console.log("existing item updated");
+        }
+      } else {
+        localCart.push(item); // Add new item
+      }
+
+      localStorage.setItem('cart', JSON.stringify(localCart));
+      setCartItems(localCart);
+      const uniqueItems = new Set(localCart.map(i => i.productId)).size;
+      setCartItemCount(Math.min(uniqueItems, 99));
+    }
+  };
 
   const removeItemFromCart = (productId) => {
     if (status === 'authenticated') {
-      // Remove item from the server cart
       fetch('http://localhost:3000/api/auth/cart/delete', {
         method: 'DELETE',
         headers: {
@@ -116,7 +143,6 @@ export const CartProvider = ({ children }) => {
         }
       });
     } else {
-      // Remove item from the local cart
       const localCart = JSON.parse(localStorage.getItem('cart')) || [];
       const updatedCart = localCart.filter(item => item.productId !== productId);
       localStorage.setItem('cart', JSON.stringify(updatedCart));
@@ -125,8 +151,40 @@ export const CartProvider = ({ children }) => {
     }
   };
 
+  const updateItemQuantity = (productId, newQuantity) => {
+    if (status === 'authenticated') {
+      fetch('http://localhost:3000/api/auth/cart/update', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ productId, quantity: newQuantity }),
+      }).then((response) => {
+        if (response.ok) {
+          console.log('set new cart update')
+          setCartItems(prevItems => {
+            return prevItems.map(item =>
+              item.productId === productId ? { ...item, quantity: newQuantity } : item
+            );
+          });
+        }
+      });
+    } else {
+      const localCart = JSON.parse(localStorage.getItem('cart')) || [];
+      const item = localCart.find(i => i.productId === productId);
+
+      if (item && newQuantity <= item.productAmount) {
+        const updatedCart = localCart.map(i =>
+          i.productId === productId ? { ...i, quantity: newQuantity } : i
+        );
+        localStorage.setItem('cart', JSON.stringify(updatedCart));
+        setCartItems(updatedCart);
+      }
+    }
+  };
+
   return (
-    <CartContext.Provider value={{ cartItems, cartItemCount, setCartItems, setCartItemCount, addItemToCart, removeItemFromCart }}>
+    <CartContext.Provider value={{ cartItems, cartItemCount, setCartItems, setCartItemCount, addItemToCart, removeItemFromCart, updateItemQuantity }}>
       {children}
     </CartContext.Provider>
   );

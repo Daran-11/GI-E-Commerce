@@ -13,8 +13,11 @@ export default function CartPageClient() {
   }
   
     return (
-      <div className="top-container">
-        <CartItem initialItems={cartItems} session={session} />
+      <div className="">
+        <div className=''>
+            <CartItem initialItems={cartItems} session={session} />         
+        </div>
       </div>
+      
     );
   }

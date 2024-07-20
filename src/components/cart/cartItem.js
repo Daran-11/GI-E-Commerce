@@ -1,23 +1,39 @@
 "use client"
 import { useCart } from "@/context/cartContext";
 import { useEffect } from "react";
+import QuantityHandler from "../quantityhandler";
 
-export default function CartItem({initialItems, session}) {
-    const { cartItems, setCartItems, removeItemFromCart } = useCart();
-    //const [items, setItems] = useState(initialItems);
+export default function CartItem({ initialItems }) {
+  const { cartItems, setCartItems, removeItemFromCart, updateItemQuantity } = useCart();
 
-    useEffect(() => {
-      setCartItems(initialItems);
-    }, [initialItems]);
+  useEffect(() => {
+    setCartItems(initialItems);
+  }, [initialItems]);
+
+  useEffect(() => {
+    console.log('CartItems data:', cartItems);
+  }, [cartItems]);
+
+
+
+  const handleUpdateQuantity = (productId, newQuantity) => {
+    // Check if the new quantity exceeds available amount
+    const item = cartItems.find(i => i.productId === productId);
+    if (item && newQuantity <= item.productAmount) {
+      updateItemQuantity(productId, newQuantity);
+      console.log('update item')
+    }
+  };
+
+  const handleDelete = (productId) => {
+    removeItemFromCart(productId);
+  };
+
   
-    const handleDelete = async (productId) => {
-      removeItemFromCart(productId);
-    };
-
-  
-    return (
-      <div className="top-container">
-        <table>
+  return (
+    <div className="top-container grid grid-cols-10">
+      <div className="col-span-8">
+        <table className="">
           <thead>
             <tr>
               <th className="pr-[200px]">สินค้า</th>
@@ -31,10 +47,14 @@ export default function CartItem({initialItems, session}) {
             {cartItems.length > 0 ? (
               cartItems.map((item) => (
                 <tr key={item.productId}>
-                  <td>{item.productName || item.product.ProductName}{item.productType || item.product.ProductType}</td>
+                  <td>{item.productName || item.product.ProductName} {item.productType || item.product.ProductType}</td>
                   <td>{item.productPrice || item.product.Price}</td>
-                  <td>{item.quantity}</td>
-                  <td>{item.quantity * item.productPrice || item.product.Price }</td>
+                  <td><QuantityHandler 
+                  productAmount={item.productAmount || item.product.Amount} 
+                  productId={item.productId || item.product.ProductID} 
+                  initialQuantity={item.quantity } 
+                  onQuantityChange={handleUpdateQuantity} /></td>
+                  <td>{item.quantity * (item.productPrice || item.product.Price)}</td>
                   <td>
                     <button onClick={() => handleDelete(item.productId)}>ลบ</button>
                   </td>
@@ -48,5 +68,11 @@ export default function CartItem({initialItems, session}) {
           </tbody>
         </table>
       </div>
-    );
+      <div className="col-span-2 bg-green-300 w-full h-[200px]">
+        <button>
+          hello
+        </button>
+      </div>
+    </div>
+  );
 }
