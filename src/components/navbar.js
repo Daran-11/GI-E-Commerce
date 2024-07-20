@@ -48,18 +48,21 @@ export const Navbar = () => {
                                 className={currentPath === "/about" ? "text-[#4EAC14]": "text-[#595959]"}
                                 >เกี่ยวกับเรา</Link>
                             </li>
+
+                            {status === 'unauthenticated' &&
                             <li>
                                 <Link href='/register'
                                 className={currentPath === "/register" ? "text-[#4EAC14]": "text-[#595959]"}
                                 >สมัครสมาชิก</Link>
                             </li>
+                            }
 
                             <li>
                                 <Link href='/cart'
                                 className={currentPath === "/cart" ? "text-[#4EAC14]": "text-[#595959]"}
                                 >ตะกร้า </Link>
                                 <span className='bg-[#4EAC14] text-white text-base rounded-full px-1 '>
-                                {cartItemCount}                                   
+                                {cartItemCount}
                                 </span>
 
                             </li>
