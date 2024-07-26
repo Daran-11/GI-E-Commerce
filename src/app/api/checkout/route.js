@@ -1,38 +1,55 @@
 import { NextResponse } from 'next/server';
-import prisma from '../../../../lib/prisma'; // Adjust the import based on your project structure
+import prisma from '../../../../lib/prisma';
 
 export async function POST(request) {
-  const { productId, quantity } = await request.json();
+  try {
+    const { userId, productId, quantity, address } = await request.json();
 
-  // Validate the input
-  if (!productId || !quantity) {
-    return NextResponse.json({ error: 'Product ID and quantity are required.' }, { status: 400 });
+    // Fetch the product to validate quantity and calculate total price
+    const product = await prisma.product.findUnique({
+      where: { ProductID: productId }
+    });
+
+    if (!product) {
+      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+    }
+
+    if (quantity > product.Amount) {
+      return NextResponse.json({ error: 'Insufficient product quantity' }, { status: 400 });
+    }
+
+    // Create or get the user's address
+    const userAddress = await prisma.address.create({
+      data: {
+        userId: userId,
+        province: address.province,
+        amphoe: address.amphoe,
+        tambon: address.tambon,
+        addressLine: address.addressLine,
+        postalCode: address.postalCode
+      }
+    });
+
+    // Create the order
+    const order = await prisma.order.create({
+      data: {
+        userId: userId,
+        productId: productId,
+        quantity: quantity,
+        totalPrice: quantity * product.Price,
+        addressId: userAddress.id
+      }
+    });
+
+    // Reduce the product amount
+    await prisma.product.update({
+      where: { ProductID: productId },
+      data: { Amount: product.Amount - quantity }
+    });
+
+    return NextResponse.json({ message: 'Order placed successfully', order }, { status: 201 });
+  } catch (error) {
+    console.error('Checkout error:', error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
-
-  // Fetch product details from database
-  const product = await prisma.product.findUnique({
-    where: { ProductID: productId },
-  });
-
-  if (!product) {
-    return NextResponse.json({ error: 'Product not found.' }, { status: 404 });
-  }
-
-  // Validate quantity
-  if (quantity <= 0 || quantity > product.Amount) {
-    return NextResponse.json({ error: 'Invalid quantity.' }, { status: 400 });
-  }
-
-  // Here you can process the checkout logic, such as creating an order or updating stock
-
-  // Example response
-  return NextResponse.json({
-    message: 'Checkout successful!',
-    product: {
-      name: product.ProductName,
-      price: product.Price,
-      quantity,
-      total: product.Price * quantity,
-    },
-  });
 }
