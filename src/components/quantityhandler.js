@@ -33,6 +33,31 @@ export default function QuantityHandler({ productAmount, productId, initialQuant
     updateItemQuantity(productId, newQuantity);
   };
 
+  const handleInputChange = (e) => {
+    const value = e.target.value;
+    if (value === '') {
+      setQuantity('');
+    } else {
+      let newQuantity = parseInt(value, 10);
+      if (isNaN(newQuantity) || newQuantity < 1) {
+        newQuantity = 1;
+      } else if (newQuantity > productAmount) {
+        newQuantity = productAmount;
+      }
+      handleQuantityChange(newQuantity);
+    }
+  };
+
+  const handleBlur = () => {
+    if (quantity === '' || quantity < 1) {
+      setQuantity(1);
+      updateItemQuantity(productId, 1);
+    }
+  };
+
+
+  
+
   const increment = () => {
     if (quantity < productAmount) {
       console.log("+ triggered")
@@ -53,12 +78,33 @@ export default function QuantityHandler({ productAmount, productId, initialQuant
           -
         </button>
         <div className='w-10 h-10 border-2 flex items-center justify-center'>
-        <span>{quantity}</span>
+        <input
+          type="number"
+          className="w-10 h-10 border-2 text-center appearance-none"
+          value={quantity}
+          onChange={handleInputChange}
+          onBlur={handleBlur}
+          min="1"
+          max={productAmount}
+        />
         </div>
         <button className='btn w-10 h-10 border-2' onClick={increment}>
           +
         </button>
       </div>
+      <style jsx>{`
+        /* Chrome, Safari, Edge, Opera */
+        input[type='number']::-webkit-outer-spin-button,
+        input[type='number']::-webkit-inner-spin-button {
+          -webkit-appearance: none;
+          margin: 0;
+        }
+
+        /* Firefox */
+        input[type='number'] {
+          -moz-appearance: textfield;
+        }
+      `}</style>
     </div>
   );
 }

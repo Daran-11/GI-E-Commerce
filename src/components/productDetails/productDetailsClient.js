@@ -12,20 +12,22 @@ export default function ProductDetailsClient({ product }) {
   };
 
   const addToCart = async () => {
-    const productResponse = await fetch(`http://localhost:3000/api/product/${product.ProductID}`);
-    const productData = await productResponse.json();
-
     const item = {
-      productId: productData.ProductID,
+      productId: product.ProductID,
       quantity: quantity,
-      productName: productData.ProductName,
-      productType: productData.ProductType,
-      productPrice: productData.Price,
-      productAmount: productData.Amount,
+      productName: product.ProductName,
+      productType: product.ProductType,
+      productPrice: product.Price,
+      productAmount: product.Amount,
     };
 
-    addItemToCart(item);
-    alert('Product added to cart');
+    try {
+      await addItemToCart(item);
+      alert('Product added to cart');
+    } catch (error) {
+      console.error('Error adding product to cart:', error);
+      alert('Failed to add product to cart');
+    }
   };
 
   return (

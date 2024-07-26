@@ -67,6 +67,7 @@ export const CartProvider = ({ children }) => {
 
       if (response.ok) {
         const data = await response.json();
+        console.log('cart item updated to server')
         setCartItems(data); // Update state with server data
         const uniqueItemsCount = new Set(data.map(item => item.productId)).size;
         setCartItemCount(Math.min(uniqueItemsCount, 99)); // Update count
@@ -84,6 +85,12 @@ export const CartProvider = ({ children }) => {
         },
         body: JSON.stringify(item),
       });
+
+      if (!response.ok) {
+        console.error('Failed to add item to cart on server:', await response.text());
+        return;
+      }
+      
 
       if (response.ok) {
         setCartItems(prevItems => {
