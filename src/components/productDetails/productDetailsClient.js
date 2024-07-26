@@ -12,13 +12,16 @@ export default function ProductDetailsClient({ product }) {
   };
 
   const addToCart = async () => {
+    const productResponse = await fetch(`http://localhost:3000/api/product/${product.ProductID}`);
+    const productData = await productResponse.json();
+
     const item = {
-      productId: product.ProductID,
+      productId: productData.ProductID,
       quantity: quantity,
-      productName: product.ProductName,
-      productType: product.ProductType,
-      productPrice: product.Price,
-      productAmount: product.Amount,
+      productName: productData.ProductName,
+      productType: productData.ProductType,
+      productPrice: productData.Price,
+      productAmount: productData.Amount,
     };
 
     try {

@@ -1,5 +1,6 @@
 "use client"
 import { useCart } from "@/context/cartContext";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import QuantityHandler from "../quantityhandler";
@@ -9,6 +10,7 @@ export default function CartItem({ initialItems }) {
 
   const [selectedItem, setSelectedItem] = useState(null);
   const router = useRouter();
+  const { data: session } = useSession();
   
 
   useEffect(() => {
@@ -20,8 +22,8 @@ export default function CartItem({ initialItems }) {
   }, [cartItems]);
 
     // Function to select an item
-    const selectItem = (item) => {
-      setSelectedItem(selectedItem?.productId === item.productId ? null : item);
+    const selectItem = (productId) => {
+      setSelectedItem(selectedItem === productId ? null : productId);
     };
 
   const handleUpdateQuantity = (productId, newQuantity) => {
@@ -39,18 +41,33 @@ export default function CartItem({ initialItems }) {
 
 
   
-  // Function to handle checkout
-  const handleCheckout = () => {
+  const handleCheckout = async () => {
     if (selectedItem) {
-      const params = new URLSearchParams({
-        productId: selectedItem.productId,
-        productName: selectedItem.productName,
-        productType: selectedItem.productType,
-        productPrice: selectedItem.productPrice,
-        quantity: selectedItem.quantity
+      const selectedItemData = cartItems.find(item => item.productId === selectedItem);
+      const address = {
+        province: "Bangkok",
+        amphoe: "Bang Kapi",
+        tambon: "Hua Mak",
+        addressLine: "123 Main St.",
+        postalCode: "10240"
+      };
+      const response = await fetch('http://localhost:3000/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          userId: session.user.id,  // replace with actual user ID
+          productId: selectedItemData.productId,
+          quantity: selectedItemData.quantity,
+          address 
+        })
       });
-
-      router.push(`/checkout?${params.toString()}`);
+      const result = await response.json();
+      if (response.ok) {
+        // Redirect to confirmation page
+        router.push(`/confirm?orderId=${result.order.id}`);
+      } else {
+        alert(result.error || 'Failed to place order');
+      }
     } else {
       alert("Please select an item to checkout.");
     }
@@ -78,8 +95,8 @@ export default function CartItem({ initialItems }) {
                   <td className="items-center justify-center ">
                   <input
                   type="radio"
-                  checked={selectedItem?.productId === item.productId}
-                  onChange={() => selectItem(item)}
+                  checked={selectedItem === item.productId}
+                  onChange={() => selectItem(item.productId)}
                 />                  
                   </td>
 
