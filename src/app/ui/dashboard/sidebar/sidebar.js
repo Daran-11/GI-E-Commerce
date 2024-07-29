@@ -1,5 +1,6 @@
-import React from 'react'
-import styles from "./sidebar.module.css"
+
+import React from 'react';
+import styles from "./sidebar.module.css";
 import {
   MdDashboard,
   MdSupervisedUserCircle,
@@ -11,10 +12,11 @@ import {
   MdOutlineSettings,
   MdHelpCenter,
   MdLogout,
-} from "react-icons/md"
-import MenuLink from './menuLink/menuLink'
-import Image from 'next/image'
+} from "react-icons/md";
+import MenuLink from './menuLink/menuLink'; // Ensure this path is correct
+import Image from 'next/image';
 
+// Define the menu items
 const menuItems = [
   {
     title: "pages",
@@ -25,9 +27,9 @@ const menuItems = [
         icon: <MdDashboard />,
       },
       {
-        title: "users",
+        title: "Users",
         path: "/dashboard/users",
-        icon: <MdSupervisedUserCircle />
+        icon: <MdSupervisedUserCircle />,
       },
       {
         title: "Products",
@@ -35,7 +37,7 @@ const menuItems = [
         icon: <MdShoppingBag />,
       },
       {
-        title: "Transaction",
+        title: "Transactions",
         path: "/dashboard/transactions",
         icon: <MdAttachMoney />,
       },
@@ -76,8 +78,9 @@ const menuItems = [
       },
     ]
   }
-]
+];
 
+// Define the Sidebar component
 const Sidebar = () => {
   return (
     <div className={styles.container}>
@@ -86,7 +89,7 @@ const Sidebar = () => {
         <div className={styles.userDetail}>
           <span className={styles.username}>Tanatorn Temsirimongkol</span>
           <span className={styles.userTitle}>Administrator</span>
-                </div>
+        </div>
       </div>
       <ul className={styles.list}>
         {menuItems.map((cat) => (
@@ -98,8 +101,12 @@ const Sidebar = () => {
           </li>
         ))}
       </ul>
+      <button className={styles.logout}>
+        <MdLogout />
+        Logout
+      </button>
     </div>
-  )
+  );
 }
 
-export default Sidebar
+export default Sidebar;
