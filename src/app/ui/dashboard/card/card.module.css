@@ -9,7 +9,7 @@
 }
 
 .container:hover{
-    background-color: #2e374a;
+    background-color: #75BB49;
 }
 
 .texts {
@@ -29,7 +29,7 @@
 }
 
 .positive{
-    color: lime;
+    color: green;
 }
 
 .negative{

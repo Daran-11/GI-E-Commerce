@@ -19,60 +19,61 @@ import Image from 'next/image';
 // Define the menu items
 const menuItems = [
   {
-    title: "pages",
+    title: "หน้า",
     list: [
       {
-        title: "Dashboard",
+        title: "หน้าหลัก",
         path: "/dashboard",
         icon: <MdDashboard />,
       },
       {
-        title: "Users",
+        title: "จัดการผู้ใช้",
         path: "/dashboard/users",
         icon: <MdSupervisedUserCircle />,
       },
       {
-        title: "Products",
+        title: "จัดการสินค้า",
         path: "/dashboard/products",
         icon: <MdShoppingBag />,
       },
       {
-        title: "Transactions",
+        title: "ประวัติการขาย",
         path: "/dashboard/transactions",
         icon: <MdAttachMoney />,
+      },
+      {
+        title: 'จัดการคำสั่งซื้อ',
+        path: "/dashboard/teams",
+        icon: <MdPeople />,
       },
     ],
   },
   {
-    title: "analytics",
+    title: "วิเคราะห์",
     list: [
       {
-        title: "Revenue",
+        title: "ตรวจสอบสินค้า",
         path: "/dashboard/revenue",
         icon: <MdWork />,
       },
       {
-        title: "Reports",
+        title: "ตรวจสอบคำร้องเรียน",
         path: '/dashboard/reports',
         icon: <MdAnalytics />,
       },
-      {
-        title: 'Teams',
-        path: "/dashboard/teams",
-        icon: <MdPeople />,
-      },
+      
     ]
   },
   {
-    title: "Users",
+    title: "ผู้ใช้",
     list: [
       {
-        title: "Settings",
+        title: "การตั้งค่า",
         path: "/dashboard/settings",
         icon: <MdOutlineSettings />,
       },
       {
-        title: "Help",
+        title: "ช่วยเหลือ",
         path: "/dashboard/help",
         icon: <MdHelpCenter />,
       },
@@ -87,8 +88,8 @@ const Sidebar = () => {
       <div className={styles.user}>
         <Image className={styles.userImage} src="/noavatar.png" alt="" width="50" height="50" />
         <div className={styles.userDetail}>
-          <span className={styles.username}>Tanatorn Temsirimongkol</span>
-          <span className={styles.userTitle}>Administrator</span>
+          <span className={styles.username}>ธนธร เต็มสิริมงคล</span>
+          <span className={styles.userTitle}>ผู้ดูแลระบบ</span>
         </div>
       </div>
       <ul className={styles.list}>
@@ -103,7 +104,7 @@ const Sidebar = () => {
       </ul>
       <button className={styles.logout}>
         <MdLogout />
-        Logout
+        ลงชื่อออก
       </button>
     </div>
   );
