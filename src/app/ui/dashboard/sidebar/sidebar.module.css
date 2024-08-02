@@ -1,6 +1,7 @@
 .container{
     position: sticky;
     top: 40px;
+   
   
 }
 
@@ -34,7 +35,13 @@ object-fit: cover;
 }
 .list{
     list-style: none;
+    color: #878d84;
 }
+
+.list li a:hover, .active{
+    color: black;
+}
+
 
 .cat{
     color: var(--textSoft);
@@ -60,3 +67,4 @@ object-fit: cover;
 .logout:hover{
     background-color: #75BB49;
 }
+

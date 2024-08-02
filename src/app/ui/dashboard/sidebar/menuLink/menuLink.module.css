@@ -1,13 +1,23 @@
-.container{
-    padding: 20px;
+.menuLink {
+    margin-bottom: 10px;
+  }
+  
+  .link {
     display: flex;
     align-items: center;
-    gap: 10px;
-   margin: 5px 0px;
-   border-radius: 8px;
-    
-}
-
-.container:hover, .active{
-    background-color: #75BB49;
-}
+    padding: 10px;
+    color: #333; /* Ensure the text is always black */
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s, color 0.3s;
+  }
+  
+  .link:hover {
+    background-color: #e0e0e0; /* Background color on hover */
+  }
+  
+  .active {
+    background-color: #cce7ff; /* Active background color */
+    color: #333; /* Ensure active text color is black */
+  }
+  
