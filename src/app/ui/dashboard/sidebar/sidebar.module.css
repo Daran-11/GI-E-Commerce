@@ -1,8 +1,7 @@
 .container{
     position: sticky;
-    top: 40px;
-   
-  
+    top: 25px;
+    
 }
 
 .user{
@@ -10,7 +9,6 @@
     align-items: center;
     gap: 20px;
     margin-bottom: 18px;
-  
 }
 
 .userImage{
@@ -27,6 +25,7 @@ object-fit: cover;
 .username{
     font-weight: 500;
     font-size: 20px;
+    
 }
 
 .userTitle{
@@ -38,9 +37,6 @@ object-fit: cover;
     color: #878d84;
 }
 
-.list li a:hover, .active{
-    color: black;
-}
 
 
 .cat{
@@ -60,11 +56,13 @@ object-fit: cover;
     border-radius: 10px;
     background: none;
     border: none;
-    color: black;
+    color: #878d84;
     width: 100%;
 }
 
 .logout:hover{
-    background-color: #75BB49;
+    background-color: #ffffff;
+  box-shadow: 0 0 10px 8px rgba(0, 0, 0, 0.1);
 }
+
 

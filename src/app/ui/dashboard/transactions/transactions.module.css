@@ -2,6 +2,7 @@
   background-color: var(--bgSoft);
   padding: 20px;
   border-radius: 10px;
+
 }
 
 .title {
@@ -51,3 +52,6 @@
     background-color: #f7737375;
 }
 
+.chart{
+  display: flex;
+}

@@ -26,7 +26,7 @@ const menuItems = [
       {
         title: "หน้าหลัก",
         path: "/dashboard",
-        icon: <MdDashboard />,
+        icon: <MdDashboard className={styles.dashboard}  />,
       },
       {
         title: "จัดการผู้ใช้",
@@ -73,7 +73,7 @@ const menuItems = [
       {
         title: "การตั้งค่า",
         path: "/dashboard/settings",
-        icon: <MdOutlineSettings />,
+        icon: <MdOutlineSettings style={{}} />,
       },
       {
         title: "ช่วยเหลือ",

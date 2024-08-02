@@ -1,6 +1,6 @@
 "use client"
 import styles from "./chart.module.css"
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend, Line, LineChart } from 'recharts';
 
 const data = [
   {
@@ -73,6 +73,8 @@ const chart = () => {
           <Area type="monotone" dataKey="pv" stroke="#4EAC14" fillOpacity={1} fill="url(#colorPv)" />
         </AreaChart>
       </ResponsiveContainer>
+
+     
     </div>
   )
 }

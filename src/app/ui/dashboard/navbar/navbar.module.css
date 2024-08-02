@@ -1,11 +1,11 @@
 .container{
 padding: 20px;
-border-radius: 10px;
+border-radius: 0px;
 background-color: var(--bgSoft);
 display: flex;
 align-items:  center;
 justify-content: space-between;
-
+background-color: #FEFEFE;
 }
 
 .title{
@@ -28,7 +28,7 @@ justify-content: space-between;
    background-color: #F3F3F3;
    padding: 10px;
    border-radius: 10px; 
-   
+
 }
 
 .input{

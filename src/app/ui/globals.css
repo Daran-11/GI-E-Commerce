@@ -3,8 +3,8 @@
 @tailwind utilities;
 
 :root{
-    --bg: #F3F3F3;
-     --bgSoft: #eaeaea;
+    --bg: #E8EDF5;
+     --bgSoft: white;
     --text: black;
     --textSoft: #4EAC14;
 
@@ -15,7 +15,7 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: "Prompt", sans-serif; 
+   
 }
 
 body{

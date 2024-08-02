@@ -4,16 +4,32 @@ import React from 'react';
 import Link from 'next/link';
 import styles from './menuLink.module.css';
 
+const activeColors = {
+  "หน้าหลัก": styles.activeDashboard,
+  "จัดการผู้ใช้": styles.activeUsers,
+  "จัดการสินค้า": styles.activeProducts,
+  "จัดการคำสั่งซื้อ": styles.activeOrders,
+  "ประวัติการขาย": styles.activeTransactions,
+  "ตรวจสอบสินค้า": styles.activeRevenue,
+  "ตรวจสอบคำร้องเรียน": styles.activeReports,
+  "การตั้งค่า": styles.activeSettings,
+  "ช่วยเหลือ": styles.activeHelp,
+};
+
+
 const MenuLink = ({ item, isActive }) => {
+  const activeClass = isActive ? activeColors[item.title] : '';
   return (
-    <li className={styles.menuLink}>
-      <Link href={item.path}>
-        <a className={`${styles.link} ${isActive ? styles.active : ''}`}>
-          {item.icon}
-          <span>{item.title}</span>
-        </a>
-      </Link>
-    </li>
+    <Link
+      href={item.path}
+      className={`${styles.container} ${isActive ? styles.active : ''}`}>
+      <span className={`${styles.icon} ${activeClass}`}>
+        {item.icon}
+      </span>
+      <span>{item.title}</span>
+
+    </Link>
+
   );
 };
 

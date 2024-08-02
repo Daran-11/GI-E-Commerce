@@ -9,14 +9,17 @@
 }
 
 .content {
-  flex: 4;
-  padding: 20px;
+  flex: 5;
+  padding: 0px;
+
 }
 
 .wrapper {
   display: flex;
   gap: 20px;
   margin-top: 20px;
+  padding-left: 20px;
+  padding-right: 20px;
 }
 .main {
     flex: 3;
