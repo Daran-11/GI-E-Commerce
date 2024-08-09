@@ -18,13 +18,25 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Insufficient product quantity' }, { status: 400 });
     }
 
-    // Create or get the user's address
-    const userAddress = await prisma.address.create({
-      data: {
+    // Create the user's address or update if it exists
+    const userAddress = await prisma.address.upsert({
+      where: {
+        userId_addressLine: {
+          userId: userId,
+          addressLine: address.addressLine
+        }
+      },
+      update: {
+        provinceId: address.provinceId,
+        amphoeId: address.amphoeId,
+        tambonId: address.tambonId,
+        postalCode: address.postalCode
+      },
+      create: {
         userId: userId,
-        province: address.province,
-        amphoe: address.amphoe,
-        tambon: address.tambon,
+        provinceId: address.provinceId,
+        amphoeId: address.amphoeId,
+        tambonId: address.tambonId,
         addressLine: address.addressLine,
         postalCode: address.postalCode
       }

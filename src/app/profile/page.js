@@ -1,5 +1,6 @@
 'use client';
 
+import AddressManagement from '@/components/AddressManagement';
 import { signOut, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
@@ -31,6 +32,8 @@ export default function Profile() {
           >
             Logout
           </button>
+
+          <AddressManagement/>
         </div>
       </div>
     )

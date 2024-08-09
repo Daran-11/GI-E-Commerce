@@ -17,7 +17,7 @@ model Product {
   ProductPic  Bytes?   @db.Blob
   DateCreated DateTime @default(now()) @db.Timestamp(0)
   cartItems   CartItem[]
-  Order       Order[]
+  Orders      Order[]
 }
 
 model User {
@@ -30,8 +30,8 @@ model User {
   phone     String   @unique
   updatedAt DateTime @updatedAt
   cartItems CartItem[]
-  Order     Order[]
-  Address   Address[]
+  Orders    Order[]
+  Addresses Address[]
 }
 
 model CartItem {
@@ -50,7 +50,7 @@ model Order {
   userId        Int
   productId     Int
   quantity      Int
-  totalPrice    Int
+  totalPrice    Float
   addressId     Int
   status        String   @default("Pending")
   createdAt     DateTime @default(now())
@@ -62,16 +62,60 @@ model Order {
 }
 
 model Address {
-  id        Int      @id @default(autoincrement())
-  userId    Int
-  province  String   @db.VarChar(100)
-  amphoe    String   @db.VarChar(100)
-  tambon    String   @db.VarChar(100)
-  addressLine String @db.VarChar(200)
-  postalCode String  @db.VarChar(10)
-  Order     Order[]
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  provinceId Int
+  amphoeId   Int
+  tambonId   Int
+  addressLine String
+  postalCode  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  user User @relation(fields: [userId], references: [id])
+  user       User     @relation(fields: [userId], references: [id])
+  province   Province @relation(fields: [provinceId], references: [id])
+  amphoe     Amphoe   @relation(fields: [amphoeId], references: [id])
+  tambon     Tambon   @relation(fields: [tambonId], references: [id])
+  orders     Order[]
+  
+}
+
+model Province {
+  id       Int       @id @default(autoincrement())
+  name_th  String
+  name_en  String
+  geography_id Int
+  created_at DateTime @default(now())
+  updated_at  DateTime   @updatedAt
+  deleted_at  DateTime?   @default(now())
+  amphoes  Amphoe[]
+  addresses Address[]
+}
+
+model Amphoe {
+  id          Int        @id @default(autoincrement())
+  name_th     String
+  name_en     String
+  province_id Int
+  created_at  DateTime   @default(now())
+  updated_at  DateTime   @updatedAt
+  deleted_at  DateTime?   @default(now())
+  tambons     Tambon[]
+  addresses   Address[]
+  province    Province   @relation(fields: [province_id], references: [id])
+}
+
+model Tambon {
+  id         Int       @id @default(autoincrement())
+  name_th    String
+  name_en    String
+  amphoeId   Int
+  zip_code   Int
+  amphoe     Amphoe    @relation(fields: [amphoeId], references: [id])
+  addresses  Address[]
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+  deleted_at  DateTime?   @default(now())
 }
 
 enum Role {
