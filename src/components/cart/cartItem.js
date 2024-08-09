@@ -41,33 +41,18 @@ export default function CartItem({ initialItems }) {
 
 
   
-  const handleCheckout = async () => {
+
+  const handleCheckout = () => {
     if (selectedItem) {
       const selectedItemData = cartItems.find(item => item.productId === selectedItem);
-      const address = {
-        province: "Bangkok",
-        amphoe: "Bang Kapi",
-        tambon: "Hua Mak",
-        addressLine: "123 Main St.",
-        postalCode: "10240"
-      };
-      const response = await fetch('http://localhost:3000/api/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          userId: session.user.id,  // replace with actual user ID
-          productId: selectedItemData.productId,
-          quantity: selectedItemData.quantity,
-          address 
-        })
-      });
-      const result = await response.json();
-      if (response.ok) {
-        // Redirect to confirmation page
-        router.push(`/confirm?orderId=${result.order.id}`);
-      } else {
-        alert(result.error || 'Failed to place order');
-      }
+      const queryParams = new URLSearchParams({
+        productId: selectedItemData.productId,
+        quantity: selectedItemData.quantity,
+        productName: selectedItemData.productName || selectedItemData.product.ProductName,
+        productPrice: selectedItemData.productPrice || selectedItemData.product.Price
+      }).toString();
+      
+      router.push(`/checkout?${queryParams}`);
     } else {
       alert("Please select an item to checkout.");
     }
