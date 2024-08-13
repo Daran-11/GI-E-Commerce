@@ -41,7 +41,8 @@ export const CartProvider = ({ children }) => {
       syncCartWithServer(session);
     }
   }, [session]);
-
+  
+  // ใส่ตัวเช็คว่าจำนวนจะเกินไหมใน syncCartwithServer
   const syncCartWithServer = async (session) => {
     const localCart = JSON.parse(localStorage.getItem('cart')) || [];
     for (const item of localCart) {

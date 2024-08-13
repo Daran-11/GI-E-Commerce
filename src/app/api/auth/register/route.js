@@ -1,7 +1,7 @@
-import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
+import prisma from "../../../../../lib/prisma";
 
-const prisma = new PrismaClient()
+
 
 export async function POST(request) {
     try {
@@ -24,7 +24,7 @@ export async function POST(request) {
             return new Response(JSON.stringify({ error: 'อีเมลนี้ถูกใช้ไปแล้ว' }), { status: 400 });
         }
 
-        const hashedPassword = await  bcrypt.hashSync(password, 10);
+        const hashedPassword = await bcrypt.hashSync(password, 10);
 
         const user = await prisma.user.create({
             data: {
