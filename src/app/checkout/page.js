@@ -1,11 +1,22 @@
-"use client";
-import AddressManagement from "@/components/AddressManagement";
+// This file should be a server component to use `getServerSession`
+import CheckoutClient from "@/components/checkout/CheckoutClient";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "../api/auth/[...nextauth]/route"; // Adjust path if necessary
 
-export default function Checkout() {
+export default async function CheckoutPage() {
+  const session = await getServerSession(authOptions);
+
+  if (!session || !session.user) {
+    // Redirect to login if no session or user found
+    redirect("/Login");
+  }
+
+  const userId = session.user.id;
 
   return (
-    <div className="top-container">
-        <AddressManagement />
+    <div>
+      <h1>Checkout</h1>
+      <CheckoutClient userId={userId} />
     </div>
   );
 }

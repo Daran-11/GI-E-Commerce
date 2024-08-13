@@ -4,10 +4,10 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-export default function AddressManagement() {
+export default function AddressManagement({ onAddressSelect }) {
   const { data: session , status} = useSession();
   const router = useRouter();
-
+  const [selectedAddress, setSelectedAddress] = useState(null);
   const [addresses, setAddresses] = useState([]);
   const [addressForm, setAddressForm] = useState({
     id: "",
@@ -47,6 +47,11 @@ export default function AddressManagement() {
     } else {
       console.error("User ID is not available.");
     }
+  };
+
+  const handleSelectAddress = (addressId) => {
+    setSelectedAddress(addressId);
+    onAddressSelect(addressId); // Notify parent component of address selection
   };
 
   const fetchProvinces = async () => {
@@ -238,6 +243,16 @@ export default function AddressManagement() {
             {address.addressLine}, {address.province.name_th}, {address.amphoe.name_th}, {address.tambon.name_th}, {address.postalCode}
             <button onClick={() => handleEdit(address)}>Edit</button>
             <button onClick={() => handleDelete(address.id)}>Delete</button>
+          </li>
+        ))}
+      </ul>
+      <h2>Select Address</h2>
+      <ul>
+        {addresses.map(address => (
+          <li key={address.id}>
+            <button onClick={() => handleSelectAddress(address.id)}>
+              {address.addressLine}
+            </button>
           </li>
         ))}
       </ul>

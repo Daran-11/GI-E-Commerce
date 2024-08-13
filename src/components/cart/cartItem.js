@@ -45,14 +45,14 @@ export default function CartItem({ initialItems }) {
   const handleCheckout = () => {
     if (selectedItem) {
       const selectedItemData = cartItems.find(item => item.productId === selectedItem);
-      const queryParams = new URLSearchParams({
-        productId: selectedItemData.productId,
-        quantity: selectedItemData.quantity,
-        productName: selectedItemData.productName || selectedItemData.product.ProductName,
-        productPrice: selectedItemData.productPrice || selectedItemData.product.Price
-      }).toString();
-      
-      router.push(`/checkout?${queryParams}`);
+  
+      if (selectedItemData) {
+        // Save selected item data to localStorage
+        localStorage.setItem('selectedItem', JSON.stringify(selectedItemData));
+        router.push('/checkout');
+      } else {
+        alert("Selected item not found in cart.");
+      }
     } else {
       alert("Please select an item to checkout.");
     }
