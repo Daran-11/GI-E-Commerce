@@ -6,12 +6,12 @@ import styles from './menuLink.module.css';
 
 const activeColors = {
   "หน้าหลัก": styles.activeDashboard,
-  "จัดการผู้ใช้": styles.activeUsers,
   "จัดการสินค้า": styles.activeProducts,
   "จัดการคำสั่งซื้อ": styles.activeOrders,
   "ประวัติการขาย": styles.activeTransactions,
-  "ตรวจสอบสินค้า": styles.activeRevenue,
-  "ตรวจสอบคำร้องเรียน": styles.activeReports,
+  "ตรวจสอบสินค้า": styles.activeCheckProducts,
+  "ตรวจสอบย้อนกลับ": styles.activeTraceability,
+  "ลงทะเบียนใบรับรอง": styles.activeCertificate,
   "การตั้งค่า": styles.activeSettings,
   "ช่วยเหลือ": styles.activeHelp,
 };

@@ -1,0 +1,74 @@
+.container{
+
+    background-color: var(--bgSoft);
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 20px;
+    
+}
+.top{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.addButton{
+padding: 10px;
+background-color: #98de6d;
+color: var(--text);
+border: none;
+border-radius: 5px;
+cursor: pointer;
+}
+
+.table{
+    width: 100%;
+}
+
+.table td{
+    padding: 15px;
+  
+}
+
+
+.buttons{
+    display: flex;
+    gap: 10px;
+}
+
+.button{
+    padding:5px 10px;
+    border-radius: 5px;
+    color: var(--text);
+    border: none;
+    cursor: pointer;
+}
+
+.view{
+    background-color: #98de6d;
+}
+
+
+.pending {
+    background-color: #f7cb7375;
+}
+
+.done {
+    background-color: #afd6ee75;
+}
+
+.cancelled {
+    background-color: #f7737375;
+}
+
+.expired{
+    background-color: #afafaf;
+}
+
+
+.status {
+    border-radius: 5px;
+    padding: 5px;
+    font-size: 14px;
+    color: black;
+  }

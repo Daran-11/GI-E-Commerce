@@ -13,7 +13,9 @@ const Dashboard = () => {
           <Card />
           <Card />
         </div>
+        <div>
         <Transactions />
+        </div>
         <Chart />
       </div>
       

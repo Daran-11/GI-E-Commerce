@@ -1,5 +1,5 @@
 import Search from "@/app/ui/dashboard/search/search"
-import styles from "@/app/ui/dashboard/products/products.module.css"
+import styles from "@/app/ui/dashboard/certificate/certificate.module.css"
 import Link from "next/link"
 import Image from "next/image"
 import Pagination from "@/app/ui/dashboard/pagination/pagination"
@@ -8,8 +8,8 @@ const Certificate = () => {
   return (
     <div className={styles.container}>
       <div className={styles.top}>
-        <Search placeholder="ค้นหาสินค้า..." />
-        <Link href="/dashboard/products/add">
+        <Search placeholder="ค้นหาผู้ใช้..." />
+        <Link href="/dashboard/certificate/add">
           <button className={styles.addButton}>Add New</button>
         </Link>
       </div>

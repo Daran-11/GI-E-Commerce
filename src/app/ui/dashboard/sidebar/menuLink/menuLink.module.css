@@ -29,10 +29,6 @@
   color: #ff5722; /* Example color for "หน้าหลัก" */
 }
 
-.activeUsers {
-  color: #3f51b5; /* Example color for "จัดการผู้ใช้" */
-}
-
 .activeProducts {
   color: #4caf50; /* Example color for "จัดการสินค้า" */
 }
@@ -45,12 +41,16 @@
   color: #9c27b0; /* Example color for "ประวัติการขาย" */
 }
 
-.activeRevenue {
+.activeCheckProducts {
   color: #009688; /* Example color for "ตรวจสอบสินค้า" */
 }
 
-.activeReports {
-  color: #e91e63; /* Example color for "ตรวจสอบคำร้องเรียน" */
+.activeTraceability {
+  color: #e91e63; /* Example color for "ตรวจสอบยอนกลับ" */
+}
+
+.activeCertificate {
+  color: #3f51b5; /* Example color for "ลงทะบียนใบรับรอง" */
 }
 
 .activeSettings {

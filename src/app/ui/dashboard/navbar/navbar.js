@@ -2,8 +2,6 @@
 import { usePathname } from "next/navigation";
 import styles from "./navbar.module.css";
 import { MdNotifications, MdOutlineChat, MdPublic, MdSearch } from "react-icons/md";
-import Dashboard from "@/app/dashboard/page";
-import transactions from "../transactions/transactions";
 
 const Navbar = () => {
   const pathname = usePathname();
@@ -11,10 +9,10 @@ const Navbar = () => {
   // Define a mapping of pathnames to Thai titles
   const titleMap = {
     dashboard: "หน้าหลัก",
-    users: "จัดการผู้ใช้",
     products: "จัดการสินค้า",
     orders: "จัดการคำสั่งซื้อ",
     transactions: "ประวัติการขาย",
+    certificate: "ลงทะเบียนใบรับรอง",
     // Add more pathnames and corresponding Thai titles as needed
   };
 

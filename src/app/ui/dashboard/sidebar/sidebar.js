@@ -12,6 +12,7 @@ import {
   MdOutlineSettings,
   MdHelpCenter,
   MdLogout,
+  MdMoney,
 } from "react-icons/md";
 import MenuLink from './menuLink/menuLink'; // Ensure this path is correct
 import Image from 'next/image';
@@ -26,12 +27,7 @@ const menuItems = [
       {
         title: "หน้าหลัก",
         path: "/dashboard",
-        icon: <MdDashboard className={styles.dashboard}  />,
-      },
-      {
-        title: "จัดการผู้ใช้",
-        path: "/dashboard/users",
-        icon: <MdSupervisedUserCircle />,
+        icon: <MdDashboard />,
       },
       {
         title: "จัดการสินค้า",
@@ -55,13 +51,8 @@ const menuItems = [
     title: "วิเคราะห์",
     list: [
       {
-        title: "ตรวจสอบสินค้า",
-        path: "/dashboard/revenue",
-        icon: <MdWork />,
-      },
-      {
-        title: "ตรวจสอบคำร้องเรียน",
-        path: '/dashboard/reports',
+        title: "ตรวจสอบย้อนกลับ",
+        path: '/dashboard/traceability',
         icon: <MdAnalytics />,
       },
 
@@ -71,9 +62,19 @@ const menuItems = [
     title: "ผู้ใช้",
     list: [
       {
+        title: "ลงทะเบียนใบรับรอง",
+        path: "/dashboard/certificate",
+        icon: <MdSupervisedUserCircle />,
+      },
+      {
+        title: "ช่องทางชำระเงิน",
+        path: "/dashboard/chennel",
+        icon: <MdMoney />,
+      },
+      {
         title: "การตั้งค่า",
         path: "/dashboard/settings",
-        icon: <MdOutlineSettings style={{}} />,
+        icon: <MdOutlineSettings  />,
       },
       {
         title: "ช่วยเหลือ",
