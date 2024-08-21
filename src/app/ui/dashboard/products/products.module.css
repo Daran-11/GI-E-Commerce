@@ -1,74 +1,84 @@
-.container{
-
-    background-color: var(--bgSoft);
-    padding: 20px;
-    border-radius: 10px;
-    margin-top: 20px;
-    
-}
-.top{
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+/* Global container styles */
+.container {
+  background-color: var(--bgSoft);
+  padding: 20px;
+  border-radius: 10px;
+  margin-top: 20px;
 }
 
-.addButton{
-padding: 10px;
-background-color: #98de6d;
-color: var(--text);
-border: none;
-border-radius: 5px;
-cursor: pointer;
+/* Flexbox container for top section */
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
-.table{
-    width: 100%;
+/* Add new button styles */
+.addButton {
+  padding: 10px;
+  background-color: #98de6d;
+  color: var(--text);
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
 }
 
-.table td{
-    padding: 15px;
-  
+/* Table styles */
+.table {
+  width: 100%;
+  border-collapse: collapse; /* Ensures borders between cells are merged */
 }
 
-
-.buttons{
-    display: flex;
-    gap: 10px;
+.table td {
+  padding: 15px;
+  border-bottom: 1px solid #ddd; /* Adds a subtle border between rows */
 }
 
-.button{
-    padding:5px 10px;
-    border-radius: 5px;
-    color: var(--text);
-    border: none;
-    cursor: pointer;
+/* Button styles */
+.buttons {
+  display: flex;
+  gap: 10px;
 }
 
-.view{
-    background-color: #98de6d;
+.button {
+  padding: 5px 10px;
+  border-radius: 5px;
+  color: var(--text);
+  border: none;
+  cursor: pointer;
 }
 
+/* Button variations */
+.view {
+  background-color: #98de6d;
+}
 
+/* Status indicator styles */
+.status {
+  border-radius: 5px;
+  padding: 5px;
+  font-size: 14px;
+  color: black;
+}
+
+/* Status colors */
 .pending {
-    background-color: #f7cb7375;
+  background-color: rgba(
+    247,
+    203,
+    115,
+    0.75
+  ); /* Using rgba for better color transparency */
 }
 
-.done {
-    background-color: #afd6ee75;
+.Available {
+  background-color: rgba(175, 214, 238, 0.75);
 }
 
 .cancelled {
-    background-color: #f7737375;
+  background-color: rgba(247, 115, 115, 0.75);
 }
 
-.expired{
-    background-color: #afafaf;
+.Out-of-Stock {
+  background-color: #afafaf;
 }
-
-
-.status {
-    border-radius: 5px;
-    padding: 5px;
-    font-size: 14px;
-    color: black;
-  }

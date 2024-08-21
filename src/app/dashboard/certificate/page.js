@@ -1,10 +1,10 @@
-'use client';
-import { useState, useEffect } from 'react';
-import styles from '@/app/ui/dashboard/certificate/certificate.module.css';
-import Link from 'next/link';
-import Image from 'next/image';
-import Pagination from '@/app/ui/dashboard/pagination/pagination';
-import Search from '@/app/ui/dashboard/search/search';
+"use client";
+import { useState, useEffect } from "react";
+import styles from "@/app/ui/dashboard/certificate/certificate.module.css";
+import Link from "next/link";
+import Image from "next/image";
+import Pagination from "@/app/ui/dashboard/pagination/pagination";
+import Search from "@/app/ui/dashboard/search/search";
 
 const Certificate = () => {
   const [certificates, setCertificates] = useState([]);
@@ -12,11 +12,11 @@ const Certificate = () => {
   useEffect(() => {
     const fetchCertificates = async () => {
       try {
-        const response = await fetch('/api/certificate/add');
+        const response = await fetch("/api/certificate/add");
         const data = await response.json();
         setCertificates(data);
       } catch (error) {
-        console.error('Failed to fetch certificates:', error);
+        console.error("Failed to fetch certificates:", error);
       }
     };
 
@@ -24,21 +24,20 @@ const Certificate = () => {
   }, []);
 
   const handleDelete = async (id) => {
-    if (confirm('Are you sure you want to delete this certificate?')) {
+    if (confirm("Are you sure you want to delete this certificate?")) {
       try {
-        const response = await fetch('/api/certificate/add', {
-          method: 'DELETE',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id }),
+        const response = await fetch(`/api/certificate/add?id=${id}`, {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
         });
         if (response.ok) {
-          alert('Certificate deleted successfully');
+          alert("Certificate deleted successfully");
           setCertificates(certificates.filter((cert) => cert.id !== id));
         } else {
-          alert('Failed to delete certificate');
+          alert("Failed to delete certificate");
         }
       } catch (error) {
-        console.error('Failed to delete certificate:', error);
+        console.error("Failed to delete certificate:", error);
       }
     }
   };
@@ -71,23 +70,31 @@ const Certificate = () => {
                 <td>{certificate.id}</td>
                 <td>{certificate.variety}</td>
                 <td>{certificate.plotCode}</td>
-                <td>{new Date(certificate.registrationDate).toLocaleDateString()}</td>
+                <td>
+                  {new Date(certificate.registrationDate).toLocaleDateString()}
+                </td>
                 <td>{new Date(certificate.expiryDate).toLocaleDateString()}</td>
                 <td>
-                  <span className={`${styles.status} ${styles[certificate.status]}`}>
+                  <span
+                    className={`${styles.status} ${styles[certificate.status]}`}
+                  >
                     {certificate.status}
                   </span>
                 </td>
-               
+
                 <td>
-                  {certificate.farmer?.name || 'N/A'}
+                  {certificate.farmer?.name || "N/A"}
                   <br />
-                  {certificate.farmer?.location || 'N/A'}
+                  {certificate.farmer?.location || "N/A"}
                 </td>
                 <td>
                   <div className={styles.buttons}>
-                    <Link href={`/dashboard/certificate/edit/${certificate.id}`}>
-                      <button className={`${styles.button} ${styles.view}`}>Edit</button>
+                    <Link
+                      href={`/dashboard/certificate/edit/${certificate.id}`}
+                    >
+                      <button className={`${styles.button} ${styles.view}`}>
+                        Edit
+                      </button>
                     </Link>
                     <button
                       className={`${styles.button} ${styles.cancelled}`}

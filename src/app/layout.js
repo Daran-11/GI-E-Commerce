@@ -1,9 +1,8 @@
-import { Inter, Prompt } from "next/font/google";
+import { Prompt } from "next/font/google";
 import "./ui/globals.css";
 
 // const inter = Inter({ subsets: ["latin"] });
-const inter = Prompt({ subsets: ["thai"], weight:'400' });
-
+const inter = Prompt({ subsets: ["thai"], weight: "400" });
 
 export const metadata = {
   title: "Create Next App",

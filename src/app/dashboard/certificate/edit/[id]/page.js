@@ -1,17 +1,17 @@
-'use client';
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import styles from '@/app/ui/dashboard/certificate/certificate.module.css';
+"use client";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import styles from "@/app/ui/dashboard/certificate/certificate.module.css";
 
 const EditCertificatePage = ({ params }) => {
   const [formData, setFormData] = useState({
-    variety: '',
-    plotCode: '',
-    registrationDate: '',
-    expiryDate: '',
-    status: '',
-    imageUrl: '',
-    farmerId: ''
+    variety: "",
+    plotCode: "",
+    registrationDate: "",
+    expiryDate: "",
+    status: "",
+    imageUrl: "",
+    farmerId: "",
   });
 
   const router = useRouter();
@@ -26,17 +26,19 @@ const EditCertificatePage = ({ params }) => {
           setFormData({
             variety: data.variety,
             plotCode: data.plotCode,
-            registrationDate: new Date(data.registrationDate).toISOString().split('T')[0],
-            expiryDate: new Date(data.expiryDate).toISOString().split('T')[0],
+            registrationDate: new Date(data.registrationDate)
+              .toISOString()
+              .split("T")[0],
+            expiryDate: new Date(data.expiryDate).toISOString().split("T")[0],
             status: data.status,
             imageUrl: data.imageUrl,
-            farmerId: data.farmer?.id || ''
+            farmerId: data.farmer?.id || "",
           });
         } else {
-          alert('Failed to fetch certificate');
+          alert("Failed to fetch certificate");
         }
       } catch (error) {
-        console.error('Failed to fetch certificate:', error);
+        console.error("Failed to fetch certificate:", error);
       }
     };
 
@@ -51,19 +53,19 @@ const EditCertificatePage = ({ params }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const response = await fetch('/api/certificate/add', {
-      method: 'PUT',
+    const response = await fetch("/api/certificate/add", {
+      method: "PUT",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({ id, ...formData }),
     });
 
     if (response.ok) {
-      alert('Certificate updated successfully');
-      router.push('/dashboard/certificate');
+      alert("Certificate updated successfully");
+      router.push("/dashboard/certificate");
     } else {
-      alert('Failed to update certificate');
+      alert("Failed to update certificate");
     }
   };
 
@@ -72,7 +74,7 @@ const EditCertificatePage = ({ params }) => {
       <input
         name="variety"
         type="text"
-        placeholder="Variety"
+        placeholder="สายพันธุ์"
         value={formData.variety}
         onChange={handleChange}
         required
@@ -80,7 +82,7 @@ const EditCertificatePage = ({ params }) => {
       <input
         name="plotCode"
         type="text"
-        placeholder="Plot Code"
+        placeholder="รหัสแปลงปลูก"
         value={formData.plotCode}
         onChange={handleChange}
         required
@@ -88,7 +90,7 @@ const EditCertificatePage = ({ params }) => {
       <input
         name="registrationDate"
         type="date"
-        placeholder="Registration Date"
+        placeholder="วันจดทะเบียน"
         value={formData.registrationDate}
         onChange={handleChange}
         required
@@ -96,7 +98,7 @@ const EditCertificatePage = ({ params }) => {
       <input
         name="expiryDate"
         type="date"
-        placeholder="Expiry Date"
+        placeholder="วันหมดอายุ"
         value={formData.expiryDate}
         onChange={handleChange}
         required
@@ -104,7 +106,7 @@ const EditCertificatePage = ({ params }) => {
       <input
         name="status"
         type="text"
-        placeholder="Status"
+        placeholder="สถานะ"
         value={formData.status}
         onChange={handleChange}
         required
@@ -112,7 +114,7 @@ const EditCertificatePage = ({ params }) => {
       <input
         name="imageUrl"
         type="text"
-        placeholder="Image URL"
+        placeholder="รูปภาพ"
         value={formData.imageUrl}
         onChange={handleChange}
         required
@@ -120,12 +122,12 @@ const EditCertificatePage = ({ params }) => {
       <input
         name="farmerId"
         type="number"
-        placeholder="Farmer ID"
+        placeholder="รหัสเกษตร"
         value={formData.farmerId}
         onChange={handleChange}
         required
       />
-      <button type="submit">Update Certificate</button>
+      <button type="submit">แก้ไขใบรับรอง</button>
     </form>
   );
 };

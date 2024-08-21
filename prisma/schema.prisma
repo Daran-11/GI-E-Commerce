@@ -26,3 +26,13 @@ model Certificate {
   farmerId        Int
   farmer          Farmer   @relation(fields: [farmerId], references: [id])
 }
+
+model Product {
+  id           Int      @id @default(autoincrement())
+  plotCode     String
+  productName  String
+  variety      String
+  price        Float
+  amount       Int
+  status       String
+}
