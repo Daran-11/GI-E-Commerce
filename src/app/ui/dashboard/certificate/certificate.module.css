@@ -1,74 +1,79 @@
-.container{
-
+/* Global container styles */
+.container {
     background-color: var(--bgSoft);
     padding: 20px;
     border-radius: 10px;
     margin-top: 20px;
-    
 }
-.top{
+
+/* Flexbox container for top section */
+.top {
     display: flex;
     align-items: center;
     justify-content: space-between;
 }
 
-.addButton{
-padding: 10px;
-background-color: #98de6d;
-color: var(--text);
-border: none;
-border-radius: 5px;
-cursor: pointer;
+/* Add new button styles */
+.addButton {
+    padding: 10px;
+    background-color: #98de6d;
+    color: var(--text);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
 }
 
-.table{
+/* Table styles */
+.table {
     width: 100%;
+    border-collapse: collapse; /* Ensures borders between cells are merged */
 }
 
-.table td{
+.table td {
     padding: 15px;
-  
+    border-bottom: 1px solid #ddd; /* Adds a subtle border between rows */
 }
 
-
-.buttons{
+/* Button styles */
+.buttons {
     display: flex;
     gap: 10px;
 }
 
-.button{
-    padding:5px 10px;
+.button {
+    padding: 5px 10px;
     border-radius: 5px;
     color: var(--text);
     border: none;
     cursor: pointer;
 }
 
-.view{
+/* Button variations */
+.view {
     background-color: #98de6d;
 }
 
-
-.pending {
-    background-color: #f7cb7375;
-}
-
-.done {
-    background-color: #afd6ee75;
-}
-
-.cancelled {
-    background-color: #f7737375;
-}
-
-.expired{
-    background-color: #afafaf;
-}
-
-
+/* Status indicator styles */
 .status {
     border-radius: 5px;
     padding: 5px;
     font-size: 14px;
     color: black;
-  }
+}
+
+/* Status colors */
+.pending {
+    background-color: rgba(247, 203, 115, 0.75); /* Using rgba for better color transparency */
+}
+
+.done {
+    background-color: rgba(175, 214, 238, 0.75);
+}
+
+.cancelled {
+    background-color: rgba(247, 115, 115, 0.75);
+}
+
+.expired {
+    background-color: #afafaf;
+}
