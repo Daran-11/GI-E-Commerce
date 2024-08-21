@@ -2,18 +2,20 @@ import { NextResponse } from 'next/server';
 import prisma from '../../../../../lib/prisma';
 
 export async function GET(request, { params }) {
-  const { orderId } = params;
-
-  if (!orderId) {
-    return NextResponse.json({ error: 'Order ID is required' }, { status: 400 });
-  }
+  const { id } = params;
 
   try {
     const order = await prisma.order.findUnique({
-      where: { id: Number(orderId) },
+      where: { id: parseInt(id, 10) },
       include: {
         product: true,
-        address: true,
+        address: {
+          include: {
+            province: true,
+            amphoe: true,
+            tambon: true,
+          },
+        },
       },
     });
 
@@ -21,7 +23,7 @@ export async function GET(request, { params }) {
       return NextResponse.json({ error: 'Order not found' }, { status: 404 });
     }
 
-    return NextResponse.json(order, { status: 200 });
+    return NextResponse.json(order);
   } catch (error) {
     console.error('Error fetching order details:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

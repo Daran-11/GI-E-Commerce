@@ -5,7 +5,7 @@ import { authOptions } from '../../auth/[...nextauth]/route';
 
 export async function PUT(request, { params }) {
   const { id } = params; // Address ID from URL
-  const { addressLine, provinceId, amphoeId, tambonId, postalCode } = await request.json();
+  const { addressLine, provinceId, amphoeId, tambonId, postalCode, isDefault } = await request.json();
 
   try {
     const session = await getServerSession(authOptions);
@@ -13,23 +13,29 @@ export async function PUT(request, { params }) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Convert IDs to integers
     const addressId = parseInt(id, 10);
-    const province = parseInt(provinceId, 10);
-    const amphoe = parseInt(amphoeId, 10);
-    const tambon = parseInt(tambonId, 10);
 
     // Update the address
     const updatedAddress = await prisma.address.update({
       where: { id: addressId },
       data: {
         addressLine,
-        provinceId: province,
-        amphoeId: amphoe,
-        tambonId: tambon,
-        postalCode
+        provinceId: provinceId,
+        amphoeId: amphoeId,
+        tambonId: tambonId,
+        postalCode,
+        isDefault, // Update default status if needed
       }
     });
+
+    // Handle default address logic
+    if (isDefault) {
+      console.log('Incoming data:', { addressLine, provinceId, amphoeId, tambonId, postalCode, isDefault });
+      await prisma.address.updateMany({
+        where: { userId: session.user.id, id: { not: addressId }, isDefault: true },
+        data: { isDefault: false },
+      });
+    }
 
     return NextResponse.json(updatedAddress);
   } catch (error) {
@@ -38,18 +44,41 @@ export async function PUT(request, { params }) {
   }
 }
 
-
 export async function DELETE(request, { params }) {
   const { id } = params;
 
+  const session = await getServerSession(authOptions);
+
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const addressId = parseInt(id, 10);
+
+    // Check if the address being deleted is the default address
+    const address = await prisma.address.findUnique({
+      where: { id: addressId },
+    });
+
+    if (!address) {
+      return NextResponse.json({ error: "Address not found" }, { status: 404 });
     }
 
-    // Convert ID to integer
-    const addressId = parseInt(id, 10);
+    if (address.isDefault) {
+      // Reassign default address
+      const otherAddress = await prisma.address.findFirst({
+        where: { userId: session.user.id, id: { not: addressId } },
+        orderBy: { createdAt: 'asc' } // Choose a method for selecting a new default
+      });
+
+      if (otherAddress) {
+        await prisma.address.update({
+          where: { id: otherAddress.id },
+          data: { isDefault: true },
+        });
+      }
+    }
 
     await prisma.address.delete({ where: { id: addressId } });
     return NextResponse.json({ message: "Address deleted" }, { status: 200 });
@@ -58,4 +87,3 @@ export async function DELETE(request, { params }) {
     return NextResponse.json({ error: 'Failed to delete address' }, { status: 500 });
   }
 }
-

@@ -30,6 +30,9 @@ export async function GET(req, { params }) {
         tambon: true,
       },
     });
+
+
+    
     return NextResponse.json(addresses, { status: 200 });
   } catch (error) {
     console.error('Failed to fetch addresses:', error);

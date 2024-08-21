@@ -4,10 +4,11 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-export default function AddressManagement({ onAddressSelect }) {
+export default function AddressManagement() {
   const { data: session , status} = useSession();
   const router = useRouter();
   const [selectedAddress, setSelectedAddress] = useState(null);
+  const [isActive, setIsActive] = useState(false);
   const [addresses, setAddresses] = useState([]);
   const [addressForm, setAddressForm] = useState({
     id: "",
@@ -16,12 +17,14 @@ export default function AddressManagement({ onAddressSelect }) {
     amphoeId: "",
     tambonId: "",
     postalCode: "",
+    isDefault: false,
   });
 
   const [provinces, setProvinces] = useState([]);
   const [amphoes, setAmphoes] = useState([]);
   const [tambons, setTambons] = useState([]);
   const [isFormVisible, setIsFormVisible] = useState(false);
+
 
   useEffect(() => {
     if (status === "loading") return; // Optionally handle loading state
@@ -40,6 +43,7 @@ export default function AddressManagement({ onAddressSelect }) {
       const res = await fetch(`http://localhost:3000/api/users/${session.user.id}/addresses`);
       if (res.ok) {
         const data = await res.json();
+        console.log('Fetched Addresses:', data); // Debug the response
         setAddresses(data);
       } else {
         console.error("Failed to fetch addresses:", res.statusText);
@@ -49,10 +53,6 @@ export default function AddressManagement({ onAddressSelect }) {
     }
   };
 
-  const handleSelectAddress = (addressId) => {
-    setSelectedAddress(addressId);
-    onAddressSelect(addressId); // Notify parent component of address selection
-  };
 
   const fetchProvinces = async () => {
     const res = await fetch("http://localhost:3000/api/provinces");
@@ -114,7 +114,7 @@ export default function AddressManagement({ onAddressSelect }) {
     const res = await fetch(url, {
       method,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...addressForm, userId: session.user.id }),
+      body: JSON.stringify({ ...addressForm, userId: session.user.id, isDefault: addressForm.isDefault }),
     });
 
     if (res.ok) {
@@ -126,10 +126,29 @@ export default function AddressManagement({ onAddressSelect }) {
         amphoeId: "",
         tambonId: "",
         postalCode: "",
+        isDefault: false,
       });
       setIsFormVisible(false); // Hide form after saving
     } else {
       console.error("Failed to save address");
+    }
+  };
+
+  const handleSetDefault = async (addressId) => {
+    // Make sure the user has at most 2 addresses
+    const res = await fetch(`http://localhost:3000/api/users/${session.user.id}/addresses`);
+    const addresses = await res.json();
+  
+    if (addresses.length < 2) {
+      await fetch(`http://localhost:3000/api/addresses/${addressId}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isDefault: true }),
+      });
+  
+      fetchAddresses();
+    } else {
+      alert("You can only have up to 2 addresses.");
     }
   };
 
@@ -141,6 +160,7 @@ export default function AddressManagement({ onAddressSelect }) {
       amphoeId: address.amphoe.id,
       tambonId: address.tambon.id,
       postalCode: address.postalCode,
+      isDefault: address.isDefault || false,
     });
     fetchAmphoes(address.province.id);
     fetchTambons(address.amphoe.id);
@@ -230,6 +250,19 @@ export default function AddressManagement({ onAddressSelect }) {
               onChange={handleAddressChange}
             />
           </div>
+
+          <div>
+            <label>
+              <input
+                type="checkbox"
+                name="default"
+                checked={addressForm.isDefault}
+                onChange={(e) => setAddressForm({ ...addressForm, isDefault: e.target.checked })}
+              />
+              Set as default address
+            </label>
+          </div>
+
           <button type="button" onClick={handleSave}>
             {addressForm.id ? "Update Address" : "Save Address"}
           </button>
@@ -240,18 +273,11 @@ export default function AddressManagement({ onAddressSelect }) {
       <ul>
         {addresses.length > 0 && addresses.map((address) => (
           <li key={address.id}>
-            {address.addressLine}, {address.province.name_th}, {address.amphoe.name_th}, {address.tambon.name_th}, {address.postalCode}
+            {address.addressLine}, {address.province.name_th}, {address.amphoe.name_th}, {address.tambon.name_th}, {address.postalCode}, {address.isDefault}
             <button onClick={() => handleEdit(address)}>Edit</button>
             <button onClick={() => handleDelete(address.id)}>Delete</button>
-          </li>
-        ))}
-      </ul>
-      <h2>Select Address</h2>
-      <ul>
-        {addresses.map(address => (
-          <li key={address.id}>
-            <button onClick={() => handleSelectAddress(address.id)}>
-              {address.addressLine}
+            <button onClick={() => handleSetDefault(address.id)}>
+              {address.isDefault ? "Default" : "Set as Default"}
             </button>
           </li>
         ))}
