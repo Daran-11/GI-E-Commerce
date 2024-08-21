@@ -4,26 +4,38 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function CheckoutClient({userId}) {
-  const router = useRouter();
+   const router = useRouter();
   const [selectedItem, setSelectedItem] = useState(null);
   const [selectedAddressId, setSelectedAddressId] = useState(null);
 
   useEffect(() => {
+    const fetchDefaultAddress = async () => {
+      try {
+        const res = await fetch(`http://localhost:3000/api/users/${userId}/default-address`);
+        if (res.ok) {
+          const data = await res.json();
+          setSelectedAddressId(data.id); // Set default address ID
+        } else {
+          console.error('Failed to fetch default address');
+        }
+      } catch (error) {
+        console.error('Error fetching default address:', error);
+      }
+    };
+
     const storedItem = localStorage.getItem("selectedItem");
     if (storedItem) {
       setSelectedItem(JSON.parse(storedItem));
     }
-  }, []);
+
+    fetchDefaultAddress(); // Fetch default address when component mounts
+  }, [userId]);
 
   if (!selectedItem) {
     return <div>No item selected for checkout.</div>;
   }
 
-  const handleAddressSelect = (addressId) => {
-    setSelectedAddressId(addressId);
-  };
-
-  const handleConfirmOrder = async ({productId}) => { 
+  const handleConfirmOrder = async () => {
     if (selectedItem && selectedAddressId) {
       try {
         // Create the order
@@ -52,12 +64,13 @@ export default function CheckoutClient({userId}) {
             body: JSON.stringify({ productId: selectedItem.productId }),
           });
 
-          if (removeFromCartResponse.ok) {
-            console.log('Order successful and item removed from cart');
-            localStorage.removeItem('selectedItem');
-            router.push('/order-confirmation');
+          if (orderResponse.ok) {
+            const orderData = await orderResponse.json();
+    
+            // Redirect to order confirmation with the order ID
+            router.push(`/order-confirmation?id=${orderData.id}`);
           } else {
-            console.error('Failed to remove item from cart');
+            console.error('Failed to create order');
           }
         } else {
           console.error('Failed to create order');
@@ -70,31 +83,28 @@ export default function CheckoutClient({userId}) {
     }
   };
 
-
-
-  
-
   return (
     <div className="top-container">
       <h1>Checkout</h1>
 
-{/* Product Summary */}
-<h2>Product Summary</h2>
-{selectedItem && (
-  <div>
-    <p><strong>Product Name:</strong> {selectedItem.productName || selectedItem.product.ProductName}</p>
-    <p><strong>Quantity:</strong> {selectedItem.quantity}</p>
-    <p><strong>Price:</strong> {selectedItem.productPrice || selectedItem.product.Price}</p>
-    <p><strong>Total:</strong> {(selectedItem.productPrice || selectedItem.product.Price) * selectedItem.quantity}</p>
-  </div>
-)}
+      {/* Product Summary */}
+      <h2>Product Summary</h2>
+      {selectedItem && (
+        <div>
+          <p><strong>Product Name:</strong> {selectedItem.productName || selectedItem.product.ProductName}</p>
+          <p><strong>Quantity:</strong> {selectedItem.quantity}</p>
+          <p><strong>Price:</strong> {selectedItem.productPrice || selectedItem.product.Price}</p>
+          <p><strong>Total:</strong> {(selectedItem.productPrice || selectedItem.product.Price) * selectedItem.quantity}</p>
+        </div>
+      )}
+
       <h2>Delivery Address</h2>
-        <AddressManagement onAddressSelect={handleAddressSelect}/>
+      {/* Display address management component if needed */}
+      <AddressManagement/>
 
-        <button type="button" onClick={handleConfirmOrder}>
-        Confirm and Pay
+      <button className="w-[200px] h-[50px] font-light rounded-xl text-white bg-[#4EAC14] hover:bg-[#84d154]" type="button" onClick={handleConfirmOrder}>
+        ชำระเงิน
       </button>
-
     </div>
   );
 }

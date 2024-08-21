@@ -23,9 +23,11 @@ export default function CartItem({ initialItems }) {
 
     // Function to select an item
     const selectItem = (productId) => {
-      setSelectedItem(selectedItem === productId ? null : productId);
+      setSelectedItem((prevSelectedItem) =>
+        prevSelectedItem === productId ? null : productId
+      );
+      console.log('item selected:', productId);
     };
-
   const handleUpdateQuantity = (productId, newQuantity) => {
     // Check if the new quantity exceeds available amount
     const item = cartItems.find(i => i.productId === productId);
@@ -109,12 +111,12 @@ export default function CartItem({ initialItems }) {
         </table>
       </div>
       <div className="col-span-2 border-2 border-black w-full h-[200px]">
-      <button
+      <button 
         onClick={handleCheckout}
         disabled={!selectedItem}
-        className="bg-blue-500 rounded w-[150px] mt-4"
+        className="action-button bg-[#4EAC14] text-white font-light rounded-xl w-[150px] mt-4 disabled:bg-gray-300"
       >
-        Checkout
+        สั่งซื้อ
       </button>
       </div>
     </div>

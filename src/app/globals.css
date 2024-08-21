@@ -15,6 +15,10 @@
   margin-right: auto;
 }
 
+.action-button {
+  @apply w-[170px] h-[50px] rounded-xl text-2xl 
+}
+
 
 
 .input-position {
