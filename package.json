@@ -2,6 +2,7 @@
   "name": "gi_pineapple",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -23,4 +24,6 @@
     "prisma": "^5.18.0",
     "tailwindcss": "^3.4.1"
   }
+
 }
+

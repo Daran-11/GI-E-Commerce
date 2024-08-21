@@ -1,8 +1,8 @@
 "use client";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 
-export default function AddproductPage() {
+const EditProductPage = ({ params }) => {
   const [formData, setFormData] = useState({
     plotCode: "",
     productName: "",
@@ -13,6 +13,32 @@ export default function AddproductPage() {
   });
 
   const router = useRouter();
+  const { id } = params;
+
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const response = await fetch(`/api/product/add?id=${id}`);
+        if (response.ok) {
+          const data = await response.json();
+          setFormData({
+            plotCode: data.plotCode,
+            productName: data.productName,
+            variety: data.variety,
+            price: data.price,
+            amount: data.amount,
+            status: data.status,
+          });
+        } else {
+          alert("Failed to fetch product");
+        }
+      } catch (error) {
+        console.error("Failed to fetch product:", error);
+      }
+    };
+
+    fetchProduct();
+  }, [id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -23,18 +49,18 @@ export default function AddproductPage() {
     e.preventDefault();
 
     const response = await fetch("/api/product/add", {
-      method: "POST",
+      method: "PUT",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(formData),
+      body: JSON.stringify({ id, ...formData }),
     });
 
     if (response.ok) {
-      alert("product added successfully");
+      alert("Certificate updated successfully");
       router.push("/dashboard/products");
     } else {
-      alert("Failed to add product");
+      alert("Failed to update product");
     }
   };
 
@@ -66,7 +92,7 @@ export default function AddproductPage() {
       />
       <input
         name="price"
-        type="float"
+        type="number"
         placeholder="ราคา"
         value={formData.price}
         onChange={handleChange}
@@ -88,7 +114,9 @@ export default function AddproductPage() {
         onChange={handleChange}
         required
       />
-      <button type="submit">เพิ่มสินค้า</button>
+      <button type="submit">แก้ไขสินค้า</button>
     </form>
   );
-}
+};
+
+export default EditProductPage;
