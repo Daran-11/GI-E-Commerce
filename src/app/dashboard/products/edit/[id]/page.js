@@ -1,8 +1,34 @@
 "use client";
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useCallback, useEffect } from "react";
+import {
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Button,
+  TextField,
+  Grid,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  styled,
+  Paper,
+} from "@mui/material";
 
-const EditProductPage = ({ params }) => {
+const CustomPaper = styled(Paper)(({ theme }) => ({
+  borderRadius: "16px",
+  padding: "20px",
+  backgroundColor: "#f5f5f5",
+}));
+
+const EditProductDialog = ({
+  open,
+  onClose,
+  onEditProduct,
+  productId,
+  onSuccess,
+}) => {
   const [formData, setFormData] = useState({
     plotCode: "",
     productName: "",
@@ -12,13 +38,10 @@ const EditProductPage = ({ params }) => {
     status: "",
   });
 
-  const router = useRouter();
-  const { id } = params;
-
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const response = await fetch(`/api/product/add?id=${id}`);
+        const response = await fetch(`/api/product/add?id=${productId}`);
         if (response.ok) {
           const data = await response.json();
           setFormData({
@@ -37,86 +60,176 @@ const EditProductPage = ({ params }) => {
       }
     };
 
-    fetchProduct();
-  }, [id]);
+    if (productId) {
+      fetchProduct();
+    }
+  }, [productId]);
+
+  const formatPrice = (value) => {
+    const cleanValue = value.replace(/[^0-9.]/g, "");
+    const [integerPart, decimalPart] = cleanValue.split(".");
+    const formattedIntegerPart = integerPart.replace(
+      /\B(?=(\d{3})+(?!\d))/g,
+      ","
+    );
+    return decimalPart
+      ? `${formattedIntegerPart}.${decimalPart}`
+      : formattedIntegerPart;
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (name === "price") {
+      const formattedValue = formatPrice(value);
+      setFormData((prev) => ({ ...prev, [name]: formattedValue }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
   };
+
+  // Handle dialog close and reset form
+  const handleClose = useCallback(() => {
+    setFormData({
+      plotCode: "",
+      productName: "",
+      variety: "",
+      price: "",
+      amount: "",
+      status: "",
+    });
+    onClose();
+  }, [onClose]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const response = await fetch("/api/product/add", {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ id, ...formData }),
-    });
+    const formattedData = {
+      ...formData,
+    };
 
-    if (response.ok) {
-      alert("Certificate updated successfully");
-      router.push("/dashboard/products");
-    } else {
-      alert("Failed to update product");
+    try {
+      const response = await fetch(`/api/product/add?id=${productId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: productId, // Include the id in the request body
+          ...formattedData,
+        }),
+      });
+
+      if (response.ok) {
+        const updatedProduct = await response.json();
+        alert("Product updated successfully");
+        handleClose();
+        if (onSuccess) onSuccess(); // Notify parent component of success
+      } else {
+        const errorData = await response.json();
+        alert(`Failed to update product: ${errorData.error}`);
+      }
+    } catch (error) {
+      console.error("Failed to submit data:", error);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <input
-        name="plotCode"
-        type="text"
-        placeholder="รหัสแปลงปลูก"
-        value={formData.plotCode}
-        onChange={handleChange}
-        required
-      />
-      <input
-        name="productName"
-        type="text"
-        placeholder="ชื่อสินค้า"
-        value={formData.productName}
-        onChange={handleChange}
-        required
-      />
-      <input
-        name="variety"
-        type="text"
-        placeholder="สายพันธุ์"
-        value={formData.variety}
-        onChange={handleChange}
-        required
-      />
-      <input
-        name="price"
-        type="number"
-        placeholder="ราคา"
-        value={formData.price}
-        onChange={handleChange}
-        required
-      />
-      <input
-        name="amount"
-        type="number"
-        placeholder="จำนวน"
-        value={formData.amount}
-        onChange={handleChange}
-        required
-      />
-      <input
-        name="status"
-        type="text"
-        placeholder="สถานะ"
-        value={formData.status}
-        onChange={handleChange}
-        required
-      />
-      <button type="submit">แก้ไขสินค้า</button>
-    </form>
+    <Dialog open={open} onClose={handleClose} PaperComponent={CustomPaper}>
+      <DialogTitle>Edit Product</DialogTitle>
+      <DialogContent>
+        <form onSubmit={handleSubmit}>
+          <Grid container spacing={2} marginTop={0}>
+            <Grid item xs={12}>
+              <TextField
+                name="plotCode"
+                label="Plot Code"
+                variant="outlined"
+                fullWidth
+                value={formData.plotCode}
+                onChange={handleChange}
+                required
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                name="productName"
+                label="Product Name"
+                variant="outlined"
+                fullWidth
+                value={formData.productName}
+                onChange={handleChange}
+                required
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                name="variety"
+                label="Variety"
+                variant="outlined"
+                fullWidth
+                value={formData.variety}
+                onChange={handleChange}
+                required
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                name="price"
+                label="Price"
+                variant="outlined"
+                fullWidth
+                value={formData.price}
+                onChange={handleChange}
+                required
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                name="amount"
+                label="Amount"
+                variant="outlined"
+                type="number"
+                fullWidth
+                value={formData.amount}
+                onChange={handleChange}
+                required
+                inputProps={{ min: 0 }}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <FormControl fullWidth variant="outlined" required>
+                <InputLabel>Status</InputLabel>
+                <Select
+                  name="status"
+                  value={formData.status}
+                  onChange={handleChange}
+                  label="Status"
+                >
+                  <MenuItem value="Available">Available</MenuItem>
+                  <MenuItem value="Out of Stock">Out of Stock</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12}>
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                fullWidth
+              >
+                บันทึก
+              </Button>
+            </Grid>
+          </Grid>
+        </form>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleClose} color="primary">
+          Cancel
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 };
 
-export default EditProductPage;
+export default EditProductDialog;

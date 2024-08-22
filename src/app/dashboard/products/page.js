@@ -1,28 +1,40 @@
+// components/Product.js
 "use client";
 import { useState, useEffect } from "react";
 import styles from "@/app/ui/dashboard/products/products.module.css";
-import Link from "next/link";
-import Image from "next/image";
+import Button from "@mui/material/Button";
 import Pagination from "@/app/ui/dashboard/pagination/pagination";
 import Search from "@/app/ui/dashboard/search/search";
+import AddProductDialog from "@/app/dashboard/products/add/page";
+import EditProductDialog from "@/app/dashboard/products/edit/[id]/page";
 
 const Product = () => {
   const [products, setProducts] = useState([]);
+  const [openAddDialog, setOpenAddDialog] = useState(false);
+  const [openEditDialog, setOpenEditDialog] = useState(false);
+  const [selectedProductId, setSelectedProductId] = useState(null);
+
+  const fetchProducts = async () => {
+    try {
+      const response = await fetch("/api/product/add");
+      const data = await response.json();
+      const formattedData = data.map((product) => ({
+        ...product,
+        price: formatPrice(product.price),
+      }));
+      setProducts(formattedData);
+    } catch (error) {
+      console.error("Failed to fetch products:", error);
+    }
+  };
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const response = await fetch("/api/product/add");
-        const data = await response.json();
-        console.log("Fetched products:", data); // Debug log
-        setProducts(data);
-      } catch (error) {
-        console.error("Failed to fetch products:", error);
-      }
-    };
-
     fetchProducts();
   }, []);
+
+  const formatPrice = (price) => {
+    return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  };
 
   const handleDelete = async (id) => {
     if (confirm("Are you sure you want to delete this product?")) {
@@ -31,7 +43,6 @@ const Product = () => {
           method: "DELETE",
           headers: { "Content-Type": "application/json" },
         });
-        console.log("Delete response:", response); // Debug log
         if (response.ok) {
           setProducts(products.filter((product) => product.id !== id));
         } else {
@@ -43,13 +54,66 @@ const Product = () => {
     }
   };
 
+  const handleOpenAddDialog = () => setOpenAddDialog(true);
+  const handleCloseAddDialog = () => setOpenAddDialog(false);
+
+  const handleOpenEditDialog = (id) => {
+    setSelectedProductId(id);
+    setOpenEditDialog(true);
+  };
+
+  const handleCloseEditDialog = () => {
+    setSelectedProductId(null);
+    setOpenEditDialog(false);
+  };
+
+  const handleAddProduct = async (productData) => {
+    const response = await fetch("/api/product/add", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(productData),
+    });
+
+    if (response.ok) {
+      alert("Product added successfully");
+      fetchProducts(); // Refetch products after adding a new product
+      handleCloseAddDialog();
+    } else {
+      alert("Failed to add product");
+    }
+  };
+
+  const handleEditProduct = async (id, productData) => {
+    const response = await fetch(`/api/product/add?id=${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(productData),
+    });
+
+    if (response.ok) {
+      alert("Product updated successfully");
+      fetchProducts(); // Refetch products after editing
+      handleCloseEditDialog();
+    } else {
+      alert("Failed to update product");
+    }
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.top}>
         <Search placeholder="ค้นหาผู้ใช้..." />
-        <Link href="/dashboard/products/add">
-          <button className={styles.addButton}>Add New</button>
-        </Link>
+        <Button
+          className={styles.addButton}
+          color="primary"
+          onClick={handleOpenAddDialog}
+        >
+          เพิ่มสินค้า
+        </Button>
       </div>
       <table className={styles.table}>
         <thead>
@@ -83,32 +147,50 @@ const Product = () => {
                     {product.status}
                   </span>
                 </td>
-
                 <td>
                   <div className={styles.buttons}>
-                    <Link href={`/dashboard/products/edit/${product.id}`}>
-                      <button className={`${styles.button} ${styles.view}`}>
-                        Edit
-                      </button>
-                    </Link>
-                    <button
+                    <Button
+                      className={`${styles.button} ${styles.view}`}
+                      onClick={() => handleOpenEditDialog(product.id)}
+                    >
+                      แก้ไข
+                    </Button>
+                    <Button
                       className={`${styles.button} ${styles.cancelled}`}
                       onClick={() => handleDelete(product.id)}
                     >
-                      Delete
-                    </button>
+                      ลบ
+                    </Button>
                   </div>
                 </td>
               </tr>
             ))
           ) : (
             <tr>
-              <td colSpan={9}>No products available</td>
+              <td colSpan={8}>No products available</td>
             </tr>
           )}
         </tbody>
       </table>
       <Pagination />
+
+      {/* Add Product Dialog */}
+      <AddProductDialog
+        open={openAddDialog}
+        onClose={handleCloseAddDialog}
+        onAddProduct={handleAddProduct}
+      />
+
+      {/* Edit Product Dialog */}
+      {selectedProductId && (
+        <EditProductDialog
+          open={openEditDialog}
+          onClose={handleCloseEditDialog}
+          onEditProduct={handleEditProduct}
+          productId={selectedProductId}
+          onSuccess={fetchProducts} // Pass the fetchProducts function as onSuccess
+        />
+      )}
     </div>
   );
 };
