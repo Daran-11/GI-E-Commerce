@@ -10,6 +10,7 @@ import EditProductDialog from "@/app/dashboard/products/edit/[id]/page";
 
 const Product = () => {
   const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true); // Add a loading state  
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [selectedProductId, setSelectedProductId] = useState(null);
@@ -23,13 +24,17 @@ const Product = () => {
         price: formatPrice(product.price),
       }));
       setProducts(formattedData);
+      setLoading(false); // Set loading to false after data is fetched
     } catch (error) {
       console.error("Failed to fetch products:", error);
+      setLoading(false); // Even on error, stop loading
     }
   };
 
+
   useEffect(() => {
     fetchProducts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const formatPrice = (price) => {
@@ -103,13 +108,25 @@ const Product = () => {
     }
   };
 
+  if (loading) {
+    return <div>Loading...</div>; // You can replace this with a more sophisticated loading UI
+  }
+
+
   return (
     <div className={styles.container}>
       <div className={styles.top}>
         <Search placeholder="ค้นหาผู้ใช้..." />
         <Button
-          className={styles.addButton}
-          color="primary"
+          sx={{
+            color: 'var(--text)',
+            backgroundColor: 'var(--background-add)',
+            padding: 'var(--padding)',
+            fontSize: 'var(--font-size)',
+            '&:hover': {
+              backgroundColor: 'var(--background-hover)',
+            },
+          }}
           onClick={handleOpenAddDialog}
         >
           เพิ่มสินค้า
@@ -140,9 +157,8 @@ const Product = () => {
                 <td>{product.amount}</td>
                 <td>
                   <span
-                    className={`${styles.status} ${
-                      styles[product.status.replace(/ /g, "-")]
-                    }`}
+                    className={`${styles.status} ${styles[product.status.replace(/ /g, "-")]
+                      }`}
                   >
                     {product.status}
                   </span>
@@ -150,13 +166,29 @@ const Product = () => {
                 <td>
                   <div className={styles.buttons}>
                     <Button
-                      className={`${styles.button} ${styles.view}`}
+                      sx={{
+                        color: 'var(--text)',
+                        backgroundColor: 'var(--background-view)',
+                        padding: 'var(--padding)',
+                        fontSize: 'var(--font-size)',
+                        '&:hover': {
+                          backgroundColor: 'var(--background-hover)',
+                        },
+                      }}
                       onClick={() => handleOpenEditDialog(product.id)}
                     >
                       แก้ไข
                     </Button>
                     <Button
-                      className={`${styles.button} ${styles.cancelled}`}
+                      sx={{
+                        color: 'var(--text)',
+                        backgroundColor: 'var(--background-delete)',
+                        padding: 'var(--padding)',
+                        fontSize: 'var(--font-size)',
+                        '&:hover': {
+                          backgroundColor: 'var(--background-hover)',
+                        },
+                      }}
                       onClick={() => handleDelete(product.id)}
                     >
                       ลบ
