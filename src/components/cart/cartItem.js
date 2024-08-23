@@ -81,7 +81,7 @@ export default function CartItem({ initialItems }) {
                 <tr key={item.productId}>
                   <td className="items-center justify-center ">
                   <input
-                  type="radio"
+                  type="checkbox"
                   checked={selectedItem === item.productId}
                   onChange={() => selectItem(item.productId)}
                 />                  

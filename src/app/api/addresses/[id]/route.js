@@ -4,45 +4,51 @@ import prisma from '../../../../../lib/prisma';
 import { authOptions } from '../../auth/[...nextauth]/route';
 
 export async function PUT(request, { params }) {
-  const { id } = params; // Address ID from URL
+  const { id } = params;
   const { addressLine, provinceId, amphoeId, tambonId, postalCode, isDefault } = await request.json();
 
   try {
     const session = await getServerSession(authOptions);
-    if (!session) {
+    if (!session || !session.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const addressId = parseInt(id, 10);
 
-    // Update the address
+    // Handle default address logic
+    if (isDefault) {
+      // Clear existing default address for the user
+      await prisma.address.updateMany({
+        where: {
+          userId: session.user.id,
+          isDefault: true,
+        },
+        data: {
+          isDefault: false,
+        },
+      });
+    }
+
+    // Update the selected address
     const updatedAddress = await prisma.address.update({
       where: { id: addressId },
       data: {
         addressLine,
-        provinceId: provinceId,
-        amphoeId: amphoeId,
-        tambonId: tambonId,
+        provinceId,
+        amphoeId,
+        tambonId,
         postalCode,
-        isDefault, // Update default status if needed
-      }
+        isDefault, // Update the default status here
+      },
     });
-
-    // Handle default address logic
-    if (isDefault) {
-      console.log('Incoming data:', { addressLine, provinceId, amphoeId, tambonId, postalCode, isDefault });
-      await prisma.address.updateMany({
-        where: { userId: session.user.id, id: { not: addressId }, isDefault: true },
-        data: { isDefault: false },
-      });
-    }
 
     return NextResponse.json(updatedAddress);
   } catch (error) {
     console.error('Error updating address:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json({ error: `Internal Server Error: ${error.message}` }, { status: 500 });
   }
 }
+
 
 export async function DELETE(request, { params }) {
   const { id } = params;

@@ -8,7 +8,6 @@ export default function AddressManagement() {
   const { data: session , status} = useSession();
   const router = useRouter();
   const [selectedAddress, setSelectedAddress] = useState(null);
-  const [isActive, setIsActive] = useState(false);
   const [addresses, setAddresses] = useState([]);
   const [addressForm, setAddressForm] = useState({
     id: "",
@@ -109,14 +108,24 @@ export default function AddressManagement() {
   };
 
   const handleSave = async () => {
+
+    
+
     const method = addressForm.id ? "PUT" : "POST";
-    const url = addressForm.id ? `http://localhost:3000/api/addresses/${addressForm.id}` : "http://localhost:3000/api/addresses";
+    const url = addressForm.id
+      ? `http://localhost:3000/api/users/${session.user.id}/addresses`
+      : `http://localhost:3000/api/users/${session.user.id}/addresses`;
+  
     const res = await fetch(url, {
       method,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...addressForm, userId: session.user.id, isDefault: addressForm.isDefault }),
+      body: JSON.stringify({
+        ...addressForm,
+        // Include userId in the request body
+        userId: session.user.id,
+      }),
     });
-
+  
     if (res.ok) {
       fetchAddresses();
       setAddressForm({
@@ -133,25 +142,59 @@ export default function AddressManagement() {
       console.error("Failed to save address");
     }
   };
+  
 
   const handleSetDefault = async (addressId) => {
-    // Make sure the user has at most 2 addresses
-    const res = await fetch(`http://localhost:3000/api/users/${session.user.id}/addresses`);
-    const addresses = await res.json();
+    if (session?.user?.id) {
+      const userId = session.user.id;
   
-    if (addresses.length < 2) {
-      await fetch(`http://localhost:3000/api/addresses/${addressId}`, {
-        method: "GET",
+      // Find the address details
+      const address = addresses.find((addr) => addr.id === addressId);
+      if (!address) {
+        console.error('Address not found');
+        return;
+      }
+  
+      // Determine if the current address is already the default
+      const isCurrentlyDefault = address.isDefault;
+  
+      // Validate address fields before sending
+      const { addressLine, provinceId, amphoeId, tambonId, postalCode } = address;
+      if (!addressLine || !provinceId || !amphoeId || !tambonId || !postalCode) {
+        console.error('Invalid address data');
+        return;
+      }
+  
+      // If the address is already the default, simply return (do nothing)
+      if (isCurrentlyDefault) {
+        console.log('Address is already the default');
+        return;
+      }
+  
+      const response = await fetch(`http://localhost:3000/api/users/${userId}/addresses`, {
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ isDefault: true }),
+        body: JSON.stringify({
+          id: addressId,
+          addressLine,
+          provinceId: parseInt(provinceId, 10), // Ensure these are numbers
+          amphoeId: parseInt(amphoeId, 10),
+          tambonId: parseInt(tambonId, 10),
+          postalCode,
+          isDefault: false, // Set to true or false based on the logic
+        }),
       });
   
-      fetchAddresses();
-    } else {
-      alert("You can only have up to 2 addresses.");
+      if (response.ok) {
+        fetchAddresses(); // Refresh the list of addresses
+      } else {
+        console.error('Failed to set default address');
+      }
     }
   };
-
+  
+  
+  
   const handleEdit = (address) => {
     setAddressForm({
       id: address.id,
@@ -274,9 +317,9 @@ export default function AddressManagement() {
         {addresses.length > 0 && addresses.map((address) => (
           <li key={address.id}>
             {address.addressLine}, {address.province.name_th}, {address.amphoe.name_th}, {address.tambon.name_th}, {address.postalCode}, {address.isDefault}
-            <button onClick={() => handleEdit(address)}>Edit</button>
-            <button onClick={() => handleDelete(address.id)}>Delete</button>
-            <button onClick={() => handleSetDefault(address.id)}>
+            <button className=" w-20 text-[#4EAC14]" onClick={() => handleEdit(address)}>Edit</button>
+            <button className="w-20 text-red-700"  onClick={() => handleDelete(address.id)}>Delete</button>
+            <button  className={`text-black ${address.isDefault ? 'text-gray-600' : 'text-blue-600 hover:text-blue-300'}`} onClick={() => handleSetDefault(address.id)}>
               {address.isDefault ? "Default" : "Set as Default"}
             </button>
           </li>

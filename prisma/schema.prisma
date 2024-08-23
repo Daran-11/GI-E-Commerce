@@ -78,8 +78,8 @@ model Address {
   tambon     Tambon   @relation(fields: [tambonId], references: [id])
   orders     Order[]
   
-  isDefault   Boolean  @default(false) // New field to indicate the default address
-  @@unique([userId, isDefault])
+  isDefault   Boolean  @default(false)// New field to indicate the default address
+
 }
 
 model Province {
