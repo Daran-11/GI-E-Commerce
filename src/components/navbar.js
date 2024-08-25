@@ -13,7 +13,7 @@ export const Navbar = () => {
     //const cartItems = (10);
     const { cartItemCount } = useCart(); // Use cart context
     //const [cartItemCount, setCartItemCount] = useState(0); //จำนวนสินค้าในตะกร้าตอนนี้
-    
+    const activePaths = ['/account/user/profile', '/account/user/settings', '/account/user/orders' ,'/account/user/addresses'];
 
     return (
 
@@ -39,41 +39,52 @@ export const Navbar = () => {
                                 <Link 
                                     href='/'
                                     className={currentPath === "/" ? "text-[#4EAC14]": "text-[#595959]"}
-                                    >
+                                >
                                     หน้าแรก
                                 </Link>
                             </li>
                             <li>
-                                <Link href='/about'
-                                className={currentPath === "/about" ? "text-[#4EAC14]": "text-[#595959]"}
-                                >เกี่ยวกับเรา</Link>
+                                <Link 
+                                    href='/about'
+                                    className={currentPath === "/about" ? "text-[#4EAC14]": "text-[#595959]"}
+                                >
+                                    เกี่ยวกับเรา
+                                </Link>
                             </li>
 
                             {status === 'unauthenticated' &&
                             <li>
-                                <Link href='/register'
-                                className={currentPath === "/register" ? "text-[#4EAC14]": "text-[#595959]"}
-                                >สมัครสมาชิก</Link>
+                                <Link 
+                                    href='/register'
+                                    className={currentPath === "/register" ? "text-[#4EAC14]": "text-[#595959]"}
+                                >
+                                    สมัครสมาชิก
+                                </Link>
                             </li>
                             }
 
                             <li>
-                                <Link href='/cart'
-                                className={currentPath === "/cart" ? "text-[#4EAC14]": "text-[#595959]"}
-                                >ตะกร้า </Link>
+                                <Link 
+                                    href='/cart'
+                                    className={currentPath === "/cart" ? "text-[#4EAC14]": "text-[#595959]"}
+                                >
+                                    ตะกร้า 
+                                </Link>
                                 <span className='bg-[#4EAC14] text-white text-base rounded-full px-1 '>
-                                {cartItemCount}
+                                    {cartItemCount}
                                 </span>
 
                             </li>
 
                             {status === 'unauthenticated' ? (
                             <li>
-                            <Link href='/Login'
-                             className={currentPath === "/Login" ? "text-[#4EAC14]": "text-[#595959]"}
-                            >เข้าสู่ระบบ</Link>
+                                <Link 
+                                    href='/login'
+                                    className={currentPath === "/login" ? "text-[#4EAC14]": "text-[#595959]"}
+                                    >เข้าสู่ระบบ
+                                </Link>
                             </li>
-                        ) : status === 'authenticated' && session?.user ? (
+                            ) : status === 'authenticated' && session?.user ? (
                             <>
                             <Dropdown
                                 showArrow ='true'
@@ -83,25 +94,34 @@ export const Navbar = () => {
                                     variant="bordered" 
                                     disableRipple="true"
                                     >
-                                            <svg className='fill-current hover:text-[#4EAC14]'
+                                        <svg 
+                                             className={`fill-current hover:text-[#4EAC14] ${activePaths.includes(currentPath) ? 'text-[#4EAC14]' : 'text-[#595959]'}`}
                                              xmlns="http://www.w3.org/2000/svg" 
                                              height="30px" viewBox="0 -960 960 960" 
                                              width="30px" fill="#595959">
                                                 <path d="M170-254.62q-12.75 0-21.37-8.63-8.63-8.62-8.63-21.38 0-12.75 8.63-21.37 8.62-8.61 21.37-8.61h620q12.75 0 21.37 8.62 8.63 8.63 8.63 21.39 0 12.75-8.63 21.37-8.62 8.61-21.37 8.61H170ZM170-450q-12.75 0-21.37-8.63-8.63-8.63-8.63-21.38 0-12.76 8.63-21.37Q157.25-510 170-510h620q12.75 0 21.37 8.63 8.63 8.63 8.63 21.38 0 12.76-8.63 21.37Q802.75-450 790-450H170Zm0-195.39q-12.75 0-21.37-8.62-8.63-8.63-8.63-21.39 0-12.75 8.63-21.37 8.62-8.61 21.37-8.61h620q12.75 0 21.37 8.63 8.63 8.62 8.63 21.38 0 12.75-8.63 21.37-8.62 8.61-21.37 8.61H170Z"/>
-                                            </svg>
-
-                                   
+                                        </svg>
                                     </Button>
                                 </DropdownTrigger>
+
                                 <DropdownMenu 
                                     aria-label="Static Actions"
                                     className='pt-10 w-[300px] h-[500px] bg-white border shadow-lg rounded-lg flex-auto '
                                 >
-                                    <DropdownItem key="profile" className='dropdown-item textValue="โปรไฟล์" ' href='/profile'>
-                                            บัญชีผู้ใช้
+                                    <DropdownItem 
+                                        className={`dropdown-item ${currentPath === '/account/user/profile' ? 'text-[#4EAC14]' : 'text-[#595959]'}`}
+                                        textValue="โปรไฟล์"
+                                        href="/account/user/profile"
+                                        >
+                                        บัญชีผู้ใช้
                                     </DropdownItem>
 
-                                    <DropdownItem key="farmer register " className='dropdown-item' textValue="ลงทะเบียนเกษตรกร" href='/about'>
+                                    <DropdownItem 
+                                        key="farmer register " 
+                                        className={`dropdown-item ${currentPath === '/about' ? 'text-[#4EAC14]' : 'text-[#595959]'}`}
+                                        textValue="ลงทะเบียนเกษตรกร" 
+                                        href='/about'
+                                    >
                                             ลงทะเบียนเกษตรกร
                                     </DropdownItem>   
                                     
