@@ -1,0 +1,48 @@
+// prisma/schema.prisma
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Farmer {
+  id        Int    @id @default(autoincrement())
+  name      String
+  email     String @unique
+  phone     String @unique
+  password  String
+  role      String
+  certificates Certificate[]
+}
+
+model Certificate {
+  id                 Int       @id @default(autoincrement())
+  type               String
+  variety            String
+  plotCode           String
+  latitude           Float
+  longitude          Float
+  productionQuantity Int
+  hasCertificate     Boolean
+  imageUrl           String?
+  registrationDate   DateTime
+  expiryDate         DateTime
+  status             String    @default("pending")
+  farmerId           Int
+  farmer             Farmer    @relation(fields: [farmerId], references: [id])
+  createdAt          DateTime  @default(now())
+}
+
+
+model Product {
+  id           Int      @id @default(autoincrement())
+  plotCode     String
+  productName  String
+  variety      String
+  price        Float
+  amount       Int
+  status       String
+}
