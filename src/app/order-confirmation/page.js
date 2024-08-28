@@ -46,7 +46,7 @@ export default function OrderConfirmation() {
       <p><strong>Quantity:</strong> {order.quantity}</p>
       <p><strong>Price:</strong> {order.totalPrice}</p>
       <p><strong>Total:</strong> {order.quantity}</p>
-      <p><strong>Address:</strong> {order.address.addressLine}, {order.address.province.name_th}, {order.address.amphoe.name_th}, {order.address.tambon.name_th}, {order.address.postalCode}</p>
+      <p><strong>Address:</strong> {order.addressText}</p>
       ขอบคุณครับ
     </div>
   );
