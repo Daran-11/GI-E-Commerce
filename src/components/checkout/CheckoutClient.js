@@ -64,11 +64,12 @@ export default function CheckoutClient({userId}) {
             body: JSON.stringify({ productId: selectedItem.productId }),
           });
 
-          if (orderResponse.ok) {
+          if (removeFromCartResponse.ok) {
             const orderData = await orderResponse.json();
-    
+            console.log('Order Data:', orderData);
             // Redirect to order confirmation with the order ID
-            router.push(`/order-confirmation?id=${orderData.id}`);
+            console.log("order id",orderData.order.id);
+            router.push(`/order-confirmation?id=${orderData.order.id}`);
           } else {
             console.error('Failed to create order');
           }

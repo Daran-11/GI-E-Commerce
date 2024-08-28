@@ -4,18 +4,19 @@ import prisma from '../../../../../lib/prisma';
 export async function GET(request, { params }) {
   const { id } = params;
 
+  // Convert id to an integer
+  const orderId = parseInt(id, 10);
+
+  // Check if orderId is a valid number
+  if (isNaN(orderId)) {
+    return NextResponse.json({ error: 'Invalid order ID' }, { status: 400 });
+  }
+
   try {
     const order = await prisma.order.findUnique({
-      where: { id: parseInt(id, 10) },
+      where: { id: orderId },
       include: {
         product: true,
-        address: {
-          include: {
-            province: true,
-            amphoe: true,
-            tambon: true,
-          },
-        },
       },
     });
 
