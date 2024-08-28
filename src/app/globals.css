@@ -6,7 +6,6 @@
   max-width: 80%;
   margin-left: auto;
   margin-right: auto;
-
 }
 .top-container {
   margin-top: 150px;
@@ -16,36 +15,64 @@
 }
 
 .action-button {
-  @apply w-[170px] h-[50px] rounded-xl text-2xl 
+  @apply w-[170px] h-[50px] rounded-xl text-2xl;
 }
 
-
-
 .input-position {
-    @apply flex justify-start items-center
+  @apply flex justify-start items-center;
 }
 
 .input-box {
-   @apply block mb-5 bg-white border-2  rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+  @apply block mb-5 bg-white border-2  rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
 }
 
 .label {
-    @apply text-gray-600 font-bold 
+  @apply text-gray-600 font-bold;
 }
 
 .input-error {
-    @apply text-sm mb-3 text-red-500 px-3
+  @apply text-sm mb-3 text-red-500 px-3;
 }
 
 .dropdown-item {
-   @apply w-full h-[40px] pb-4 pl-[50px] hover:text-[#4EAC14]
+  @apply w-full h-[40px] pb-4 pl-[50px] hover:text-[#4EAC14];
 }
 
 .icon-hover {
-  @apply text-[#595959] hover:text-[#4EAC14]
+  @apply text-[#595959] hover:text-[#4EAC14];
 }
 
-table, th, td {
-  @apply bg-[#ffffff] border-black border-2
+table,
+th,
+td {
+  @apply bg-[#ffffff] border-black border-2;
 }
 
+:root {
+  --bg: #e8edf5;
+  --bgSoft: white;
+  --text: black;
+  --textSoft: #4eac14;
+  --background-view: #98de6d;
+  --background-delete: #f77373bf;
+  --background-add: #98de6d;
+  --background-hover: #e3e6e9;
+  --padding: 10px 10px;
+  --font-size: 14px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
