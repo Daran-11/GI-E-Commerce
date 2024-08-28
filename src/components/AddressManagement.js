@@ -210,15 +210,39 @@ export default function AddressManagement() {
     setIsFormVisible(true); // Show form for editing
   };
 
-  const handleDelete = async (id) => {
-    const res = await fetch(`http://localhost:3000/api/addresses/${id}`, {
-      method: "DELETE",
-    });
-
-    if (res.ok) {
-      fetchAddresses();
-    } else {
-      console.error("Failed to delete address");
+  const handleDelete = async (addressId) => {
+    const confirmDelete = window.confirm('Are you sure you want to delete this address?');
+  
+    if (confirmDelete && session?.user?.id) {
+      const userId = session.user.id;
+  
+      // Ensure that there are at least 2 addresses before allowing deletion
+      if (addresses.length <= 1) {
+        alert('You must have at least one address.');
+        return;
+      }
+  
+      try {
+        const response = await fetch(`/api/users/${userId}/addresses/${addressId}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+  
+        if (response.ok) {
+          // Remove the deleted address from the state to refresh the UI
+          setAddresses((prevAddresses) => prevAddresses.filter((addr) => addr.id !== addressId));
+          alert('Address deleted successfully');
+        } else {
+          const errorData = await response.json();
+          console.error('Failed to delete address:', errorData.message);
+          alert('Failed to delete address. Please try again.');
+        }
+      } catch (error) {
+        console.error('Error deleting address:', error);
+        alert('An error occurred while deleting the address. Please try again.');
+      }
     }
   };
 
