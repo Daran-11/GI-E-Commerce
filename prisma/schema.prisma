@@ -10,11 +10,14 @@ datasource db {
 
 model Product {
   ProductID   Int      @id @unique(map: "ProductID") @default(autoincrement())
+   plotCode     String
   ProductName String   @db.VarChar(11)
   ProductType String   @db.VarChar(11)
   Description String?  @db.VarChar(200)
   Price       Int      @db.SmallInt
   Amount      Int      @db.MediumInt
+    variety      String
+    status       String
   ProductPic  Bytes?   @db.Blob
   DateCreated DateTime @default(now()) @db.Timestamp(0)
   cartItems   CartItem[]
@@ -124,9 +127,6 @@ enum Role {
   farmer
   admin
 }
-generator client {
-  provider = "prisma-client-js"
-}
 
 model Farmer {
   id         Int          @id @default(autoincrement())
@@ -147,12 +147,3 @@ model Certificate {
   farmer          Farmer   @relation(fields: [farmerId], references: [id])
 }
 
-model Product {
-  id           Int      @id @default(autoincrement())
-  plotCode     String
-  productName  String
-  variety      String
-  price        Float
-  amount       Int
-  status       String
-}
