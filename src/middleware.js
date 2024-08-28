@@ -8,8 +8,8 @@ export async function middleware(req) {
   console.log('Token:', token)
 
   if (!token) {
-    console.log('No token found, redirecting to /Login')
-    return NextResponse.redirect(new URL('/Login', req.url))
+    console.log('No token found, redirecting to /login')
+    return NextResponse.redirect(new URL('/login', req.url))
   }
 
   const { role } = token
@@ -24,11 +24,13 @@ export async function middleware(req) {
     return NextResponse.redirect(new URL('/', req.url))
   }
 
-  // Protect user routes
-  if (url.startsWith('/user') && role !== 'user' && role !== 'admin') {
-    console.log('User is not authorized, redirecting to homepage')
-    return NextResponse.redirect(new URL('/', req.url))
-  }
+    // Protect user routes
+    if (url.startsWith('/account/user') && role !== 'customer' && role !== 'admin') {
+      console.log('User is not authorized, redirecting to homepage');
+      return NextResponse.redirect(new URL('/', req.url));
+    }
+
+
 
   //สำหรับ farmer
   /*if (url.startsWith('/farmer') && role !== 'farmer' ) {
@@ -45,6 +47,6 @@ export async function middleware(req) {
 export const config = {
   matcher: [
     '/admin/:path*',
-    '/user/:path*',
+    '/account/user/:path*',
   ],
 }
