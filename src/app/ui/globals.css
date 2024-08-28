@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root{
+    --bg: #E8EDF5;
+     --bgSoft: white;
+    --text: black;
+    --textSoft: #4EAC14;
+    --background-view: #98de6d;
+    --background-delete: #f77373bf;
+    --background-add: #98de6d;
+    --background-hover: #e3e6e9;
+    --padding: 10px 10px;
+    --font-size: 14px;
+
+}
+
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    
+   
+}
+
+body{
+    background-color:  var(--bg);
+    color: var(--text);
+
+}     
+
+a{
+    color: inherit;
+    text-decoration: none;
+}
+
+
