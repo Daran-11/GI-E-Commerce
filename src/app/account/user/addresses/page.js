@@ -3,8 +3,7 @@ import AddressManagement from '@/components/AddressManagement';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-
-function page() {
+export default function page() {
 
     const { data: session, status } = useSession()
     const router = useRouter()
@@ -16,11 +15,13 @@ function page() {
       }, [status, router])
 
   return (
-    <div className='top-container'>          
-        <AddressManagement/>
+    <div>
+          <AddressManagement/>          
+        
+
+        
     </div>
     
   )
 }
 
-export default page

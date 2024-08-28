@@ -8,7 +8,7 @@ import prisma from '../../../../../../lib/prisma';
 export async function GET(req, { params }) {
   const session = await getServerSession({ req, ...authOptions });
 
-  console.log('Session:', session); // Debug session
+  console.log('chk Session for addresses:', session); // Debug session
   console.log('User ID:', session?.user?.id); // Debug user ID
 
   if (!session) {
