@@ -2,6 +2,7 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// prisma/schema.prisma
 datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
@@ -122,4 +123,36 @@ enum Role {
   customer
   farmer
   admin
+}
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Farmer {
+  id         Int          @id @default(autoincrement())
+  name       String
+  location   String
+  certificates Certificate[]
+}
+
+model Certificate {
+  id              Int      @id @default(autoincrement())
+  variety         String
+  plotCode        String
+  registrationDate DateTime
+  expiryDate      DateTime
+  status          String
+  imageUrl        String
+  farmerId        Int
+  farmer          Farmer   @relation(fields: [farmerId], references: [id])
+}
+
+model Product {
+  id           Int      @id @default(autoincrement())
+  plotCode     String
+  productName  String
+  variety      String
+  price        Float
+  amount       Int
+  status       String
 }
