@@ -24,7 +24,6 @@ export const Navbar = () => {
                         
                         <a href ='/'>GI Pineapple</a>
                         
-                        
                     </div>
 
                     <div className="search w-[550px] ml-5">

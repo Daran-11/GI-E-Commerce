@@ -18,7 +18,7 @@ export default function Profile() {
   // When after loading success and have session, show profile
   return (
     status === 'authenticated' && session.user && (
-      <div className="flex h-screen items-center justify-center">
+      <div className=" flex">
         <div className="bg-white p-6 rounded-md shadow-md">
           <p>
             Welcome, <b>{session.user.name}!</b>
