@@ -51,14 +51,13 @@ model Order {
   productId     Int
   quantity      Int
   totalPrice    Float
-  addressId     Int
+  addressText   String   // New field to store the address in text form
   status        String   @default("Pending")
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
   user          User     @relation(fields: [userId], references: [id])
   product       Product  @relation(fields: [productId], references: [ProductID])
-  address       Address  @relation(fields: [addressId], references: [id])
 }
 
 model Address {
@@ -76,7 +75,6 @@ model Address {
   province   Province @relation(fields: [provinceId], references: [id])
   amphoe     Amphoe   @relation(fields: [amphoeId], references: [id])
   tambon     Tambon   @relation(fields: [tambonId], references: [id])
-  orders     Order[]
   
   isDefault   Boolean  @default(false)// New field to indicate the default address
 
