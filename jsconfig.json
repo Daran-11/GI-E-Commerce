@@ -5,7 +5,7 @@
     },
 
     "jsx": "preserve",
-    "checkJs": true
+    "checkJs": false
   },
  "exclude": ["node_modules", "**/node_modules/*"]
 }
