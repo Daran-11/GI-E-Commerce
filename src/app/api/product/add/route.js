@@ -5,12 +5,12 @@ const prisma = new PrismaClient();
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
-  const id = searchParams.get("id");
+  const ProductID = searchParams.get("ProductID");
 
-  if (id) {
+  if (ProductID) {
     try {
       const product = await prisma.product.findUnique({
-        where: { id: parseInt(id, 10) },
+        where: { ProductID: parseInt(ProductID, 10) },
         // No need to include 'farmer' here as it's not in the Product model
       });
       if (product) {
@@ -69,41 +69,46 @@ export async function POST(request) {
 export async function PUT(request) {
   try {
     const data = await request.json();
+    console.log("Received data:", data); // Log the received data
+
     const updatedProduct = await prisma.product.update({
-      where: { id: parseInt(data.id, 10) },
+      where: { ProductID: parseInt(data.ProductID, 10) },
       data: {
         PlotCode: data.PlotCode,
         ProductName: data.ProductName,
         ProductType: data.ProductType,
-        Price: data.Price,
-        Amount: data.Amount,
+        Price: data.Price, // Convert Price to integer
+        Amount: parseInt(data.Amount, 10), // Assuming Amount should also be an integer
         Status: data.Status,
       },
     });
-    return NextResponse.json(updatedProduct, { Status: 200 });
+
+    console.log("Updated product:", updatedProduct); // Log the updated product
+    return NextResponse.json(updatedProduct, { status: 200 });
   } catch (error) {
     console.error("Failed to update product:", error);
     return NextResponse.json(
       { error: "Failed to update product" },
-      { Status: 500 }
+      { status: 500 }
     );
   }
 }
+
 
 export async function DELETE(request) {
   try {
     const { searchParams, href } = new URL(request.url);
 
     console.log("Request URL:", href); // Log the entire URL
-    const id = searchParams.get("id");
+    const ProductID = searchParams.get("ProductID");
 
-    if (!id) {
-      console.warn("No 'id' provided in the URL query string:", href);
-      return NextResponse.json({ error: "No id provided" }, { Status: 400 });
+    if (!ProductID) {
+      console.warn("No 'ProductID' provProductIDed in the URL query string:", href);
+      return NextResponse.json({ error: "No ProductID provide" }, { Status: 400 });
     }
 
     await prisma.product.delete({
-      where: { id: parseInt(id, 10) },
+      where: { ProductID: parseInt(ProductID, 10) },
     });
     return NextResponse.json({ Status: 200 });
   } catch (error) {

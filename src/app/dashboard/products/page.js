@@ -6,7 +6,8 @@ import Button from "@mui/material/Button";
 import Pagination from "@/app/ui/dashboard/pagination/pagination";
 import Search from "@/app/ui/dashboard/search/search";
 import AddProductDialog from "@/app/dashboard/products/add/page";
-import EditProductDialog from "@/app/dashboard/products/edit/[id]/page";
+import EditProductDialog from "@/app/dashboard/products/edit/[ProductID]/page";
+
 
 const Product = () => {
   const [products, setProducts] = useState([]);
@@ -41,15 +42,15 @@ const Product = () => {
     return Price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (ProductID) => {
     if (confirm("Are you sure you want to delete this product?")) {
       try {
-        const response = await fetch(`/api/product/add?id=${id}`, {
+        const response = await fetch(`/api/product/add?ProductID=${ProductID}`, {
           method: "DELETE",
           headers: { "Content-Type": "application/json" },
         });
         if (response.ok) {
-          setProducts(products.filter((product) => product.id !== id));
+          setProducts(products.filter((product) => product.ProductID !== ProductID));
         } else {
           alert("Failed to delete product");
         }
@@ -62,8 +63,8 @@ const Product = () => {
   const handleOpenAddDialog = () => setOpenAddDialog(true);
   const handleCloseAddDialog = () => setOpenAddDialog(false);
 
-  const handleOpenEditDialog = (id) => {
-    setSelectedProductId(id);
+  const handleOpenEditDialog = (ProductID) => {
+    setSelectedProductId(ProductID);
     setOpenEditDialog(true);
   };
 
@@ -90,8 +91,9 @@ const Product = () => {
     }
   };
 
-  const handleEditProduct = async (id, productData) => {
-    const response = await fetch(`/api/product/add?id=${id}`, {
+  const handleEditProduct = async (ProductID, productData) => {
+
+    const response = await fetch(`/api/product/add?ProductID=${ProductID}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -175,7 +177,8 @@ const Product = () => {
                           backgroundColor: 'var(--background-hover)',
                         },
                       }}
-                      onClick={() => handleOpenEditDialog(product.id)}
+                      onClick={() => handleOpenEditDialog(product.ProductID)}
+
                     >
                       แก้ไข
                     </Button>
@@ -189,7 +192,8 @@ const Product = () => {
                           backgroundColor: 'var(--background-hover)',
                         },
                       }}
-                      onClick={() => handleDelete(product.id)}
+                      onClick={() => handleDelete(product.ProductID)}
+
                     >
                       ลบ
                     </Button>
@@ -215,13 +219,12 @@ const Product = () => {
 
       {/* Edit Product Dialog */}
       {selectedProductId && (
-        <EditProductDialog
-          open={openEditDialog}
-          onClose={handleCloseEditDialog}
-          onEditProduct={handleEditProduct}
-          productId={selectedProductId}
-          onSuccess={fetchProducts} // Pass the fetchProducts function as onSuccess
-        />
+       <EditProductDialog
+       open={openEditDialog}
+       onClose={handleCloseEditDialog}
+       ProductID={selectedProductId} // Ensure consistency in prop name
+       onSuccess={fetchProducts}
+     />
       )}
     </div>
   );
