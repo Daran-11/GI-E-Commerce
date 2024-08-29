@@ -1,11 +1,14 @@
 .container{
-    padding-top: 80px;
     position: fixed;
-    top: 25px;
-
+    top: 90px;
+    background-color: var(--bgSoft);
+    width: 320px;
+    height: 100vh;
+    max-width: 100vh;
 }
 
 .user{
+    padding-top: 10px;
     display: flex;
     align-items: center;
     gap: 20px;
@@ -36,8 +39,47 @@ object-fit: cover;
 .list{
     list-style: none;
     color: #878d84;
+    height: 100%; /* Make the list take the full height of the container */
+    width: 100%;
+    overflow-y: auto; /* Make the list scrollable if content exceeds the height */
 }
 
+.containerlist{
+    width: 315px;
+    height: 90vh; /* Set this to your desired height */
+    overflow: hidden; /* Hide any overflow beyond the container */
+}
+
+/* For screens smaller than 1200px */
+@media  (max-height: 1200px) {
+    .containerlist {
+        height: 80vh; /* Adjust height for medium screens */
+    }
+  }
+  
+  /* For screens smaller than 992px */
+  @media (max-height: 992px) {
+    .containerlist {
+        height: 70vh; /* Adjust height for smaller screens */
+    }
+  }
+  
+  /* For screens smaller than 768px */
+  @media (max-height: 768px) {
+    .containerlist {
+      height: 60vh; /* Adjust height for mobile screens */
+    }
+  }
+
+  /* For screens smaller than 768px */
+  @media (max-height: 460px) {
+    .containerlist {
+      height: 30vh; /* Adjust height for mobile screens */
+    }
+  }
+
+
+  
 
 
 .cat{

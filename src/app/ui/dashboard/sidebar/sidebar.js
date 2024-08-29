@@ -97,18 +97,21 @@ const Sidebar = () => {
           <span className={styles.userTitle}>ผู้ผลิต</span>
         </div>
       </div>
-      <ul className={`${styles.list}`}>
+      <div className={styles.containerlist}>
+        <ul className={`${styles.list}`}>
 
-        {menuItems.map((cat) => (
-          <li key={cat.title}>
-            <span className={styles.cat}>{cat.title}</span>
-            {cat.list.map((item) => (
-              <MenuLink item={item} key={item.title} isActive={pathname === item.path} />
-            ))}
-          </li>
-        ))}
+          {menuItems.map((cat) => (
+            <li key={cat.title}>
+              <span className={styles.cat}>{cat.title}</span>
+              {cat.list.map((item) => (
+                <MenuLink item={item} key={item.title} isActive={pathname === item.path} />
+              ))}
+            </li>
+          ))}
 
-      </ul>
+        </ul>        
+        </div>
+
       <button className={styles.logout}>
         <MdLogout />
         ลงชื่อออก
