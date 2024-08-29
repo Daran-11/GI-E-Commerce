@@ -13,6 +13,7 @@ const Navbar = () => {
     orders: "จัดการคำสั่งซื้อ",
     transactions: "ประวัติการขาย",
     certificate: "ลงทะเบียนใบรับรอง",
+    add: "ลงทะเบียนใบรับรอง",
     // Add more pathnames and corresponding Thai titles as needed
   };
 

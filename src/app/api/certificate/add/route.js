@@ -35,19 +35,17 @@ async function handleFileUpload(file) {
   }
 }
 
-export async function POST(request) {
+export async function PUT(request) {
   try {
     const formData = await request.formData();
-    
-    let imageUrl = null;
-    if (formData.get('hasCertificate') === 'มี') {
-      const file = formData.get('imageUrl');
-      if (file) {
-        imageUrl = await handleFileUpload(file);
-      }
+
+    let imageUrl = formData.get('imageUrl');
+    if (formData.get('hasCertificate') === 'มี' && imageUrl instanceof File) {
+      imageUrl = await handleFileUpload(imageUrl);
     }
 
-    const certificate = await prisma.certificate.create({
+    const updatedCertificate = await prisma.certificate.update({
+      where: { id: parseInt(formData.get('id'), 10) },
       data: {
         type: formData.get('type'),
         variety: formData.get('variety'),
@@ -56,56 +54,24 @@ export async function POST(request) {
         longitude: parseFloat(formData.get('longitude')),
         productionQuantity: parseInt(formData.get('productionQuantity'), 10),
         hasCertificate: formData.get('hasCertificate') === 'มี',
-        imageUrl: imageUrl,
-        registrationDate: new Date(formData.get('registrationDate')) || new Date(),
-        expiryDate: new Date(formData.get('expiryDate')) || new Date(),
+        imageUrl: formData.get('hasCertificate') === 'มี' ? imageUrl : null,
         status: formData.get('status') || 'pending',
         farmer: {
           connect: { id: parseInt(formData.get('farmerId'), 10) },
         },
       },
     });
-    return NextResponse.json(certificate, { status: 201 });
-  } catch (error) {
-    console.error("Failed to add certificate:", error);
-    return NextResponse.json(
-      { error: "Failed to add certificate", details: error.message },
-      { status: 500 }
-    );
-  }
-}
 
-
-export async function PUT(request) {
-  try {
-    const data = await request.json();
-
-    const updatedCertificate = await prisma.certificate.update({
-      where: { id: parseInt(data.id, 10) },
-      data: {
-        type: data.type,
-        variety: data.variety,
-        plotCode: data.plotCode,
-        latitude: parseFloat(data.latitude),
-        longitude: parseFloat(data.longitude),
-        productionQuantity: parseFloat(data.productionQuantity),
-        hasCertificate: data.hasCertificate,
-        imageUrl: data.hasCertificate ? data.imageUrl : null,
-        status: data.status,
-        farmer: {
-          connect: { id: parseInt(data.farmerId, 10) }, // Connect farmer by id
-        },
-      },
-    });
     return NextResponse.json(updatedCertificate, { status: 200 });
   } catch (error) {
     console.error("Failed to update certificate:", error);
     return NextResponse.json(
-      { error: "Failed to update certificate" },
+      { error: "Failed to update certificate", details: error.message },
       { status: 500 }
     );
   }
 }
+
 
 export async function DELETE(request) {
   try {

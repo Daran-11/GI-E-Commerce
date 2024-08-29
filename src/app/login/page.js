@@ -69,6 +69,7 @@ export default function Login() {
                   onChange={(e) => setLogin(e.target.value)}
                 />
               </div>
+              <br></br>
               <div className={styles.label}>
                 <label htmlFor="password" className="sr-only">รหัสผ่าน</label>
                 <input
