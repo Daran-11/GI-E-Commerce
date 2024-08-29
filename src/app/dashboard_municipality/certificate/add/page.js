@@ -1,7 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import "./add.css";
+import './add.css';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -43,19 +43,15 @@ const Register = () => {
     if (!formData.type) newErrors.type = "กรุณากรอกชนิด";
     if (!formData.variety) newErrors.variety = "กรุณากรอกสายพันธุ์";
     if (!formData.plotCode) newErrors.plotCode = "กรุณากรอกรหัสแปลงปลูก";
-    if (!formData.latitude)
-      newErrors.latitude = "กรุณากรอกพิกัดแกน X (ละติจูด)";
-    if (!formData.longitude)
-      newErrors.longitude = "กรุณากรอกพิกัดแกน Y (ลองจิจูด)";
-    if (!formData.productionQuantity)
-      newErrors.productionQuantity = "กรุณากรอกจำนวนผลผลิต";
-    if (!formData.hasCertificate)
-      newErrors.hasCertificate = "กรุณาเลือกว่ามีใบรับรองหรือไม่";
-    if (formData.hasCertificate === "มี" && !formData.imageUrl)
-      newErrors.imageUrl = "กรุณาอัปโหลดรูปใบรับรอง";
-
+    if (!formData.latitude) newErrors.latitude = "กรุณากรอกพิกัดแกน X (ละติจูด)";
+    if (!formData.longitude) newErrors.longitude = "กรุณากรอกพิกัดแกน Y (ลองจิจูด)";
+    if (!formData.productionQuantity) newErrors.productionQuantity = "กรุณากรอกจำนวนผลผลิต";
+    if (!formData.hasCertificate) newErrors.hasCertificate = "กรุณาเลือกว่ามีใบรับรองหรือไม่";
+    if (formData.hasCertificate === "มี" && !formData.imageUrl) newErrors.imageUrl = "กรุณาอัปโหลดรูปใบรับรอง";
+   
     if (!formData.farmerId) newErrors.farmerId = "กรุณากรอกรหัสเกษตร";
 
+    // If there are errors, update state and stop submission
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
@@ -73,7 +69,7 @@ const Register = () => {
       formDataToSend.append("imageUrl", formData.imageUrl);
     }
     formDataToSend.append("farmerId", formData.farmerId);
-
+    
     if (formData.hasCertificate === "มี" && formData.imageUrl) {
       formDataToSend.append("imageUrl", formData.imageUrl);
     }
@@ -100,26 +96,20 @@ const Register = () => {
   return (
     <div className="container">
       <main className="mainContent">
-        <h1 className="title-name">ขอใบรับรอง</h1>
-        <p className="subtitle-name">ข้อมูลผลิต</p>
+        <h1 className="text-3xl font-bold mb-10">เพิ่มใบรับรอง</h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="form-container">
-            <p className="section-name">ชนิด</p>
-            <select
+            <input
               name="type"
+              type="text"
+              placeholder="ชนิด"
               value={formData.type}
               onChange={handleChange}
-              className="formInput"
+              className="form-input"
               required
-            >
-              <option value="" disabled hidden>
-                -
-              </option>
-              <option value="สับปะรด">สับปะรด</option>
-            </select>
+            />
             {errors.type && <p className="error">{errors.type}</p>}
 
-            <p className="section-name">สายพันธุ์</p>
             <input
               name="variety"
               type="text"
@@ -131,7 +121,6 @@ const Register = () => {
             />
             {errors.variety && <p className="error">{errors.variety}</p>}
 
-            <p className="section-name">รหัสแปลงปลูก</p>
             <input
               name="plotCode"
               type="text"
@@ -143,7 +132,6 @@ const Register = () => {
             />
             {errors.plotCode && <p className="error">{errors.plotCode}</p>}
 
-            <p className="section-name">พิกัดแกน X (ละติจูด)</p>
             <input
               name="latitude"
               type="text"
@@ -155,7 +143,6 @@ const Register = () => {
             />
             {errors.latitude && <p className="error">{errors.latitude}</p>}
 
-            <p className="section-name">พิกัดแกน Y (ลองจิจูด)</p>
             <input
               name="longitude"
               type="text"
@@ -167,7 +154,6 @@ const Register = () => {
             />
             {errors.longitude && <p className="error">{errors.longitude}</p>}
 
-            <p className="section-name">จำนวนผลผลิต (กิโลกรัม)</p>
             <input
               name="productionQuantity"
               type="text"
@@ -177,28 +163,20 @@ const Register = () => {
               className="form-input"
               required
             />
-            {errors.productionQuantity && (
-              <p className="error">{errors.productionQuantity}</p>
-            )}
+            {errors.productionQuantity && <p className="error">{errors.productionQuantity}</p>}
 
-            <p className="section-name">ใบรับรอง</p>
             <select
               name="hasCertificate"
               value={formData.hasCertificate}
               onChange={handleChange}
-              className="formInput"
+              className="form-input"
               required
             >
-              <option value="" disabled hidden>
-                -
-              </option>
-              
+              <option value="">มีใบรับรองหรือไม่</option>
               <option value="มี">มี</option>
               <option value="ไม่มี">ไม่มี</option>
             </select>
-            {errors.hasCertificate && (
-              <p className="error">{errors.hasCertificate}</p>
-            )}
+            {errors.hasCertificate && <p className="error">{errors.hasCertificate}</p>}
 
             {formData.hasCertificate === "มี" && (
               <div>
@@ -234,9 +212,7 @@ const Register = () => {
           </div>
 
           <div className="button-group">
-            <button type="submit" className="button-submit">
-              เพิ่มใบรับรอง
-            </button>
+            <button type="submit" className="button-submit">เพิ่มใบรับรอง</button>
           </div>
         </form>
       </main>
