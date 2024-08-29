@@ -2,9 +2,10 @@
     position: fixed;
     top: 90px;
     background-color: var(--bgSoft);
-    width: 320px;
+    width: 330px;
     height: 100vh;
     max-width: 100vh;
+    padding-left: 10px;
 }
 
 .user{
