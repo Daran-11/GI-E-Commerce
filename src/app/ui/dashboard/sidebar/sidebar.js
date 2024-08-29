@@ -1,23 +1,20 @@
 "use client"
-import React from 'react';
-import styles from "./sidebar.module.css";
+import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 import {
-  MdDashboard,
-  MdSupervisedUserCircle,
-  MdShoppingBag,
-  MdAttachMoney,
-  MdWork,
   MdAnalytics,
-  MdPeople,
-  MdOutlineSettings,
+  MdAttachMoney,
+  MdDashboard,
   MdHelpCenter,
   MdLogout,
   MdMoney,
+  MdOutlineSettings,
+  MdPeople,
+  MdShoppingBag,
+  MdSupervisedUserCircle
 } from "react-icons/md";
 import MenuLink from './menuLink/menuLink'; // Ensure this path is correct
-import Image from 'next/image';
-import { usePathname } from 'next/navigation';
-import Link from 'next/link';
+import styles from "./sidebar.module.css";
 
 // Define the menu items
 const menuItems = [
@@ -91,6 +88,7 @@ const Sidebar = () => {
   const pathname = usePathname()
 
   return (
+    
     <div className={styles.container}>
       <div className={styles.user}>
         <Image className={styles.userImage} src="/dinosaur.png" alt="" width="50" height="50" />
