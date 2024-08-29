@@ -25,15 +25,15 @@ export async function middleware(req) {
   }
 
     // Protect user routes
-    if (url.startsWith('/account/user') && role !== 'customer' && role !== 'admin') {
+    if (url.startsWith('/account/user') && role !== 'customer' && role !== 'admin' && role !== 'farmer') {
       console.log('User is not authorized, redirecting to homepage');
       return NextResponse.redirect(new URL('/', req.url));
     }
 
 
 
-  //สำหรับ farmer
-  /*if (url.startsWith('/farmer') && role !== 'farmer' ) {
+
+  /*if (url.startsWith('/dashboard') && role !== 'farmer' ) {
     console.log('User is not authorized, redirecting to homepage')
     return NextResponse.redirect(new URL('/', req.url))
   }*/
@@ -48,5 +48,6 @@ export const config = {
   matcher: [
     '/admin/:path*',
     '/account/user/:path*',
+    //'/dashboard/:path*'
   ],
 }
