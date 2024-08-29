@@ -21,7 +21,7 @@ const Product = () => {
       const data = await response.json();
       const formattedData = data.map((product) => ({
         ...product,
-        price: formatPrice(product.price),
+        Price: formatPrice(product.Price),
       }));
       setProducts(formattedData);
       setLoading(false); // Set loading to false after data is fetched
@@ -37,8 +37,8 @@ const Product = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const formatPrice = (price) => {
-    return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  const formatPrice = (Price) => {
+    return Price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
 
   const handleDelete = async (id) => {
@@ -148,19 +148,19 @@ const Product = () => {
         <tbody>
           {products.length > 0 ? (
             products.map((product) => (
-              <tr key={product.id}>
-                <td>{product.id}</td>
-                <td>{product.plotCode}</td>
-                <td>{product.productName}</td>
-                <td>{product.variety}</td>
-                <td>{product.price}</td>
-                <td>{product.amount}</td>
+              <tr key={product.ProductID}>
+                <td>{product.ProductID}</td>
+                <td>{product.PlotCode}</td>
+                <td>{product.ProductName}</td>
+                <td>{product.ProductType}</td>
+                <td>{product.Price}</td>
+                <td>{product.Amount}</td>
                 <td>
                   <span
-                    className={`${styles.status} ${styles[product.status.replace(/ /g, "-")]
+                    className={`${styles.Status} ${styles[product.Status.replace(/ /g, "-")]
                       }`}
                   >
-                    {product.status}
+                    {product.Status}
                   </span>
                 </td>
                 <td>
