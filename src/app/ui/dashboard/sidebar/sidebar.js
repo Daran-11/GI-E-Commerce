@@ -1,23 +1,20 @@
 "use client"
-import React from 'react';
-import styles from "./sidebar.module.css";
+import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 import {
-  MdDashboard,
-  MdSupervisedUserCircle,
-  MdShoppingBag,
-  MdAttachMoney,
-  MdWork,
   MdAnalytics,
-  MdPeople,
-  MdOutlineSettings,
+  MdAttachMoney,
+  MdDashboard,
   MdHelpCenter,
   MdLogout,
   MdMoney,
+  MdOutlineSettings,
+  MdPeople,
+  MdShoppingBag,
+  MdSupervisedUserCircle
 } from "react-icons/md";
 import MenuLink from './menuLink/menuLink'; // Ensure this path is correct
-import Image from 'next/image';
-import { usePathname } from 'next/navigation';
-import Link from 'next/link';
+import styles from "./sidebar.module.css";
 
 // Define the menu items
 const menuItems = [
@@ -91,6 +88,7 @@ const Sidebar = () => {
   const pathname = usePathname()
 
   return (
+    
     <div className={styles.container}>
       <div className={styles.user}>
         <Image className={styles.userImage} src="/dinosaur.png" alt="" width="50" height="50" />
@@ -99,18 +97,21 @@ const Sidebar = () => {
           <span className={styles.userTitle}>ผู้ผลิต</span>
         </div>
       </div>
-      <ul className={`${styles.list}`}>
+      <div className={styles.containerlist}>
+        <ul className={`${styles.list}`}>
 
-        {menuItems.map((cat) => (
-          <li key={cat.title}>
-            <span className={styles.cat}>{cat.title}</span>
-            {cat.list.map((item) => (
-              <MenuLink item={item} key={item.title} isActive={pathname === item.path} />
-            ))}
-          </li>
-        ))}
+          {menuItems.map((cat) => (
+            <li key={cat.title}>
+              <span className={styles.cat}>{cat.title}</span>
+              {cat.list.map((item) => (
+                <MenuLink item={item} key={item.title} isActive={pathname === item.path} />
+              ))}
+            </li>
+          ))}
 
-      </ul>
+        </ul>        
+        </div>
+
       <button className={styles.logout}>
         <MdLogout />
         ลงชื่อออก

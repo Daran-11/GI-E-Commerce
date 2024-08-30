@@ -6,11 +6,10 @@ import Link from "next/link";
 import { usePathname } from 'next/navigation';
 import SearchBar from "./searchbar";
 
-
 export const Navbar = () => {
     const { data: session, status } = useSession()
     const currentPath = usePathname();
-    //const cartItems = (10);
+    const pathname = usePathname()
     const { cartItemCount } = useCart(); // Use cart context
     //const [cartItemCount, setCartItemCount] = useState(0); //จำนวนสินค้าในตะกร้าตอนนี้
     const activePaths = ['/account/user/profile', '/account/user/settings', '/account/user/orders' ,'/account/user/addresses'];
@@ -51,6 +50,7 @@ export const Navbar = () => {
                                 </Link>
                             </li>
 
+
                             {status === 'unauthenticated' &&
                             <li>
                                 <Link 
@@ -69,11 +69,24 @@ export const Navbar = () => {
                                 >
                                     ตะกร้า 
                                 </Link>
-                                <span className='bg-[#4EAC14] text-white text-base rounded-full px-1 '>
-                                    {cartItemCount}
+                                <span className={`text-white text-base rounded-full ml-1  px-2  ${cartItemCount >= 1 ? "bg-[#4EAC14] ": "bg-[#a8a8a8]"}`}>
+                                    {cartItemCount} 
                                 </span>
 
                             </li>
+
+                                    {session?.user?.role === 'farmer' && (
+                                    
+                                    <li>
+                                    <Link
+                                    key="farmer dashboard" 
+                                    className={`${currentPath === '/dashboard' ? 'text-[#4EAC14]' : 'text-[#595959]'}`}
+                                    textValue="แดชบอร์ดเกษตรกร" 
+                                    href='/dashboard'>
+                                       แดชบอร์ดเกษตรกร                                                                     
+                                    </Link>
+                                    </li>
+                                )}      
 
                             {status === 'unauthenticated' ? (
                             <li>
@@ -114,7 +127,7 @@ export const Navbar = () => {
                                         >
                                         บัญชีผู้ใช้
                                     </DropdownItem>
-
+                                    
                                     <DropdownItem 
                                         key="farmer register " 
                                         className={`dropdown-item ${currentPath === '/about' ? 'text-[#4EAC14]' : 'text-[#595959]'}`}
@@ -122,14 +135,21 @@ export const Navbar = () => {
                                         href='/about'
                                     >
                                             ลงทะเบียนเกษตรกร
-                                    </DropdownItem>   
+                                    </DropdownItem>  
+                                 
+                                    
+                                   
+                                    
+                                                                    
+                                    
+
                                     
                                     <DropdownItem key="signout" className='dropdown-item text-red-500 hover:text-red-500' textValue="ออกจากระบบ">
                                         <button onClick={() => signOut({ callbackUrl: '/' })}>
                                             ออกจากระบบ
                                         </button>
                                     </DropdownItem>
-                                    
+                                  
                                 </DropdownMenu>
                                 </Dropdown>
                             </>
