@@ -7,6 +7,8 @@ import Pagination from "@/app/ui/dashboard/pagination/pagination";
 import Search from "@/app/ui/dashboard/search/search";
 import { useRouter } from "next/navigation";
 
+
+
 const Certificate = () => {
   const [certificates, setCertificates] = useState([]);
   const [farmerId, setFarmerId] = useState(null);
@@ -116,10 +118,10 @@ const Certificate = () => {
                   <div className={styles.buttons}>
                 
                     <button
-                      className={`${styles.button} ${styles.cancelled}`}
+                      className={`${styles.button} ${styles.delete}`}
                       onClick={() => handleDelete(certificate.id)}
                     >
-                      Delete
+                      ลบใบรับรอง
                     </button>
                   </div>
                 </td>
@@ -127,7 +129,7 @@ const Certificate = () => {
             ))
           ) : (
             <tr>
-              <td colSpan={6}>No certificates available</td>
+              <td colSpan={6}>ไม่มีใบรับรอง</td>
             </tr>
           )}
         </tbody>

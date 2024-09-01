@@ -50,7 +50,8 @@
 
 /* Button variations */
 .view {
-    background-color: #98de6d;
+    background-color: rgba(156, 204, 235, 0.75);
+
 }
 
 /* Status indicator styles */
@@ -62,18 +63,29 @@
 }
 
 /* Status colors */
-.pending {
-    background-color: rgba(247, 203, 115, 0.75); /* Using rgba for better color transparency */
+.กำลังดำเนินการ {
+    color: rgb(247, 167, 47);
 }
 
-.done {
-    background-color: rgba(175, 214, 238, 0.75);
+.อนุมัติ {
+    color: rgb(55, 187, 3);
 }
 
-.cancelled {
-    background-color: rgba(247, 115, 115, 0.75);
+.ไม่อนุมัติ {
+    color: rgba(247, 115, 115, 0.75);
 }
 
-.expired {
+.หมดอายุ {
     background-color: #afafaf;
 }
+
+.delete {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: rgba(247, 115, 115, 0.75); /* Red color for delete action */
+  }
+  
+  .delete:hover {
+    color: #ff7875; /* Lighter red on hover */
+  }

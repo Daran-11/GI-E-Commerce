@@ -174,7 +174,7 @@ const Register = () => {
               <p className="error">{errors.productionQuantity}</p>
             )}
 
-            <p className="section-name">ใบรับรอง กรม</p>
+            <p className="section-name">ใบรับรอง กรมทรัพย์สินทางปัญญา</p>
             <select
               name="hasCertificate"
               value={formData.hasCertificate}

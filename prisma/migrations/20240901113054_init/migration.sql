@@ -1,14 +1,19 @@
 -- CreateTable
 CREATE TABLE `Farmer` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `title` VARCHAR(191) NOT NULL,
     `name` VARCHAR(191) NOT NULL,
-    `email` VARCHAR(191) NOT NULL,
+    `lastname` VARCHAR(191) NOT NULL,
+    `address` VARCHAR(191) NOT NULL,
+    `sub_district` VARCHAR(191) NOT NULL,
+    `district` VARCHAR(191) NOT NULL,
+    `province` VARCHAR(191) NOT NULL,
+    `zip_code` VARCHAR(191) NOT NULL,
     `phone` VARCHAR(191) NOT NULL,
+    `planting_plot_code` VARCHAR(191) NOT NULL,
     `password` VARCHAR(191) NOT NULL,
     `role` VARCHAR(191) NOT NULL,
 
-    UNIQUE INDEX `Farmer_email_key`(`email`),
-    UNIQUE INDEX `Farmer_phone_key`(`phone`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -25,7 +30,7 @@ CREATE TABLE `Certificate` (
     `imageUrl` VARCHAR(191) NULL,
     `registrationDate` DATETIME(3) NOT NULL,
     `expiryDate` DATETIME(3) NOT NULL,
-    `status` VARCHAR(191) NOT NULL DEFAULT 'pending',
+    `status` VARCHAR(191) NOT NULL DEFAULT 'กำลังดำเนินการ',
     `farmerId` INTEGER NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
