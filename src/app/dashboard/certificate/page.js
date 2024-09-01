@@ -5,14 +5,30 @@ import Link from "next/link";
 import Image from "next/image";
 import Pagination from "@/app/ui/dashboard/pagination/pagination";
 import Search from "@/app/ui/dashboard/search/search";
+import { useRouter } from "next/navigation";
 
 const Certificate = () => {
   const [certificates, setCertificates] = useState([]);
+  const [farmerId, setFarmerId] = useState(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    const storedFarmerId = localStorage.getItem('farmerId');
+    if (storedFarmerId) {
+      setFarmerId(storedFarmerId);
+    } else {
+      console.error("Farmer ID not found in localStorage");
+      // Redirect to login page if farmerId is not found
+      router.push('/login');
+    }
+  }, [router]);
 
   useEffect(() => {
     const fetchCertificates = async () => {
+      if (!farmerId) return;
+
       try {
-        const response = await fetch("/api/certificate/add");
+        const response = await fetch(`/api/certificate/add?farmerId=${farmerId}`);
         const data = await response.json();
         setCertificates(data);
       } catch (error) {
@@ -21,7 +37,7 @@ const Certificate = () => {
     };
 
     fetchCertificates();
-  }, []);
+  }, [farmerId]);
 
   const handleDelete = async (id) => {
     if (confirm("Are you sure you want to delete this certificate?")) {
@@ -41,7 +57,6 @@ const Certificate = () => {
       }
     }
   };
-
   return (
     <div className={styles.container}>
       <div className={styles.top}>
@@ -95,18 +110,11 @@ const Certificate = () => {
                 <td>
                   {certificate.farmer?.name || "N/A"}
                   <br />
-                  {certificate.farmer?.location || "N/A"}
                 </td>
                 <td>{certificate.productionQuantity}</td>
                 <td>
                   <div className={styles.buttons}>
-                    <Link
-                      href={`/dashboard/certificate/edit/${certificate.id}`}
-                    >
-                      <button className={`${styles.button} ${styles.view}`}>
-                        Edit
-                      </button>
-                    </Link>
+                
                     <button
                       className={`${styles.button} ${styles.cancelled}`}
                       onClick={() => handleDelete(certificate.id)}
