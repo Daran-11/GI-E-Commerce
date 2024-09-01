@@ -35,17 +35,25 @@ async function handleFileUpload(file) {
   }
 }
 
-export async function PUT(request) {
+export async function POST(request) {
   try {
     const formData = await request.formData();
 
-    let imageUrl = formData.get('imageUrl');
-    if (formData.get('hasCertificate') === 'มี' && imageUrl instanceof File) {
-      imageUrl = await handleFileUpload(imageUrl);
+    // ดึง farmerId จาก formData
+    const farmerId = formData.get('farmerId');
+    if (!farmerId) {
+      throw new Error("Farmer ID is not provided in the form data.");
     }
 
-    const updatedCertificate = await prisma.certificate.update({
-      where: { id: parseInt(formData.get('id'), 10) },
+    let imageUrl = null;
+    if (formData.get('hasCertificate') === 'มี') {
+      const file = formData.get('imageUrl');
+      if (file) {
+        imageUrl = await handleFileUpload(file);
+      }
+    }
+
+    const certificate = await prisma.certificate.create({
       data: {
         type: formData.get('type'),
         variety: formData.get('variety'),
@@ -54,24 +62,59 @@ export async function PUT(request) {
         longitude: parseFloat(formData.get('longitude')),
         productionQuantity: parseInt(formData.get('productionQuantity'), 10),
         hasCertificate: formData.get('hasCertificate') === 'มี',
-        imageUrl: formData.get('hasCertificate') === 'มี' ? imageUrl : null,
-        status: formData.get('status') || 'pending',
+        imageUrl: imageUrl,
+        registrationDate: new Date(),
+        expiryDate: new Date(),
+        status: 'pending',
         farmer: {
-          connect: { id: parseInt(formData.get('farmerId'), 10) },
+          connect: { id: parseInt(farmerId, 10) },
         },
       },
     });
 
-    return NextResponse.json(updatedCertificate, { status: 200 });
+    return NextResponse.json(certificate, { status: 201 });
   } catch (error) {
-    console.error("Failed to update certificate:", error);
+    console.error("Failed to add certificate:", error);
     return NextResponse.json(
-      { error: "Failed to update certificate", details: error.message },
+      { error: "Failed to add certificate", details: error.message },
       { status: 500 }
     );
   }
 }
 
+// ... (rest of the code remains unchanged)
+
+
+export async function PUT(request) {
+  try {
+    const data = await request.json();
+
+    const updatedCertificate = await prisma.certificate.update({
+      where: { id: parseInt(data.id, 10) },
+      data: {
+        type: data.type,
+        variety: data.variety,
+        plotCode: data.plotCode,
+        latitude: parseFloat(data.latitude),
+        longitude: parseFloat(data.longitude),
+        productionQuantity: parseFloat(data.productionQuantity),
+        hasCertificate: data.hasCertificate,
+        imageUrl: data.hasCertificate ? data.imageUrl : null,
+        status: data.status,
+        farmer: {
+          connect: { id: parseInt(data.farmerId, 10) }, // Connect farmer by id
+        },
+      },
+    });
+    return NextResponse.json(updatedCertificate, { status: 200 });
+  } catch (error) {
+    console.error("Failed to update certificate:", error);
+    return NextResponse.json(
+      { error: "Failed to update certificate" },
+      { status: 500 }
+    );
+  }
+}
 
 export async function DELETE(request) {
   try {
@@ -100,42 +143,29 @@ export async function DELETE(request) {
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
-  const id = searchParams.get("id");
+  const farmerId = searchParams.get('farmerId');
 
-  if (id) {
-    try {
-      const certificate = await prisma.certificate.findUnique({
-        where: { id: parseInt(id, 10) },
-        include: { farmer: true },
-      });
-      if (certificate) {
-        return NextResponse.json(certificate);
-      } else {
-        return NextResponse.json(
-          { error: "Certificate not found" },
-          { status: 404 }
-        );
+  if (!farmerId) {
+    return NextResponse.json({ error: "Farmer ID is required" }, { status: 400 });
+  }
+
+  try {
+    const certificates = await prisma.certificate.findMany({
+      where: {
+        farmerId: parseInt(farmerId, 10)
+      },
+      include: {
+        farmer: {
+          select: {
+            name: true
+          }
+        }
       }
-    } catch (error) {
-      console.error("Error fetching certificate:", error);
-      return NextResponse.json(
-        { error: "Error fetching certificate" },
-        { status: 500 }
-      );
-    }
-  } else {
-    // Existing GET method for fetching all certificates
-    try {
-      const certificates = await prisma.certificate.findMany({
-        include: { farmer: true },
-      });
-      return NextResponse.json(certificates);
-    } catch (error) {
-      console.error("Error fetching certificates:", error);
-      return NextResponse.json(
-        { error: "Error fetching certificates" },
-        { status: 500 }
-      );
-    }
+    });
+
+    return NextResponse.json(certificates);
+  } catch (error) {
+    console.error("Error fetching certificates:", error);
+    return NextResponse.json({ error: "Error fetching certificates" }, { status: 500 });
   }
 }

@@ -28,8 +28,10 @@ export default function Login() {
        
         localStorage.setItem('token', data.token); 
         localStorage.setItem('login', login); 
+        localStorage.setItem('id', data.id); 
         localStorage.setItem('name', data.name); 
         localStorage.setItem('role', data.role); 
+        localStorage.setItem('farmerId', data.id);
         
         // Redirect to the dashboard
         router.push('/dashboard');

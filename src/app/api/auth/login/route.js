@@ -22,7 +22,9 @@ export async function POST(req) {
       return new Response(JSON.stringify({
         token: 'your-token-here', 
         name: farmer.name,
-        role: farmer.role
+        role: farmer.role,
+        id: farmer.id
+        
       }), { status: 200 });
     } else {
       return new Response(JSON.stringify({ message: 'Invalid credentials' }), { status: 401 });
