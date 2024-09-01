@@ -9,13 +9,20 @@ generator client {
 }
 
 model Farmer {
-  id        Int    @id @default(autoincrement())
-  name      String
-  email     String @unique
-  phone     String @unique
-  password  String
-  role      String
-  certificates Certificate[]
+  id                 Int          @id @default(autoincrement())
+  title              String
+  name               String
+  lastname           String
+  address            String
+  sub_district       String
+  district           String
+  province           String
+  zip_code           String
+  phone              String
+  planting_plot_code String
+  password           String
+  role               String
+  certificates       Certificate[]
 }
 
 model Certificate {
@@ -30,7 +37,7 @@ model Certificate {
   imageUrl           String?
   registrationDate   DateTime
   expiryDate         DateTime
-  status             String    @default("pending")
+  status             String    @default("กำลังดำเนินการ")
   farmerId           Int
   farmer             Farmer    @relation(fields: [farmerId], references: [id])
   createdAt          DateTime  @default(now())

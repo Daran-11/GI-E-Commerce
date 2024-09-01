@@ -1,40 +1,48 @@
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import { PrismaClient } from '@prisma/client';
 
-
-import prisma from '@/app/lib/db';
-import bcrypt from 'bcryptjs'; 
+const prisma = new PrismaClient();
+const JWT_SECRET = process.env.JWT_SECRET;
 
 export async function POST(req) {
-  const { login, password } = await req.json();
-
   try {
+    if (!JWT_SECRET) {
+      throw new Error('JWT_SECRET is not defined in environment variables.');
+    }
     
+    const { login, password } = await req.json();
+
+    if (!login || !password) {
+      return new Response(JSON.stringify({ message: 'Login and password are required' }), { status: 400 });
+    }
+
+    console.log('Login:', login); // Debugging statement
     const farmer = await prisma.farmer.findFirst({
-      where: {
-        OR: [
-          { email: login },
-          { phone: login } 
-        ]
-      }
+      where: { phone: login }
     });
 
-    if (farmer && (await bcrypt.compare(password, farmer.password))) {
-     
+    console.log('Farmer found:', farmer); // Debugging statement
+
+    if (farmer && await bcrypt.compare(password, farmer.password)) {
+      const token = jwt.sign(
+        { id: farmer.id, name: farmer.name, lastname: farmer.lastname, role: farmer.role },
+        JWT_SECRET,
+        { expiresIn: '1h' }
+      );
+
       return new Response(JSON.stringify({
-        token: 'your-token-here', 
+        token,
         name: farmer.name,
+        lastname: farmer.lastname,
         role: farmer.role,
         id: farmer.id
-        
       }), { status: 200 });
     } else {
       return new Response(JSON.stringify({ message: 'Invalid credentials' }), { status: 401 });
     }
   } catch (error) {
+    console.error('Login error:', error.message);
     return new Response(JSON.stringify({ message: 'Server error' }), { status: 500 });
   }
-}
-
-// Optionally handle other HTTP methods
-export async function GET(req) {
-  return new Response(JSON.stringify({ message: 'GET method not supported for this endpoint' }), { status: 405 });
 }

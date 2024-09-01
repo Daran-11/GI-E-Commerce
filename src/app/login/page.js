@@ -1,9 +1,11 @@
-'use client'; 
+// app/login/page.js
+
+'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import styles from './Login.module.css'; 
+import styles from './Login.module.css';
 
 export default function Login() {
   const [login, setLogin] = useState('');
@@ -14,26 +16,25 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-  
+
     try {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ login, password }),
       });
-  
+
       if (response.ok) {
         const data = await response.json();
         
-       
         localStorage.setItem('token', data.token); 
-        localStorage.setItem('login', login); 
         localStorage.setItem('id', data.id); 
-        localStorage.setItem('name', data.name); 
+        localStorage.setItem('login', login); 
+        localStorage.setItem('name', data.name);
+        localStorage.setItem('lastname', data.lastname); 
         localStorage.setItem('role', data.role); 
-        localStorage.setItem('farmerId', data.id);
+        localStorage.setItem('farmerId', data.id); 
         
-        // Redirect to the dashboard
         router.push('/dashboard');
       } else {
         const errorData = await response.json();
@@ -43,8 +44,7 @@ export default function Login() {
       setError('เกิดข้อผิดพลาดในการเข้าสู่ระบบ');
     }
   };
-  
-  
+
   return (
     <div className={styles.container}>
       <div className={styles.wrapper}>
@@ -52,9 +52,7 @@ export default function Login() {
           <img src="/images/login.png" alt="login" style={{ width: '100%', height: '100%' }} />
         </div>
         <div className={styles.formContainer}>
-          <div>
-            <h2 className={styles.heading}>ลงชื่อเข้าใช้</h2>
-          </div>
+          <h2 className={styles.heading}>ลงชื่อเข้าใช้</h2>
           <form className={styles.form} onSubmit={handleSubmit}>
             <input type="hidden" name="remember" value="true" />
             <div className="rounded-md shadow-sm -space-y-px">
@@ -71,7 +69,6 @@ export default function Login() {
                   onChange={(e) => setLogin(e.target.value)}
                 />
               </div>
-              <br></br>
               <div className={styles.label}>
                 <label htmlFor="password" className="sr-only">รหัสผ่าน</label>
                 <input

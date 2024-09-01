@@ -12,7 +12,7 @@ const Certificate = () => {
   useEffect(() => {
     const fetchCertificates = async () => {
       try {
-        const response = await fetch("/api/certificate/add");
+        const response = await fetch("/api/approvecertificate");
         const data = await response.json();
         setCertificates(data);
       } catch (error) {
@@ -46,22 +46,19 @@ const Certificate = () => {
     <div className={styles.container}>
       <div className={styles.top}>
         <Search placeholder="ค้นหาผู้ใช้..." />
-        <Link href="/dashboard/certificate/add">
-          <button className={styles.addButton}>Add New</button>
-        </Link>
       </div>
       <table className={styles.table}>
         <thead>
           <tr>
             <td>#</td>
-            <td>Type</td>
+            <td>ประเภท</td>
             <td>สายพันธุ์</td>
             <td>รหัสแปลงปลูก</td>
-            <td>Image</td>
-            <td>สถานะ</td>
+            <td>ชนิดการรับรอง</td>          
             <td>ข้อมูลเกษตรกร</td>
             <td>จำนวนผลผลิต</td>
-            <td>Actions</td>
+            <td>สถานะ</td>
+            <td></td>
           </tr>
         </thead>
         <tbody>
@@ -84,6 +81,18 @@ const Certificate = () => {
                     "No Image"
                   )}
                 </td>
+                
+
+                <td>
+                  {certificate.farmer?.name || "N/A"}
+                  <br />
+                 
+                </td>
+
+                  
+
+                <td>{certificate.productionQuantity}</td>
+
                 <td>
                   <span
                     className={`${styles.status} ${styles[certificate.status]}`}
@@ -93,26 +102,14 @@ const Certificate = () => {
                 </td>
 
                 <td>
-                  {certificate.farmer?.name || "N/A"}
-                  <br />
-                  {certificate.farmer?.location || "N/A"}
-                </td>
-                <td>{certificate.productionQuantity}</td>
-                <td>
                   <div className={styles.buttons}>
                     <Link
                       href={`/dashboard/certificate/edit/${certificate.id}`}
                     >
                       <button className={`${styles.button} ${styles.view}`}>
-                        Edit
+                        ตรวจสอบใบรับรอง
                       </button>
                     </Link>
-                    <button
-                      className={`${styles.button} ${styles.cancelled}`}
-                      onClick={() => handleDelete(certificate.id)}
-                    >
-                      Delete
-                    </button>
                   </div>
                 </td>
               </tr>

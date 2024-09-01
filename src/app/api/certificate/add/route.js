@@ -65,7 +65,7 @@ export async function POST(request) {
         imageUrl: imageUrl,
         registrationDate: new Date(),
         expiryDate: new Date(),
-        status: 'pending',
+        status: 'กำลังดำเนินการ',
         farmer: {
           connect: { id: parseInt(farmerId, 10) },
         },
