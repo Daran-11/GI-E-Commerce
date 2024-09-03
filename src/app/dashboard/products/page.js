@@ -6,8 +6,7 @@ import Button from "@mui/material/Button";
 import Pagination from "@/app/ui/dashboard/pagination/pagination";
 import Search from "@/app/ui/dashboard/search/search";
 import AddProductDialog from "@/app/dashboard/products/add/page";
-import EditProductDialog from "@/app/dashboard/products/edit/[ProductID]/page";
-
+import EditProductDialog from "@/app/dashboard/products/edit/[id]/page";
 
 const Product = () => {
   const [products, setProducts] = useState([]);
@@ -22,7 +21,7 @@ const Product = () => {
       const data = await response.json();
       const formattedData = data.map((product) => ({
         ...product,
-        Price: formatPrice(product.Price),
+        price: formatPrice(product.price),
       }));
       setProducts(formattedData);
       setLoading(false); // Set loading to false after data is fetched
@@ -38,19 +37,19 @@ const Product = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const formatPrice = (Price) => {
-    return Price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  const formatPrice = (price) => {
+    return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
 
-  const handleDelete = async (ProductID) => {
+  const handleDelete = async (id) => {
     if (confirm("Are you sure you want to delete this product?")) {
       try {
-        const response = await fetch(`/api/product/add?ProductID=${ProductID}`, {
+        const response = await fetch(`/api/product/add?id=${id}`, {
           method: "DELETE",
           headers: { "Content-Type": "application/json" },
         });
         if (response.ok) {
-          setProducts(products.filter((product) => product.ProductID !== ProductID));
+          setProducts(products.filter((product) => product.id !== id));
         } else {
           alert("Failed to delete product");
         }
@@ -63,8 +62,8 @@ const Product = () => {
   const handleOpenAddDialog = () => setOpenAddDialog(true);
   const handleCloseAddDialog = () => setOpenAddDialog(false);
 
-  const handleOpenEditDialog = (ProductID) => {
-    setSelectedProductId(ProductID);
+  const handleOpenEditDialog = (id) => {
+    setSelectedProductId(id);
     setOpenEditDialog(true);
   };
 
@@ -91,9 +90,8 @@ const Product = () => {
     }
   };
 
-  const handleEditProduct = async (ProductID, productData) => {
-
-    const response = await fetch(`/api/product/add?ProductID=${ProductID}`, {
+  const handleEditProduct = async (id, productData) => {
+    const response = await fetch(`/api/product/add?id=${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -150,19 +148,19 @@ const Product = () => {
         <tbody>
           {products.length > 0 ? (
             products.map((product) => (
-              <tr key={product.ProductID}>
-                <td>{product.ProductID}</td>
-                <td>{product.PlotCode}</td>
-                <td>{product.ProductName}</td>
-                <td>{product.ProductType}</td>
-                <td>{product.Price}</td>
-                <td>{product.Amount}</td>
+              <tr key={product.id}>
+                <td>{product.id}</td>
+                <td>{product.plotCode}</td>
+                <td>{product.productName}</td>
+                <td>{product.variety}</td>
+                <td>{product.price}</td>
+                <td>{product.amount}</td>
                 <td>
                   <span
-                    className={`${styles.Status} ${styles[product.Status.replace(/ /g, "-")]
+                    className={`${styles.status} ${styles[product.status.replace(/ /g, "-")]
                       }`}
                   >
-                    {product.Status}
+                    {product.status}
                   </span>
                 </td>
                 <td>
@@ -177,8 +175,7 @@ const Product = () => {
                           backgroundColor: 'var(--background-hover)',
                         },
                       }}
-                      onClick={() => handleOpenEditDialog(product.ProductID)}
-
+                      onClick={() => handleOpenEditDialog(product.id)}
                     >
                       แก้ไข
                     </Button>
@@ -192,8 +189,7 @@ const Product = () => {
                           backgroundColor: 'var(--background-hover)',
                         },
                       }}
-                      onClick={() => handleDelete(product.ProductID)}
-
+                      onClick={() => handleDelete(product.id)}
                     >
                       ลบ
                     </Button>
@@ -219,12 +215,13 @@ const Product = () => {
 
       {/* Edit Product Dialog */}
       {selectedProductId && (
-       <EditProductDialog
-       open={openEditDialog}
-       onClose={handleCloseEditDialog}
-       ProductID={selectedProductId} // Ensure consistency in prop name
-       onSuccess={fetchProducts}
-     />
+        <EditProductDialog
+          open={openEditDialog}
+          onClose={handleCloseEditDialog}
+          onEditProduct={handleEditProduct}
+          productId={selectedProductId}
+          onSuccess={fetchProducts} // Pass the fetchProducts function as onSuccess
+        />
       )}
     </div>
   );
