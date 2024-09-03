@@ -16,12 +16,11 @@ import {
 } from 'react-icons/md';
 import MenuLink from './menuLink/menuLink'; 
 import Image from 'next/image';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 // Define the menu items
 const menuItems = [
   {
-   
     list: [
       { title: 'หน้าหลัก', path: '/dashboard', icon: <MdDashboard /> },    
     ],
@@ -54,6 +53,7 @@ const menuItems = [
 // Define the Sidebar component
 const Sidebar = () => {
   const pathname = usePathname();
+  const router = useRouter();
   const [user, setUser] = useState({ name: 'Loading...', role: 'Loading...' });
 
   useEffect(() => {
@@ -62,14 +62,23 @@ const Sidebar = () => {
   
     if (name && role) {
       setUser({ name, role });
+
+      // Redirect to dashboard_municipality if role is เทศบาล or admin
+      if (role === 'เทศบาล' || role === 'admin') {
+        router.push('/dashboard_municipality');
+      } else if (role !== 'เกษตรกร') {
+        router.push('/login'); // Redirect to login if role is not เกษตรกร, เทศบาล, or admin
+      }
     } else {
-      setUser({ name: 'Loading...', role: 'Loading...' });
+      // Redirect to login if user data is not available
+      router.push('/login');
     }
-  }, []);
-  
-  
-  
-  
+  }, [router]);
+
+  const handleLogout = () => {
+    localStorage.clear();
+    router.push('/login'); // Redirect to login page or any other page
+  };
 
   return (
     <div className={styles.container}>
@@ -90,7 +99,7 @@ const Sidebar = () => {
           </li>
         ))}
       </ul>
-      <button className={styles.logout}>
+      <button className={styles.logout} onClick={handleLogout}>
         <MdLogout />
         ลงชื่อออก
       </button>

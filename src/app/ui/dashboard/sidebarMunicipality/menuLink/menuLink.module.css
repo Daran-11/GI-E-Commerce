@@ -1,62 +1,62 @@
 .container {
-  display: flex;
-  padding: 20px;
-  align-items: center;
-  gap: 10px;
-  border-radius: 10px;
-  margin: 5px 0;
-  transition: background-color 0.3s, box-shadow 0.3s;
-}
-
-.container:hover {
-  background-color: #ffffff;
-  box-shadow: 0 0 10px 8px rgba(0, 0, 0, 0.1); /* Shadow on hover */
-}
-
-.active {
-  background-color: #ffffff; /* Active background color */
-  color: #333; /* Active text color is black */
-  box-shadow:  0px 0px 20px 1px rgba(0, 0, 0, 0.1); /* Shadow for active item */
-}
-
-.icon {
-  margin-right: 8px; /* Space between icon and text */
-  color: #666; /* Default icon color */
-}
-
-/* Active icon color styles */
-.activeDashboard {
-  color: #ff5722; /* Example color for "หน้าหลัก" */
-}
-
-.activeProducts {
-  color: #4caf50; /* Example color for "จัดการสินค้า" */
-}
-
-.activeOrders {
-  color: #f44336; /* Example color for "จัดการคำสั่งซื้อ" */
-}
-
-.activeTransactions {
-  color: #9c27b0; /* Example color for "ประวัติการขาย" */
-}
-
-.activeCheckProducts {
-  color: #009688; /* Example color for "ตรวจสอบสินค้า" */
-}
-
-.activeTraceability {
-  color: #e91e63; /* Example color for "ตรวจสอบยอนกลับ" */
-}
-
-.activeCertificate {
-  color: #3f51b5; /* Example color for "ลงทะบียนใบรับรอง" */
-}
-
-.activeSettings {
-  color: #607d8b; /* Example color for "การตั้งค่า" */
-}
-
-.activeHelp {
-  color: #ffc107; /* Example color for "ช่วยเหลือ" */
-}
+    display: flex;
+    padding: 20px;
+    align-items: center;
+    gap: 10px;
+    border-radius: 10px;
+    margin: 5px 0;
+    transition: background-color 0.3s, box-shadow 0.3s;
+  }
+  
+  .container:hover {
+    background-color: #ffffff;
+    box-shadow: 0 0 10px 8px rgba(0, 0, 0, 0.1); /* Shadow on hover */
+  }
+  
+  .active {
+    background-color: #ffffff; /* Active background color */
+    color: #333; /* Active text color is black */
+    box-shadow:  0px 0px 20px 1px rgba(0, 0, 0, 0.1); /* Shadow for active item */
+  }
+  
+  .icon {
+    margin-right: 8px; /* Space between icon and text */
+    color: #666; /* Default icon color */
+  }
+  
+  /* Active icon color styles */
+  .activeDashboard {
+    color: #ff5722; /* Example color for "หน้าหลัก" */
+  }
+  
+  .activeProducts {
+    color: #4caf50; /* Example color for "จัดการสินค้า" */
+  }
+  
+  .activeOrders {
+    color: #f44336; /* Example color for "จัดการคำสั่งซื้อ" */
+  }
+  
+  .activeTransactions {
+    color: #9c27b0; /* Example color for "ประวัติการขาย" */
+  }
+  
+  .activeCheckProducts {
+    color: #009688; /* Example color for "ตรวจสอบสินค้า" */
+  }
+  
+  .activeTraceability {
+    color: #e91e63; /* Example color for "ตรวจสอบยอนกลับ" */
+  }
+  
+  .activeCertificate {
+    color: #3f51b5; /* Example color for "ลงทะบียนใบรับรอง" */
+  }
+  
+  .activeSettings {
+    color: #607d8b; /* Example color for "การตั้งค่า" */
+  }
+  
+  .activeHelp {
+    color: #ffc107; /* Example color for "ช่วยเหลือ" */
+  }
