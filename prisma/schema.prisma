@@ -19,7 +19,6 @@ model Farmer {
   province           String
   zip_code           String
   phone              String
-  planting_plot_code String
   password           String
   role               String
   certificates       Certificate[]
@@ -37,7 +36,7 @@ model Certificate {
   imageUrl           String?
   registrationDate   DateTime
   expiryDate         DateTime
-  status             String    @default("กำลังดำเนินการ")
+  status             String    @default("รอตรวจสอบใบรับรอง")
   farmerId           Int
   farmer             Farmer    @relation(fields: [farmerId], references: [id])
   createdAt          DateTime  @default(now())

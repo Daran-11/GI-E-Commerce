@@ -51,11 +51,11 @@ const Certificate = () => {
         <thead>
           <tr>
             <td>#</td>
+            <td>ชื่อเกษตรกร</td>
             <td>ประเภท</td>
             <td>สายพันธุ์</td>
             <td>รหัสแปลงปลูก</td>
-            <td>ชนิดการรับรอง</td>          
-            <td>ข้อมูลเกษตรกร</td>
+            <td>รูปใบรับรอง</td>          
             <td>จำนวนผลผลิต</td>
             <td>สถานะ</td>
             <td></td>
@@ -63,9 +63,13 @@ const Certificate = () => {
         </thead>
         <tbody>
           {certificates.length > 0 ? (
-            certificates.map((certificate) => (
+            certificates.map((certificate, index) => (
               <tr key={certificate.id}>
-                <td>{certificate.id}</td>
+                <td>{index + 1}</td> {/* Display serial number starting from 1 */}
+                <td>
+                  {certificate.farmer?.name || "N/A"}
+                  <br />
+                </td>
                 <td>{certificate.type}</td>
                 <td>{certificate.variety}</td>
                 <td>{certificate.plotCode}</td>
@@ -81,18 +85,7 @@ const Certificate = () => {
                     "No Image"
                   )}
                 </td>
-                
-
-                <td>
-                  {certificate.farmer?.name || "N/A"}
-                  <br />
-                 
-                </td>
-
-                  
-
                 <td>{certificate.productionQuantity}</td>
-
                 <td>
                   <span
                     className={`${styles.status} ${styles[certificate.status]}`}
@@ -100,11 +93,10 @@ const Certificate = () => {
                     {certificate.status}
                   </span>
                 </td>
-
                 <td>
                   <div className={styles.buttons}>
                     <Link
-                      href={`/dashboard/certificate/edit/${certificate.id}`}
+                      href={`/dashboard_municipality/certificate/edit/${certificate.id}`}
                     >
                       <button className={`${styles.button} ${styles.view}`}>
                         ตรวจสอบใบรับรอง
@@ -116,7 +108,7 @@ const Certificate = () => {
             ))
           ) : (
             <tr>
-              <td colSpan={6}>No certificates available</td>
+              <td colSpan={9}>No certificates available</td> {/* Adjust colSpan if necessary */}
             </tr>
           )}
         </tbody>

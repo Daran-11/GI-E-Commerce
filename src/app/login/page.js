@@ -57,18 +57,19 @@ export default function Login() {
             <input type="hidden" name="remember" value="true" />
             <div className="rounded-md shadow-sm -space-y-px">
               <div className={styles.label}>
-                <label htmlFor="login" className="sr-only">อีเมลหรือเบอร์โทรศัพท์</label>
+                <label htmlFor="login" className="sr-only">เบอร์โทรศัพท์</label>
                 <input
                   id="login"
                   name="login"
                   type="text"
                   required
                   className={`${styles.input} ${styles.inputLogin}`}
-                  placeholder="อีเมลหรือเบอร์โทรศัพท์"
+                  placeholder="เบอร์โทรศัพท์"
                   value={login}
                   onChange={(e) => setLogin(e.target.value)}
                 />
               </div>
+              <br/>
               <div className={styles.label}>
                 <label htmlFor="password" className="sr-only">รหัสผ่าน</label>
                 <input
