@@ -72,31 +72,41 @@ export async function POST(request) {
 }
 
 export async function PUT(request) {
-  try {
-    const data = await request.json();
-    const updatedCertificate = await prisma.certificate.update({
-      where: { id: parseInt(data.id, 10) },
-      data: {
-        variety: data.variety,
-        plotCode: data.plotCode,
-        registrationDate: new Date(data.registrationDate),
-        expiryDate: new Date(data.expiryDate),
-        status: data.status,
-        imageUrl: data.imageUrl,
-        farmer: {
-          connect: { id: parseInt(data.farmerId, 10) }, // Convert farmerId to integer
+    try {
+      const formData = await request.formData();
+      
+      const id = formData.get('id');
+      const variety = formData.get('variety');
+      const plotCode = formData.get('plotCode');
+      const registrationDate = formData.get('registrationDate');
+      const expiryDate = formData.get('expiryDate');
+      const status = formData.get('status');
+      const farmerId = formData.get('farmerId');
+  
+      const updatedCertificate = await prisma.certificate.update({
+        where: { id: parseInt(id, 10) },
+        data: {
+          variety,
+          plotCode,
+          registrationDate: new Date(registrationDate),
+          expiryDate: new Date(expiryDate),
+          status,
+          farmer: {
+            connect: { id: parseInt(farmerId, 10) },
+          },
         },
-      },
-    });
-    return NextResponse.json(updatedCertificate, { status: 200 });
-  } catch (error) {
-    console.error("Failed to update certificate:", error);
-    return NextResponse.json(
-      { error: "Failed to update certificate" },
-      { status: 500 }
-    );
+      });
+      
+      return NextResponse.json(updatedCertificate, { status: 200 });
+    } catch (error) {
+      console.error("Failed to update certificate:", error);
+      return NextResponse.json(
+        { error: "Failed to update certificate" },
+        { status: 500 }
+      );
+    }
   }
-}
+  
 
 export async function DELETE(request) {
   try {
