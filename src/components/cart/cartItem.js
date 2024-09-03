@@ -7,11 +7,9 @@ import QuantityHandler from "../quantityhandler";
 
 export default function CartItem({ initialItems }) {
   const { cartItems, setCartItems, removeItemFromCart, updateItemQuantity } = useCart();
-
-  const [selectedItem, setSelectedItem] = useState(null);
+  const [selectedItems, setSelectedItems] = useState([]);
   const router = useRouter();
   const { data: session } = useSession();
-  
 
   useEffect(() => {
     setCartItems(initialItems);
@@ -21,19 +19,23 @@ export default function CartItem({ initialItems }) {
     console.log('CartItems data:', cartItems);
   }, [cartItems]);
 
-    // Function to select an item
-    const selectItem = (productId) => {
-      setSelectedItem((prevSelectedItem) =>
-        prevSelectedItem === productId ? null : productId
-      );
-      console.log('item selected:', productId);
-    };
+  // Function to select or deselect an item
+  const selectItem = (productId) => {
+    setSelectedItems((prevSelectedItems) => {
+      if (prevSelectedItems.includes(productId)) {
+        // If already selected, deselect it
+        return prevSelectedItems.filter(item => item !== productId);
+      } else {
+        // Otherwise, add it to the selected items
+        return [...prevSelectedItems, productId];
+      }
+    });
+  };
+
   const handleUpdateQuantity = (productId, newQuantity) => {
-    // Check if the new quantity exceeds available amount
     const item = cartItems.find(i => i.productId === productId);
     if (item && newQuantity <= item.productAmount) {
       updateItemQuantity(productId, newQuantity);
-      console.log('update item')
     }
   };
 
@@ -41,30 +43,25 @@ export default function CartItem({ initialItems }) {
     removeItemFromCart(productId);
   };
 
-
-  
-
   const handleCheckout = () => {
-    if (selectedItem) {
-      const selectedItemData = cartItems.find(item => item.productId === selectedItem);
-  
-      if (selectedItemData) {
-        // Save selected item data to localStorage
-        localStorage.setItem('selectedItem', JSON.stringify(selectedItemData));
+    if (selectedItems.length > 0) {
+      const selectedItemData = cartItems.filter(item => selectedItems.includes(item.productId));
+      
+      if (selectedItemData.length > 0) {
+        localStorage.setItem('selectedItems', JSON.stringify(selectedItemData));
         router.push('/checkout');
       } else {
-        alert("Selected item not found in cart.");
+        alert("Selected items not found in cart.");
       }
     } else {
-      alert("Please select an item to checkout.");
+      alert("Please select at least one item to checkout.");
     }
   };
 
-  
   return (
     <div className="top-container grid grid-cols-10">
       <div className="col-span-8">
-        <table className="">
+        <table>
           <thead>
             <tr>
               <th className="pr-[50px]">เลือก</th>
@@ -80,44 +77,46 @@ export default function CartItem({ initialItems }) {
               cartItems.map((item) => (
                 <tr key={item.productId}>
                   <td className="items-center justify-center ">
-                  <input
-                  type="checkbox"
-                  checked={selectedItem === item.productId}
-                  onChange={() => selectItem(item.productId)}
-                />                  
+                    <input
+                      type="checkbox"
+                      checked={selectedItems.includes(item.productId)}
+                      onChange={() => selectItem(item.productId)}
+                    />
                   </td>
-
-                  <td className="">{item.productName || item.product.ProductName} {item.productType || item.product.ProductType}</td>
+                  <td>{item.productName || item.product.ProductName} {item.productType || item.product.ProductType}</td>
                   <td>{item.productPrice || item.product.Price}</td>
-                  <td><QuantityHandler 
-                  productAmount={item.productAmount || item.product.Amount} 
-                  productId={item.productId || item.product.ProductID} 
-                  initialQuantity={item.quantity } 
-                  onQuantityChange={handleUpdateQuantity} /></td>
+                  <td>
+                    <QuantityHandler 
+                      productAmount={item.productAmount || item.product.Amount} 
+                      productId={item.productId || item.product.ProductID} 
+                      initialQuantity={item.quantity} 
+                      onQuantityChange={handleUpdateQuantity} 
+                    />
+                  </td>
                   <td>{item.quantity * (item.productPrice || item.product.Price)}</td>
                   <td>
                     <button onClick={() => handleDelete(item.productId)}>
-                      
-                      ลบ</button>
+                      ลบ
+                    </button>
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="5">No items in the cart.</td>
+                <td colSpan="6">No items in the cart.</td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
       <div className="col-span-2 border-2 border-black w-full h-[200px]">
-      <button 
-        onClick={handleCheckout}
-        disabled={!selectedItem}
-        className="action-button bg-[#4EAC14] text-white font-light rounded-xl w-[150px] mt-4 disabled:bg-gray-300"
-      >
-        สั่งซื้อ
-      </button>
+        <button 
+          onClick={handleCheckout}
+          disabled={selectedItems.length === 0}
+          className="action-button bg-[#4EAC14] text-white font-light rounded-xl w-[150px] mt-4 disabled:bg-gray-300"
+        >
+          สั่งซื้อ
+        </button>
       </div>
     </div>
   );
