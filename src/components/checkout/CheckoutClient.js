@@ -3,9 +3,9 @@ import AddressManagement from "@/components/AddressManagement";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-export default function CheckoutClient({userId}) {
-   const router = useRouter();
-  const [selectedItem, setSelectedItem] = useState(null);
+export default function CheckoutClient({ userId }) {
+  const router = useRouter();
+  const [selectedItems, setSelectedItems] = useState([]);
   const [selectedAddressId, setSelectedAddressId] = useState(null);
 
   useEffect(() => {
@@ -23,64 +23,64 @@ export default function CheckoutClient({userId}) {
       }
     };
 
-    const storedItem = localStorage.getItem("selectedItem");
-    if (storedItem) {
-      setSelectedItem(JSON.parse(storedItem));
+    const storedItems = localStorage.getItem("selectedItems");
+    if (storedItems) {
+      setSelectedItems(JSON.parse(storedItems));
     }
 
     fetchDefaultAddress(); // Fetch default address when component mounts
   }, [userId]);
 
-  if (!selectedItem) {
-    return <div>No item selected for checkout.</div>;
+  if (!selectedItems.length) {
+    return <div>No items selected for checkout.</div>;
   }
 
   const handleConfirmOrder = async () => {
-    if (selectedItem && selectedAddressId) {
+    if (selectedItems.length && selectedAddressId) {
       try {
-        // Create the order
-        const orderResponse = await fetch('http://localhost:3000/api/orders', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            userId: userId, // Replace with dynamic user ID if needed
-            productId: selectedItem.productId,
-            quantity: selectedItem.quantity,
-            productName: selectedItem.productName || selectedItem.product.ProductName,
-            productPrice: selectedItem.productPrice || selectedItem.product.Price,
-            addressId: selectedAddressId,
-          }),
-        });
-
-        if (orderResponse.ok) {
-          // Remove item from cart
-          const removeFromCartResponse = await fetch('http://localhost:3000/api/auth/cart/delete', {
-            method: 'DELETE',
+        const orderPromises = selectedItems.map(async (item) => {
+          const orderResponse = await fetch('http://localhost:3000/api/orders', {
+            method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ productId: selectedItem.productId }),
+            body: JSON.stringify({
+              userId,
+              productId: item.productId,
+              quantity: item.quantity,
+              productName: item.productName || item.product.ProductName,
+              productPrice: item.productPrice || item.product.Price,
+              addressId: selectedAddressId,
+            }),
           });
 
-          if (removeFromCartResponse.ok) {
-            const orderData = await orderResponse.json();
-            console.log('Order Data:', orderData);
-            // Redirect to order confirmation with the order ID
-            console.log("order id",orderData.order.id);
-            router.push(`/order-confirmation?id=${orderData.order.id}`);
+          if (orderResponse.ok) {
+            // Remove item from cart
+            await fetch('http://localhost:3000/api/auth/cart/delete', {
+              method: 'DELETE',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ productId: item.productId }),
+            });
+
+            return await orderResponse.json();
           } else {
-            console.error('Failed to create order');
+            throw new Error('Failed to create order');
           }
-        } else {
-          console.error('Failed to create order');
-        }
+        });
+
+        const orders = await Promise.all(orderPromises);
+        const orderIds = orders.map(order => order.order.id);
+        
+        // Redirect to order confirmation with the order IDs
+        router.push(`/order-confirmation?ids=${orderIds.join(',')}`);
+
       } catch (error) {
         console.error('Error:', error);
       }
     } else {
-      alert("Please select an item and an address to checkout.");
+      alert("Please select items and an address to checkout.");
     }
   };
 
@@ -90,18 +90,17 @@ export default function CheckoutClient({userId}) {
 
       {/* Product Summary */}
       <h2>Product Summary</h2>
-      {selectedItem && (
-        <div>
-          <p><strong>Product Name:</strong> {selectedItem.productName || selectedItem.product.ProductName}</p>
-          <p><strong>Quantity:</strong> {selectedItem.quantity}</p>
-          <p><strong>Price:</strong> {selectedItem.productPrice || selectedItem.product.Price}</p>
-          <p><strong>Total:</strong> {(selectedItem.productPrice || selectedItem.product.Price) * selectedItem.quantity}</p>
+      {selectedItems.map(item => (
+        <div key={item.productId}>
+          <p><strong>Product Name:</strong> {item.productName || item.product.ProductName}</p>
+          <p><strong>Quantity:</strong> {item.quantity}</p>
+          <p><strong>Price:</strong> {item.productPrice || item.product.Price}</p>
+          <p><strong>Total:</strong> {(item.productPrice || item.product.Price) * item.quantity}</p>
         </div>
-      )}
+      ))}
 
       <h2>Delivery Address</h2>
-      {/* Display address management component if needed */}
-      <AddressManagement/>
+      <AddressManagement />
 
       <button className="w-[200px] h-[50px] font-light rounded-xl text-white bg-[#4EAC14] hover:bg-[#84d154]" type="button" onClick={handleConfirmOrder}>
         ชำระเงิน

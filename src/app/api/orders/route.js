@@ -55,5 +55,41 @@ import { authOptions } from '../auth/[...nextauth]/route';
     }
   }
 
+export async function GET(request) {
+  const { searchParams } = new URL(request.url);
+  const ids = searchParams.get('ids');
+
+  // Check if IDs are provided
+  if (!ids) {
+    return NextResponse.json({ error: 'No order IDs provided' }, { status: 400 });
+  }
+
+  // Convert the IDs string to an array of integers
+  const orderIds = ids.split(',').map(id => parseInt(id, 10)).filter(id => !isNaN(id));
+
+  // Check if orderIds array is empty after filtering
+  if (orderIds.length === 0) {
+    return NextResponse.json({ error: 'Invalid order IDs' }, { status: 400 });
+  }
+
+  try {
+    const orders = await prisma.order.findMany({
+      where: { id: { in: orderIds } },
+      include: {
+        product: true,
+      },
+    });
+
+    if (orders.length === 0) {
+      return NextResponse.json({ error: 'Orders not found' }, { status: 404 });
+    }
+
+    return NextResponse.json(orders);
+  } catch (error) {
+    console.error('Error fetching order details:', error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  }
+}
+
 
   
