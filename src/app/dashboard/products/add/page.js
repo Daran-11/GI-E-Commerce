@@ -28,15 +28,15 @@ const CustomPaper = styled(Paper)(({ theme }) => ({
 
 const AddProductDialog = ({ open, onClose, onAddProduct }) => {
   const [formData, setFormData] = useState({
-    plotCode: "",
-    productName: "",
-    variety: "",
-    price: "",
-    amount: "",
-    status: "",
+    PlotCode: "",
+    ProductName: "",
+    ProductType: "",
+    Price: "",
+    Amount: "",
+    Status: "",
   });
 
-  // Format price with commas
+  // Format Price with commas
   const formatPrice = (value) => {
     const cleanValue = value.replace(/[^0-9.]/g, "");
     const [integerPart, decimalPart] = cleanValue.split(".");
@@ -52,7 +52,7 @@ const AddProductDialog = ({ open, onClose, onAddProduct }) => {
   // Handle input change
   const handleChange = (e) => {
     const { name, value } = e.target;
-    if (name === "price") {
+    if (name === "Price") {
       const formattedValue = formatPrice(value);
       setFormData((prev) => ({ ...prev, [name]: formattedValue }));
     } else {
@@ -64,10 +64,10 @@ const AddProductDialog = ({ open, onClose, onAddProduct }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Convert price with commas to float
+    // Convert Price with commas to float
     const formattedData = {
       ...formData,
-      price: parseFloat(formData.price.replace(/,/g, "")).toFixed(2),
+      Price: parseFloat(formData.Price.replace(/,/g, "")).toFixed(2),
     };
 
     await onAddProduct(formattedData);
@@ -77,12 +77,12 @@ const AddProductDialog = ({ open, onClose, onAddProduct }) => {
   // Handle dialog close and reset form
   const handleClose = useCallback(() => {
     setFormData({
-      plotCode: "",
-      productName: "",
-      variety: "",
-      price: "",
-      amount: "",
-      status: "",
+      PlotCode: "",
+      ProductName: "",
+      ProductType: "",
+      Price: "",
+      Amount: "",
+      Status: "",
     });
     onClose();
   }, [onClose]);
@@ -95,56 +95,56 @@ const AddProductDialog = ({ open, onClose, onAddProduct }) => {
           <Grid container spacing={2} marginTop={0}>
             <Grid item xs={12}>
               <TextField
-                name="plotCode"
+                name="PlotCode"
                 label="รหัสแปลงปลูก"
                 variant="outlined"
                 fullWidth
-                value={formData.plotCode}
+                value={formData.PlotCode}
                 onChange={handleChange}
                 required
               />
             </Grid>
             <Grid item xs={12}>
               <TextField
-                name="productName"
+                name="ProductName"
                 label="ชื่อสินค้า"
                 variant="outlined"
                 fullWidth
-                value={formData.productName}
+                value={formData.ProductName}
                 onChange={handleChange}
                 required
               />
             </Grid>
             <Grid item xs={12}>
               <TextField
-                name="variety"
+                name="ProductType"
                 label="สายพันธุ์"
                 variant="outlined"
                 fullWidth
-                value={formData.variety}
+                value={formData.ProductType}
                 onChange={handleChange}
                 required
               />
             </Grid>
             <Grid item xs={12}>
               <TextField
-                name="price"
+                name="Price"
                 label="ราคา"
                 variant="outlined"
                 fullWidth
-                value={formData.price}
+                value={formData.Price}
                 onChange={handleChange}
                 required
               />
             </Grid>
             <Grid item xs={12}>
               <TextField
-                name="amount"
+                name="Amount"
                 label="จำนวน"
                 variant="outlined"
                 type="number"
                 fullWidth
-                value={formData.amount}
+                value={formData.Amount}
                 onChange={handleChange}
                 required
               />
@@ -153,8 +153,8 @@ const AddProductDialog = ({ open, onClose, onAddProduct }) => {
               <FormControl fullWidth variant="outlined" required>
                 <InputLabel>สถานะ</InputLabel>
                 <Select
-                  name="status"
-                  value={formData.status}
+                  name="Status"
+                  value={formData.Status}
                   onChange={handleChange}
                   label="สถานะ"
                 >
