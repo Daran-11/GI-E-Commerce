@@ -25,31 +25,32 @@ const CustomPaper = styled(Paper)(({ theme }) => ({
 const EditProductDialog = ({
   open,
   onClose,
-  ProductID,
+  onEditProduct,
+  productId,
   onSuccess,
 }) => {
   const [formData, setFormData] = useState({
-    PlotCode: "",
-    ProductName: "",
-    ProductType: "",
-    Price: "",
-    Amount: "",
-    Status: "",
+    plotCode: "",
+    productName: "",
+    variety: "",
+    price: "",
+    amount: "",
+    status: "",
   });
 
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const response = await fetch(`/api/product/add?ProductID=${ProductID}`);
+        const response = await fetch(`/api/product/add?id=${productId}`);
         if (response.ok) {
           const data = await response.json();
           setFormData({
-            PlotCode: data.PlotCode || "",
-            ProductName: data.ProductName || "",
-            ProductType: data.ProductType || "",
-            Price: data.Price !== null && data.Price !== undefined ? data.Price.toString() : "", // Ensure Price is a string
-            Amount: data.Amount !== null && data.Amount !== undefined ? data.Amount.toString() : "",
-            Status: data.Status || "",
+            plotCode: data.plotCode,
+            productName: data.productName,
+            variety: data.variety,
+            price: data.price,
+            amount: data.amount,
+            status: data.status,
           });
         } else {
           alert("Failed to fetch product");
@@ -59,45 +60,42 @@ const EditProductDialog = ({
       }
     };
 
-    if (ProductID) {
+    if (productId) {
       fetchProduct();
     }
-  }, [ProductID]);
+  }, [productId]);
 
   const formatPrice = (value) => {
-    if (typeof value === 'number') {
-      return value.toLocaleString(); // Format as integer with commas
-    } else if (typeof value === 'string') {
-      const cleanValue = value.replace(/[^0-9.]/g, ""); // Clean non-numeric characters
-      const [integerPart, decimalPart] = cleanValue.split(".");
-      const formattedIntegerPart = integerPart.replace(
-        /\B(?=(\d{3})+(?!\d))/g,
-        ","
-      );
-      return decimalPart
-        ? `${formattedIntegerPart}.${decimalPart}`
-        : formattedIntegerPart;
-    }
-    return "";
+    const cleanValue = value.replace(/[^0-9.]/g, "");
+    const [integerPart, decimalPart] = cleanValue.split(".");
+    const formattedIntegerPart = integerPart.replace(
+      /\B(?=(\d{3})+(?!\d))/g,
+      ","
+    );
+    return decimalPart
+      ? `${formattedIntegerPart}.${decimalPart}`
+      : formattedIntegerPart;
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    if (name === "Price") {
-      setFormData((prev) => ({ ...prev, [name]: value }));
+    if (name === "price") {
+      const formattedValue = formatPrice(value);
+      setFormData((prev) => ({ ...prev, [name]: formattedValue }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
 
+  // Handle dialog close and reset form
   const handleClose = useCallback(() => {
     setFormData({
-      PlotCode: "",
-      ProductName: "",
-      ProductType: "",
-      Price: "",
-      Amount: "",
-      Status: "",
+      plotCode: "",
+      productName: "",
+      variety: "",
+      price: "",
+      amount: "",
+      status: "",
     });
     onClose();
   }, [onClose]);
@@ -107,17 +105,16 @@ const EditProductDialog = ({
 
     const formattedData = {
       ...formData,
-      Price: parseInt(formData.Price.replace(/[^0-9]/g, ""), 10), // Convert to integer
     };
 
     try {
-      const response = await fetch(`/api/product/add?ProductID=${ProductID}`, {
+      const response = await fetch(`/api/product/add?id=${productId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          ProductID: ProductID,
+          id: productId, // Include the id in the request body
           ...formattedData,
         }),
       });
@@ -126,7 +123,7 @@ const EditProductDialog = ({
         const updatedProduct = await response.json();
         alert("Product updated successfully");
         handleClose();
-        if (onSuccess) onSuccess();
+        if (onSuccess) onSuccess(); // Notify parent component of success
       } else {
         const errorData = await response.json();
         alert(`Failed to update product: ${errorData.error}`);
@@ -144,56 +141,56 @@ const EditProductDialog = ({
           <Grid container spacing={2} marginTop={0}>
             <Grid item xs={12}>
               <TextField
-                name="PlotCode"
+                name="plotCode"
                 label="Plot Code"
                 variant="outlined"
                 fullWidth
-                value={formData.PlotCode || ""}
+                value={formData.plotCode}
                 onChange={handleChange}
                 required
               />
             </Grid>
             <Grid item xs={12}>
               <TextField
-                name="ProductName"
+                name="productName"
                 label="Product Name"
                 variant="outlined"
                 fullWidth
-                value={formData.ProductName || ""}
+                value={formData.productName}
                 onChange={handleChange}
                 required
               />
             </Grid>
             <Grid item xs={12}>
               <TextField
-                name="ProductType"
+                name="variety"
                 label="Variety"
                 variant="outlined"
                 fullWidth
-                value={formData.ProductType || ""}
+                value={formData.variety}
                 onChange={handleChange}
                 required
               />
             </Grid>
             <Grid item xs={12}>
               <TextField
-                name="Price"
+                name="price"
                 label="Price"
                 variant="outlined"
                 fullWidth
-                value={formatPrice(formData.Price)} // Format for display
+                value={formData.price}
                 onChange={handleChange}
                 required
               />
             </Grid>
             <Grid item xs={12}>
               <TextField
-                name="Amount"
+                name="amount"
                 label="Amount"
                 variant="outlined"
                 type="number"
                 fullWidth
-                value={formData.Amount || ""}
+                value={formData.amount}
                 onChange={handleChange}
                 required
                 inputProps={{ min: 0 }}
@@ -203,8 +200,8 @@ const EditProductDialog = ({
               <FormControl fullWidth variant="outlined" required>
                 <InputLabel>Status</InputLabel>
                 <Select
-                  name="Status"
-                  value={formData.Status || ""}
+                  name="status"
+                  value={formData.status}
                   onChange={handleChange}
                   label="Status"
                 >
@@ -220,7 +217,7 @@ const EditProductDialog = ({
                 color="primary"
                 fullWidth
               >
-                Save
+                บันทึก
               </Button>
             </Grid>
           </Grid>

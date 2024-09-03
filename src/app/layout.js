@@ -20,7 +20,7 @@ export default async function RootLayout({ children }) {
       <body className={`${prompt.className} bg-[#f1f1f1]`}>
           <SessionProvider session={session}>
             <CartProvider>
-        
+              <Navbar />
               <main>{children}</main>              
             </CartProvider>
           </SessionProvider>
