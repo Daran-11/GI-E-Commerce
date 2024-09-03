@@ -7,8 +7,6 @@ import Pagination from "@/app/ui/dashboard/pagination/pagination";
 import Search from "@/app/ui/dashboard/search/search";
 import { useRouter } from "next/navigation";
 
-
-
 const Certificate = () => {
   const [certificates, setCertificates] = useState([]);
   const [farmerId, setFarmerId] = useState(null);
@@ -59,33 +57,33 @@ const Certificate = () => {
       }
     }
   };
+
   return (
     <div className={styles.container}>
       <div className={styles.top}>
         <Search placeholder="ค้นหาผู้ใช้..." />
         <Link href="/dashboard/certificate/add">
-          <button className={styles.addButton}>Add New</button>
+          <button className={styles.addButton}>เพิ่ม ใบรับรอง</button>
         </Link>
       </div>
       <table className={styles.table}>
         <thead>
           <tr>
             <td>#</td>
-            <td>Type</td>
+            <td>ชนิด</td>
             <td>สายพันธุ์</td>
             <td>รหัสแปลงปลูก</td>
-            <td>Image</td>
-            <td>สถานะ</td>
-            <td>ข้อมูลเกษตรกร</td>
+            <td>รูปใบรับรอง</td>
             <td>จำนวนผลผลิต</td>
-            <td>Actions</td>
+            <td>สถานะ</td>
+            <td></td>
           </tr>
         </thead>
         <tbody>
           {certificates.length > 0 ? (
-            certificates.map((certificate) => (
+            certificates.map((certificate, index) => (
               <tr key={certificate.id}>
-                <td>{certificate.id}</td>
+                <td>{index + 1}</td>
                 <td>{certificate.type}</td>
                 <td>{certificate.variety}</td>
                 <td>{certificate.plotCode}</td>
@@ -101,6 +99,7 @@ const Certificate = () => {
                     "No Image"
                   )}
                 </td>
+                <td>{certificate.productionQuantity}</td>
                 <td>
                   <span
                     className={`${styles.status} ${styles[certificate.status]}`}
@@ -108,15 +107,8 @@ const Certificate = () => {
                     {certificate.status}
                   </span>
                 </td>
-
-                <td>
-                  {certificate.farmer?.name || "N/A"}
-                  <br />
-                </td>
-                <td>{certificate.productionQuantity}</td>
                 <td>
                   <div className={styles.buttons}>
-                
                     <button
                       className={`${styles.button} ${styles.delete}`}
                       onClick={() => handleDelete(certificate.id)}
@@ -129,7 +121,7 @@ const Certificate = () => {
             ))
           ) : (
             <tr>
-              <td colSpan={6}>ไม่มีใบรับรอง</td>
+              <td colSpan={8}>ไม่มีใบรับรอง</td>
             </tr>
           )}
         </tbody>

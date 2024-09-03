@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import styles from "@/app/ui/dashboard/certificate/certificate.module.css";
 
-
 const EditCertificatePage = ({ params }) => {
   const [formData, setFormData] = useState({
     variety: "",
@@ -25,14 +24,14 @@ const EditCertificatePage = ({ params }) => {
         if (response.ok) {
           const data = await response.json();
           setFormData({
-            variety: data.variety,
-            plotCode: data.plotCode,
+            variety: data.variety || "",
+            plotCode: data.plotCode || "",
             registrationDate: new Date(data.registrationDate)
               .toISOString()
               .split("T")[0],
             expiryDate: new Date(data.expiryDate).toISOString().split("T")[0],
-            status: data.status,
-            imageUrl: data.imageUrl,
+            status: data.status || "",
+            imageUrl: data.imageUrl || "",
             farmerId: data.farmer?.id || "",
           });
         } else {
@@ -72,62 +71,82 @@ const EditCertificatePage = ({ params }) => {
 
   return (
     <form onSubmit={handleSubmit}>
-      <input
-        name="variety"
-        type="text"
-        placeholder="สายพันธุ์"
-        value={formData.variety}
-        onChange={handleChange}
-        required
-      />
-      <input
-        name="plotCode"
-        type="text"
-        placeholder="รหัสแปลงปลูก"
-        value={formData.plotCode}
-        onChange={handleChange}
-        required
-      />
-      <input
-        name="registrationDate"
-        type="date"
-        placeholder="วันจดทะเบียน"
-        value={formData.registrationDate}
-        onChange={handleChange}
-        required
-      />
-      <input
-        name="expiryDate"
-        type="date"
-        placeholder="วันหมดอายุ"
-        value={formData.expiryDate}
-        onChange={handleChange}
-        required
-      />
-      <input
-        name="status"
-        type="text"
-        placeholder="สถานะ"
-        value={formData.status}
-        onChange={handleChange}
-        required
-      />
-      <input
-        name="imageUrl"
-        type="text"
-        placeholder="รูปภาพ"
-        value={formData.imageUrl}
-        onChange={handleChange}
-        required
-      />
-      <input
-        name="farmerId"
-        type="number"
-        placeholder="รหัสเกษตร"
-        value={formData.farmerId}
-        onChange={handleChange}
-        required
-      />
+      <div className={styles.formGroup}>
+        <label htmlFor="variety">Variety</label>
+        <input
+          type="text"
+          id="variety"
+          name="variety"
+          value={formData.variety}
+          onChange={handleChange}
+          placeholder="Enter variety"
+        />
+      </div>
+      <div className={styles.formGroup}>
+        <label htmlFor="plotCode">Plot Code</label>
+        <input
+          type="text"
+          id="plotCode"
+          name="plotCode"
+          value={formData.plotCode}
+          onChange={handleChange}
+          placeholder="Enter plot code"
+        />
+      </div>
+      <div className={styles.formGroup}>
+        <label htmlFor="registrationDate">Registration Date</label>
+        <input
+          type="date"
+          id="registrationDate"
+          name="registrationDate"
+          value={formData.registrationDate}
+          onChange={handleChange}
+        />
+      </div>
+      <div className={styles.formGroup}>
+        <label htmlFor="expiryDate">Expiry Date</label>
+        <input
+          type="date"
+          id="expiryDate"
+          name="expiryDate"
+          value={formData.expiryDate}
+          onChange={handleChange}
+        />
+      </div>
+      <div className={styles.formGroup}>
+        <label htmlFor="status">Status</label>
+        <input
+          type="text"
+          id="status"
+          name="status"
+          value={formData.status}
+          onChange={handleChange}
+          placeholder="Enter status"
+        />
+      </div>
+      <div className={styles.formGroup}>
+        <label htmlFor="imageUrl">Image URL</label>
+        <input
+          type="text"
+          id="imageUrl"
+          name="imageUrl"
+          value={formData.imageUrl}
+          onChange={handleChange}
+          placeholder="Enter image URL"
+        />
+      </div>
+      <div className={styles.formGroup}>
+        <label htmlFor="farmerId">Farmer ID</label>
+        <input
+          type="text"
+          id="farmerId"
+          name="farmerId"
+          value={formData.farmerId}
+          onChange={handleChange}
+          placeholder="Enter farmer ID"
+        />
+      </div>
+      
       <button type="submit">แก้ไขใบรับรอง</button>
     </form>
   );
