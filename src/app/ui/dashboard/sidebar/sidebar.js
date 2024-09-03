@@ -1,4 +1,5 @@
 "use client"
+import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import {
@@ -85,6 +86,7 @@ const menuItems = [
 // Define the Sidebar component
 const Sidebar = () => {
 
+  const { data: session, status } = useSession()
   const pathname = usePathname()
 
   return (
@@ -93,8 +95,8 @@ const Sidebar = () => {
       <div className={styles.user}>
         <Image className={styles.userImage} src="/dinosaur.png" alt="" width="50" height="50" />
         <div className={styles.userDetail}>
-          <span className={styles.username}>ธนธร เต็มสิริมงคล</span>
-          <span className={styles.userTitle}>ผู้ผลิต</span>
+          <span className={styles.username}>{session?.user?.name}</span>
+          <span className={styles.userTitle}>{session?.user?.role}</span>
         </div>
       </div>
       <div className={styles.containerlist}>
