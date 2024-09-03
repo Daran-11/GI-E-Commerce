@@ -18,12 +18,11 @@ export async function POST(request) {
       province,
       zipCode,
       phone,
-      plantingPlotCode,
       password
     } = await request.json();
 
     // Validate input
-    if (!title || !name || !lastname || !address || !subDistrict || !district || !province || !zipCode || !phone || !plantingPlotCode || !password) {
+    if (!title || !name || !lastname || !address || !subDistrict || !district || !province || !zipCode || !phone  || !password) {
       return NextResponse.json({ message: 'ข้อมูลไม่ครบถ้วน' }, { status: 400 });
     }
 
@@ -42,7 +41,6 @@ export async function POST(request) {
         province,
         zip_code: zipCode,
         phone,
-        planting_plot_code: plantingPlotCode,
         password: hashedPassword,
         role: 'เกษตรกร'
       },

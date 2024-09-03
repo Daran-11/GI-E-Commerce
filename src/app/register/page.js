@@ -14,7 +14,6 @@ export default function Register() {
   const [province, setProvince] = useState("");
   const [zipCode, setZipCode] = useState("");
   const [phone, setPhone] = useState("");
-  const [plantingPlotCode, setPlantingPlotCode] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
@@ -51,9 +50,6 @@ export default function Register() {
       case "phone":
         setPhone(value);
         break;
-      case "plantingPlotCode":
-        setPlantingPlotCode(value);
-        break;
       case "password":
         setPassword(value);
         break;
@@ -85,7 +81,6 @@ export default function Register() {
       !province ||
       !zipCode ||
       !phone ||
-      !plantingPlotCode ||
       !password
     ) {
       setError("กรุณากรอกข้อมูลให้ครบ");
@@ -107,7 +102,6 @@ export default function Register() {
           province,
           zipCode,
           phone,
-          plantingPlotCode,
           password,
         }),
       });
@@ -285,19 +279,7 @@ export default function Register() {
               </div>
 
               <div className="group-division">
-                <div className={styles.label}>
-                  <label htmlFor="plantingPlotCode">รหัสแปลงปลูก</label>
-                  <input
-                    id="plantingPlotCode"
-                    name="plantingPlotCode"
-                    type="text"
-                    required
-                    className={styles.input}
-                    placeholder="รหัสแปลงปลูก"
-                    value={plantingPlotCode}
-                    onChange={handleChange}
-                  />
-                </div>
+                
                 <div className={styles.label}>
                   <label htmlFor="password">รหัสผ่าน</label>
                   <input
