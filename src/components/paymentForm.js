@@ -100,8 +100,10 @@ const handlePayment = async (token) => {
     console.log('Response from process-payment API:', data); // Log the response from your API
 
     if (data.success) {
+      console.log("order Id:",orderIds);
       localStorage.removeItem('orderIds');
-      onPaymentSuccess();
+      onPaymentSuccess(orderIds);
+      
     } else {
       setError(data.message || "Payment failed. Please try again.");
     }

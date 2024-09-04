@@ -45,6 +45,7 @@ import { authOptions } from '../auth/[...nextauth]/route';
           quantity: parseInt(quantity, 10),
           totalPrice: parseFloat(quantity * productPrice),
           addressText: addressText,
+          status: 'Pending'
         },
       });
   
@@ -55,41 +56,40 @@ import { authOptions } from '../auth/[...nextauth]/route';
     }
   }
 
-export async function GET(request) {
-  const { searchParams } = new URL(request.url);
-  const ids = searchParams.get('ids');
-
-  // Check if IDs are provided
-  if (!ids) {
-    return NextResponse.json({ error: 'No order IDs provided' }, { status: 400 });
-  }
-
-  // Convert the IDs string to an array of integers
-  const orderIds = ids.split(',').map(id => parseInt(id, 10)).filter(id => !isNaN(id));
-
-  // Check if orderIds array is empty after filtering
-  if (orderIds.length === 0) {
-    return NextResponse.json({ error: 'Invalid order IDs' }, { status: 400 });
-  }
-
-  try {
-    const orders = await prisma.order.findMany({
-      where: { id: { in: orderIds } },
-      include: {
-        product: true,
-      },
-    });
-
-    if (orders.length === 0) {
-      return NextResponse.json({ error: 'Orders not found' }, { status: 404 });
+  export async function GET(request) {
+    const { searchParams } = new URL(request.url);
+    const ids = searchParams.get('ids');
+  
+    if (!ids) {
+      return new Response("Bad Request: Missing order IDs", { status: 400 });
     }
-
-    return NextResponse.json(orders);
-  } catch (error) {
-    console.error('Error fetching order details:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  
+    // Convert the ids to an array of integers
+    const orderIds = ids.split(',').map(id => parseInt(id, 10));
+  
+    // Check for any invalid order IDs
+    if (orderIds.some(isNaN)) {
+      return new Response("Invalid order ID(s)", { status: 400 });
+    }
+  
+    try {
+      // Fetch orders with the provided IDs
+      const orders = await prisma.order.findMany({
+        where: {
+          id: {
+            in: orderIds,
+          },
+        },
+        include: {
+          product: true, // Assuming you have a product relation
+        },
+      });
+  
+      return NextResponse.json(orders);
+    } catch (error) {
+      return new Response("Failed to fetch orders", { status: 500 });
+    }
   }
-}
 
 
   

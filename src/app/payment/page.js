@@ -13,7 +13,7 @@ export default function PaymentPage() {
     const orderIds = localStorage.getItem('orderIds');
     if (!orderIds) {
       // Redirect to another page if orderIds is not found in local storage
-      router.push('/some-other-page');
+      router.push('/');
     }
   }, []);
 
@@ -37,8 +37,11 @@ export default function PaymentPage() {
     }
   };
 
-  const handlePaymentSuccess = () => {
-    router.push('/order-confirmation');
+  const handlePaymentSuccess = (orderIds) => {
+    const orderIdString = orderIds.join(','); // Convert array to a comma-separated string
+    console.log("strings order ID:",orderIdString)
+    router.push(`/order-confirmation?id=${orderIdString}`);
+    
   };
 
   return (
