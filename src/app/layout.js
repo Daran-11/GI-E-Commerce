@@ -17,6 +17,9 @@ export default async function RootLayout({ children }) {
   return (
     
     <html lang="th">
+      <head>
+        <script src="https://cdn.omise.co/omise.js" defer></script>
+      </head>
       <body className={`${prompt.className} bg-[#f1f1f1]`}>
           <SessionProvider session={session}>
             <CartProvider>

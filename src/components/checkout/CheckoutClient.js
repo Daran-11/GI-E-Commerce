@@ -73,8 +73,11 @@ export default function CheckoutClient({ userId }) {
         const orders = await Promise.all(orderPromises);
         const orderIds = orders.map(order => order.order.id);
         
-        // Redirect to order confirmation with the order IDs
-        router.push(`/order-confirmation?ids=${orderIds.join(',')}`);
+        // Store the order IDs in localStorage for later use
+        localStorage.setItem("orderIds", JSON.stringify(orderIds));
+
+        // Redirect to payment page with the order IDs
+        router.push(`/payment?orderIds=${orderIds.join(',')}`);
 
       } catch (error) {
         console.error('Error:', error);
