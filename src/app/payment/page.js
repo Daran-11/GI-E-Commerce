@@ -41,7 +41,6 @@ export default function PaymentPage() {
     const orderIdString = orderIds.join(','); // Convert array to a comma-separated string
     console.log("strings order ID:",orderIdString)
     router.push(`/order-confirmation?id=${orderIdString}`);
-    
   };
 
   return (

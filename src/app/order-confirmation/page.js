@@ -50,6 +50,14 @@ export default function OrderConfirmation() {
     }
   }, [status, router]);
 
+
+  useEffect(() => {
+    // Remove orderIds from localStorage after successful confirmation
+    if (orders.length > 0) {
+      localStorage.removeItem('orderIds');
+    }
+  }, [orders]);
+
   if (error) {
     return <div>{error}</div>;
   }
@@ -57,6 +65,7 @@ export default function OrderConfirmation() {
   if (orders.length === 0) {
     return <div>Loading...</div>;
   }
+
 
   return (
     <div className="top-container">

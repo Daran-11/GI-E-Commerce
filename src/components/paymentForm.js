@@ -101,9 +101,9 @@ const handlePayment = async (token) => {
 
     if (data.success) {
       console.log("order Id:",orderIds);
-      localStorage.removeItem('orderIds');
       onPaymentSuccess(orderIds);
       
+
     } else {
       setError(data.message || "Payment failed. Please try again.");
     }
@@ -114,17 +114,31 @@ const handlePayment = async (token) => {
     setLoading(false);
   }
 };
-  
+
+
+const handleCardNumberChange = (e) => {
+  let value = e.target.value.replace(/\D/g, ''); // Remove non-digit characters
+  if (value.length > 16) {
+    value = value.slice(0, 16); // Limit to 16 digits
+  }
+
+  // Format the card number with dashes
+  const formattedValue = value.match(/.{1,4}/g)?.join('-') || '';
+
+  setCardNumber(formattedValue);
+};
   
 
   return (
     <form onSubmit={handleSubmit} className="top-container">
       <div>
-        <label>Card Number</label>
+      <label>Card Number</label>
         <input
           type="text"
           value={cardNumber}
-          onChange={(e) => setCardNumber(e.target.value)}
+          onChange={handleCardNumberChange}
+          maxLength="19" // Max length to handle the dashes
+          placeholder="XXXX-XXXX-XXXX-XXXX"
           required
         />
       </div>
