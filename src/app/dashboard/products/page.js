@@ -6,11 +6,11 @@ import Button from "@mui/material/Button";
 import Pagination from "@/app/ui/dashboard/pagination/pagination";
 import Search from "@/app/ui/dashboard/search/search";
 import AddProductDialog from "@/app/dashboard/products/add/page";
-import EditProductDialog from "@/app/dashboard/products/edit/[id]/page";
+import EditProductDialog from "@/app/dashboard/products/edit/[ProductID]/page";
 
 const Product = () => {
   const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true); // Add a loading state  
+  const [loading, setLoading] = useState(true); // Add a loading state
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [selectedProductId, setSelectedProductId] = useState(null);
@@ -31,7 +31,6 @@ const Product = () => {
     }
   };
 
-
   useEffect(() => {
     fetchProducts();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -41,15 +40,20 @@ const Product = () => {
     return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (ProductID) => {
     if (confirm("Are you sure you want to delete this product?")) {
       try {
-        const response = await fetch(`/api/product/add?id=${id}`, {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-        });
+        const response = await fetch(
+          `/api/product/add?ProductID=${ProductID}`,
+          {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+          }
+        );
         if (response.ok) {
-          setProducts(products.filter((product) => product.id !== id));
+          setProducts(
+            products.filter((product) => product.ProductID !== ProductID)
+          );
         } else {
           alert("Failed to delete product");
         }
@@ -62,8 +66,8 @@ const Product = () => {
   const handleOpenAddDialog = () => setOpenAddDialog(true);
   const handleCloseAddDialog = () => setOpenAddDialog(false);
 
-  const handleOpenEditDialog = (id) => {
-    setSelectedProductId(id);
+  const handleOpenEditDialog = (ProductID) => {
+    setSelectedProductId(ProductID);
     setOpenEditDialog(true);
   };
 
@@ -90,8 +94,8 @@ const Product = () => {
     }
   };
 
-  const handleEditProduct = async (id, productData) => {
-    const response = await fetch(`/api/product/add?id=${id}`, {
+  const handleEditProduct = async (ProductID, productData) => {
+    const response = await fetch(`/api/product/add?ProductID=${ProductID}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -112,19 +116,18 @@ const Product = () => {
     return <div>Loading...</div>; // You can replace this with a more sophisticated loading UI
   }
 
-
   return (
     <div className={styles.container}>
       <div className={styles.top}>
         <Search placeholder="ค้นหาผู้ใช้..." />
         <Button
           sx={{
-            color: 'var(--text)',
-            backgroundColor: 'var(--background-add)',
-            padding: 'var(--padding)',
-            fontSize: 'var(--font-size)',
-            '&:hover': {
-              backgroundColor: 'var(--background-hover)',
+            color: "var(--text)",
+            backgroundColor: "var(--background-add)",
+            padding: "var(--padding)",
+            fontSize: "var(--font-size)",
+            "&:hover": {
+              backgroundColor: "var(--background-hover)",
             },
           }}
           onClick={handleOpenAddDialog}
@@ -148,17 +151,18 @@ const Product = () => {
         <tbody>
           {products.length > 0 ? (
             products.map((product) => (
-              <tr key={product.id}>
-                <td>{product.id}</td>
+              <tr key={product.ProductID}>
+                <td>{product.ProductID}</td>
                 <td>{product.plotCode}</td>
-                <td>{product.productName}</td>
-                <td>{product.variety}</td>
+                <td>{product.ProductName}</td>
+                <td>{product.ProductType}</td>
                 <td>{product.price}</td>
                 <td>{product.amount}</td>
                 <td>
                   <span
-                    className={`${styles.status} ${styles[product.status.replace(/ /g, "-")]
-                      }`}
+                    className={`${styles.status} ${
+                      styles[product.status.replace(/ /g, "-")]
+                    }`}
                   >
                     {product.status}
                   </span>
@@ -167,29 +171,29 @@ const Product = () => {
                   <div className={styles.buttons}>
                     <Button
                       sx={{
-                        color: 'var(--text)',
-                        backgroundColor: 'var(--background-view)',
-                        padding: 'var(--padding)',
-                        fontSize: 'var(--font-size)',
-                        '&:hover': {
-                          backgroundColor: 'var(--background-hover)',
+                        color: "var(--text)",
+                        backgroundColor: "var(--background-view)",
+                        padding: "var(--padding)",
+                        fontSize: "var(--font-size)",
+                        "&:hover": {
+                          backgroundColor: "var(--background-hover)",
                         },
                       }}
-                      onClick={() => handleOpenEditDialog(product.id)}
+                      onClick={() => handleOpenEditDialog(product.ProductID)}
                     >
                       แก้ไข
                     </Button>
                     <Button
                       sx={{
-                        color: 'var(--text)',
-                        backgroundColor: 'var(--background-delete)',
-                        padding: 'var(--padding)',
-                        fontSize: 'var(--font-size)',
-                        '&:hover': {
-                          backgroundColor: 'var(--background-hover)',
+                        color: "var(--text)",
+                        backgroundColor: "var(--background-delete)",
+                        padding: "var(--padding)",
+                        fontSize: "var(--font-size)",
+                        "&:hover": {
+                          backgroundColor: "var(--background-hover)",
                         },
                       }}
-                      onClick={() => handleDelete(product.id)}
+                      onClick={() => handleDelete(product.ProductID)}
                     >
                       ลบ
                     </Button>
