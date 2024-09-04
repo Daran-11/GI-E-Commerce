@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server"; // Ensure you import NextResponse
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import prisma from "../../../../../lib/prisma";
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
@@ -9,10 +7,13 @@ export async function GET(request) {
 
   if (id) {
     try {
+      
       const product = await prisma.product.findUnique({
         where: { ProductID: parseInt(id, 10) },
         // No need to include 'farmer' here as it's not in the Product model
+        
       });
+      console.log("ID in GET method:",id)
       if (product) {
         return NextResponse.json(product);
       } else {
@@ -51,8 +52,8 @@ export async function POST(request) {
         plotCode: data.plotCode,
         ProductName: data.ProductName,
         ProductType: data.ProductType,
-        price: parseFloat(data.price), // Convert to Float
-        amount: parseInt(data.amount, 10), // Convert to Int
+        Price: parseFloat(data.Price), // Convert to Float
+        Amount: parseInt(data.Amount, 10), // Convert to Int
         status: data.status,
       },
     });
@@ -68,6 +69,10 @@ export async function POST(request) {
 
 export async function PUT(request) {
   try {
+
+
+
+
     const data = await request.json();
     const updatedProduct = await prisma.product.update({
       where: { ProductID: parseInt(data.id, 10) },
@@ -75,8 +80,8 @@ export async function PUT(request) {
         plotCode: data.plotCode,
         ProductName: data.ProductName,
         ProductType: data.ProductType,
-        price: data.price,
-        amount: data.amount,
+        Price: parseFloat(data.Price),
+        Amount: parseFloat(data.Amount),
         status: data.status,
       },
     });
@@ -103,7 +108,7 @@ export async function DELETE(request) {
     }
 
     await prisma.product.delete({
-      where: { id: parseInt(id, 10) },
+      where: { ProductID: parseInt(id, 10) },
     });
     return NextResponse.json({ status: 200 });
   } catch (error) {
