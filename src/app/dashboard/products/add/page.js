@@ -29,8 +29,8 @@ const CustomPaper = styled(Paper)(({ theme }) => ({
 const AddProductDialog = ({ open, onClose, onAddProduct }) => {
   const [formData, setFormData] = useState({
     plotCode: "",
-    productName: "",
-    variety: "",
+    ProductName: "",
+    ProductType: "",
     price: "",
     amount: "",
     status: "",
@@ -78,8 +78,8 @@ const AddProductDialog = ({ open, onClose, onAddProduct }) => {
   const handleClose = useCallback(() => {
     setFormData({
       plotCode: "",
-      productName: "",
-      variety: "",
+      ProductName: "",
+      ProductType: "",
       price: "",
       amount: "",
       status: "",
@@ -106,22 +106,22 @@ const AddProductDialog = ({ open, onClose, onAddProduct }) => {
             </Grid>
             <Grid item xs={12}>
               <TextField
-                name="productName"
+                name="ProductName"
                 label="ชื่อสินค้า"
                 variant="outlined"
                 fullWidth
-                value={formData.productName}
+                value={formData.ProductName}
                 onChange={handleChange}
                 required
               />
             </Grid>
             <Grid item xs={12}>
               <TextField
-                name="variety"
+                name="ProductType"
                 label="สายพันธุ์"
                 variant="outlined"
                 fullWidth
-                value={formData.variety}
+                value={formData.ProductType}
                 onChange={handleChange}
                 required
               />
