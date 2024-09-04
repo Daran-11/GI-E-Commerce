@@ -10,6 +10,14 @@ export default function PaymentPage() {
   const [totalAmount, setTotalAmount] = useState(0);
 
   useEffect(() => {
+    const orderIds = localStorage.getItem('orderIds');
+    if (!orderIds) {
+      // Redirect to another page if orderIds is not found in local storage
+      router.push('/some-other-page');
+    }
+  }, []);
+
+  useEffect(() => {
     const ids = searchParams.get('orderIds');
     if (ids) {
       const orderIdsArray = ids.split(',');
