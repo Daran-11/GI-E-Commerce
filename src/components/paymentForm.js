@@ -8,10 +8,13 @@ export default function PaymentForm({ totalAmount, orderIds, onPaymentSuccess })
   const [cardName, setCardName] = useState("");
   const [expiryMonth, setExpiryMonth] = useState("");
   const [expiryYear, setExpiryYear] = useState("");
+  const [expiryDate, setExpiryDate] = useState(''); // Combined expiry date
   const [securityCode, setSecurityCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+
+  
   useEffect(() => {
     const loadOmiseScript = () => {
       return new Promise((resolve, reject) => {
@@ -41,7 +44,9 @@ export default function PaymentForm({ totalAmount, orderIds, onPaymentSuccess })
     e.preventDefault();
     setLoading(true);
     setError(null);
-  
+
+    const [expiryMonth, expiryYear] = expiryDate.split('/');
+    
     try {
       const omise = window.Omise;
       if (!omise) {
@@ -127,13 +132,35 @@ const handleCardNumberChange = (e) => {
 
   setCardNumber(formattedValue);
 };
-  
+
+const handleExpiryDateChange = (e) => {
+  let value = e.target.value.replace(/\D/g, ''); // Remove all non-numeric characters
+  if (value.length > 2) {
+    value = `${value.slice(0, 2)}/${value.slice(2, 4)}`; // Insert "/" after the month
+  }
+  setExpiryDate(value);
+};
+
+
 
   return (
-    <form onSubmit={handleSubmit} className="top-container">
+    <div className="top-container flex justify-center border-2 w-[500px] lg:w-[500px] h-[600px] rounded-2xl shadow-lg ">
+    <div className="w-[400px] sm:[320px]  md:[350px]">
+    
+    <form onSubmit={handleSubmit} className="mt-[80px] mx-4">
+      <div className="flex">
+        <div className="text-5xl text-gray-800 mb-1">
+          ชำระเงิน
+        </div>     
+      </div>
+
+      <div className="text-xl mb-[30px] pb-3 text-gray-600 border-b-2 border-gray-300 ">
+        Secured by Opn Payments
+      </div>
       <div>
-      <label>Card Number</label>
-        <input
+      <label>เลขบัตรเครดิต/บัตรเดบิต</label>
+      <input
+          className="input-box w-full h-[45px] p-2"
           type="text"
           value={cardNumber}
           onChange={handleCardNumberChange}
@@ -143,51 +170,58 @@ const handleCardNumberChange = (e) => {
         />
       </div>
 
-      <div>
-        <label>Name on Card</label>
+      <div className="">
+        <label>ชื่อบนบัตร</label>
         <input
+          className="input-box w-full h-[45px] p-2"
           type="text"
           value={cardName}
           onChange={(e) => setCardName(e.target.value)}
+          placeholder="John Doe"
           required
         />
       </div>
 
-      <div>
-        <label>Expiry Month</label>
-        <input
-          type="text"
-          value={expiryMonth}
-          onChange={(e) => setExpiryMonth(e.target.value)}
-          required
-        />
+
+      <div  className="flex ">
+        <div className="mr-3">
+          <label>วันที่หมดอายุ</label>
+            <input
+              className="input-box w-full h-[45px] p-2"
+              type="text"
+              value={expiryDate}
+              onChange={handleExpiryDateChange}
+              placeholder="ดด/ปป"
+              maxLength="5" // Max length to handle MM/YY format
+              required
+              />
+        </div>
+        <div>
+          <label>รหัสความปลอดภัย</label>
+          <input
+            className="input-box w-full h-[45px] p-2"
+            type="text"
+            value={securityCode}
+            onChange={(e) => setSecurityCode(e.target.value)}
+            placeholder="XXX"
+            required
+          />
+        </div>                
       </div>
 
-      <div>
-        <label>Expiry Year</label>
-        <input
-          type="text"
-          value={expiryYear}
-          onChange={(e) => setExpiryYear(e.target.value)}
-          required
-        />
-      </div>
 
-      <div>
-        <label>Security Code (CVC)</label>
-        <input
-          type="text"
-          value={securityCode}
-          onChange={(e) => setSecurityCode(e.target.value)}
-          required
-        />
-      </div>
+
 
       {error && <p style={{ color: "red" }}>{error}</p>}
 
-      <button type="submit" disabled={loading}>
-        {loading ? "Processing..." : `Pay ${totalAmount} THB`}
+      <button type="submit" disabled={loading} className="w-full hover:bg-blue-500 h-[45px] bg-blue-600 text-white rounded-xl ">
+        {loading ? "Processing..." : `ชำระเงิน ${totalAmount} THB`}
       </button>
-    </form>
+
+    </form>      
+    </div>      
+    </div>
+
+
   );
 }
