@@ -26,13 +26,13 @@ const EditProductDialog = ({
   open,
   onClose,
   onEditProduct,
-  productId,
+  ProductID,
   onSuccess,
 }) => {
   const [formData, setFormData] = useState({
     plotCode: "",
-    productName: "",
-    variety: "",
+    ProductName: "",
+    ProductType: "",
     price: "",
     amount: "",
     status: "",
@@ -41,13 +41,13 @@ const EditProductDialog = ({
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const response = await fetch(`/api/product/add?id=${productId}`);
+        const response = await fetch(`/api/product/add?ProductID=${ProductID}`);
         if (response.ok) {
           const data = await response.json();
           setFormData({
             plotCode: data.plotCode,
-            productName: data.productName,
-            variety: data.variety,
+            ProductName: data.ProductName,
+            ProductType: data.ProductType,
             price: data.price,
             amount: data.amount,
             status: data.status,
@@ -60,10 +60,10 @@ const EditProductDialog = ({
       }
     };
 
-    if (productId) {
+    if (ProductID) {
       fetchProduct();
     }
-  }, [productId]);
+  }, [ProductID]);
 
   const formatPrice = (value) => {
     const cleanValue = value.replace(/[^0-9.]/g, "");
@@ -91,8 +91,8 @@ const EditProductDialog = ({
   const handleClose = useCallback(() => {
     setFormData({
       plotCode: "",
-      productName: "",
-      variety: "",
+      ProductName: "",
+      ProductType: "",
       price: "",
       amount: "",
       status: "",
@@ -108,13 +108,13 @@ const EditProductDialog = ({
     };
 
     try {
-      const response = await fetch(`/api/product/add?id=${productId}`, {
+      const response = await fetch(`/api/product/add?ProductID=${ProductID}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          id: productId, // Include the id in the request body
+          id: ProductID, // Include the id in the request body
           ...formattedData,
         }),
       });
@@ -152,22 +152,22 @@ const EditProductDialog = ({
             </Grid>
             <Grid item xs={12}>
               <TextField
-                name="productName"
+                name="ProductName"
                 label="Product Name"
                 variant="outlined"
                 fullWidth
-                value={formData.productName}
+                value={formData.ProductName}
                 onChange={handleChange}
                 required
               />
             </Grid>
             <Grid item xs={12}>
               <TextField
-                name="variety"
+                name="ProductType"
                 label="Variety"
                 variant="outlined"
                 fullWidth
-                value={formData.variety}
+                value={formData.ProductType}
                 onChange={handleChange}
                 required
               />
