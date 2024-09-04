@@ -16,7 +16,6 @@ model Product {
   Description String?  @db.VarChar(200)
   Price       Int      @db.SmallInt
   Amount      Int      @db.MediumInt
-    variety      String
     status       String
   ProductPic  Bytes?   @db.Blob
   DateCreated DateTime @default(now()) @db.Timestamp(0)
