@@ -1,12 +1,12 @@
 // components/Product.js
 "use client";
-import { useState, useEffect } from "react";
-import styles from "@/app/ui/dashboard/products/products.module.css";
-import Button from "@mui/material/Button";
-import Pagination from "@/app/ui/dashboard/pagination/pagination";
-import Search from "@/app/ui/dashboard/search/search";
 import AddProductDialog from "@/app/dashboard/products/add/page";
 import EditProductDialog from "@/app/dashboard/products/edit/[ProductID]/page";
+import Pagination from "@/app/ui/dashboard/pagination/pagination";
+import styles from "@/app/ui/dashboard/products/products.module.css";
+import Search from "@/app/ui/dashboard/search/search";
+import Button from "@mui/material/Button";
+import { useEffect, useState } from "react";
 
 const Product = () => {
   const [products, setProducts] = useState([]);
@@ -21,7 +21,7 @@ const Product = () => {
       const data = await response.json();
       const formattedData = data.map((product) => ({
         ...product,
-        price: formatPrice(product.price),
+        Price: formatPrice(product.Price),
       }));
       setProducts(formattedData);
       setLoading(false); // Set loading to false after data is fetched
@@ -36,8 +36,8 @@ const Product = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const formatPrice = (price) => {
-    return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  const formatPrice = (Price) => {
+    return Price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
 
   const handleDelete = async (ProductID) => {
@@ -156,8 +156,8 @@ const Product = () => {
                 <td>{product.plotCode}</td>
                 <td>{product.ProductName}</td>
                 <td>{product.ProductType}</td>
-                <td>{product.price}</td>
-                <td>{product.amount}</td>
+                <td>{product.Price}</td>
+                <td>{product.Amount}</td>
                 <td>
                   <span
                     className={`${styles.status} ${
@@ -223,7 +223,7 @@ const Product = () => {
           open={openEditDialog}
           onClose={handleCloseEditDialog}
           onEditProduct={handleEditProduct}
-          productId={selectedProductId}
+          ProductID={selectedProductId}
           onSuccess={fetchProducts} // Pass the fetchProducts function as onSuccess
         />
       )}

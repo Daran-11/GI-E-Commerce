@@ -1,20 +1,20 @@
 "use client";
-import { useState, useCallback, useEffect } from "react";
 import {
+  Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  Button,
-  TextField,
-  Grid,
   FormControl,
+  Grid,
   InputLabel,
-  Select,
   MenuItem,
-  styled,
   Paper,
+  Select,
+  styled,
+  TextField,
 } from "@mui/material";
+import { useCallback, useEffect, useState } from "react";
 
 const CustomPaper = styled(Paper)(({ theme }) => ({
   borderRadius: "16px",
@@ -22,44 +22,44 @@ const CustomPaper = styled(Paper)(({ theme }) => ({
   backgroundColor: "#f5f5f5",
 }));
 
-const EditProductDialog = ({
-  open,
-  onClose,
-  onEditProduct,
-  ProductID,
-  onSuccess,
-}) => {
+const EditProductDialog = ({open,onClose,onEditProduct,ProductID,onSuccess,}) => {
   const [formData, setFormData] = useState({
     plotCode: "",
     ProductName: "",
     ProductType: "",
-    price: "",
-    amount: "",
+    Price: "",
+    Amount: "",
     status: "",
   });
 
   useEffect(() => {
+    console.log("Fetching product details for ProductID:", ProductID);
     const fetchProduct = async () => {
       try {
+        console.log(`Fetching product with ID: ${ProductID}`); // Debugging line
         const response = await fetch(`/api/product/add?ProductID=${ProductID}`);
         if (response.ok) {
           const data = await response.json();
+          console.log('Fetched product data:', data); // Debugging line
           setFormData({
-            plotCode: data.plotCode,
-            ProductName: data.ProductName,
-            ProductType: data.ProductType,
-            price: data.price,
-            amount: data.amount,
-            status: data.status,
+            plotCode: data.plotCode || "",
+            ProductName: data.ProductName || "",
+            ProductType: data.ProductType || "",
+            Price: parseFloat(data.Price) || "",
+            Amount: data.Amount || "",
+            status: data.status || "",
           });
         } else {
+          const errorData = await response.json();
+          console.error("Error fetching product:", errorData);
           alert("Failed to fetch product");
         }
       } catch (error) {
         console.error("Failed to fetch product:", error);
+        alert("An error occurred while fetching the product data.");
       }
     };
-
+  
     if (ProductID) {
       fetchProduct();
     }
@@ -93,8 +93,8 @@ const EditProductDialog = ({
       plotCode: "",
       ProductName: "",
       ProductType: "",
-      price: "",
-      amount: "",
+      Price: "",
+      Amount: "",
       status: "",
     });
     onClose();
@@ -105,6 +105,7 @@ const EditProductDialog = ({
 
     const formattedData = {
       ...formData,
+     
     };
 
     try {
@@ -174,23 +175,23 @@ const EditProductDialog = ({
             </Grid>
             <Grid item xs={12}>
               <TextField
-                name="price"
+                name="Price"
                 label="Price"
                 variant="outlined"
                 fullWidth
-                value={formData.price}
+                value={formData.Price}
                 onChange={handleChange}
                 required
               />
             </Grid>
             <Grid item xs={12}>
               <TextField
-                name="amount"
+                name="Amount"
                 label="Amount"
                 variant="outlined"
                 type="number"
                 fullWidth
-                value={formData.amount}
+                value={formData.Amount}
                 onChange={handleChange}
                 required
                 inputProps={{ min: 0 }}

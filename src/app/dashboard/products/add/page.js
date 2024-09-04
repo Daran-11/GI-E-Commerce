@@ -1,20 +1,20 @@
 "use client";
-import { useState, useCallback } from "react";
 import {
+  Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  Button,
-  TextField,
-  Grid,
   FormControl,
+  Grid,
   InputLabel,
-  Select,
   MenuItem,
-  styled,
   Paper,
+  Select,
+  styled,
+  TextField,
 } from "@mui/material";
+import { useCallback, useState } from "react";
 
 // Styled Paper component
 const CustomPaper = styled(Paper)(({ theme }) => ({
@@ -31,8 +31,8 @@ const AddProductDialog = ({ open, onClose, onAddProduct }) => {
     plotCode: "",
     ProductName: "",
     ProductType: "",
-    price: "",
-    amount: "",
+    Price: "",
+    Amount: "",
     status: "",
   });
 
@@ -67,7 +67,7 @@ const AddProductDialog = ({ open, onClose, onAddProduct }) => {
     // Convert price with commas to float
     const formattedData = {
       ...formData,
-      price: parseFloat(formData.price.replace(/,/g, "")).toFixed(2),
+      Price: parseFloat(formData.Price.replace(/,/g, "")).toFixed(2),
     };
 
     await onAddProduct(formattedData);
@@ -80,8 +80,8 @@ const AddProductDialog = ({ open, onClose, onAddProduct }) => {
       plotCode: "",
       ProductName: "",
       ProductType: "",
-      price: "",
-      amount: "",
+      Price: "",
+      Amount: "",
       status: "",
     });
     onClose();
@@ -128,23 +128,23 @@ const AddProductDialog = ({ open, onClose, onAddProduct }) => {
             </Grid>
             <Grid item xs={12}>
               <TextField
-                name="price"
+                name="Price"
                 label="ราคา"
                 variant="outlined"
                 fullWidth
-                value={formData.price}
+                value={formData.Price}
                 onChange={handleChange}
                 required
               />
             </Grid>
             <Grid item xs={12}>
               <TextField
-                name="amount"
+                name="Amount"
                 label="จำนวน"
                 variant="outlined"
                 type="number"
                 fullWidth
-                value={formData.amount}
+                value={formData.Amount}
                 onChange={handleChange}
                 required
               />
