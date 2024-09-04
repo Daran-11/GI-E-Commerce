@@ -13,7 +13,7 @@ export async function GET(request) {
         // No need to include 'farmer' here as it's not in the Product model
         
       });
-      console.log("ID in GET method:",id)
+      console.log("Get product Id:",id)
       if (product) {
         return NextResponse.json(product);
       } else {
@@ -47,6 +47,7 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     const data = await request.json();
+    console.log("create data:",data)
     const product = await prisma.product.create({
       data: {
         plotCode: data.plotCode,
@@ -70,9 +71,6 @@ export async function POST(request) {
 export async function PUT(request) {
   try {
 
-
-
-
     const data = await request.json();
     const updatedProduct = await prisma.product.update({
       where: { ProductID: parseInt(data.id, 10) },
@@ -85,6 +83,8 @@ export async function PUT(request) {
         status: data.status,
       },
     });
+    console.log("updated:",updatedProduct)
+    
     return NextResponse.json(updatedProduct, { status: 200 });
   } catch (error) {
     console.error("Failed to update product:", error);
