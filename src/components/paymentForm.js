@@ -12,6 +12,7 @@ export default function PaymentForm({ totalAmount, orderIds, onPaymentSuccess })
   const [securityCode, setSecurityCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  
 
 
   
@@ -107,7 +108,6 @@ const handlePayment = async (token) => {
     if (data.success) {
       console.log("order Id:",orderIds);
       onPaymentSuccess(orderIds);
-      
 
     } else {
       setError(data.message || "Payment failed. Please try again.");
@@ -128,7 +128,7 @@ const handleCardNumberChange = (e) => {
   }
 
   // Format the card number with dashes
-  const formattedValue = value.match(/.{1,4}/g)?.join('-') || '';
+  const formattedValue = value.match(/.{1,4}/g)?.join(' ') || '';
 
   setCardNumber(formattedValue);
 };
@@ -140,6 +140,9 @@ const handleExpiryDateChange = (e) => {
   }
   setExpiryDate(value);
 };
+
+
+
 
 
 
@@ -199,11 +202,12 @@ const handleExpiryDateChange = (e) => {
         <div>
           <label>รหัสความปลอดภัย</label>
           <input
-            className="input-box w-full h-[45px] p-2"
-            type="text"
+            className="input-box w-full h-[45px] p-2  "
+            type="password"
             value={securityCode}
             onChange={(e) => setSecurityCode(e.target.value)}
             placeholder="XXX"
+            maxLength="3"
             required
           />
         </div>                
@@ -214,7 +218,7 @@ const handleExpiryDateChange = (e) => {
 
       {error && <p style={{ color: "red" }}>{error}</p>}
 
-      <button type="submit" disabled={loading} className="w-full hover:bg-blue-500 h-[45px] bg-blue-600 text-white rounded-xl ">
+      <button type="submit" disabled={loading} className="mt-4 w-full hover:bg-blue-500 h-[45px] bg-blue-600 text-white rounded-xl ">
         {loading ? "Processing..." : `ชำระเงิน ${totalAmount} THB`}
       </button>
 

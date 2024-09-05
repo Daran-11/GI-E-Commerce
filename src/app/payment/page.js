@@ -6,25 +6,37 @@ import { useEffect, useState } from "react";
 export default function PaymentPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [loading, setLoading] = useState(false);
   const [orderIds, setOrderIds] = useState([]);
   const [totalAmount, setTotalAmount] = useState(0);
+  const [selectedItems, setSelectedItems] = useState([]);
+
 
   useEffect(() => {
-    const orderIds = localStorage.getItem('orderIds');
-    if (!orderIds) {
+    // Retrieve the order IDs and selected items from cart from sessionStorage)
+    const storedOrderIds = sessionStorage.getItem('orderIds');
+
+    const storedItems = localStorage.getItem("selectedItems");
+
+
+    if (!storedOrderIds) {
       // Redirect to another page if orderIds is not found in local storage
       router.push('/');
     }
+
+    if (storedOrderIds) {
+      const parsedOrderIds = JSON.parse(storedOrderIds);
+      setOrderIds(parsedOrderIds);
+
+      // Fetch total amount for these order IDs or perform any other operations
+      fetchTotalAmount(parsedOrderIds);
+    }
+    if (storedItems) {
+      setSelectedItems(JSON.parse(storedItems));
+    }
   }, []);
 
-  useEffect(() => {
-    const ids = searchParams.get('orderIds');
-    if (ids) {
-      const orderIdsArray = ids.split(',');
-      setOrderIds(orderIdsArray);
-      fetchTotalAmount(orderIdsArray); // Fetch total amount for these order IDs
-    }
-  }, [searchParams]);
+  
 
   const fetchTotalAmount = async (orderIds) => {
     try {
@@ -37,10 +49,38 @@ export default function PaymentPage() {
     }
   };
 
-  const handlePaymentSuccess = (orderIds) => {
-    const orderIdString = orderIds.join(','); // Convert array to a comma-separated string
-    console.log("strings order ID:",orderIdString)
-    router.push(`/order-confirmation?id=${orderIdString}`);
+  const handlePaymentSuccess = async (orderIds) => {
+    if (selectedItems.length) {
+      setLoading(true);
+      try {
+        orderSelected = selectedItems.map(async (item) => {
+          const response = await fetch('http://localhost:3000/api/auth/cart/delete', {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              productId: item.productId  // Send the productId to the API for deletion
+            }),
+          });          
+          if (response.ok) {
+            localStorage.removeItem('selectedItems');
+            console.log('Cart items deleted successfully');
+            router.push(`/order-confirmation`);
+          } else {
+            console.error('Failed to delete cart items');
+          }        
+        });
+
+
+
+      } catch (error) {
+        console.error('Error deleting cart items:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
   };
 
   return (

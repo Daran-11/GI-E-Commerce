@@ -1,18 +1,16 @@
 "use client";
 import { useSession } from "next-auth/react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function OrderConfirmation() {
   const [orders, setOrders] = useState([]);
   const [error, setError] = useState(null);
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const orderIds = searchParams.get("id")?.split(',') || [];
   const { data: session, status } = useSession();
+  const router = useRouter();
 
   useEffect(() => {
-    const orderIds = localStorage.getItem('orderIds');
+    const orderIds = sessionStorage.getItem('orderIds');
     if (!orderIds) {
       // Redirect to another page if orderIds is not found in local storage
       router.push('/');
@@ -26,10 +24,11 @@ export default function OrderConfirmation() {
     }
 
     if (status === "authenticated") {
+      const orderIdsString = sessionStorage.getItem('orderIds');
+      const orderIds = JSON.parse(orderIdsString);
       if (orderIds) {
         console.log("OrderId:",orderIds);
         const idsQueryParam = orderIds.join(',');
-        console.log("idsQueryParam:",idsQueryParam);
         const fetchOrders = async () => {
           try {
             const response = await fetch(`/api/orders?ids=${idsQueryParam}`);
@@ -54,7 +53,7 @@ export default function OrderConfirmation() {
   useEffect(() => {
     // Remove orderIds from localStorage after successful confirmation
     if (orders.length > 0) {
-      localStorage.removeItem('orderIds');
+      sessionStorage.removeItem('orderIds');
     }
   }, [orders]);
 

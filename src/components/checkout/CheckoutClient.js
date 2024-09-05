@@ -55,15 +55,6 @@ export default function CheckoutClient({ userId }) {
           });
 
           if (orderResponse.ok) {
-            // Remove item from cart
-            await fetch('http://localhost:3000/api/auth/cart/delete', {
-              method: 'DELETE',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({ productId: item.productId }),
-            });
-
             return await orderResponse.json();
           } else {
             throw new Error('Failed to create order');
@@ -74,10 +65,10 @@ export default function CheckoutClient({ userId }) {
         const orderIds = orders.map(order => order.order.id);
         
         // Store the order IDs in localStorage for later use
-        localStorage.setItem("orderIds", JSON.stringify(orderIds));
+        sessionStorage.setItem("orderIds", JSON.stringify(orderIds));
 
         // Redirect to payment page with the order IDs
-        router.push(`/payment?orderIds=${orderIds.join(',')}`);
+        router.push('/payment');
 
       } catch (error) {
         console.error('Error:', error);
