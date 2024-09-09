@@ -1,7 +1,16 @@
-import Card from "../ui/dashboard/card/card"
-import Chart from "../ui/dashboard/chart/chart"
+
+import dynamic from "next/dynamic"
 import styles from "../ui/dashboard/dashboard.module.css"
-import Transactions from "../ui/dashboard/transactions/transactions"
+
+
+const Card = dynamic(() => import ("../ui/dashboard/card/card"),
+  {
+    loading: () => <p>Loading...</p>,
+  }
+)
+const Chart = dynamic(() => import ("../ui/dashboard/chart/chart"))
+const Transactions = dynamic(() => import ("../ui/dashboard/transactions/transactions"))
+
 
 const Dashboard = () => {
   return (
