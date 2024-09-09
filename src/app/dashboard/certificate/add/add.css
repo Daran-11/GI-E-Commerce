@@ -103,3 +103,43 @@ form{
 .section-name{
   font-size: 18px;
 }
+
+.button-location {
+  padding: 10px;
+  background-color: #98de6d;
+  color: var(--text);
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 175px; /* ปรับขนาดตามความยาวของตัวอักษร */
+  margin-left: 0; /* ชิดซ้าย */
+}
+
+/* Add this to your CSS file (e.g., add.css) */
+
+.checkbox-container {
+  display: flex;
+  gap: 1rem; /* Space between checkboxes */
+  margin-top: 1rem;
+}
+
+/* Adjust the size of the checkboxes */
+.checkbox-container input[type="checkbox"] {
+  width: 1.5rem; /* Increase width of checkbox */
+  height: 1.5rem; /* Increase height of checkbox */
+  margin-right: 0.75rem; /* Increase space between checkbox and label */
+  /* Optional: Adjust the appearance of the checkbox */
+  accent-color: #98de6d; /* Change the checkbox color (modern browsers) */
+}
+
+/* Adjust font size of the labels to match the checkbox size */
+.checkbox-container label {
+  display: flex;
+  align-items: center;
+  font-size: 1.125rem; /* Increase font size to match checkbox */
+}
+
+/* Optional: Add some hover and focus effects for better UX */
+.checkbox-container input[type="checkbox"]:hover {
+  cursor: pointer;
+}

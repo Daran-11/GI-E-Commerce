@@ -5,84 +5,54 @@ import path from 'path';
 
 const prisma = new PrismaClient();
 
-async function handleFileUpload(file) {
-  try {
-    // Check if file exists
-    if (!file) {
-      throw new Error('No file uploaded');
-    }
-
-    // Read the file content
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-
-    // Generate a unique filename
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    const filename = file.name.replace(/\.[^/.]+$/, "") + '-' + uniqueSuffix + path.extname(file.name);
-
-    // Define the path where the file will be saved
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads');
-    const filepath = path.join(uploadDir, filename);
-
-    // Write the file to the filesystem
-    await writeFile(filepath, buffer);
-
-    // Return the public URL of the file
-    return `/uploads/${filename}`;
-  } catch (error) {
-    console.error('Error in file upload:', error);
-    throw error;
-  }
-}
-
 export async function POST(request) {
   try {
     const formData = await request.formData();
 
-    // ดึง farmerId จาก formData
+    // รับค่า farmerId จาก formData
     const farmerId = formData.get('farmerId');
     if (!farmerId) {
       throw new Error("Farmer ID is not provided in the form data.");
     }
 
-    let imageUrl = null;
-    if (formData.get('hasCertificate') === 'มี') {
-      const file = formData.get('imageUrl');
-      if (file) {
-        imageUrl = await handleFileUpload(file);
-      }
+    // ตรวจสอบและเก็บค่าพิกัด
+    const latitude = parseFloat(formData.get('latitude'));
+    const longitude = parseFloat(formData.get('longitude'));
+    
+    if (!latitude || !longitude) {
+      throw new Error("Invalid latitude or longitude values.");
     }
 
-    const certificate = await prisma.certificate.create({
-      data: {
-        type: formData.get('type'),
-        variety: formData.get('variety'),
-        plotCode: formData.get('plotCode'),
-        latitude: parseFloat(formData.get('latitude')),
-        longitude: parseFloat(formData.get('longitude')),
-        productionQuantity: parseInt(formData.get('productionQuantity'), 10),
-        hasCertificate: formData.get('hasCertificate') === 'มี',
-        imageUrl: imageUrl,
-        registrationDate: new Date(),
-        expiryDate: new Date(),
-        status: 'รอตรวจสอบใบรับรอง',
-        farmer: {
-          connect: { id: parseInt(farmerId, 10) },
-        },
+    // จัดการข้อมูลจากฟอร์ม
+    const certificateData = {
+      type: formData.get('type'),
+      variety: formData.get('variety'),
+      plotCode: formData.get('plotCode'),
+      latitude,
+      longitude,
+      productionQuantity: parseInt(formData.get('productionQuantity'), 10),
+      hasGAP: formData.get('hasGAP') === 'true',  // รับค่าเป็น boolean
+      hasGI: formData.get('hasGI') === 'true',    // รับค่าเป็น boolean
+      status: 'รอตรวจสอบใบรับรอง',  // ค่าเริ่มต้นของสถานะ
+      registrationDate: new Date(),
+      expiryDate: new Date(),  // ค่าเริ่มต้นของวันหมดอายุ (สามารถแก้ไขได้)
+      farmer: {
+        connect: { id: parseInt(farmerId, 10) },
       },
+    };
+
+    // สร้างใบรับรองใหม่ในฐานข้อมูล
+    const certificate = await prisma.certificate.create({
+      data: certificateData,
     });
 
     return NextResponse.json(certificate, { status: 201 });
   } catch (error) {
-    console.error("Failed to add certificate:", error);
-    return NextResponse.json(
-      { error: "Failed to add certificate", details: error.message },
-      { status: 500 }
-    );
+    console.error("Error adding certificate:", error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
 
-// ... (rest of the code remains unchanged)
 
 
 export async function PUT(request) {

@@ -1,7 +1,18 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import L from "leaflet";
 import "./add.css";
+
+// Fix for the missing marker icon in Leaflet
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
+  iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
+});
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -11,48 +22,36 @@ const Register = () => {
     latitude: "",
     longitude: "",
     productionQuantity: "",
-    hasCertificate: "",
-    imageUrl: null,
+    hasGAP: false,
+    hasGI: false,
   });
 
-  const [imagePreview, setImagePreview] = useState(null);
   const [errors, setErrors] = useState({});
   const [farmerId, setFarmerId] = useState(null);
   const router = useRouter();
 
-  // ดึง farmerId จาก localStorage แทนที่จะใช้ session
   useEffect(() => {
     const storedFarmerId = localStorage.getItem('farmerId');
     if (storedFarmerId) {
       setFarmerId(storedFarmerId);
     } else {
       console.error("Farmer ID not found in localStorage");
-      // อาจจะ redirect ไปหน้า login หรือแสดง error message
     }
   }, []);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
     setErrors((prev) => ({ ...prev, [name]: "" }));
-  };
-
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setFormData((prev) => ({ ...prev, imageUrl: file }));
-      setImagePreview(URL.createObjectURL(file));
-      setErrors((prev) => ({ ...prev, imageUrl: "" }));
-    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validation checks
     const newErrors = {};
-    // ... (validation logic remains the same)
-
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
@@ -62,8 +61,7 @@ const Register = () => {
     for (const key in formData) {
       formDataToSend.append(key, formData[key]);
     }
-    
-    // เพิ่ม farmerId จาก state (ที่ได้มาจาก localStorage) ลงใน formData
+
     if (farmerId) {
       formDataToSend.append("farmerId", farmerId);
     } else {
@@ -87,6 +85,44 @@ const Register = () => {
     } catch (error) {
       console.error("Error:", error);
       alert(error.message || "Failed to add certificate");
+    }
+  };
+
+  const LocationMarker = () => {
+    useMapEvents({
+      click(e) {
+        const { lat, lng } = e.latlng;
+        setFormData((prev) => ({
+          ...prev,
+          latitude: lat,
+          longitude: lng,
+        }));
+      },
+    });
+
+    return formData.latitude && formData.longitude ? (
+      <Marker position={[formData.latitude, formData.longitude]}></Marker>
+    ) : null;
+  };
+
+  const getCurrentLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setFormData((prev) => ({
+            ...prev,
+            latitude,
+            longitude,
+          }));
+        },
+        (error) => {
+          console.error("Error getting location:", error);
+          alert("ไม่สามารถดึงตำแหน่งปัจจุบันได้");
+        }
+      );
+    } else {
+      alert("Geolocation is not supported by this browser.");
     }
   };
 
@@ -136,29 +172,22 @@ const Register = () => {
             />
             {errors.plotCode && <p className="error">{errors.plotCode}</p>}
 
-            <p className="section-name">พิกัดแกน X (ละติจูด)</p>
-            <input
-              name="latitude"
-              type="text"
-              placeholder="พิกัดแกน X (ละติจูด)"
-              value={formData.latitude}
-              onChange={handleChange}
-              className="form-input"
-              required
-            />
-            {errors.latitude && <p className="error">{errors.latitude}</p>}
+            <p className="section-name">พิกัด</p>
+            <MapContainer
+              center={[13.736717, 100.523186]} // Default location
+              zoom={6}
+              style={{ height: "400px", width: "100%" }}
+            >
+              <TileLayer
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
+              <LocationMarker />
+            </MapContainer>
+            <p>พิกัดที่เลือก: ละติจูด {formData.latitude}, ลองจิจูด {formData.longitude}</p>
 
-            <p className="section-name">พิกัดแกน Y (ลองจิจูด)</p>
-            <input
-              name="longitude"
-              type="text"
-              placeholder="พิกัดแกน Y (ลองจิจูด)"
-              value={formData.longitude}
-              onChange={handleChange}
-              className="form-input"
-              required
-            />
-            {errors.longitude && <p className="error">{errors.longitude}</p>}
+            <button type="button" className="button-location" onClick={getCurrentLocation}>
+              ตำแหน่งปัจจุบัน
+            </button>
 
             <p className="section-name">จำนวนผลผลิต (กิโลกรัม)</p>
             <input
@@ -174,44 +203,27 @@ const Register = () => {
               <p className="error">{errors.productionQuantity}</p>
             )}
 
-            <p className="section-name">ใบรับรอง กรมทรัพย์สินทางปัญญา</p>
-            <select
-              name="hasCertificate"
-              value={formData.hasCertificate}
-              onChange={handleChange}
-              className="formInput"
-              required
-            >
-              <option value="" disabled hidden>
-                -
-              </option>
-              <option value="มี">มี</option>
-              <option value="ไม่มี">ไม่มี</option>
-            </select>
-            {errors.hasCertificate && (
-              <p className="error">{errors.hasCertificate}</p>
-            )}
-
-            {formData.hasCertificate === "มี" && (
-              <div>
+            <p className="section-name">ใบรับรอง</p>
+            <div className="checkbox-container">
+              <label>
                 <input
-                  name="imageUrl"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  className="form-input"
-                  required
-                />
-                {imagePreview && (
-                  <img
-                    src={imagePreview}
-                    alt="Uploaded Preview"
-                    className="image-preview"
-                  />
-                )}
-                {errors.imageUrl && <p className="error">{errors.imageUrl}</p>}
-              </div>
-            )}
+                  type="checkbox"
+                  name="hasGAP"
+                  checked={formData.hasGAP}
+                  onChange={handleChange}
+                />{" "}
+                GAP
+              </label>
+              <label>
+                <input
+                  type="checkbox"
+                  name="hasGI"
+                  checked={formData.hasGI}
+                  onChange={handleChange}
+                />{" "}
+                GI
+              </label>
+            </div>
           </div>
 
           <div className="button-group">

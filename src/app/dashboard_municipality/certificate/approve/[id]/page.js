@@ -1,7 +1,18 @@
 "use client";
-import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import L from "leaflet";
 import "@/app/dashboard/certificate/add/add.css";
+
+// Fix for the missing marker icon in Leaflet
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
+  iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
+});
 
 const ApproveCertificatePage = ({ params }) => {
   const [formData, setFormData] = useState({
@@ -11,12 +22,9 @@ const ApproveCertificatePage = ({ params }) => {
     latitude: "",
     longitude: "",
     productionQuantity: "",
-    hasCertificate: "",
-    imageUrl: null,
-    farmerId: "",
-    registrationDate: "",
-    expiryDate: "",
-    status: "",
+    hasGAP: false,
+    hasGI: false,
+    hasCertificate: false, // Now a boolean based on the checkbox
   });
 
   const [imagePreview, setImagePreview] = useState(null);
@@ -37,8 +45,9 @@ const ApproveCertificatePage = ({ params }) => {
             latitude: data.latitude || "",
             longitude: data.longitude || "",
             productionQuantity: data.productionQuantity || "",
-            hasCertificate: data.hasCertificate || "",
-            imageUrl: data.imageUrl || null,
+            hasGAP: data.hasGAP || false,
+            hasGI: data.hasGI || false,
+            hasCertificate: data.hasCertificate || false,
             farmerId: data.farmer?.id || "",
             registrationDate: new Date(data.registrationDate).toISOString().split("T")[0],
             expiryDate: new Date(data.expiryDate).toISOString().split("T")[0],
@@ -59,8 +68,11 @@ const ApproveCertificatePage = ({ params }) => {
   }, [id]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
     setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
@@ -81,8 +93,7 @@ const ApproveCertificatePage = ({ params }) => {
     if (!formData.latitude) newErrors.latitude = "กรุณากรอกพิกัดแกน X (ละติจูด)";
     if (!formData.longitude) newErrors.longitude = "กรุณากรอกพิกัดแกน Y (ลองจิจูด)";
     if (!formData.productionQuantity) newErrors.productionQuantity = "กรุณากรอกจำนวนผลผลิต";
-    if (!formData.hasCertificate) newErrors.hasCertificate = "กรุณาเลือกว่ามีใบรับรองหรือไม่";
-    if (formData.hasCertificate === "มี" && !formData.imageUrl) newErrors.imageUrl = "กรุณาอัปโหลดรูปใบรับรอง";
+    if (formData.hasCertificate && !formData.imageUrl) newErrors.imageUrl = "กรุณาอัปโหลดรูปใบรับรอง";
     if (!formData.farmerId) newErrors.farmerId = "กรุณากรอกรหัสเกษตร";
     if (!formData.registrationDate) newErrors.registrationDate = "กรุณากรอกวันจดทะเบียน";
     if (!formData.expiryDate) newErrors.expiryDate = "กรุณากรอกวันหมดอายุ";
@@ -100,12 +111,14 @@ const ApproveCertificatePage = ({ params }) => {
     formDataToSend.append("latitude", formData.latitude);
     formDataToSend.append("longitude", formData.longitude);
     formDataToSend.append("productionQuantity", formData.productionQuantity);
+    formDataToSend.append("hasGAP", formData.hasGAP);
+    formDataToSend.append("hasGI", formData.hasGI);
     formDataToSend.append("hasCertificate", formData.hasCertificate);
     formDataToSend.append("farmerId", formData.farmerId);
     formDataToSend.append("registrationDate", formData.registrationDate);
     formDataToSend.append("expiryDate", formData.expiryDate);
     formDataToSend.append("status", action);
-    if (formData.imageUrl instanceof File) {
+    if (formData.hasCertificate && formData.imageUrl instanceof File) {
       formDataToSend.append("imageUrl", formData.imageUrl);
     }
 
@@ -128,19 +141,57 @@ const ApproveCertificatePage = ({ params }) => {
     }
   };
 
+   const LocationMarker = () => {
+    useMapEvents({
+      click(e) {
+        const { lat, lng } = e.latlng;
+        setFormData((prev) => ({
+          ...prev,
+          latitude: lat,
+          longitude: lng,
+        }));
+      },
+    });
+
+    return formData.latitude && formData.longitude ? (
+      <Marker position={[formData.latitude, formData.longitude]}></Marker>
+    ) : null;
+  };
+
+  const getCurrentLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setFormData((prev) => ({
+            ...prev,
+            latitude,
+            longitude,
+          }));
+        },
+        (error) => {
+          console.error("Error getting location:", error);
+          alert("ไม่สามารถดึงตำแหน่งปัจจุบันได้");
+        }
+      );
+    } else {
+      alert("Geolocation is not supported by this browser.");
+    }
+  };
+
   return (
     <div className="container">
       <main className="mainContent">
         <h1 className="title-name">เเก้ไขใบรับรอง</h1>
-        <p className="subtitle-name">ข้อมูลผลิต</p>
         <form onSubmit={(e) => e.preventDefault()} className="space-y-4">
-          <div className="form-container">
+        <div className="form-container">
             <p className="section-name">ชนิด</p>
             <select
               name="type"
               value={formData.type}
               onChange={handleChange}
               className="formInput"
+              disabled
               required
             >
               <option value="" disabled hidden>
@@ -158,6 +209,7 @@ const ApproveCertificatePage = ({ params }) => {
               value={formData.variety}
               onChange={handleChange}
               className="form-input"
+              disabled
               required
             />
             {errors.variety && <p className="error">{errors.variety}</p>}
@@ -170,33 +222,27 @@ const ApproveCertificatePage = ({ params }) => {
               value={formData.plotCode}
               onChange={handleChange}
               className="form-input"
+              disabled
               required
             />
             {errors.plotCode && <p className="error">{errors.plotCode}</p>}
 
-            <p className="section-name">พิกัดแกน X (ละติจูด)</p>
-            <input
-              name="latitude"
-              type="text"
-              placeholder="พิกัดแกน X (ละติจูด)"
-              value={formData.latitude}
-              onChange={handleChange}
-              className="form-input"
-              required
-            />
-            {errors.latitude && <p className="error">{errors.latitude}</p>}
+            <p className="section-name">พิกัด</p>
+            <MapContainer
+              center={[13.736717, 100.523186]} // Default location
+              zoom={6}
+              style={{ height: "400px", width: "100%" }}
+            >
+              <TileLayer
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
+              <LocationMarker />
+            </MapContainer>
+            <p>พิกัดที่เลือก: ละติจูด {formData.latitude}, ลองจิจูด {formData.longitude}</p>
 
-            <p className="section-name">พิกัดแกน Y (ลองจิจูด)</p>
-            <input
-              name="longitude"
-              type="text"
-              placeholder="พิกัดแกน Y (ลองจิจูด)"
-              value={formData.longitude}
-              onChange={handleChange}
-              className="form-input"
-              required
-            />
-            {errors.longitude && <p className="error">{errors.longitude}</p>}
+            <button type="button" className="button-location" onClick={getCurrentLocation}>
+              ตำแหน่งปัจจุบัน
+            </button>
 
             <p className="section-name">จำนวนผลผลิต (กิโลกรัม)</p>
             <input
@@ -206,6 +252,7 @@ const ApproveCertificatePage = ({ params }) => {
               value={formData.productionQuantity}
               onChange={handleChange}
               className="form-input"
+              disabled
               required
             />
             {errors.productionQuantity && (
@@ -213,46 +260,29 @@ const ApproveCertificatePage = ({ params }) => {
             )}
 
             <p className="section-name">ใบรับรอง</p>
-            <select
-              name="hasCertificate"
-              value={formData.hasCertificate}
-              onChange={handleChange}
-              className="formInput"
-              required
-            >
-              <option value="" disabled hidden>
-                -
-              </option>
-              <option value="มี">มี</option>
-              <option value="ไม่มี">ไม่มี</option>
-            </select>
-            {errors.hasCertificate && (
-              <p className="error">{errors.hasCertificate}</p>
-            )}
-
-            {formData.hasCertificate === "มี" && (
-              <div>
+            <div className="checkbox-container">
+              <label>
                 <input
-                  name="imageUrl"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  className="form-input"
-                />
-                {imagePreview && (
-                  <img
-                    src={imagePreview}
-                    alt="Uploaded Preview"
-                    className="image-preview"
-                  />
-                )}
-                {errors.imageUrl && <p className="error">{errors.imageUrl}</p>}
-              </div>
-            )}
-
-            {errors.farmerId && <p className="error">{errors.farmerId}</p>}
+                  type="checkbox"
+                  name="hasGAP"
+                  checked={formData.hasGAP}
+                  onChange={handleChange}
+                  disabled
+                />{" "}
+                GAP
+              </label>
+              <label>
+                <input
+                  type="checkbox"
+                  name="hasGI"
+                  checked={formData.hasGI}
+                  onChange={handleChange}
+                  disabled
+                />{" "}
+                GI
+              </label>
+            </div>
           </div>
-
           <div className="button-group">
             <button
               type="button"

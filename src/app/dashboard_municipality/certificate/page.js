@@ -2,7 +2,6 @@
 import { useState, useEffect } from "react";
 import styles from "@/app/ui/dashboard/certificate/certificate.module.css";
 import Link from "next/link";
-import Image from "next/image";
 import Pagination from "@/app/ui/dashboard/pagination/pagination";
 import Search from "@/app/ui/dashboard/search/search";
 
@@ -55,7 +54,8 @@ const Certificate = () => {
             <td>ประเภท</td>
             <td>สายพันธุ์</td>
             <td>รหัสแปลงปลูก</td>
-            <td>รูปใบรับรอง</td>          
+            <td>GAP</td>
+            <td>GI</td>
             <td>จำนวนผลผลิต</td>
             <td>สถานะ</td>
             <td></td>
@@ -73,18 +73,8 @@ const Certificate = () => {
                 <td>{certificate.type}</td>
                 <td>{certificate.variety}</td>
                 <td>{certificate.plotCode}</td>
-                <td>
-                  {certificate.hasCertificate && certificate.imageUrl ? (
-                    <Image
-                      src={certificate.imageUrl}
-                      alt="Certificate Image"
-                      width={100}
-                      height={100}
-                    />
-                  ) : (
-                    "No Image"
-                  )}
-                </td>
+                <td>{certificate.hasGAP ? "มี" : "ไม่มี"}</td> {/* Display GAP status */}
+                <td>{certificate.hasGI ? "มี" : "ไม่มี"}</td> {/* Display GI status */}
                 <td>{certificate.productionQuantity}</td>
                 <td>
                   <span
@@ -108,7 +98,7 @@ const Certificate = () => {
             ))
           ) : (
             <tr>
-              <td colSpan={9}>No certificates available</td> {/* Adjust colSpan if necessary */}
+              <td colSpan={10}>No certificates available</td> {/* Adjust colSpan if necessary */}
             </tr>
           )}
         </tbody>

@@ -73,7 +73,8 @@ const Certificate = () => {
             <td>ชนิด</td>
             <td>สายพันธุ์</td>
             <td>รหัสแปลงปลูก</td>
-            <td>รูปใบรับรอง</td>
+            <td>GAP</td>
+            <td>GI</td>
             <td>จำนวนผลผลิต</td>
             <td>สถานะ</td>
             <td></td>
@@ -87,18 +88,8 @@ const Certificate = () => {
                 <td>{certificate.type}</td>
                 <td>{certificate.variety}</td>
                 <td>{certificate.plotCode}</td>
-                <td>
-                  {certificate.hasCertificate && certificate.imageUrl ? (
-                    <Image
-                      src={certificate.imageUrl}
-                      alt="Certificate Image"
-                      width={100}
-                      height={100}
-                    />
-                  ) : (
-                    "No Image"
-                  )}
-                </td>
+                <td>{certificate.hasGAP ? "มี" : "ไม่มี"}</td> {/* Display GAP status */}
+                <td>{certificate.hasGI ? "มี" : "ไม่มี"}</td> {/* Display GI status */}
                 <td>{certificate.productionQuantity}</td>
                 <td>
                   <span

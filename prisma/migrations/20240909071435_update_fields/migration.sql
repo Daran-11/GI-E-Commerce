@@ -10,7 +10,6 @@ CREATE TABLE `Farmer` (
     `province` VARCHAR(191) NOT NULL,
     `zip_code` VARCHAR(191) NOT NULL,
     `phone` VARCHAR(191) NOT NULL,
-    `planting_plot_code` VARCHAR(191) NOT NULL,
     `password` VARCHAR(191) NOT NULL,
     `role` VARCHAR(191) NOT NULL,
 
@@ -26,11 +25,11 @@ CREATE TABLE `Certificate` (
     `latitude` DOUBLE NOT NULL,
     `longitude` DOUBLE NOT NULL,
     `productionQuantity` INTEGER NOT NULL,
-    `hasCertificate` BOOLEAN NOT NULL,
-    `imageUrl` VARCHAR(191) NULL,
+    `hasGAP` BOOLEAN NOT NULL,
+    `hasGI` BOOLEAN NOT NULL,
     `registrationDate` DATETIME(3) NOT NULL,
     `expiryDate` DATETIME(3) NOT NULL,
-    `status` VARCHAR(191) NOT NULL DEFAULT 'กำลังดำเนินการ',
+    `status` VARCHAR(191) NOT NULL DEFAULT 'รอตรวจสอบใบรับรอง',
     `farmerId` INTEGER NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
