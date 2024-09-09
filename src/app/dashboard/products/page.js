@@ -6,18 +6,23 @@ import Pagination from "@/app/ui/dashboard/pagination/pagination";
 import styles from "@/app/ui/dashboard/products/products.module.css";
 import Search from "@/app/ui/dashboard/search/search";
 import Button from "@mui/material/Button";
+import { useSession } from 'next-auth/react';
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const Product = () => {
+  const { data: session, status } = useSession()
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true); // Add a loading state
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [selectedProductId, setSelectedProductId] = useState(null);
+  const router = useRouter()
 
   const fetchProducts = async () => {
+    
     try {
-      const response = await fetch("/api/product/add");
+      const response = await fetch(`/api/users/${session.user.id}/product`);
       const data = await response.json();
       const formattedData = data.map((product) => ({
         ...product,
@@ -32,9 +37,20 @@ const Product = () => {
   };
 
   useEffect(() => {
-    fetchProducts();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if (status === "unauthenticated") {
+      router.push("/login");
+    }
+
+    if (status === "authenticated") {
+      try {
+        if (session?.user?.id) {
+          fetchProducts();
+        }
+      } catch (error) {
+        setError("An error occurred while fetching products");        
+      }
+    }
+  }, [status, session ,router]);
 
   const formatPrice = (Price) => {
     return Price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -43,13 +59,13 @@ const Product = () => {
   const handleDelete = async (ProductID) => {
     if (confirm("Are you sure you want to delete this product?")) {
       try {
-        const response = await fetch(
-          `/api/product/add?ProductID=${ProductID}`,
-          {
+        const response = await fetch(`/api/users/${session.user.id}/product/${ProductID}`, {
             method: "DELETE",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+              "Content-Type": "application/json" },
           }
         );
+
         if (response.ok) {
           setProducts(
             products.filter((product) => product.ProductID !== ProductID)
@@ -77,7 +93,7 @@ const Product = () => {
   };
 
   const handleAddProduct = async (productData) => {
-    const response = await fetch("/api/product/add", {
+    const response = await fetch(`/api/users/${session.user.id}/product`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -95,7 +111,7 @@ const Product = () => {
   };
 
   const handleEditProduct = async (ProductID, productData) => {
-    const response = await fetch(`/api/product/add?ProductID=${ProductID}`, {
+    const response = await fetch(`/api/users/${session.user.id}/product/edit?ProductID=${ProductID}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",

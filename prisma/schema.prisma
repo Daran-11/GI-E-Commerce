@@ -181,7 +181,7 @@ enum Role {
 
 model Farmer {
   id             Int          @id @default(autoincrement())
-  userId         Int
+  userId         Int           @unique
   location       String
   farmerName     String        @db.VarChar(100)   // Farmer's full name
   contactLine    String        @db.VarChar(15)    // Farmer's contact

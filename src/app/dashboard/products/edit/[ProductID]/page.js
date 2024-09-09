@@ -16,6 +16,8 @@ import {
 } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
 
+import { useSession } from 'next-auth/react';
+
 const CustomPaper = styled(Paper)(({ theme }) => ({
   borderRadius: "16px",
   padding: "20px",
@@ -23,6 +25,8 @@ const CustomPaper = styled(Paper)(({ theme }) => ({
 }));
 
 const EditProductDialog = ({open,onClose,onEditProduct,ProductID,onSuccess,}) => {
+  const { data: session, status } = useSession()
+  
   const [formData, setFormData] = useState({
     plotCode: "",
     ProductName: "",
@@ -37,7 +41,7 @@ const EditProductDialog = ({open,onClose,onEditProduct,ProductID,onSuccess,}) =>
     const fetchProduct = async () => {
       try {
         console.log(`Fetching product with ID: ${ProductID}`); // Debugging line
-        const response = await fetch(`/api/product/add?ProductID=${ProductID}`);
+        const response = await fetch(`/api/users/${session.user.id}/product/${ProductID}`);
         if (response.ok) {
           const data = await response.json();
           console.log('Fetched product data:', data); // Debugging line
@@ -109,7 +113,7 @@ const EditProductDialog = ({open,onClose,onEditProduct,ProductID,onSuccess,}) =>
     };
 
     try {
-      const response = await fetch(`/api/product/add?ProductID=${ProductID}`, {
+      const response = await fetch(`/api/users/${session.user.id}/product/${ProductID}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
