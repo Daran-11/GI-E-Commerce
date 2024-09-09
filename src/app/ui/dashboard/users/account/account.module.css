@@ -1,0 +1,54 @@
+/* Global container styles */
+.container {
+    background-color: var(--bgSoft);
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 20px;
+}
+
+/* Flexbox container for top section */
+.top {
+    display: flex;
+    justify-content: flex-end; /* Aligns children to the right */
+    margin-bottom: 10px;
+}
+
+/* Add new button styles */
+.addButton {
+    padding: 10px;
+    background-color: #98de6d;
+    color: var(--text);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+/* Table styles */
+.table {
+    width: 100%;
+    border-collapse: collapse; /* Ensures borders between cells are merged */
+}
+
+.table thead {
+    background-color: #f4f4f4;
+}
+
+.table th, .table td {
+    padding: 15px;
+    border-bottom: 1px solid #ddd; /* Adds a subtle border between rows */
+    text-align: left;
+}
+
+/* Button styles */
+.button {
+    padding: 5px 10px;
+    border-radius: 5px;
+    color: var(--text);
+    border: none;
+    cursor: pointer;
+    background-color: rgba(156, 204, 235, 0.75); /* Light blue background */
+}
+
+.button:hover {
+    background-color: rgba(156, 204, 235, 0.9); /* Darker blue on hover */
+}

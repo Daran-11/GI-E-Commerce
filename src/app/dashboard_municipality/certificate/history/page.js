@@ -5,13 +5,13 @@ import Link from "next/link";
 import Pagination from "@/app/ui/dashboard/pagination/pagination";
 import Search from "@/app/ui/dashboard/search/search";
 
-const Certificate = () => {
+const Historycer = () => {
   const [certificates, setCertificates] = useState([]);
 
   useEffect(() => {
     const fetchCertificates = async () => {
       try {
-        const response = await fetch("/api/approvecertificate");
+        const response = await fetch("/api/histroycer");
         const data = await response.json();
         setCertificates(data);
       } catch (error) {
@@ -45,9 +45,6 @@ const Certificate = () => {
     <div className={styles.container}>
       <div className={styles.top}>
         <Search placeholder="ค้นหาผู้ใช้..." />
-        <Link href="/dashboard_municipality/certificate/history">
-          <button className={styles.addButton}>ประวัติการรับรอง</button>
-        </Link>
       </div>
       <table className={styles.table}>
         <thead>
@@ -101,7 +98,7 @@ const Certificate = () => {
             ))
           ) : (
             <tr>
-              <td colSpan={10}>ไม่พบใบรับรอง</td> {/* Adjust colSpan if necessary */}
+              <td colSpan={10}>No certificates available</td> {/* Adjust colSpan if necessary */}
             </tr>
           )}
         </tbody>
@@ -111,4 +108,4 @@ const Certificate = () => {
   );
 };
 
-export default Certificate;
+export default Historycer;
