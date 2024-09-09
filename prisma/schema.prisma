@@ -32,8 +32,8 @@ model Certificate {
   latitude           Float
   longitude          Float
   productionQuantity Int
-  hasCertificate     Boolean
-  imageUrl           String?
+  hasGAP             Boolean
+  hasGI              Boolean
   registrationDate   DateTime
   expiryDate         DateTime
   status             String    @default("รอตรวจสอบใบรับรอง")
