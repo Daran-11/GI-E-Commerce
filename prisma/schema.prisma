@@ -17,6 +17,7 @@ model Product {
   Price       Int      @db.SmallInt
   Amount      Int      @db.MediumInt
     status       String
+    imageUrl String?
   ProductPic  Bytes?   @db.Blob
   DateCreated DateTime @default(now()) @db.Timestamp(0)
   cartItems   CartItem[]
