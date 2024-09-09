@@ -28,6 +28,7 @@ const menuItems = [
   {
     title: 'ใบรับรอง',
     list: [
+      { title: 'จัดการผู้ใช้', path: '/dashboard_municipality/users', icon: <MdSupervisedUserCircle /> },
       { title: 'ตรวจสอบใบรับรอง', path: '/dashboard_municipality/certificate', icon: <MdSupervisedUserCircle /> },
     ],
   },

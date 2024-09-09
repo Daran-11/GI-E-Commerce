@@ -1,0 +1,95 @@
+/* Global container styles */
+.container {
+    background-color: var(--bgSoft);
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 20px;
+}
+
+/* Flexbox container for top section */
+.top {
+    display: flex;
+    justify-content: flex-end; /* Aligns children to the right */
+    margin-bottom: 10px;
+}
+
+/* Add new button styles */
+.addButton {
+    padding: 10px;
+    background-color: #98de6d;
+    color: var(--text);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+/* Table styles */
+.table {
+    width: 100%;
+    border-collapse: collapse; /* Ensures borders between cells are merged */
+}
+
+.table thead {
+    background-color: #ffffff;
+}
+
+.table th, .table td {
+    padding: 15px;
+    border-bottom: 1px solid #ddd; /* Adds a subtle border between rows */
+    text-align: left;
+}
+
+/* Button styles */
+.buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.button {
+    padding: 5px 10px;
+    border-radius: 5px;
+    color: var(--text);
+    border: none;
+    cursor: pointer;
+}
+
+/* Button variations */
+.view {
+    background-color: rgba(156, 204, 235, 0.75);
+}
+
+/* Status indicator styles */
+.status {
+    border-radius: 5px;
+    padding: 5px;
+    font-size: 14px;
+    color: black;
+}
+
+/* Status colors */
+.รอตรวจสอบใบรับรอง {
+    color: rgb(247, 167, 47);
+}
+
+.อนุมัติ {
+    color: rgb(55, 187, 3);
+}
+
+.ไม่อนุมัติ {
+    color: rgba(247, 115, 115, 0.75);
+}
+
+.หมดอายุ {
+    background-color: #afafaf;
+}
+
+.delete {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: rgba(247, 115, 115, 0.75); /* Red color for delete action */
+}
+
+.delete:hover {
+    color: #ff7875; /* Lighter red on hover */
+}
