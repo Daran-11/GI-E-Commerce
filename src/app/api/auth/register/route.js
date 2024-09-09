@@ -42,7 +42,7 @@ export async function POST(request) {
         zip_code: zipCode,
         phone,
         password: hashedPassword,
-        role: 'เกษตรกร'
+        role: 'ผู้ใช้'
       },
     });
 
