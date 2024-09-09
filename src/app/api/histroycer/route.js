@@ -3,16 +3,18 @@ import { NextResponse } from "next/server";
 
 const prisma = new PrismaClient();
 
+const VALID_STATUSES = ["อนุมัติ", "ไม่อนุมัติ", "หมดอายุ"];
+
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
 
   if (id) {
     try {
-      const certificate = await prisma.certificate.findUnique({
+      const certificate = await prisma.certificate.findFirst({
         where: { 
           id: parseInt(id, 10),
-          status: "รอตรวจสอบใบรับรอง" // เพิ่มเงื่อนไขสถานะ
+          status: { in: VALID_STATUSES }
         },
         include: { farmer: true },
       });
@@ -20,7 +22,7 @@ export async function GET(request) {
         return NextResponse.json(certificate);
       } else {
         return NextResponse.json(
-          { error: "Certificate not found or not in 'รอตรวจสอบใบรับรอง' status" },
+          { error: "Certificate not found or not in valid status" },
           { status: 404 }
         );
       }
@@ -32,11 +34,11 @@ export async function GET(request) {
       );
     }
   } else {
-    // Fetching all certificates with 'รอตรวจสอบใบรับรอง' status
+    // Fetching all certificates with valid statuses
     try {
       const certificates = await prisma.certificate.findMany({
         where: {
-          status: "รอตรวจสอบใบรับรอง"
+          status: { in: VALID_STATUSES }
         },
         include: { farmer: true },
       });

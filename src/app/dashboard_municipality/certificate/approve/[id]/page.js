@@ -24,9 +24,10 @@ const ApproveCertificatePage = ({ params }) => {
     productionQuantity: "",
     hasGAP: false,
     hasGI: false,
-    hasCertificate: false, // Now a boolean based on the checkbox
+    hasCertificate: false,
+    municipalComment: "",
   });
-
+  const [showCommentField, setShowCommentField] = useState(false);
   const [imagePreview, setImagePreview] = useState(null);
   const [errors, setErrors] = useState({});
   const router = useRouter();
@@ -45,13 +46,14 @@ const ApproveCertificatePage = ({ params }) => {
             latitude: data.latitude || "",
             longitude: data.longitude || "",
             productionQuantity: data.productionQuantity || "",
-            hasGAP: data.hasGAP || false,
+            hasGAP: data.hasGAP || false,      
             hasGI: data.hasGI || false,
             hasCertificate: data.hasCertificate || false,
             farmerId: data.farmer?.id || "",
             registrationDate: new Date(data.registrationDate).toISOString().split("T")[0],
             expiryDate: new Date(data.expiryDate).toISOString().split("T")[0],
             status: data.status || "",
+            municipalComment: "",
           });
           if (data.imageUrl) {
             setImagePreview(data.imageUrl);
@@ -76,15 +78,6 @@ const ApproveCertificatePage = ({ params }) => {
     setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setFormData((prev) => ({ ...prev, imageUrl: file }));
-      setImagePreview(URL.createObjectURL(file));
-      setErrors((prev) => ({ ...prev, imageUrl: "" }));
-    }
-  };
-
   const handleSubmit = async (action) => {
     const newErrors = {};
     if (!formData.type) newErrors.type = "กรุณากรอกชนิด";
@@ -97,6 +90,10 @@ const ApproveCertificatePage = ({ params }) => {
     if (!formData.farmerId) newErrors.farmerId = "กรุณากรอกรหัสเกษตร";
     if (!formData.registrationDate) newErrors.registrationDate = "กรุณากรอกวันจดทะเบียน";
     if (!formData.expiryDate) newErrors.expiryDate = "กรุณากรอกวันหมดอายุ";
+    
+    if (action === "ไม่อนุมัติ" && !formData.municipalComment) {
+      newErrors.municipalComment = "กรุณากรอกความคิดเห็นเมื่อไม่อนุมัติใบรับรอง"; // Validate comment on rejection
+    }
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -114,13 +111,13 @@ const ApproveCertificatePage = ({ params }) => {
     formDataToSend.append("hasGAP", formData.hasGAP);
     formDataToSend.append("hasGI", formData.hasGI);
     formDataToSend.append("hasCertificate", formData.hasCertificate);
-    formDataToSend.append("farmerId", formData.farmerId);
-    formDataToSend.append("registrationDate", formData.registrationDate);
-    formDataToSend.append("expiryDate", formData.expiryDate);
-    formDataToSend.append("status", action);
-    if (formData.hasCertificate && formData.imageUrl instanceof File) {
-      formDataToSend.append("imageUrl", formData.imageUrl);
+    formDataToSend.append("action", action);
+    formDataToSend.append("comment", formData.municipalComment);
+    if (action === "ไม่อนุมัติ") {
+      formDataToSend.append("municipalComment", formData.municipalComment); // Add comment to request
     }
+
+    console.log("FormData being sent:", Object.fromEntries(formDataToSend));
 
     try {
       const response = await fetch("/api/approvecertificate", {
@@ -130,15 +127,21 @@ const ApproveCertificatePage = ({ params }) => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to update certificate");
+        throw new Error(errorData.message || "ไม่สามารถอัพเดดใบรับรอง");
       }
+      const result = await response.json();
+      console.log("Response from server:", result);
 
-      alert(`Certificate ${action === "อนุมัติ" ? "approved" : "rejected"} successfully`);
+      alert(`ใบรับรอง${action === "อนุมัติ" ? "ได้รับการอนุมัติ" : "ถูกปฏิเสธ"}เรียบร้อยแล้ว`);
       router.push("/dashboard_municipality/certificate");
     } catch (error) {
       console.error("Error:", error);
-      alert(error.message || "Failed to update certificate");
+      alert(error.message || "ไม่สามารถอัพเดตใบรับรอง");
     }
+  };
+
+  const handleReject = () => {
+    setShowCommentField(true);
   };
 
    const LocationMarker = () => {
@@ -182,7 +185,7 @@ const ApproveCertificatePage = ({ params }) => {
   return (
     <div className="container">
       <main className="mainContent">
-        <h1 className="title-name">เเก้ไขใบรับรอง</h1>
+        <h1 className="title-name">อนุมัติใบรับรอง</h1>
         <form onSubmit={(e) => e.preventDefault()} className="space-y-4">
         <div className="form-container">
             <p className="section-name">ชนิด</p>
@@ -283,22 +286,47 @@ const ApproveCertificatePage = ({ params }) => {
               </label>
             </div>
           </div>
-          <div className="button-group">
-            <button
-              type="button"
-              className="button-submitt"
-              onClick={() => handleSubmit("อนุมัติ")}
-            >
-              อนุมัติใบรับรอง
-            </button>
-            <button
-              type="button"
-              className="button-submittt"
-              onClick={() => handleSubmit("ไม่อนุมัติ")}
-            >
-              ไม่อนุมัติใบรับรอง
-            </button>
-          </div>
+          {showCommentField && (
+            <div className="form-container">
+              <p className="section-name">ความคิดเห็น (เหตุผลที่ไม่อนุมัติ)</p>
+              <textarea
+                name="municipalComment"
+                value={formData.municipalComment}
+                onChange={handleChange}
+                className="form-input"
+                rows="4"
+                required
+              />
+              {errors.municipalComment && <p className="error">{errors.municipalComment}</p>}
+            </div>
+          )}
+          
+           <div className="button-group">
+      <button
+        type="button"
+        className="button-submitt"
+        onClick={() => handleSubmit("อนุมัติ")}
+      >
+        อนุมัติใบรับรอง
+      </button>
+      <button
+        type="button"
+        className="button-submittt"
+        onClick={handleReject}
+      >
+        ไม่อนุมัติใบรับรอง
+      </button>
+    </div>
+    
+    {showCommentField && (
+      <button
+        type="button"
+        className="button-submittt"
+        onClick={() => handleSubmit("ไม่อนุมัติ")}
+      >
+        ยืนยันการไม่อนุมัติ
+      </button>
+    )}
         </form>
       </main>
     </div>

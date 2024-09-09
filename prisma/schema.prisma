@@ -39,6 +39,7 @@ model Certificate {
   status             String    @default("รอตรวจสอบใบรับรอง")
   farmerId           Int
   farmer             Farmer    @relation(fields: [farmerId], references: [id])
+  municipalComment   String?   // Optional field for municipal comment
   createdAt          DateTime  @default(now())
 }
 
