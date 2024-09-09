@@ -1,4 +1,3 @@
-// components/Product.js
 "use client";
 import AddProductDialog from "@/app/dashboard/products/add/page";
 import EditProductDialog from "@/app/dashboard/products/edit/[ProductID]/page";
@@ -145,6 +144,7 @@ const Product = () => {
             <td>ราคา</td>
             <td>จำนวน</td>
             <td>สถานะ</td>
+            <td>รูปภาพ</td> {/* New column for Image */}
             <td>Actions</td>
           </tr>
         </thead>
@@ -166,6 +166,18 @@ const Product = () => {
                   >
                     {product.status}
                   </span>
+                </td>
+                <td>
+                  {/* Display product image if available */}
+                  {product.imageUrl ? (
+                    <img
+                      src={product.imageUrl}
+                      alt={product.ProductName}
+                      className={styles.productImage} // You can style the image accordingly
+                    />
+                  ) : (
+                    "No image"
+                  )}
                 </td>
                 <td>
                   <div className={styles.buttons}>
@@ -203,7 +215,7 @@ const Product = () => {
             ))
           ) : (
             <tr>
-              <td colSpan={8}>No products available</td>
+              <td colSpan={9}>No products available</td>
             </tr>
           )}
         </tbody>
