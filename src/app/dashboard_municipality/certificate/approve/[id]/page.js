@@ -286,14 +286,14 @@ const ApproveCertificatePage = ({ params }) => {
           <div className="button-group">
             <button
               type="button"
-              className="button-submit"
+              className="button-submitt"
               onClick={() => handleSubmit("อนุมัติ")}
             >
               อนุมัติใบรับรอง
             </button>
             <button
               type="button"
-              className="button-submit"
+              className="button-submittt"
               onClick={() => handleSubmit("ไม่อนุมัติ")}
             >
               ไม่อนุมัติใบรับรอง
