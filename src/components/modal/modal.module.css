@@ -1,36 +1,35 @@
 /* Modal.module.css */
 .overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5); /* Dark transparent overlay */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  
-  .modal {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    max-width: 500px;
-    width: 100%;
-    position: relative;
-  }
-  
-  .closeButton {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: none;
-    border: none;
-    font-size: 24px;
-    cursor: pointer;
-  }
-  
-  .modalContent {
-    margin-top: 20px;
-  }
-  
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5); /* Dark transparent overlay */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 500px;
+  width: 100%;
+  position: relative;
+}
+
+.closeButton {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.modalContent {
+  margin-top: 20px;
+}

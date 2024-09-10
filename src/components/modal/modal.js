@@ -1,4 +1,4 @@
-import styles from '../modal/modal.module.css'; // Import CSS for styling the modal
+import styles from "../modal/modal.module.css"; // Import CSS for styling the modal
 
 const Modal = ({ children, isOpen, onClose }) => {
   if (!isOpen) return null; // Don't render if modal is closed
@@ -9,9 +9,7 @@ const Modal = ({ children, isOpen, onClose }) => {
         <button className={styles.closeButton} onClick={onClose}>
           &times;
         </button>
-        <div className={styles.modalContent}>
-          {children}
-        </div>
+        <div className={styles.modalContent}>{children}</div>
       </div>
     </div>
   );

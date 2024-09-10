@@ -1,13 +1,13 @@
-import { getServerSession } from 'next-auth/next';
-import { NextResponse } from 'next/server';
-import prisma from '../../../../../../lib/prisma';
-import { authOptions } from '../../[...nextauth]/route';
+import { getServerSession } from "next-auth/next";
+import { NextResponse } from "next/server";
+import prisma from "../../../../../../lib/prisma";
+import { authOptions } from "../../[...nextauth]/route";
 
 export async function POST(request) {
   const session = await getServerSession({ authOptions });
 
   if (!session) {
-    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
   const { productId, quantity } = await request.json();
@@ -19,7 +19,7 @@ export async function POST(request) {
   });
 
   if (!user) {
-    return NextResponse.json({ message: 'User not found' }, { status: 404 });
+    return NextResponse.json({ message: "User not found" }, { status: 404 });
   }
 
   // Add or update cart item

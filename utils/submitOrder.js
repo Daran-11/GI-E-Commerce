@@ -12,7 +12,7 @@ const submitOrder = async (orderData) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${session.accessToken}`, // Replace with actual session token if needed
+        Authorization: `Bearer ${session.accessToken}`, // Replace with actual session token if needed
       },
       body: JSON.stringify(orderData),
     });

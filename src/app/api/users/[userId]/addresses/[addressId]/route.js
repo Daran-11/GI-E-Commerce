@@ -1,12 +1,12 @@
-import { getServerSession } from 'next-auth';
-import { NextResponse } from 'next/server';
-import prisma from '../../../../../../../lib/prisma';
+import { getServerSession } from "next-auth";
+import { NextResponse } from "next/server";
+import prisma from "../../../../../../../lib/prisma";
 
 export async function DELETE(req, { params }) {
   const session = await getServerSession({ req });
-  
+
   if (!session) {
-    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
   const { userId, addressId } = params;
@@ -20,7 +20,10 @@ export async function DELETE(req, { params }) {
     });
 
     if (!address || address.userId !== Number(userId)) {
-      return NextResponse.json({ message: 'Address not found' }, { status: 404 });
+      return NextResponse.json(
+        { message: "Address not found" },
+        { status: 404 },
+      );
     }
 
     // Delete the address
@@ -30,9 +33,15 @@ export async function DELETE(req, { params }) {
       },
     });
 
-    return NextResponse.json({ message: 'Address deleted successfully' }, { status: 200 });
+    return NextResponse.json(
+      { message: "Address deleted successfully" },
+      { status: 200 },
+    );
   } catch (error) {
-    console.error('Failed to delete address:', error);
-    return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
+    console.error("Failed to delete address:", error);
+    return NextResponse.json(
+      { message: "Internal server error" },
+      { status: 500 },
+    );
   }
 }
