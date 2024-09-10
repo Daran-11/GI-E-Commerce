@@ -102,7 +102,9 @@ export async function POST(request,{ params }) {
     });
 
   if (!farmer) {
+    console.log("Farmer data not found in Farmer table")
     return NextResponse.json({ error: 'Farmer profile not found for this user.' }, { status: 404 });
+    
   }
 
   try {
