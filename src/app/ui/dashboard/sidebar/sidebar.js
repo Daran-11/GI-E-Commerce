@@ -1,6 +1,6 @@
-"use client";
-import Image from "next/image";
-import { usePathname } from "next/navigation";
+"use client"
+import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 import {
   MdAnalytics,
   MdAttachMoney,
@@ -11,9 +11,9 @@ import {
   MdOutlineSettings,
   MdPeople,
   MdShoppingBag,
-  MdSupervisedUserCircle,
+  MdSupervisedUserCircle
 } from "react-icons/md";
-import MenuLink from "./menuLink/menuLink"; // Ensure this path is correct
+import MenuLink from './menuLink/menuLink'; // Ensure this path is correct
 import styles from "./sidebar.module.css";
 
 // Define the menu items
@@ -32,7 +32,7 @@ const menuItems = [
         icon: <MdShoppingBag />,
       },
       {
-        title: "จัดการคำสั่งซื้อ",
+        title: 'จัดการคำสั่งซื้อ',
         path: "/dashboard/orders",
         icon: <MdPeople />,
       },
@@ -41,6 +41,7 @@ const menuItems = [
         path: "/dashboard/transactions",
         icon: <MdAttachMoney />,
       },
+
     ],
   },
   {
@@ -48,10 +49,11 @@ const menuItems = [
     list: [
       {
         title: "ตรวจสอบย้อนกลับ",
-        path: "/dashboard/traceability",
+        path: '/dashboard/traceability',
         icon: <MdAnalytics />,
       },
-    ],
+
+    ]
   },
   {
     title: "ผู้ใช้",
@@ -69,31 +71,27 @@ const menuItems = [
       {
         title: "การตั้งค่า",
         path: "/dashboard/settings",
-        icon: <MdOutlineSettings />,
+        icon: <MdOutlineSettings  />,
       },
       {
         title: "ช่วยเหลือ",
         path: "/dashboard/help",
         icon: <MdHelpCenter />,
       },
-    ],
-  },
+    ]
+  }
 ];
 
 // Define the Sidebar component
 const Sidebar = () => {
-  const pathname = usePathname();
+
+  const pathname = usePathname()
 
   return (
+    
     <div className={styles.container}>
       <div className={styles.user}>
-        <Image
-          className={styles.userImage}
-          src="/dinosaur.png"
-          alt=""
-          width="50"
-          height="50"
-        />
+        <Image className={styles.userImage} src="/dinosaur.png" alt="" width="50" height="50" />
         <div className={styles.userDetail}>
           <span className={styles.username}>ธนธร เต็มสิริมงคล</span>
           <span className={styles.userTitle}>ผู้ผลิต</span>
@@ -101,20 +99,18 @@ const Sidebar = () => {
       </div>
       <div className={styles.containerlist}>
         <ul className={`${styles.list}`}>
+
           {menuItems.map((cat) => (
             <li key={cat.title}>
               <span className={styles.cat}>{cat.title}</span>
               {cat.list.map((item) => (
-                <MenuLink
-                  item={item}
-                  key={item.title}
-                  isActive={pathname === item.path}
-                />
+                <MenuLink item={item} key={item.title} isActive={pathname === item.path} />
               ))}
             </li>
           ))}
-        </ul>
-      </div>
+
+        </ul>        
+        </div>
 
       <button className={styles.logout}>
         <MdLogout />
@@ -122,6 +118,6 @@ const Sidebar = () => {
       </button>
     </div>
   );
-};
+}
 
 export default Sidebar;

@@ -1,5 +1,5 @@
 "use client";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from "react";
 
 export default function SearchBar() {
@@ -19,9 +19,7 @@ export default function SearchBar() {
 
   const fetchSuggestions = async (query) => {
     try {
-      const res = await fetch(
-        `http://localhost:3000/api/suggestions?query=${query}`,
-      );
+      const res = await fetch(`http://localhost:3000/api/suggestions?query=${query}`);
       if (res.ok) {
         const data = await res.json();
         setSuggestions(data.suggestions);
@@ -36,8 +34,8 @@ export default function SearchBar() {
 
   const handleSearch = (e) => {
     e.preventDefault();
-    console.log("Search form submitted");
-    router.push(`/?query=${query}`);
+    console.log('Search form submitted');
+    router.push(`/?query=${query}`); 
   };
 
   const handleSuggestionClick = (suggestion) => {
@@ -47,10 +45,7 @@ export default function SearchBar() {
       suggestion.price.toString(),
     ];
 
-    const newQuery = queryParts
-      .filter((part) => part)
-      .join(" ")
-      .trim(); // Join non-empty parts with a space and trim whitespace
+    const newQuery = queryParts.filter(part => part).join(' ').trim(); // Join non-empty parts with a space and trim whitespace
     setQuery(newQuery);
     router.push(`/?query=${encodeURIComponent(newQuery)}`);
     setSuggestions([]); // Clear suggestions
@@ -85,15 +80,8 @@ export default function SearchBar() {
             className="w-full pl-5 pt-2 pb-2 border-2 border-[#d4d4d4] focus:outline-none focus:ring-2 focus:ring-[#4EAC14] focus:border-transparent rounded-3xl"
           />
           <button type="submit" className="search-button pl-2 pr-2">
-            <svg
-              className="fill-current text-[#4EAC14]"
-              xmlns="http://www.w3.org/2000/svg"
-              height="24px"
-              viewBox="0 -960 960 960"
-              width="24px"
-              fill="#e8eaed"
-            >
-              <path d="M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z" />
+            <svg className="fill-current text-[#4EAC14]" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed">
+              <path d="M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z"/>
             </svg>
           </button>
         </div>

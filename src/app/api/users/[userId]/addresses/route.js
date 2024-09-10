@@ -1,24 +1,24 @@
 // /pages/api/users/[userId]/addresses.js
 
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { getServerSession } from "next-auth";
-import { NextResponse } from "next/server";
-import prisma from "../../../../../../lib/prisma";
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { getServerSession } from 'next-auth';
+import { NextResponse } from 'next/server';
+import prisma from '../../../../../../lib/prisma';
 
 export async function GET(req, { params }) {
   const session = await getServerSession({ req, ...authOptions });
 
-  console.log("chk Session for addresses:", session); // Debug session
-  console.log("User ID:", session?.user?.id); // Debug user ID
+  console.log('chk Session for addresses:', session); // Debug session
+  console.log('User ID:', session?.user?.id); // Debug user ID
 
   if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   const { userId } = params;
 
   if (session.user.id !== parseInt(userId)) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
   try {
@@ -31,60 +31,40 @@ export async function GET(req, { params }) {
       },
     });
 
+
+    
     return NextResponse.json(addresses, { status: 200 });
   } catch (error) {
-    console.error("Failed to fetch addresses:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch addresses" },
-      { status: 500 },
-    );
+    console.error('Failed to fetch addresses:', error);
+    return NextResponse.json({ error: 'Failed to fetch addresses' }, { status: 500 });
   }
 }
 
+
 export async function PUT(req, { params }) {
+  
   const session = await getServerSession({ req, ...authOptions });
 
   if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   const { userId } = params;
   if (session.user.id !== parseInt(userId)) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
   const data = await req.json();
-  const {
-    id,
-    addressLine,
-    provinceId,
-    amphoeId,
-    tambonId,
-    postalCode,
-    isDefault,
-  } = data;
+  const { id, addressLine, provinceId, amphoeId, tambonId, postalCode, isDefault } = data;
 
   // Log data before processing
-  console.log("Data received for update:", {
-    id,
-    addressLine,
-    provinceId,
-    amphoeId,
-    tambonId,
-    postalCode,
-    isDefault,
+  console.log('Data received for update:', {
+    id, addressLine, provinceId, amphoeId, tambonId, postalCode, isDefault
   });
 
   // Validate data
-  if (
-    !id ||
-    !addressLine ||
-    isNaN(provinceId) ||
-    isNaN(amphoeId) ||
-    isNaN(tambonId) ||
-    !postalCode
-  ) {
-    return NextResponse.json({ error: "Invalid input data" }, { status: 400 });
+  if (!id || !addressLine || isNaN(provinceId) || isNaN(amphoeId) || isNaN(tambonId) || !postalCode) {
+    return NextResponse.json({ error: 'Invalid input data' }, { status: 400 });
   }
 
   try {
@@ -99,7 +79,7 @@ export async function PUT(req, { params }) {
           },
           data: { isDefault: false },
         });
-        console.log("Updated other addresses to not default");
+        console.log('Updated other addresses to not default');
       }
 
       // Update the specific address
@@ -115,52 +95,42 @@ export async function PUT(req, { params }) {
         },
       });
 
-      console.log("Address updated successfully");
+      console.log('Address updated successfully');
     });
 
-    return NextResponse.json(
-      { message: "Address updated successfully" },
-      { status: 200 },
-    );
+    return NextResponse.json({ message: 'Address updated successfully' }, { status: 200 });
   } catch (error) {
-    console.error("Failed to update address:", error);
-    return NextResponse.json(
-      { error: "Failed to update address" },
-      { status: 500 },
-    );
+    console.error('Failed to update address:', error);
+    return NextResponse.json({ error: 'Failed to update address' }, { status: 500 });
   }
 }
+
+
+
 
 export async function POST(req, { params }) {
   const session = await getServerSession({ req, ...authOptions });
 
   if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   const { userId } = params;
 
   if (session.user.id !== parseInt(userId)) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
-  const { addressLine, provinceId, amphoeId, tambonId, postalCode, isDefault } =
-    await req.json();
+  const { addressLine, provinceId, amphoeId, tambonId, postalCode, isDefault } = await req.json();
 
-  console.log("Data received for creation:", {
-    addressLine,
-    provinceId,
-    amphoeId,
-    tambonId,
-    postalCode,
-    isDefault,
+
+  console.log('Data received for creation:', {
+    addressLine, provinceId, amphoeId, tambonId, postalCode, isDefault
   }); // Debug data
 
+  
   if (!addressLine || !provinceId || !amphoeId || !tambonId || !postalCode) {
-    return NextResponse.json(
-      { error: "Missing required fields" },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
   }
 
   try {
@@ -190,11 +160,8 @@ export async function POST(req, { params }) {
     });
     return NextResponse.json(newAddress, { status: 201 });
   } catch (error) {
-    console.error("Failed to save address:", error);
-    return NextResponse.json(
-      { error: "Failed to save address" },
-      { status: 500 },
-    );
+    console.error('Failed to save address:', error);
+    return NextResponse.json({ error: 'Failed to save address' }, { status: 500 });
   }
 }
 
@@ -202,13 +169,13 @@ export async function DELETE(req, { params }) {
   const session = await getServerSession({ req, ...authOptions });
 
   if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   const { userId, id } = params;
 
   if (session.user.id !== parseInt(userId)) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
   try {
@@ -234,12 +201,9 @@ export async function DELETE(req, { params }) {
     await prisma.address.delete({
       where: { id: parseInt(id) },
     });
-    return NextResponse.json({ message: "Address deleted" }, { status: 200 });
+    return NextResponse.json({ message: 'Address deleted' }, { status: 200 });
   } catch (error) {
-    console.error("Failed to delete address:", error);
-    return NextResponse.json(
-      { error: "Failed to delete address" },
-      { status: 500 },
-    );
+    console.error('Failed to delete address:', error);
+    return NextResponse.json({ error: 'Failed to delete address' }, { status: 500 });
   }
 }

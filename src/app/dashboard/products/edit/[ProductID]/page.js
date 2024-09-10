@@ -1,32 +1,28 @@
 "use client";
-import { useState, useCallback, useEffect } from "react";
 import {
+  Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  Button,
-  TextField,
-  Grid,
   FormControl,
+  Grid,
   InputLabel,
-  Select,
   MenuItem,
-  styled,
   Paper,
+  Select,
+  styled,
+  TextField,
 } from "@mui/material";
+import { useCallback, useEffect, useState } from "react";
 
-// Styled Paper component
 const CustomPaper = styled(Paper)(({ theme }) => ({
   borderRadius: "16px",
-  padding: theme.spacing(3),
+  padding: "20px",
   backgroundColor: "#f5f5f5",
-  display: "flex",
-  flexDirection: "column",
-  height: "auto",
 }));
 
-const EditProductDialog = ({ open, onClose, ProductID, onSuccess }) => {
+const EditProductDialog = ({open,onClose,onEditProduct,ProductID,onSuccess,}) => {
   const [formData, setFormData] = useState({
     plotCode: "",
     ProductName: "",
@@ -34,33 +30,27 @@ const EditProductDialog = ({ open, onClose, ProductID, onSuccess }) => {
     Price: "",
     Amount: "",
     status: "",
-    description: "",
-    imageUrl: null, // File input for image
   });
 
-  const [imagePreview, setImagePreview] = useState(null); // Image preview state
-
   useEffect(() => {
+    console.log("Fetching product details for ProductID:", ProductID);
     const fetchProduct = async () => {
       try {
-        const response = await fetch(`/api/product/farmer/get?ProductID=${ProductID}`);
+        console.log(`Fetching product with ID: ${ProductID}`); // Debugging line
+        const response = await fetch(`/api/product/add?ProductID=${ProductID}`);
         if (response.ok) {
           const data = await response.json();
+          console.log('Fetched product data:', data); // Debugging line
           setFormData({
             plotCode: data.plotCode || "",
             ProductName: data.ProductName || "",
             ProductType: data.ProductType || "",
-            Price: parseFloat(data.Price).toFixed(2) || "",
+            Price: parseFloat(data.Price) || "",
             Amount: data.Amount || "",
             status: data.status || "",
-            description: data.description || "",
-            imageUrl: data.imageUrl || null, // Fetch and set the existing image URL
           });
-          if (data.imageUrl) {
-            setImagePreview(data.imageUrl); // Set image preview URL
-          }
         } else {
-          const errorData = await response.text(); // Changed to text() to inspect raw response
+          const errorData = await response.json();
           console.error("Error fetching product:", errorData);
           alert("Failed to fetch product");
         }
@@ -69,7 +59,7 @@ const EditProductDialog = ({ open, onClose, ProductID, onSuccess }) => {
         alert("An error occurred while fetching the product data.");
       }
     };
-
+  
     if (ProductID) {
       fetchProduct();
     }
@@ -89,7 +79,7 @@ const EditProductDialog = ({ open, onClose, ProductID, onSuccess }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    if (name === "Price") {
+    if (name === "price") {
       const formattedValue = formatPrice(value);
       setFormData((prev) => ({ ...prev, [name]: formattedValue }));
     } else {
@@ -97,54 +87,39 @@ const EditProductDialog = ({ open, onClose, ProductID, onSuccess }) => {
     }
   };
 
-  const handleFileChange = (file) => {
-    if (file) {
-      setFormData((prev) => ({ ...prev, imageUrl: file }));
-
-      // Create a preview URL using FileReader
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result); // Set image preview URL
-      };
-      reader.readAsDataURL(file); // Read the file as a data URL
-    }
-  };
-
-  const handleDragOver = (e) => {
-    e.preventDefault(); // Prevent default drag behavior
-    e.stopPropagation(); // Stop event from propagating
-  };
-
-  const handleDrop = (e) => {
-    e.preventDefault(); // Prevent default drop behavior
-    e.stopPropagation(); // Stop event from propagating
-    const file = e.dataTransfer.files[0];
-    handleFileChange(file); // Handle file change through drag-and-drop
-  };
+  // Handle dialog close and reset form
+  const handleClose = useCallback(() => {
+    setFormData({
+      plotCode: "",
+      ProductName: "",
+      ProductType: "",
+      Price: "",
+      Amount: "",
+      status: "",
+    });
+    onClose();
+  }, [onClose]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
-    const formDataToSend = new FormData();
-    formDataToSend.append("ProductID", ProductID);
-    formDataToSend.append("plotCode", formData.plotCode);
-    formDataToSend.append("ProductName", formData.ProductName);
-    formDataToSend.append("ProductType", formData.ProductType);
-    formDataToSend.append("Price", formData.Price);
-    formDataToSend.append("Amount", formData.Amount);
-    formDataToSend.append("status", formData.status);
-    formDataToSend.append("description", formData.description);
-  
-    if (formData.imageUrl) {
-      formDataToSend.append("imageUrl", formData.imageUrl);
-    }
-  
+
+    const formattedData = {
+      ...formData,
+     
+    };
+
     try {
-      const response = await fetch(`/api/product/farmer/put`, { // Adjust the API endpoint if needed
+      const response = await fetch(`/api/product/add?ProductID=${ProductID}`, {
         method: "PUT",
-        body: formDataToSend,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: ProductID, // Include the id in the request body
+          ...formattedData,
+        }),
       });
-  
+
       if (response.ok) {
         const updatedProduct = await response.json();
         alert("Product updated successfully");
@@ -159,31 +134,16 @@ const EditProductDialog = ({ open, onClose, ProductID, onSuccess }) => {
     }
   };
 
-  const handleClose = useCallback(() => {
-    setFormData({
-      plotCode: "",
-      ProductName: "",
-      ProductType: "",
-      Price: "",
-      Amount: "",
-      status: "",
-      description: "",
-      imageUrl: null,
-    });
-    setImagePreview(null); // Clear the image preview
-    onClose();
-  }, [onClose]);
-
   return (
     <Dialog open={open} onClose={handleClose} PaperComponent={CustomPaper}>
-      <DialogTitle>แก้ไขสินค้า</DialogTitle>
+      <DialogTitle>Edit Product</DialogTitle>
       <DialogContent>
         <form onSubmit={handleSubmit}>
           <Grid container spacing={2} marginTop={0}>
             <Grid item xs={12}>
               <TextField
                 name="plotCode"
-                label="รหัสแปลงปลูก"
+                label="Plot Code"
                 variant="outlined"
                 fullWidth
                 value={formData.plotCode}
@@ -194,7 +154,7 @@ const EditProductDialog = ({ open, onClose, ProductID, onSuccess }) => {
             <Grid item xs={12}>
               <TextField
                 name="ProductName"
-                label="ชื่อสินค้า"
+                label="Product Name"
                 variant="outlined"
                 fullWidth
                 value={formData.ProductName}
@@ -205,7 +165,7 @@ const EditProductDialog = ({ open, onClose, ProductID, onSuccess }) => {
             <Grid item xs={12}>
               <TextField
                 name="ProductType"
-                label="ประเภทสินค้า"
+                label="Variety"
                 variant="outlined"
                 fullWidth
                 value={formData.ProductType}
@@ -216,7 +176,7 @@ const EditProductDialog = ({ open, onClose, ProductID, onSuccess }) => {
             <Grid item xs={12}>
               <TextField
                 name="Price"
-                label="ราคา"
+                label="Price"
                 variant="outlined"
                 fullWidth
                 value={formData.Price}
@@ -227,77 +187,29 @@ const EditProductDialog = ({ open, onClose, ProductID, onSuccess }) => {
             <Grid item xs={12}>
               <TextField
                 name="Amount"
-                label="จำนวน"
+                label="Amount"
                 variant="outlined"
                 type="number"
                 fullWidth
                 value={formData.Amount}
                 onChange={handleChange}
                 required
+                inputProps={{ min: 0 }}
               />
             </Grid>
             <Grid item xs={12}>
               <FormControl fullWidth variant="outlined" required>
-                <InputLabel>สถานะ</InputLabel>
+                <InputLabel>Status</InputLabel>
                 <Select
                   name="status"
                   value={formData.status}
                   onChange={handleChange}
-                  label="สถานะ"
+                  label="Status"
                 >
                   <MenuItem value="Available">Available</MenuItem>
                   <MenuItem value="Out of Stock">Out of Stock</MenuItem>
                 </Select>
               </FormControl>
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                name="description"
-                label="รายละเอียดสินค้า"
-                variant="outlined"
-                fullWidth
-                multiline
-                rows={4}
-                value={formData.description}
-                onChange={handleChange}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <div
-                style={{
-                  border: "2px dashed #ccc",
-                  borderRadius: "4px",
-                  padding: "20px",
-                  textAlign: "center",
-                  cursor: "pointer",
-                  backgroundColor: "#fafafa",
-                }}
-                onDragOver={handleDragOver}
-                onDrop={handleDrop}
-                onClick={() => document.getElementById('fileInput').click()}
-              >
-                <input
-                  id="fileInput" // Added ID
-                  type="file"
-                  hidden
-                  onChange={(e) => handleFileChange(e.target.files[0])}
-                />
-                <p>ลากและวางรูปภาพที่นี่ หรือคลิกเพื่อเลือกไฟล์</p>
-              </div>
-            </Grid>
-            <Grid item xs={12}>
-              {imagePreview && (
-                <img
-                  src={imagePreview}
-                  alt="Image Preview"
-                  style={{
-                    width: "100%",
-                    maxHeight: "300px",
-                    objectFit: "cover",
-                    marginTop: "10px",
-                  }}
-                />
-              )}
             </Grid>
             <Grid item xs={12}>
               <Button
@@ -306,7 +218,7 @@ const EditProductDialog = ({ open, onClose, ProductID, onSuccess }) => {
                 color="primary"
                 fullWidth
               >
-                แก้ไขสินค้า
+                บันทึก
               </Button>
             </Grid>
           </Grid>

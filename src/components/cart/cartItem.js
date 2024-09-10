@@ -1,4 +1,4 @@
-"use client";
+"use client"
 import { useCart } from "@/context/cartContext";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -6,8 +6,7 @@ import { useEffect, useState } from "react";
 import QuantityHandler from "../quantityhandler";
 
 export default function CartItem({ initialItems }) {
-  const { cartItems, setCartItems, removeItemFromCart, updateItemQuantity } =
-    useCart();
+  const { cartItems, setCartItems, removeItemFromCart, updateItemQuantity } = useCart();
   const [selectedItems, setSelectedItems] = useState([]);
   const router = useRouter();
   const { data: session } = useSession();
@@ -17,7 +16,7 @@ export default function CartItem({ initialItems }) {
   }, [initialItems]);
 
   useEffect(() => {
-    console.log("CartItems data:", cartItems);
+    console.log('CartItems data:', cartItems);
   }, [cartItems]);
 
   // Function to select or deselect an item
@@ -25,7 +24,7 @@ export default function CartItem({ initialItems }) {
     setSelectedItems((prevSelectedItems) => {
       if (prevSelectedItems.includes(productId)) {
         // If already selected, deselect it
-        return prevSelectedItems.filter((item) => item !== productId);
+        return prevSelectedItems.filter(item => item !== productId);
       } else {
         // Otherwise, add it to the selected items
         return [...prevSelectedItems, productId];
@@ -34,7 +33,7 @@ export default function CartItem({ initialItems }) {
   };
 
   const handleUpdateQuantity = (productId, newQuantity) => {
-    const item = cartItems.find((i) => i.productId === productId);
+    const item = cartItems.find(i => i.productId === productId);
     if (item && newQuantity <= item.productAmount) {
       updateItemQuantity(productId, newQuantity);
     }
@@ -46,13 +45,11 @@ export default function CartItem({ initialItems }) {
 
   const handleCheckout = () => {
     if (selectedItems.length > 0) {
-      const selectedItemData = cartItems.filter((item) =>
-        selectedItems.includes(item.productId),
-      );
-
+      const selectedItemData = cartItems.filter(item => selectedItems.includes(item.productId));
+      
       if (selectedItemData.length > 0) {
-        localStorage.setItem("selectedItems", JSON.stringify(selectedItemData));
-        router.push("/checkout");
+        localStorage.setItem('selectedItems', JSON.stringify(selectedItemData));
+        router.push('/checkout');
       } else {
         alert("Selected items not found in cart.");
       }
@@ -86,22 +83,17 @@ export default function CartItem({ initialItems }) {
                       onChange={() => selectItem(item.productId)}
                     />
                   </td>
-                  <td>
-                    {item.productName || item.product.ProductName}{" "}
-                    {item.productType || item.product.ProductType}
-                  </td>
+                  <td>{item.productName || item.product.ProductName} {item.productType || item.product.ProductType}</td>
                   <td>{item.productPrice || item.product.Price}</td>
                   <td>
-                    <QuantityHandler
-                      productAmount={item.productAmount || item.product.Amount}
-                      productId={item.productId || item.product.ProductID}
-                      initialQuantity={item.quantity}
-                      onQuantityChange={handleUpdateQuantity}
+                    <QuantityHandler 
+                      productAmount={item.productAmount || item.product.Amount} 
+                      productId={item.productId || item.product.ProductID} 
+                      initialQuantity={item.quantity} 
+                      onQuantityChange={handleUpdateQuantity} 
                     />
                   </td>
-                  <td>
-                    {item.quantity * (item.productPrice || item.product.Price)}
-                  </td>
+                  <td>{item.quantity * (item.productPrice || item.product.Price)}</td>
                   <td>
                     <button onClick={() => handleDelete(item.productId)}>
                       ลบ
@@ -118,7 +110,7 @@ export default function CartItem({ initialItems }) {
         </table>
       </div>
       <div className="col-span-2 border-2 border-black w-full h-[200px]">
-        <button
+        <button 
           onClick={handleCheckout}
           disabled={selectedItems.length === 0}
           className="action-button bg-[#4EAC14] text-white font-light rounded-xl w-[150px] mt-4 disabled:bg-gray-300"

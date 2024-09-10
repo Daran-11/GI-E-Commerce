@@ -1,6 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  darkMode: ["selector", '[data-mode="dark"]'],
+  darkMode: ['selector', '[data-mode="dark"]'],
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -9,7 +9,8 @@ module.exports = {
   theme: {
     extend: {
       backgroundImage: {
-        pineapple: "url('/phulae.jpg')",
+        "pineapple": "url('/phulae.jpg')",
+
       },
     },
   },

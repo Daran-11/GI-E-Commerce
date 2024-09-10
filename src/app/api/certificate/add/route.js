@@ -19,14 +19,14 @@ export async function GET(request) {
       } else {
         return NextResponse.json(
           { error: "Certificate not found" },
-          { status: 404 },
+          { status: 404 }
         );
       }
     } catch (error) {
       console.error("Error fetching certificate:", error);
       return NextResponse.json(
         { error: "Error fetching certificate" },
-        { status: 500 },
+        { status: 500 }
       );
     }
   } else {
@@ -40,7 +40,7 @@ export async function GET(request) {
       console.error("Error fetching certificates:", error);
       return NextResponse.json(
         { error: "Error fetching certificates" },
-        { status: 500 },
+        { status: 500 }
       );
     }
   }
@@ -67,7 +67,7 @@ export async function POST(request) {
     console.error("Failed to add certificate:", error);
     return NextResponse.json(
       { error: "Failed to add certificate" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -94,7 +94,7 @@ export async function PUT(request) {
     console.error("Failed to update certificate:", error);
     return NextResponse.json(
       { error: "Failed to update certificate" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -119,7 +119,7 @@ export async function DELETE(request) {
     console.error("Failed to delete certificate:", error);
     return NextResponse.json(
       { error: "Failed to delete certificate" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

@@ -16,7 +16,7 @@ const Product = () => {
 
   const fetchProducts = async () => {
     try {
-      const response = await fetch("/api/product/farmer/get");
+      const response = await fetch("/api/product/add");
       const data = await response.json();
       const formattedData = data.map((product) => ({
         ...product,
@@ -43,15 +43,15 @@ const Product = () => {
     if (confirm("Are you sure you want to delete this product?")) {
       try {
         const response = await fetch(
-          `/api/product/farmer/delete?ProductID=${ProductID}`,
+          `/api/product/add?ProductID=${ProductID}`,
           {
             method: "DELETE",
             headers: { "Content-Type": "application/json" },
-          },
+          }
         );
         if (response.ok) {
           setProducts(
-            products.filter((product) => product.ProductID !== ProductID),
+            products.filter((product) => product.ProductID !== ProductID)
           );
         } else {
           alert("Failed to delete product");
@@ -76,31 +76,25 @@ const Product = () => {
   };
 
   const handleAddProduct = async (productData) => {
-    const formData = new FormData();
-  
-    // Append product data to FormData
-    formData.append("plotCode", productData.plotCode);
-    formData.append("ProductName", productData.ProductName);
-    formData.append("ProductType", productData.ProductType);
-    formData.append("Price", productData.Price);
-    formData.append("Amount", productData.Amount);
-    formData.append("status", productData.status);
-  
-    // Append image file if it exists
-    if (productData.imageUrl) {
-      formData.append("imageUrl", productData.imageUrl);
-    }
-  
-   
+    const response = await fetch("/api/product/add", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(productData),
+    });
+
+    if (response.ok) {
       alert("Product added successfully");
       fetchProducts(); // Refetch products after adding a new product
       handleCloseAddDialog();
-   
-    
+    } else {
+      alert("Failed to add product");
+    }
   };
-  
+
   const handleEditProduct = async (ProductID, productData) => {
-    const response = await fetch(`/api/product/farmer/put?ProductID=${ProductID}`, {
+    const response = await fetch(`/api/product/add?ProductID=${ProductID}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",

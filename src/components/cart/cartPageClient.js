@@ -1,22 +1,23 @@
-"use client";
+'use client';
 
-import CartItem from "@/components/cart/cartItem";
-import { useCart } from "@/context/cartContext";
-import { useSession } from "next-auth/react";
+import CartItem from '@/components/cart/cartItem';
+import { useCart } from '@/context/cartContext';
+import { useSession } from 'next-auth/react';
 
 export default function CartPageClient() {
   const { data: session, status } = useSession();
   const { cartItems } = useCart();
 
-  if (status === "loading") {
+  if (status === 'loading') {
     return <p>Loading...</p>;
   }
-
-  return (
-    <div className="">
+  
+    return (
       <div className="">
-        <CartItem initialItems={cartItems} session={session} />
+        <div className=''>
+            <CartItem initialItems={cartItems} session={session} />         
+        </div>
       </div>
-    </div>
-  );
-}
+      
+    );
+  }

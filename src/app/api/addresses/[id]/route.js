@@ -1,12 +1,11 @@
-import { getServerSession } from "next-auth";
-import { NextResponse } from "next/server";
-import prisma from "../../../../../lib/prisma";
-import { authOptions } from "../../auth/[...nextauth]/route";
+import { getServerSession } from 'next-auth';
+import { NextResponse } from 'next/server';
+import prisma from '../../../../../lib/prisma';
+import { authOptions } from '../../auth/[...nextauth]/route';
 
 export async function PUT(request, { params }) {
   const { id } = params;
-  const { addressLine, provinceId, amphoeId, tambonId, postalCode, isDefault } =
-    await request.json();
+  const { addressLine, provinceId, amphoeId, tambonId, postalCode, isDefault } = await request.json();
 
   try {
     const session = await getServerSession(authOptions);
@@ -45,13 +44,11 @@ export async function PUT(request, { params }) {
 
     return NextResponse.json(updatedAddress);
   } catch (error) {
-    console.error("Error updating address:", error);
-    return NextResponse.json(
-      { error: `Internal Server Error: ${error.message}` },
-      { status: 500 },
-    );
+    console.error('Error updating address:', error);
+    return NextResponse.json({ error: `Internal Server Error: ${error.message}` }, { status: 500 });
   }
 }
+
 
 export async function DELETE(request, { params }) {
   const { id } = params;
@@ -78,7 +75,7 @@ export async function DELETE(request, { params }) {
       // Reassign default address
       const otherAddress = await prisma.address.findFirst({
         where: { userId: session.user.id, id: { not: addressId } },
-        orderBy: { createdAt: "asc" }, // Choose a method for selecting a new default
+        orderBy: { createdAt: 'asc' } // Choose a method for selecting a new default
       });
 
       if (otherAddress) {
@@ -92,10 +89,7 @@ export async function DELETE(request, { params }) {
     await prisma.address.delete({ where: { id: addressId } });
     return NextResponse.json({ message: "Address deleted" }, { status: 200 });
   } catch (error) {
-    console.error("Error deleting address:", error);
-    return NextResponse.json(
-      { error: "Failed to delete address" },
-      { status: 500 },
-    );
+    console.error('Error deleting address:', error);
+    return NextResponse.json({ error: 'Failed to delete address' }, { status: 500 });
   }
 }
