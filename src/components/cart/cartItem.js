@@ -59,7 +59,7 @@ export default function CartItem({ initialItems }) {
   };
 
   return (
-    <div className="top-container grid grid-cols-10">
+    <div className="w-4/5 ml-auto mr-auto mt-[150px] grid grid-cols-10">
       <div className="col-span-8">
         <table>
           <thead>

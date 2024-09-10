@@ -76,7 +76,7 @@ model Order {
   userId        Int
   productId     Int
   farmerId      Int
-  deliveryId    Int
+  deliveryId    Int?
   quantity      Int
   totalPrice    Float
   addressText   String   //store the address in text form
@@ -89,7 +89,7 @@ model Order {
   //Relationships
   user          User     @relation(fields: [userId], references: [id])
   product       Product  @relation(fields: [productId], references: [ProductID])
-  delivery      Delivery_Order @relation(fields: [deliveryId], references: [id])
+  delivery      Delivery_Detail? @relation(fields: [deliveryId], references: [id])
   farmer        Farmer    @relation(fields: [farmerId], references: [id])
 }
 
@@ -97,13 +97,13 @@ model Delivery_Service{
   id      Int @id @default(autoincrement())
   name    String
 
-  deliveryOrder Delivery_Order[]
+  deliveryOrder Delivery_Detail[]
 }
 
-model Delivery_Order {
+model Delivery_Detail {
   id            Int  @id @default(autoincrement())
-  deliveryId    Int
-  trackingNum   Int
+  deliveryId    Int 
+  trackingNum   String    
 
   order                 Order[]
   deliveryService       Delivery_Service  @relation(fields: [deliveryId], references: [id])
