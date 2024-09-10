@@ -1,13 +1,16 @@
-import dynamic from "next/dynamic";
-import styles from "../ui/dashboard/dashboard.module.css";
 
-const Card = dynamic(() => import("../ui/dashboard/card/card"), {
-  loading: () => <p>Loading...</p>,
-});
-const Chart = dynamic(() => import("../ui/dashboard/chart/chart"));
-const Transactions = dynamic(
-  () => import("../ui/dashboard/transactions/transactions"),
-);
+import dynamic from "next/dynamic"
+import styles from "../ui/dashboard/dashboard.module.css"
+
+
+const Card = dynamic(() => import ("../ui/dashboard/card/card"),
+  {
+    loading: () => <p>Loading...</p>,
+  }
+)
+const Chart = dynamic(() => import ("../ui/dashboard/chart/chart"))
+const Transactions = dynamic(() => import ("../ui/dashboard/transactions/transactions"))
+
 
 const Dashboard = () => {
   return (
@@ -20,12 +23,13 @@ const Dashboard = () => {
           <Card />
         </div>
         <div>
-          <Transactions />
+        <Transactions />
         </div>
         <Chart />
       </div>
+      
     </div>
-  );
-};
+  )
+}
 
-export default Dashboard;
+export default Dashboard

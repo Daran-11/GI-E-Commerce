@@ -1,20 +1,20 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from "react";
 import ProductCard from "../components/productcard";
 
 async function fetchProducts() {
-  console.log("Fetching products...");
+  console.log('Fetching products...');
   try {
-    const res = await fetch("http://localhost:3000/api/product");
+    const res = await fetch('http://localhost:3000/api/product');
     if (!res.ok) {
-      return { error: "ไม่สามารถเชื่อมต่อข้อมูลได้ในขณะนี้" };
+      return { error: 'ไม่สามารถเชื่อมต่อข้อมูลได้ในขณะนี้' };
     }
     const products = await res.json();
     return { products, error: null };
   } catch (error) {
-    return { products: [], error: "ไม่พบข้อมูล" };
+    return { products: [], error: 'ไม่พบข้อมูล' };
   }
 }
 
@@ -22,7 +22,7 @@ export default function Home() {
   const [products, setProducts] = useState([]);
   const [error, setError] = useState(null);
   const searchParams = useSearchParams();
-  const query = searchParams.get("query");
+  const query = searchParams.get('query');
   const router = useRouter();
 
   useEffect(() => {
@@ -37,22 +37,16 @@ export default function Home() {
     loadProducts();
   }, []);
 
-  const filteredProducts = products.filter((product) => {
+  const filteredProducts = products.filter(product => {
     if (!query) {
       return true; // Return all products if no query is provided
     }
 
-    const queryParts = query
-      .toLowerCase()
-      .split(" ")
-      .filter((part) => part);
-    return queryParts.every((part) => {
-      const nameMatch =
-        product.ProductName && product.ProductName.toLowerCase().includes(part);
-      const priceMatch =
-        product.Price && product.Price.toString().includes(part);
-      const typeMatch =
-        product.ProductType && product.ProductType.toLowerCase().includes(part);
+    const queryParts = query.toLowerCase().split(' ').filter(part => part);
+    return queryParts.every(part => {
+      const nameMatch = product.ProductName && product.ProductName.toLowerCase().includes(part);
+      const priceMatch = product.Price && product.Price.toString().includes(part);
+      const typeMatch = product.ProductType && product.ProductType.toLowerCase().includes(part);
       return nameMatch || priceMatch || typeMatch;
     });
   });

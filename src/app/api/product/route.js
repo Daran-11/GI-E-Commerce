@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse } from 'next/server';
 import prisma from "../../../../lib/prisma";
 //endpoint สำหรับ display สับปะรดแต่ละอัน
 export async function GET() {
@@ -14,9 +14,6 @@ export async function GET() {
     });
     return NextResponse.json(products, { status: 200 });
   } catch (error) {
-    return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 },
-    );
+    return  NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }

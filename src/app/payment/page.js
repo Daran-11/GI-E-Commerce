@@ -11,15 +11,17 @@ export default function PaymentPage() {
   const [totalAmount, setTotalAmount] = useState(0);
   const [selectedItems, setSelectedItems] = useState([]);
 
+
   useEffect(() => {
     // Retrieve the order IDs and selected items from cart from sessionStorage)
-    const storedOrderIds = sessionStorage.getItem("orderIds");
+    const storedOrderIds = sessionStorage.getItem('orderIds');
 
     const storedItems = localStorage.getItem("selectedItems");
 
+
     if (!storedOrderIds) {
       // Redirect to another page if orderIds is not found in local storage
-      router.push("/");
+      router.push('/');
     }
 
     if (storedOrderIds) {
@@ -34,15 +36,15 @@ export default function PaymentPage() {
     }
   }, []);
 
+  
+
   const fetchTotalAmount = async (orderIds) => {
     try {
-      const res = await fetch(
-        `/api/orders/total-amount?ids=${orderIds.join(",")}`,
-      );
+      const res = await fetch(`/api/orders/total-amount?ids=${orderIds.join(',')}`);
       const data = await res.json();
       setTotalAmount(data.totalAmount);
     } catch (error) {
-      console.error("Error fetching total amount:", error);
+      console.error('Error fetching total amount:', error);
       setTotalAmount(0); // Handle error by setting total amount to 0 or showing a message
     }
   };
@@ -52,32 +54,33 @@ export default function PaymentPage() {
       setLoading(true);
       try {
         orderSelected = selectedItems.map(async (item) => {
-          const response = await fetch(
-            "http://localhost:3000/api/auth/cart/delete",
-            {
-              method: "DELETE",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                productId: item.productId, // Send the productId to the API for deletion
-              }),
+          const response = await fetch('http://localhost:3000/api/auth/cart/delete', {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
             },
-          );
+            body: JSON.stringify({
+              productId: item.productId  // Send the productId to the API for deletion
+            }),
+          });          
           if (response.ok) {
-            localStorage.removeItem("selectedItems");
-            console.log("Cart items deleted successfully");
+            localStorage.removeItem('selectedItems');
+            console.log('Cart items deleted successfully');
             router.push(`/order-confirmation`);
           } else {
-            console.error("Failed to delete cart items");
-          }
+            console.error('Failed to delete cart items');
+          }        
         });
+
+
+
       } catch (error) {
-        console.error("Error deleting cart items:", error);
+        console.error('Error deleting cart items:', error);
       } finally {
         setLoading(false);
       }
     }
+
   };
 
   return (

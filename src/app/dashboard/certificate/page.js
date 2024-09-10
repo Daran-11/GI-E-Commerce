@@ -81,6 +81,7 @@ const Certificate = () => {
                     {certificate.status}
                   </span>
                 </td>
+
                 <td>
                   {certificate.farmer?.name || "N/A"}
                   <br />

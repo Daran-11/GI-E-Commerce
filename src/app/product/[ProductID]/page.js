@@ -1,5 +1,5 @@
-import ProductDetailsClient from "@/components/productDetails/productDetailsClient";
-import prisma from "../../../../lib/prisma";
+import ProductDetailsClient from '@/components/productDetails/productDetailsClient';
+import prisma from '../../../../lib/prisma';
 
 export const revalidate = 60;
 

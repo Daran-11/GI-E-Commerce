@@ -1,12 +1,7 @@
 "use client";
 import { usePathname } from "next/navigation";
 import styles from "./navbar.module.css";
-import {
-  MdNotifications,
-  MdOutlineChat,
-  MdPublic,
-  MdSearch,
-} from "react-icons/md";
+import { MdNotifications, MdOutlineChat, MdPublic, MdSearch } from "react-icons/md";
 
 const Navbar = () => {
   const pathname = usePathname();
@@ -22,8 +17,7 @@ const Navbar = () => {
   };
 
   // Get the last part of the pathname and map it to a Thai title
-  const currentTitle =
-    titleMap[pathname.split("/").pop()] || "ไม่พบหน้าที่ต้องการ";
+  const currentTitle = titleMap[pathname.split("/").pop()] || "ไม่พบหน้าที่ต้องการ";
 
   return (
     <div className={styles.container}>
