@@ -1,4 +1,4 @@
-// /api/product/post.js
+// เเพิมข้อมูลเข้ไปยังเว็บ
 import { NextResponse } from "next/server";
 import prisma from "../../../../../../lib/prisma";
 import { writeFile } from "fs/promises";
