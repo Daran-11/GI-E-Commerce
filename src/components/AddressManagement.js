@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function AddressManagement() {
-  const { data: session , status} = useSession();
+  const { data: session, status } = useSession();
   const router = useRouter();
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [addresses, setAddresses] = useState([]);
@@ -24,14 +24,13 @@ export default function AddressManagement() {
   const [tambons, setTambons] = useState([]);
   const [isFormVisible, setIsFormVisible] = useState(false);
 
-
   useEffect(() => {
     if (status === "loading") return; // Optionally handle loading state
     if (!session) {
       router.push("/login");
     } else {
-      console.log('Client Session:', session);
-      console.log('Client Status:', status);
+      console.log("Client Session:", session);
+      console.log("Client Status:", status);
       fetchAddresses();
       fetchProvinces();
     }
@@ -39,10 +38,12 @@ export default function AddressManagement() {
 
   const fetchAddresses = async () => {
     if (session?.user?.id) {
-      const res = await fetch(`http://localhost:3000/api/users/${session.user.id}/addresses`);
+      const res = await fetch(
+        `http://localhost:3000/api/users/${session.user.id}/addresses`,
+      );
       if (res.ok) {
         const data = await res.json();
-        console.log('Fetched Addresses:', data); // Debug the response
+        console.log("Fetched Addresses:", data); // Debug the response
         setAddresses(data);
       } else {
         console.error("Failed to fetch addresses:", res.statusText);
@@ -52,7 +53,6 @@ export default function AddressManagement() {
     }
   };
 
-
   const fetchProvinces = async () => {
     const res = await fetch("http://localhost:3000/api/provinces");
     const data = await res.json();
@@ -60,13 +60,17 @@ export default function AddressManagement() {
   };
 
   const fetchAmphoes = async (provinceId) => {
-    const res = await fetch(`http://localhost:3000/api/provinces/${provinceId}/amphoes`);
+    const res = await fetch(
+      `http://localhost:3000/api/provinces/${provinceId}/amphoes`,
+    );
     const data = await res.json();
     setAmphoes(data);
   };
 
   const fetchTambons = async (amphoeId) => {
-    const res = await fetch(`http://localhost:3000/api/amphoes/${amphoeId}/tambons`);
+    const res = await fetch(
+      `http://localhost:3000/api/amphoes/${amphoeId}/tambons`,
+    );
     const data = await res.json();
     setTambons(data);
   };
@@ -81,7 +85,7 @@ export default function AddressManagement() {
       ...prev,
       provinceId,
       amphoeId: "",
-      tambonId: ""
+      tambonId: "",
     }));
 
     if (provinceId) {
@@ -97,7 +101,7 @@ export default function AddressManagement() {
     setAddressForm((prev) => ({
       ...prev,
       amphoeId,
-      tambonId: ""
+      tambonId: "",
     }));
 
     if (amphoeId) {
@@ -108,14 +112,11 @@ export default function AddressManagement() {
   };
 
   const handleSave = async () => {
-
-    
-
     const method = addressForm.id ? "PUT" : "POST";
     const url = addressForm.id
       ? `http://localhost:3000/api/users/${session.user.id}/addresses`
       : `http://localhost:3000/api/users/${session.user.id}/addresses`;
-  
+
     const res = await fetch(url, {
       method,
       headers: { "Content-Type": "application/json" },
@@ -125,7 +126,7 @@ export default function AddressManagement() {
         userId: session.user.id,
       }),
     });
-  
+
     if (res.ok) {
       fetchAddresses();
       setAddressForm({
@@ -142,59 +143,66 @@ export default function AddressManagement() {
       console.error("Failed to save address");
     }
   };
-  
 
   const handleSetDefault = async (addressId) => {
     if (session?.user?.id) {
       const userId = session.user.id;
-  
+
       // Find the address details
       const address = addresses.find((addr) => addr.id === addressId);
       if (!address) {
-        console.error('Address not found');
+        console.error("Address not found");
         return;
       }
-  
+
       // Determine if the current address is already the default
       const isCurrentlyDefault = address.isDefault;
-  
+
       // Validate address fields before sending
-      const { addressLine, provinceId, amphoeId, tambonId, postalCode } = address;
-      if (!addressLine || !provinceId || !amphoeId || !tambonId || !postalCode) {
-        console.error('Invalid address data');
+      const { addressLine, provinceId, amphoeId, tambonId, postalCode } =
+        address;
+      if (
+        !addressLine ||
+        !provinceId ||
+        !amphoeId ||
+        !tambonId ||
+        !postalCode
+      ) {
+        console.error("Invalid address data");
         return;
       }
-  
+
       // If the address is already the default, simply return (do nothing)
       if (isCurrentlyDefault) {
-        console.log('Address is already the default');
+        console.log("Address is already the default");
         return;
       }
-  
-      const response = await fetch(`http://localhost:3000/api/users/${userId}/addresses`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id: addressId,
-          addressLine,
-          provinceId: parseInt(provinceId, 10), // Ensure these are numbers
-          amphoeId: parseInt(amphoeId, 10),
-          tambonId: parseInt(tambonId, 10),
-          postalCode,
-          isDefault: false, // Set to true or false based on the logic
-        }),
-      });
-  
+
+      const response = await fetch(
+        `http://localhost:3000/api/users/${userId}/addresses`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            id: addressId,
+            addressLine,
+            provinceId: parseInt(provinceId, 10), // Ensure these are numbers
+            amphoeId: parseInt(amphoeId, 10),
+            tambonId: parseInt(tambonId, 10),
+            postalCode,
+            isDefault: false, // Set to true or false based on the logic
+          }),
+        },
+      );
+
       if (response.ok) {
         fetchAddresses(); // Refresh the list of addresses
       } else {
-        console.error('Failed to set default address');
+        console.error("Failed to set default address");
       }
     }
   };
-  
-  
-  
+
   const handleEdit = (address) => {
     setAddressForm({
       id: address.id,
@@ -211,37 +219,46 @@ export default function AddressManagement() {
   };
 
   const handleDelete = async (addressId) => {
-    const confirmDelete = window.confirm('Are you sure you want to delete this address?');
-  
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this address?",
+    );
+
     if (confirmDelete && session?.user?.id) {
       const userId = session.user.id;
-  
+
       // Ensure that there are at least 2 addresses before allowing deletion
       if (addresses.length <= 1) {
-        alert('You must have at least one address.');
+        alert("You must have at least one address.");
         return;
       }
-  
+
       try {
-        const response = await fetch(`/api/users/${userId}/addresses/${addressId}`, {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
+        const response = await fetch(
+          `/api/users/${userId}/addresses/${addressId}`,
+          {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+            },
           },
-        });
-  
+        );
+
         if (response.ok) {
           // Remove the deleted address from the state to refresh the UI
-          setAddresses((prevAddresses) => prevAddresses.filter((addr) => addr.id !== addressId));
-          alert('Address deleted successfully');
+          setAddresses((prevAddresses) =>
+            prevAddresses.filter((addr) => addr.id !== addressId),
+          );
+          alert("Address deleted successfully");
         } else {
           const errorData = await response.json();
-          console.error('Failed to delete address:', errorData.message);
-          alert('Failed to delete address. Please try again.');
+          console.error("Failed to delete address:", errorData.message);
+          alert("Failed to delete address. Please try again.");
         }
       } catch (error) {
-        console.error('Error deleting address:', error);
-        alert('An error occurred while deleting the address. Please try again.');
+        console.error("Error deleting address:", error);
+        alert(
+          "An error occurred while deleting the address. Please try again.",
+        );
       }
     }
   };
@@ -324,7 +341,12 @@ export default function AddressManagement() {
                 type="checkbox"
                 name="default"
                 checked={addressForm.isDefault}
-                onChange={(e) => setAddressForm({ ...addressForm, isDefault: e.target.checked })}
+                onChange={(e) =>
+                  setAddressForm({
+                    ...addressForm,
+                    isDefault: e.target.checked,
+                  })
+                }
               />
               Set as default address
             </label>
@@ -338,16 +360,32 @@ export default function AddressManagement() {
 
       <h2>Saved Addresses</h2>
       <ul>
-        {addresses.length > 0 && addresses.map((address) => (
-          <li key={address.id}>
-            {address.addressLine}, {address.province.name_th}, {address.amphoe.name_th}, {address.tambon.name_th}, {address.postalCode}, {address.isDefault}
-            <button className=" w-20 text-[#4EAC14]" onClick={() => handleEdit(address)}>Edit</button>
-            <button className="w-20 text-red-700"  onClick={() => handleDelete(address.id)}>Delete</button>
-            <button  className={`text-black ${address.isDefault ? 'text-gray-600' : 'text-blue-600 hover:text-blue-300'}`} onClick={() => handleSetDefault(address.id)}>
-              {address.isDefault ? "Default" : "Set as Default"}
-            </button>
-          </li>
-        ))}
+        {addresses.length > 0 &&
+          addresses.map((address) => (
+            <li key={address.id}>
+              {address.addressLine}, {address.province.name_th},{" "}
+              {address.amphoe.name_th}, {address.tambon.name_th},{" "}
+              {address.postalCode}, {address.isDefault}
+              <button
+                className=" w-20 text-[#4EAC14]"
+                onClick={() => handleEdit(address)}
+              >
+                Edit
+              </button>
+              <button
+                className="w-20 text-red-700"
+                onClick={() => handleDelete(address.id)}
+              >
+                Delete
+              </button>
+              <button
+                className={`text-black ${address.isDefault ? "text-gray-600" : "text-blue-600 hover:text-blue-300"}`}
+                onClick={() => handleSetDefault(address.id)}
+              >
+                {address.isDefault ? "Default" : "Set as Default"}
+              </button>
+            </li>
+          ))}
       </ul>
     </div>
   );

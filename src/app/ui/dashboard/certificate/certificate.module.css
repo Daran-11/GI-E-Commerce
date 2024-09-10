@@ -1,79 +1,84 @@
 /* Global container styles */
 .container {
-    background-color: var(--bgSoft);
-    padding: 20px;
-    border-radius: 10px;
-    margin-top: 20px;
+  background-color: var(--bgSoft);
+  padding: 20px;
+  border-radius: 10px;
+  margin-top: 20px;
 }
 
 /* Flexbox container for top section */
 .top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 /* Add new button styles */
 .addButton {
-    padding: 10px;
-    background-color: #98de6d;
-    color: var(--text);
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
+  padding: 10px;
+  background-color: #98de6d;
+  color: var(--text);
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
 }
 
 /* Table styles */
 .table {
-    width: 100%;
-    border-collapse: collapse; /* Ensures borders between cells are merged */
+  width: 100%;
+  border-collapse: collapse; /* Ensures borders between cells are merged */
 }
 
 .table td {
-    padding: 15px;
-    border-bottom: 1px solid #ddd; /* Adds a subtle border between rows */
+  padding: 15px;
+  border-bottom: 1px solid #ddd; /* Adds a subtle border between rows */
 }
 
 /* Button styles */
 .buttons {
-    display: flex;
-    gap: 10px;
+  display: flex;
+  gap: 10px;
 }
 
 .button {
-    padding: 5px 10px;
-    border-radius: 5px;
-    color: var(--text);
-    border: none;
-    cursor: pointer;
+  padding: 5px 10px;
+  border-radius: 5px;
+  color: var(--text);
+  border: none;
+  cursor: pointer;
 }
 
 /* Button variations */
 .view {
-    background-color: #98de6d;
+  background-color: #98de6d;
 }
 
 /* Status indicator styles */
 .status {
-    border-radius: 5px;
-    padding: 5px;
-    font-size: 14px;
-    color: black;
+  border-radius: 5px;
+  padding: 5px;
+  font-size: 14px;
+  color: black;
 }
 
 /* Status colors */
 .pending {
-    background-color: rgba(247, 203, 115, 0.75); /* Using rgba for better color transparency */
+  background-color: rgba(
+    247,
+    203,
+    115,
+    0.75
+  ); /* Using rgba for better color transparency */
 }
 
 .done {
-    background-color: rgba(175, 214, 238, 0.75);
+  background-color: rgba(175, 214, 238, 0.75);
 }
 
 .cancelled {
-    background-color: rgba(247, 115, 115, 0.75);
+  background-color: rgba(247, 115, 115, 0.75);
 }
 
 .expired {
-    background-color: #afafaf;
+  background-color: #afafaf;
 }

@@ -1,175 +1,187 @@
-'use client';
-import { useCart } from '@/context/cartContext';
-import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from '@nextui-org/react';
-import { signOut, useSession } from 'next-auth/react';
+"use client";
+import { useCart } from "@/context/cartContext";
+import {
+  Button,
+  Dropdown,
+  DropdownItem,
+  DropdownMenu,
+  DropdownTrigger,
+} from "@nextui-org/react";
+import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
-import { usePathname } from 'next/navigation';
+import { usePathname } from "next/navigation";
 import SearchBar from "./searchbar";
 
 export const Navbar = () => {
-    const { data: session, status } = useSession()
-    const currentPath = usePathname();
-    const pathname = usePathname()
-    const { cartItemCount } = useCart(); // Use cart context
-    //const [cartItemCount, setCartItemCount] = useState(0); //จำนวนสินค้าในตะกร้าตอนนี้
-    const activePaths = ['/account/user/profile', '/account/user/settings', '/account/user/orders' ,'/account/user/addresses'];
+  const { data: session, status } = useSession();
+  const currentPath = usePathname();
+  const pathname = usePathname();
+  const { cartItemCount } = useCart(); // Use cart context
+  //const [cartItemCount, setCartItemCount] = useState(0); //จำนวนสินค้าในตะกร้าตอนนี้
+  const activePaths = [
+    "/account/user/profile",
+    "/account/user/settings",
+    "/account/user/orders",
+    "/account/user/addresses",
+  ];
 
-    return (
+  return (
+    <div className="fixed top-0 left-0 w-full bg-white shadow-lg z-50">
+      <div className="header flex  w-[80%] justify-between m-auto pt-[20px] pb-[15px]">
+        <div className="flex justify-start">
+          <div className="logo mr-10 mb-auto mt-auto text-3xl text-[#4EAC14]">
+            <a href="/">GI Pineapple</a>
+          </div>
 
-        <div className="fixed top-0 left-0 w-full bg-white shadow-lg z-50">
-            <div className="header flex  w-[80%] justify-between m-auto pt-[20px] pb-[15px]">
-                <div className='flex justify-start'>
-                    <div className="logo mr-10 mb-auto mt-auto text-3xl text-[#4EAC14]">
-                        
-                        <a href ='/'>GI Pineapple</a>
-                        
-                    </div>
-
-                    <div className="search w-[550px] ml-5">
-                        <SearchBar/>
-                    </div>                    
-                </div>
-
-                <div className="menu mt-auto mb-auto ml-10">
-                    <nav>
-                        <ul className="menulist text-lg items-center text-[#595959] flex xl:gap-x-[40px] md:gap-x-[20px]">
-                            <li>
-                                <Link 
-                                    href='/'
-                                    className={currentPath === "/" ? "text-[#4EAC14]": "text-[#595959]"}
-                                >
-                                    หน้าแรก
-                                </Link>
-                            </li>
-                            <li>
-                                <Link 
-                                    href='/about'
-                                    className={currentPath === "/about" ? "text-[#4EAC14]": "text-[#595959]"}
-                                >
-                                    เกี่ยวกับเรา
-                                </Link>
-                            </li>
-
-
-                            {status === 'unauthenticated' &&
-                            <li>
-                                <Link 
-                                    href='/register'
-                                    className={currentPath === "/register" ? "text-[#4EAC14]": "text-[#595959]"}
-                                >
-                                    สมัครสมาชิก
-                                </Link>
-                            </li>
-                            }
-
-                            <li>
-                                <Link 
-                                    href='/cart'
-                                    className={currentPath === "/cart" ? "text-[#4EAC14]": "text-[#595959]"}
-                                >
-                                    ตะกร้า 
-                                </Link>
-                                <span className={`text-white text-base rounded-full ml-1  px-2  ${cartItemCount >= 1 ? "bg-[#4EAC14] ": "bg-[#a8a8a8]"}`}>
-                                    {cartItemCount} 
-                                </span>
-
-                            </li>
-
-                                    {session?.user?.role === 'farmer' && (
-                                    
-                                    <li>
-                                    <Link
-                                    key="farmer dashboard" 
-                                    className={`${currentPath === '/dashboard' ? 'text-[#4EAC14]' : 'text-[#595959]'}`}
-                                    textValue="แดชบอร์ดเกษตรกร" 
-                                    href='/dashboard'>
-                                       แดชบอร์ดเกษตรกร                                                                     
-                                    </Link>
-                                    </li>
-                                )}      
-
-                            {status === 'unauthenticated' ? (
-                            <li>
-                                <Link 
-                                    href='/login'
-                                    className={currentPath === "/login" ? "text-[#4EAC14]": "text-[#595959]"}
-                                    >เข้าสู่ระบบ
-                                </Link>
-                            </li>
-                            ) : status === 'authenticated' && session?.user ? (
-                            <>
-                            <Dropdown
-                                showArrow ='true'
-                            >
-                                <DropdownTrigger>
-                                    <Button 
-                                    variant="bordered" 
-                                    disableRipple="true"
-                                    >
-                                        <svg 
-                                             className={`fill-current hover:text-[#4EAC14] ${activePaths.includes(currentPath) ? 'text-[#4EAC14]' : 'text-[#595959]'}`}
-                                             xmlns="http://www.w3.org/2000/svg" 
-                                             height="30px" viewBox="0 -960 960 960" 
-                                             width="30px" fill="#595959">
-                                                <path d="M170-254.62q-12.75 0-21.37-8.63-8.63-8.62-8.63-21.38 0-12.75 8.63-21.37 8.62-8.61 21.37-8.61h620q12.75 0 21.37 8.62 8.63 8.63 8.63 21.39 0 12.75-8.63 21.37-8.62 8.61-21.37 8.61H170ZM170-450q-12.75 0-21.37-8.63-8.63-8.63-8.63-21.38 0-12.76 8.63-21.37Q157.25-510 170-510h620q12.75 0 21.37 8.63 8.63 8.63 8.63 21.38 0 12.76-8.63 21.37Q802.75-450 790-450H170Zm0-195.39q-12.75 0-21.37-8.62-8.63-8.63-8.63-21.39 0-12.75 8.63-21.37 8.62-8.61 21.37-8.61h620q12.75 0 21.37 8.63 8.63 8.62 8.63 21.38 0 12.75-8.63 21.37-8.62 8.61-21.37 8.61H170Z"/>
-                                        </svg>
-                                    </Button>
-                                </DropdownTrigger>
-
-                                <DropdownMenu 
-                                    aria-label="Static Actions"
-                                    className='pt-10 w-[300px] h-[500px] bg-white border shadow-lg rounded-lg flex-auto '
-                                >
-                                    <DropdownItem 
-                                        className={`dropdown-item ${currentPath === '/account/user/profile' ? 'text-[#4EAC14]' : 'text-[#595959]'}`}
-                                        textValue="โปรไฟล์"
-                                        href="/account/user/profile"
-                                        >
-                                        บัญชีผู้ใช้
-                                    </DropdownItem>
-                                    
-                                    <DropdownItem 
-                                        key="farmer register " 
-                                        className={`dropdown-item ${currentPath === '/about' ? 'text-[#4EAC14]' : 'text-[#595959]'}`}
-                                        textValue="ลงทะเบียนเกษตรกร" 
-                                        href='/about'
-                                    >
-                                            ลงทะเบียนเกษตรกร
-                                    </DropdownItem>  
-                                 
-                                    
-                                   
-                                    
-                                                                    
-                                    
-
-                                    
-                                    <DropdownItem key="signout" className='dropdown-item text-red-500 hover:text-red-500' textValue="ออกจากระบบ">
-                                        <button onClick={() => signOut({ callbackUrl: '/' })}>
-                                            ออกจากระบบ
-                                        </button>
-                                    </DropdownItem>
-                                  
-                                </DropdownMenu>
-                                </Dropdown>
-                            </>
-
-                            
-                        ) : (
-                            <li>Loading...</li>
-                        )}
-
-
-                        </ul>
-                    </nav>
-            
-                </div>
-
-            </div>
+          <div className="search w-[550px] ml-5">
+            <SearchBar />
+          </div>
         </div>
 
-    )
+        <div className="menu mt-auto mb-auto ml-10">
+          <nav>
+            <ul className="menulist text-lg items-center text-[#595959] flex xl:gap-x-[40px] md:gap-x-[20px]">
+              <li>
+                <Link
+                  href="/"
+                  className={
+                    currentPath === "/" ? "text-[#4EAC14]" : "text-[#595959]"
+                  }
+                >
+                  หน้าแรก
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/about"
+                  className={
+                    currentPath === "/about"
+                      ? "text-[#4EAC14]"
+                      : "text-[#595959]"
+                  }
+                >
+                  เกี่ยวกับเรา
+                </Link>
+              </li>
 
+              {status === "unauthenticated" && (
+                <li>
+                  <Link
+                    href="/register"
+                    className={
+                      currentPath === "/register"
+                        ? "text-[#4EAC14]"
+                        : "text-[#595959]"
+                    }
+                  >
+                    สมัครสมาชิก
+                  </Link>
+                </li>
+              )}
 
-}
-export default Navbar
+              <li>
+                <Link
+                  href="/cart"
+                  className={
+                    currentPath === "/cart"
+                      ? "text-[#4EAC14]"
+                      : "text-[#595959]"
+                  }
+                >
+                  ตะกร้า
+                </Link>
+                <span
+                  className={`text-white text-base rounded-full ml-1  px-2  ${cartItemCount >= 1 ? "bg-[#4EAC14] " : "bg-[#a8a8a8]"}`}
+                >
+                  {cartItemCount}
+                </span>
+              </li>
+
+              {session?.user?.role === "farmer" && (
+                <li>
+                  <Link
+                    key="farmer dashboard"
+                    className={`${currentPath === "/dashboard" ? "text-[#4EAC14]" : "text-[#595959]"}`}
+                    textValue="แดชบอร์ดเกษตรกร"
+                    href="/dashboard"
+                  >
+                    แดชบอร์ดเกษตรกร
+                  </Link>
+                </li>
+              )}
+
+              {status === "unauthenticated" ? (
+                <li>
+                  <Link
+                    href="/login"
+                    className={
+                      currentPath === "/login"
+                        ? "text-[#4EAC14]"
+                        : "text-[#595959]"
+                    }
+                  >
+                    เข้าสู่ระบบ
+                  </Link>
+                </li>
+              ) : status === "authenticated" && session?.user ? (
+                <>
+                  <Dropdown showArrow="true">
+                    <DropdownTrigger>
+                      <Button variant="bordered" disableRipple="true">
+                        <svg
+                          className={`fill-current hover:text-[#4EAC14] ${activePaths.includes(currentPath) ? "text-[#4EAC14]" : "text-[#595959]"}`}
+                          xmlns="http://www.w3.org/2000/svg"
+                          height="30px"
+                          viewBox="0 -960 960 960"
+                          width="30px"
+                          fill="#595959"
+                        >
+                          <path d="M170-254.62q-12.75 0-21.37-8.63-8.63-8.62-8.63-21.38 0-12.75 8.63-21.37 8.62-8.61 21.37-8.61h620q12.75 0 21.37 8.62 8.63 8.63 8.63 21.39 0 12.75-8.63 21.37-8.62 8.61-21.37 8.61H170ZM170-450q-12.75 0-21.37-8.63-8.63-8.63-8.63-21.38 0-12.76 8.63-21.37Q157.25-510 170-510h620q12.75 0 21.37 8.63 8.63 8.63 8.63 21.38 0 12.76-8.63 21.37Q802.75-450 790-450H170Zm0-195.39q-12.75 0-21.37-8.62-8.63-8.63-8.63-21.39 0-12.75 8.63-21.37 8.62-8.61 21.37-8.61h620q12.75 0 21.37 8.63 8.63 8.62 8.63 21.38 0 12.75-8.63 21.37-8.62 8.61-21.37 8.61H170Z" />
+                        </svg>
+                      </Button>
+                    </DropdownTrigger>
+
+                    <DropdownMenu
+                      aria-label="Static Actions"
+                      className="pt-10 w-[300px] h-[500px] bg-white border shadow-lg rounded-lg flex-auto "
+                    >
+                      <DropdownItem
+                        className={`dropdown-item ${currentPath === "/account/user/profile" ? "text-[#4EAC14]" : "text-[#595959]"}`}
+                        textValue="โปรไฟล์"
+                        href="/account/user/profile"
+                      >
+                        บัญชีผู้ใช้
+                      </DropdownItem>
+
+                      <DropdownItem
+                        key="farmer register "
+                        className={`dropdown-item ${currentPath === "/about" ? "text-[#4EAC14]" : "text-[#595959]"}`}
+                        textValue="ลงทะเบียนเกษตรกร"
+                        href="/about"
+                      >
+                        ลงทะเบียนเกษตรกร
+                      </DropdownItem>
+
+                      <DropdownItem
+                        key="signout"
+                        className="dropdown-item text-red-500 hover:text-red-500"
+                        textValue="ออกจากระบบ"
+                      >
+                        <button onClick={() => signOut({ callbackUrl: "/" })}>
+                          ออกจากระบบ
+                        </button>
+                      </DropdownItem>
+                    </DropdownMenu>
+                  </Dropdown>
+                </>
+              ) : (
+                <li>Loading...</li>
+              )}
+            </ul>
+          </nav>
+        </div>
+      </div>
+    </div>
+  );
+};
+export default Navbar;

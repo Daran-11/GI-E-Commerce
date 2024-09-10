@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server';
-import prisma from '../../../../../lib/prisma';
+import { NextResponse } from "next/server";
+import prisma from "../../../../../lib/prisma";
 
 export async function GET(request, { params }) {
   const { id } = params;
@@ -9,7 +9,7 @@ export async function GET(request, { params }) {
 
   // Check if orderId is a valid number
   if (isNaN(orderId)) {
-    return NextResponse.json({ error: 'Invalid order ID' }, { status: 400 });
+    return NextResponse.json({ error: "Invalid order ID" }, { status: 400 });
   }
 
   try {
@@ -21,13 +21,15 @@ export async function GET(request, { params }) {
     });
 
     if (!order) {
-      return NextResponse.json({ error: 'Order not found' }, { status: 404 });
+      return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
     return NextResponse.json(order);
   } catch (error) {
-    console.error('Error fetching order details:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    console.error("Error fetching order details:", error);
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 },
+    );
   }
 }
-

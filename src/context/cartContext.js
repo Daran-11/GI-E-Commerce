@@ -1,6 +1,6 @@
 "use client";
-import { useSession } from 'next-auth/react';
-import { createContext, useContext, useEffect, useState } from 'react';
+import { useSession } from "next-auth/react";
+import { createContext, useContext, useEffect, useState } from "react";
 
 const CartContext = createContext();
 
@@ -11,24 +11,27 @@ export const CartProvider = ({ children }) => {
 
   useEffect(() => {
     const fetchCartItems = async () => {
-      if (status === 'authenticated') {
-        const response = await fetch('http://localhost:3000/api/auth/cart', {
+      if (status === "authenticated") {
+        const response = await fetch("http://localhost:3000/api/auth/cart", {
           headers: {
-            'Cache-Control': 'no-cache',
+            "Cache-Control": "no-cache",
           },
         });
         if (response.ok) {
           const data = await response.json();
-          
+
           setCartItems(data);
-          
-          const uniqueItemsCount = new Set(data.map(item => item.productId)).size;
+
+          const uniqueItemsCount = new Set(data.map((item) => item.productId))
+            .size;
           setCartItemCount(Math.min(uniqueItemsCount, 99));
         }
       } else {
-        const localCart = JSON.parse(localStorage.getItem('cart')) || [];
+        const localCart = JSON.parse(localStorage.getItem("cart")) || [];
         setCartItems(localCart);
-        const uniqueItemsCount = new Set(localCart.map(item => item.productId)).size;
+        const uniqueItemsCount = new Set(
+          localCart.map((item) => item.productId),
+        ).size;
         setCartItemCount(Math.min(uniqueItemsCount, 99));
       }
     };
@@ -41,82 +44,92 @@ export const CartProvider = ({ children }) => {
       syncCartWithServer(session);
     }
   }, [session]);
-  
+
   // ใส่ตัวเช็คว่าจำนวนจะเกินไหมใน syncCartwithServer
   const syncCartWithServer = async (session) => {
-    const localCart = JSON.parse(localStorage.getItem('cart')) || [];
+    const localCart = JSON.parse(localStorage.getItem("cart")) || [];
     for (const item of localCart) {
-      await fetch('http://localhost:3000/api/auth/cart/add', {
-        method: 'POST',
+      await fetch("http://localhost:3000/api/auth/cart/add", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.token}`,
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.token}`,
         },
         body: JSON.stringify(item),
       });
     }
 
-    localStorage.removeItem('cart');
+    localStorage.removeItem("cart");
 
     // Fetch updated cart items from server
-    if (status === 'authenticated') {
-      const response = await fetch('http://localhost:3000/api/auth/cart', {
+    if (status === "authenticated") {
+      const response = await fetch("http://localhost:3000/api/auth/cart", {
         headers: {
-          'Cache-Control': 'no-cache',
+          "Cache-Control": "no-cache",
         },
       });
 
       if (response.ok) {
         const data = await response.json();
-        console.log('cart item updated to server')
+        console.log("cart item updated to server");
         setCartItems(data); // Update state with server data
-        const uniqueItemsCount = new Set(data.map(item => item.productId)).size;
+        const uniqueItemsCount = new Set(data.map((item) => item.productId))
+          .size;
         setCartItemCount(Math.min(uniqueItemsCount, 99)); // Update count
       }
     }
   };
 
   const addItemToCart = async (item) => {
-    
-    if (status === 'authenticated') {
-      const response = await fetch('http://localhost:3000/api/auth/cart/add', {
-        method: 'POST',
+    if (status === "authenticated") {
+      const response = await fetch("http://localhost:3000/api/auth/cart/add", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(item),
       });
 
       if (!response.ok) {
-        console.error('Failed to add item to cart on server:', await response.text());
+        console.error(
+          "Failed to add item to cart on server:",
+          await response.text(),
+        );
         return;
       }
-      
 
       if (response.ok) {
-        setCartItems(prevItems => {
+        setCartItems((prevItems) => {
           const updatedItems = [...prevItems];
-          const existingItemIndex = updatedItems.findIndex(i => i.productId === item.productId);
+          const existingItemIndex = updatedItems.findIndex(
+            (i) => i.productId === item.productId,
+          );
 
           if (existingItemIndex !== -1) {
             const existingItem = updatedItems[existingItemIndex];
             const newQuantity = existingItem.quantity + item.quantity;
 
             if (newQuantity <= existingItem.productAmount) {
-              updatedItems[existingItemIndex] = { ...existingItem, quantity: newQuantity };
+              updatedItems[existingItemIndex] = {
+                ...existingItem,
+                quantity: newQuantity,
+              };
             }
           } else {
             updatedItems.push(item);
           }
 
-          const uniqueItems = new Set(updatedItems.map(i => i.productId)).size;
+          const uniqueItems = new Set(updatedItems.map((i) => i.productId))
+            .size;
           setCartItemCount(Math.min(uniqueItems, 99));
           return updatedItems;
         });
       }
     } else {
-      const localCart = JSON.parse(localStorage.getItem('cart')) || [];
-      const existingItem = localCart.find(i => i.productId === item.productId);
+      const localCart = JSON.parse(localStorage.getItem("cart")) || [];
+      const existingItem = localCart.find(
+        (i) => i.productId === item.productId,
+      );
 
       if (existingItem) {
         const newQuantity = existingItem.quantity + item.quantity;
@@ -129,70 +142,86 @@ export const CartProvider = ({ children }) => {
         localCart.push(item); // Add new item
       }
 
-      localStorage.setItem('cart', JSON.stringify(localCart));
+      localStorage.setItem("cart", JSON.stringify(localCart));
       setCartItems(localCart);
-      const uniqueItems = new Set(localCart.map(i => i.productId)).size;
+      const uniqueItems = new Set(localCart.map((i) => i.productId)).size;
       setCartItemCount(Math.min(uniqueItems, 99));
     }
   };
 
   const removeItemFromCart = (productId) => {
-    if (status === 'authenticated') {
-      fetch('http://localhost:3000/api/auth/cart/delete', {
-        method: 'DELETE',
+    if (status === "authenticated") {
+      fetch("http://localhost:3000/api/auth/cart/delete", {
+        method: "DELETE",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ productId }),
       }).then((response) => {
         if (response.ok) {
-          setCartItems(prevItems => prevItems.filter(item => item.productId !== productId));
-          setCartItemCount(prevCount => prevCount - 1);
+          setCartItems((prevItems) =>
+            prevItems.filter((item) => item.productId !== productId),
+          );
+          setCartItemCount((prevCount) => prevCount - 1);
         }
       });
     } else {
-      const localCart = JSON.parse(localStorage.getItem('cart')) || [];
-      const updatedCart = localCart.filter(item => item.productId !== productId);
-      localStorage.setItem('cart', JSON.stringify(updatedCart));
+      const localCart = JSON.parse(localStorage.getItem("cart")) || [];
+      const updatedCart = localCart.filter(
+        (item) => item.productId !== productId,
+      );
+      localStorage.setItem("cart", JSON.stringify(updatedCart));
       setCartItems(updatedCart);
       setCartItemCount(updatedCart.length);
     }
   };
 
   const updateItemQuantity = (productId, newQuantity) => {
-    if (status === 'authenticated') {
-      fetch('http://localhost:3000/api/auth/cart/update', {
-        method: 'PUT',
+    if (status === "authenticated") {
+      fetch("http://localhost:3000/api/auth/cart/update", {
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ productId, quantity: newQuantity }),
       }).then((response) => {
         if (response.ok) {
-          console.log('set new cart update')
-          setCartItems(prevItems => {
-            return prevItems.map(item =>
-              item.productId === productId ? { ...item, quantity: newQuantity } : item
+          console.log("set new cart update");
+          setCartItems((prevItems) => {
+            return prevItems.map((item) =>
+              item.productId === productId
+                ? { ...item, quantity: newQuantity }
+                : item,
             );
           });
         }
       });
     } else {
-      const localCart = JSON.parse(localStorage.getItem('cart')) || [];
-      const item = localCart.find(i => i.productId === productId);
+      const localCart = JSON.parse(localStorage.getItem("cart")) || [];
+      const item = localCart.find((i) => i.productId === productId);
 
       if (item && newQuantity <= item.productAmount) {
-        const updatedCart = localCart.map(i =>
-          i.productId === productId ? { ...i, quantity: newQuantity } : i
+        const updatedCart = localCart.map((i) =>
+          i.productId === productId ? { ...i, quantity: newQuantity } : i,
         );
-        localStorage.setItem('cart', JSON.stringify(updatedCart));
+        localStorage.setItem("cart", JSON.stringify(updatedCart));
         setCartItems(updatedCart);
       }
     }
   };
 
   return (
-    <CartContext.Provider value={{ cartItems, cartItemCount, setCartItems, setCartItemCount, addItemToCart, removeItemFromCart, updateItemQuantity }}>
+    <CartContext.Provider
+      value={{
+        cartItems,
+        cartItemCount,
+        setCartItems,
+        setCartItemCount,
+        addItemToCart,
+        removeItemFromCart,
+        updateItemQuantity,
+      }}
+    >
       {children}
     </CartContext.Provider>
   );

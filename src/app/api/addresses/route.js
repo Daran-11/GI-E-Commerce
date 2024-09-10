@@ -12,7 +12,7 @@ export async function POST(request) {
 
     const addressData = await request.json();
     const userId = session.user.id;
-    
+
     // Convert IDs to integers
     const addressId = addressData.id ? parseInt(addressData.id, 10) : undefined;
     const provinceId = parseInt(addressData.provinceId, 10);
@@ -25,7 +25,10 @@ export async function POST(request) {
         where: { userId },
       });
       if (addressCount >= 2) {
-        return NextResponse.json({ error: "Cannot have more than 2 addresses" }, { status: 400 });
+        return NextResponse.json(
+          { error: "Cannot have more than 2 addresses" },
+          { status: 400 },
+        );
       }
     }
 
@@ -37,7 +40,7 @@ export async function POST(request) {
         where: { userId, isDefault: true },
         data: { isDefault: false },
       });
-      
+
       // Create or update the default address
       address = await prisma.address.upsert({
         where: { id: addressId || -1 },
@@ -85,6 +88,9 @@ export async function POST(request) {
     return NextResponse.json(address, { status: 200 });
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ error: "Failed to save address" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to save address" },
+      { status: 500 },
+    );
   }
 }

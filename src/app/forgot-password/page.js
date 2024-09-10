@@ -1,16 +1,16 @@
-import { useState } from 'react';
+import { useState } from "react";
 
 export default function ForgotPassword() {
-  const [email, setEmail] = useState('');
-  const [message, setMessage] = useState('');
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const res = await fetch('https://localhost:3000/api/auth/request-reset', {
-      method: 'POST',
+    const res = await fetch("https://localhost:3000/api/auth/request-reset", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({ email }),
     });

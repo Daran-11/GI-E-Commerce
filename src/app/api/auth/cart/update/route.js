@@ -1,4 +1,3 @@
-
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import prisma from "../../../../../../lib/prisma";
@@ -8,30 +7,33 @@ import { authOptions } from "../../[...nextauth]/route";
 const DEBOUNCE_DELAY = 1500; // Adjust as per your requirements
 
 // Function to update cart item quantity with debounce
-const updateCartItemQuantityDebounced = debounce(async (userId, productId, quantity) => {
-  try {
-    // Update cart item in database
-    const updatedCartItem = await prisma.cartItem.update({
-      where: {
-        userId_productId: {
-          userId: userId,
-          productId: productId,
+const updateCartItemQuantityDebounced = debounce(
+  async (userId, productId, quantity) => {
+    try {
+      // Update cart item in database
+      const updatedCartItem = await prisma.cartItem.update({
+        where: {
+          userId_productId: {
+            userId: userId,
+            productId: productId,
+          },
         },
-      },
-      data: { quantity: quantity },
-    });
+        data: { quantity: quantity },
+      });
 
-    console.log('Updated cart item:', updatedCartItem);
-  } catch (error) {
-    console.error('Error updating cart item quantity:', error);
-  }
-}, DEBOUNCE_DELAY);
+      console.log("Updated cart item:", updatedCartItem);
+    } catch (error) {
+      console.error("Error updating cart item quantity:", error);
+    }
+  },
+  DEBOUNCE_DELAY,
+);
 
 export async function PUT(req, res) {
   const session = await getServerSession({ authOptions });
-  console.log('session establised');
+  console.log("session establised");
   if (!session) {
-    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
   const { productId, quantity } = await req.json();
@@ -40,19 +42,26 @@ export async function PUT(req, res) {
   try {
     // Fetch user
     const user = await prisma.user.findUnique({
-      where: { email: userEmail }
+      where: { email: userEmail },
     });
 
     if (!user) {
-      return NextResponse.json({ message: 'User not found' }, { status: 404 });
+      return NextResponse.json({ message: "User not found" }, { status: 404 });
     }
 
     // Call the debounced function to update cart item quantity
-    updateCartItemQuantityDebounced(user.id, Number(productId), Number(quantity));
-    
-    return NextResponse.json({ message: 'Quantity update scheduled' });
+    updateCartItemQuantityDebounced(
+      user.id,
+      Number(productId),
+      Number(quantity),
+    );
+
+    return NextResponse.json({ message: "Quantity update scheduled" });
   } catch (error) {
-    console.error('Error updating cart item quantity:', error);
-    return NextResponse.json({ message: 'Unable to update cart quantity' }, { status: 500 });
+    console.error("Error updating cart item quantity:", error);
+    return NextResponse.json(
+      { message: "Unable to update cart quantity" },
+      { status: 500 },
+    );
   }
 }

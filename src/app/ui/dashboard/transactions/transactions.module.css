@@ -2,7 +2,6 @@
   background-color: var(--bgSoft);
   padding: 20px;
   border-radius: 10px;
-
 }
 
 .title {
@@ -10,12 +9,10 @@
   font-weight: 200;
   color: var(--textSoft);
   font-size: 24px;
-
 }
 
 .table {
   width: 100%;
-  
 }
 
 .table td {
@@ -41,17 +38,17 @@
 }
 
 .pending {
-    background-color: #f7cb7375;
+  background-color: #f7cb7375;
 }
 
 .done {
-    background-color: #afd6ee75;
+  background-color: #afd6ee75;
 }
 
 .cancelled {
-    background-color: #f7737375;
+  background-color: #f7737375;
 }
 
-.chart{
+.chart {
   display: flex;
 }

@@ -10,10 +10,10 @@ export default function OrderConfirmation() {
   const router = useRouter();
 
   useEffect(() => {
-    const orderIds = sessionStorage.getItem('orderIds');
+    const orderIds = sessionStorage.getItem("orderIds");
     if (!orderIds) {
       // Redirect to another page if orderIds is not found in local storage
-      router.push('/');
+      router.push("/");
     }
   }, []);
 
@@ -24,11 +24,11 @@ export default function OrderConfirmation() {
     }
 
     if (status === "authenticated") {
-      const orderIdsString = sessionStorage.getItem('orderIds');
+      const orderIdsString = sessionStorage.getItem("orderIds");
       const orderIds = JSON.parse(orderIdsString);
       if (orderIds) {
-        console.log("OrderId:",orderIds);
-        const idsQueryParam = orderIds.join(',');
+        console.log("OrderId:", orderIds);
+        const idsQueryParam = orderIds.join(",");
         const fetchOrders = async () => {
           try {
             const response = await fetch(`/api/orders?ids=${idsQueryParam}`);
@@ -49,11 +49,10 @@ export default function OrderConfirmation() {
     }
   }, [status, router]);
 
-
   useEffect(() => {
     // Remove orderIds from localStorage after successful confirmation
     if (orders.length > 0) {
-      sessionStorage.removeItem('orderIds');
+      sessionStorage.removeItem("orderIds");
     }
   }, [orders]);
 
@@ -65,18 +64,31 @@ export default function OrderConfirmation() {
     return <div>Loading...</div>;
   }
 
-
   return (
     <div className="top-container">
       <h1>Order Summary</h1>
       {orders.map((order) => (
         <div key={order.id} className="order-summary">
-          <p><strong>Order ID:</strong> {order.id}</p>
-          <p><strong>Product Name:</strong> {order.product?.ProductName} {order.product?.ProductType}</p>
-          <p><strong>Quantity:</strong> {order.quantity}</p>
-          <p><strong>Price:</strong> {order.product?.Price}</p>
-          <p><strong>Total:</strong> {order.quantity * (order.product?.Price || 0)}</p>
-          <p><strong>Address:</strong> {order.addressText}</p>
+          <p>
+            <strong>Order ID:</strong> {order.id}
+          </p>
+          <p>
+            <strong>Product Name:</strong> {order.product?.ProductName}{" "}
+            {order.product?.ProductType}
+          </p>
+          <p>
+            <strong>Quantity:</strong> {order.quantity}
+          </p>
+          <p>
+            <strong>Price:</strong> {order.product?.Price}
+          </p>
+          <p>
+            <strong>Total:</strong>{" "}
+            {order.quantity * (order.product?.Price || 0)}
+          </p>
+          <p>
+            <strong>Address:</strong> {order.addressText}
+          </p>
         </div>
       ))}
       <p>Thank you for your purchase!</p>
