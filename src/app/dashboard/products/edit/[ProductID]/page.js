@@ -1,3 +1,5 @@
+// ตัวform/model ไว้แก้ไขข้อมูลในหน้productของfarmer
+'use client' 
 import Image from 'next/image';
 import { useState, useCallback, useEffect } from "react";
 import {

@@ -1,4 +1,4 @@
-// /api/product/get.js
+// ดึงข้อมูลไปแสดงผลยังหน้าเเว็บ
 import { NextResponse } from "next/server";
 import prisma from "../../../../../../lib/prisma";
 

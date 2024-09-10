@@ -1,4 +1,4 @@
-// /api/product/delete.js
+// ใช้เพือลบไฟล์ รวมถึงรูปทีอยูในuploads
 import { NextResponse } from "next/server";
 import prisma from "../../../../../../lib/prisma";
 import { unlink } from "fs/promises";

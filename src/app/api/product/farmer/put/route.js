@@ -1,4 +1,4 @@
-// /api/product/put.js
+// เปลียนข้อมูลที่มีอยู่ก่่อนหน้า
 import { NextResponse } from "next/server";
 import prisma from "../../../../../../lib/prisma";
 import { writeFile, unlink } from "fs/promises";
