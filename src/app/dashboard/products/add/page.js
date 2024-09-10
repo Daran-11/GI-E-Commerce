@@ -278,16 +278,16 @@ const AddProductDialog = ({ open, onClose, onAddProduct }) => {
             </Grid>
             <Grid item xs={12}>
               {imagePreview && (
-                <Image
-                  src={imagePreview}
-                  alt="Image Preview"
-                  style={{
-                    width: "100%",
-                    maxHeight: "300px",
-                    objectFit: "cover",
-                    marginTop: "10px",
-                  }}
-                />
+                <div style={{ position: 'relative', width: '100%', height: 'auto', marginTop: '10px' }}>
+                  <Image
+                    src={imagePreview}
+                    alt="Image Preview"
+                    layout="responsive"
+                    width={800} // Adjust the width as needed
+                    height={600} // Adjust the height as needed
+                    objectFit="cover"
+                  />
+                </div>
               )}
             </Grid>
             <Grid item xs={12}>
