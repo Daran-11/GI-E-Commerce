@@ -10,24 +10,28 @@ import { useEffect, useState } from "react";
 
 const Product = () => {
   const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true); // Add a loading state
+  const [loading, setLoading] = useState(true);
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [selectedProductId, setSelectedProductId] = useState(null);
 
   const fetchProducts = async () => {
+    setLoading(true);
     try {
       const response = await fetch("/api/product/farmer/get");
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
       const data = await response.json();
       const formattedData = data.map((product) => ({
         ...product,
         Price: formatPrice(product.Price),
       }));
       setProducts(formattedData);
-      setLoading(false); // Set loading to false after data is fetched
     } catch (error) {
       console.error("Failed to fetch products:", error);
-      setLoading(false); // Even on error, stop loading
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -41,19 +45,17 @@ const Product = () => {
   };
 
   const handleDelete = async (ProductID) => {
-    if (confirm("Are you sure you want to delete this product?")) {
+    if (window.confirm("Are you sure you want to delete this product?")) {
       try {
         const response = await fetch(
           `/api/product/farmer/delete?ProductID=${ProductID}`,
           {
             method: "DELETE",
             headers: { "Content-Type": "application/json" },
-          },
+          }
         );
         if (response.ok) {
-          setProducts(
-            products.filter((product) => product.ProductID !== ProductID),
-          );
+          setProducts(products.filter((product) => product.ProductID !== ProductID));
         } else {
           alert("Failed to delete product");
         }
@@ -78,48 +80,44 @@ const Product = () => {
 
   const handleAddProduct = async (productData) => {
     const formData = new FormData();
-  
-    // Append product data to FormData
     formData.append("plotCode", productData.plotCode);
     formData.append("ProductName", productData.ProductName);
     formData.append("ProductType", productData.ProductType);
     formData.append("Price", productData.Price);
     formData.append("Amount", productData.Amount);
     formData.append("status", productData.status);
-  
-    // Append image file if it exists
     if (productData.imageUrl) {
       formData.append("imageUrl", productData.imageUrl);
     }
-  
-   
-      alert("Product added successfully");
-      fetchProducts(); // Refetch products after adding a new product
-      handleCloseAddDialog();
-   
-    
-  };
-  
-  const handleEditProduct = async (ProductID, productData) => {
-    const response = await fetch(`/api/product/farmer/put?ProductID=${ProductID}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(productData),
-    });
 
-    if (response.ok) {
-      alert("Product updated successfully");
-      fetchProducts(); // Refetch products after editing
-      handleCloseEditDialog();
-    } else {
-      alert("Failed to update product");
+  
+        alert("Product added successfully");
+        fetchProducts();
+        handleCloseAddDialog();
+     
+  };
+
+  const handleEditProduct = async (ProductID, productData) => {
+    try {
+      const response = await fetch(`/api/product/farmer/put?ProductID=${ProductID}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(productData),
+      });
+      if (response.ok) {
+        alert("Product updated successfully");
+        fetchProducts();
+        handleCloseEditDialog();
+      } else {
+        alert("Failed to update product");
+      }
+    } catch (error) {
+      console.error("Failed to update product:", error);
     }
   };
 
   if (loading) {
-    return <div>Loading...</div>; // You can replace this with a more sophisticated loading UI
+    return <div>Loading...</div>;
   }
 
   return (
@@ -151,7 +149,7 @@ const Product = () => {
             <td>ราคา</td>
             <td>จำนวน</td>
             <td>สถานะ</td>
-            <td>รูปภาพ</td> {/* New column for Image */}
+            <td>รูปภาพ</td>
             <td>Actions</td>
           </tr>
         </thead>
@@ -175,12 +173,16 @@ const Product = () => {
                   </span>
                 </td>
                 <td>
-                  {/* Display product image if available */}
                   {product.imageUrl ? (
                     <Image
                       src={product.imageUrl}
                       alt={product.ProductName}
-                      className={styles.productImage} // You can style the image accordingly
+                      width={200} // Adjust width as needed
+                      height={200} // Adjust height as needed
+                      style={{
+                        objectFit: "cover",
+                        marginTop: "10px",
+                      }}
                     />
                   ) : (
                     "No image"
@@ -229,21 +231,19 @@ const Product = () => {
       </table>
       <Pagination />
 
-      {/* Add Product Dialog */}
       <AddProductDialog
         open={openAddDialog}
         onClose={handleCloseAddDialog}
         onAddProduct={handleAddProduct}
       />
 
-      {/* Edit Product Dialog */}
       {selectedProductId && (
         <EditProductDialog
           open={openEditDialog}
           onClose={handleCloseEditDialog}
           onEditProduct={handleEditProduct}
           ProductID={selectedProductId}
-          onSuccess={fetchProducts} // Pass the fetchProducts function as onSuccess
+          onSuccess={fetchProducts}
         />
       )}
     </div>

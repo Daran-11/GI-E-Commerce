@@ -1,4 +1,4 @@
-"use client";
+import Image from 'next/image';
 import { useState, useCallback, useEffect } from "react";
 import {
   Dialog,
@@ -15,7 +15,6 @@ import {
   styled,
   Paper,
 } from "@mui/material";
-import Image from "next/image";
 
 // Styled Paper component
 const CustomPaper = styled(Paper)(({ theme }) => ({
@@ -25,6 +24,16 @@ const CustomPaper = styled(Paper)(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
   height: "auto",
+}));
+
+const DropZone = styled("div")(({ theme }) => ({
+  border: "2px dashed #cccccc",
+  borderRadius: "4px",
+  padding: theme.spacing(2),
+  textAlign: "center",
+  cursor: "pointer",
+  backgroundColor: "#f5f5f5",
+  marginTop: theme.spacing(2),
 }));
 
 const EditProductDialog = ({ open, onClose, ProductID, onSuccess }) => {
@@ -287,17 +296,17 @@ const EditProductDialog = ({ open, onClose, ProductID, onSuccess }) => {
               </div>
             </Grid>
             <Grid item xs={12}>
-              {imagePreview && (
-                <Image
-                  src={imagePreview}
-                  alt="Image Preview"
-                  style={{
-                    width: "100%",
-                    maxHeight: "300px",
-                    objectFit: "cover",
-                    marginTop: "10px",
-                  }}
-                />
+                {imagePreview && (
+                  <div style={{ position: 'relative', width: '100%', height: 'auto', marginTop: '10px' }}>
+                    <Image
+                      src={imagePreview}
+                      alt="Image Preview"
+                      layout="responsive"
+                      width={800} // Adjust the width as needed
+                      height={600} // Adjust the height as needed
+                      objectFit="cover"
+                    />
+                  </div>
               )}
             </Grid>
             <Grid item xs={12}>
