@@ -28,6 +28,7 @@ export default async function ProductDetails({ params }) {
       Amount: true,
       Price: true,
       Description:true,
+      imageUrl: true,
       farmer: {
         select: {
           id:true,

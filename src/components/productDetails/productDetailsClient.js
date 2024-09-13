@@ -2,6 +2,7 @@
 import QuantityHandler from '@/components/quantityhandler';
 import { useCart } from '@/context/cartContext';
 import { useSession } from 'next-auth/react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { formatDateToThaiBuddhist } from '../../../utils/formatDate';
@@ -124,7 +125,18 @@ export default function ProductDetailsClient({ product, totalReviewsCount ,Produ
     </div>
       <div className='container-detail  w-full h-full flex justify-start '> 
         <div className='w-full h-[500px] bg-white  rounded-2xl flex items-center justify-center text-center '>
-            รูป
+              {product.imageUrl ? (
+                    <Image
+                      src={product.imageUrl}
+                      alt={product.ProductName}
+                      width={0} // Adjust width as needed
+                      height={0} // Adjust height as needed
+                      sizes="100vw"
+                      className='w-full h-full object-cover rounded-2xl'
+                    />
+                  ) : (
+                    <img className="w-full h-full object-cover rounded-2xl" src="/phulae.jpg" alt="Card Image" />
+                  )}
         </div>
         <div className=' w-[700px] h-[500px]  bg-white ml-[25px] rounded-2xl '>
           <div className='product-name m-[25px] text-[#535353]'>
@@ -135,7 +147,7 @@ export default function ProductDetailsClient({ product, totalReviewsCount ,Produ
               <p className=''> ขายแล้ว ... กิโลกรัม</p>
             </div>
 
-            <p className=' text-[#4eac14] text-[40px] mb-4'>{product.Price} บาท/กิโล</p>
+            <p className=' text-[#4eac14] text-[35px] mb-4 mt-2'>{Number(product.Price).toLocaleString()} บาท/กิโล</p>
 
             <div className="  space-y-4 w-[600px] text-[#767676] text-[20px] mb-5">
               {/* Row 1 */}

@@ -1,4 +1,4 @@
-// components/Product.js
+// หน้าหลักของproduct-farmer 
 "use client";
 import AddProductDialog from "@/app/dashboard/products/add/page";
 import EditProductDialog from "@/app/dashboard/products/edit/[ProductID]/page";
@@ -7,13 +7,14 @@ import styles from "@/app/ui/dashboard/products/products.module.css";
 import Search from "@/app/ui/dashboard/search/search";
 import Button from "@mui/material/Button";
 import { useSession } from 'next-auth/react';
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const Product = () => {
   const { data: session, status } = useSession()
   const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true); // Add a loading state
+  const [loading, setLoading] = useState(true);
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [selectedProductId, setSelectedProductId] = useState(null);
@@ -21,18 +22,19 @@ const Product = () => {
 
   const fetchProducts = async () => {
     
+    setLoading(true);
     try {
-      const response = await fetch(`/api/users/${session.user.id}/product`);
+      const response = await fetch(`/api/users/${session.user.id}/product/get`);
       const data = await response.json();
       const formattedData = data.map((product) => ({
         ...product,
         Price: formatPrice(product.Price),
       }));
       setProducts(formattedData);
-      setLoading(false); // Set loading to false after data is fetched
     } catch (error) {
       console.error("Failed to fetch products:", error);
-      setLoading(false); // Even on error, stop loading
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -57,9 +59,9 @@ const Product = () => {
   };
 
   const handleDelete = async (ProductID) => {
-    if (confirm("Are you sure you want to delete this product?")) {
+    if (window.confirm("Are you sure you want to delete this product?")) {
       try {
-        const response = await fetch(`/api/users/${session.user.id}/product/${ProductID}`, {
+        const response = await fetch(`/api/users/${session.user.id}/product/${ProductID}/delete`, {
             method: "DELETE",
             headers: {
               "Content-Type": "application/json" },
@@ -67,9 +69,7 @@ const Product = () => {
         );
 
         if (response.ok) {
-          setProducts(
-            products.filter((product) => product.ProductID !== ProductID)
-          );
+          setProducts(products.filter((product) => product.ProductID !== ProductID));
         } else {
           alert("Failed to delete product");
         }
@@ -108,10 +108,26 @@ const Product = () => {
     } else {
       alert("Failed to add product");
     }
+    const formData = new FormData();
+    formData.append("plotCode", productData.plotCode);
+    formData.append("ProductName", productData.ProductName);
+    formData.append("ProductType", productData.ProductType);
+    formData.append("Price", productData.Price);
+    formData.append("Amount", productData.Amount);
+    formData.append("status", productData.status);
+    if (productData.imageUrl) {
+      formData.append("imageUrl", productData.imageUrl);
+    }
+
+  
+        alert("Product added successfully");
+        fetchProducts();
+        handleCloseAddDialog();
+     
   };
 
   const handleEditProduct = async (ProductID, productData) => {
-    const response = await fetch(`/api/users/${session.user.id}/product/edit?ProductID=${ProductID}`, {
+    const response = await fetch(`/api/users/${session.user.id}/product/put/${ProductID}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -129,7 +145,7 @@ const Product = () => {
   };
 
   if (loading) {
-    return <div>Loading...</div>; // You can replace this with a more sophisticated loading UI
+    return <div>Loading...</div>;
   }
 
   return (
@@ -161,6 +177,7 @@ const Product = () => {
             <td>ราคา</td>
             <td>จำนวน</td>
             <td>สถานะ</td>
+            <td>รูปภาพ</td>
             <td>Actions</td>
           </tr>
         </thead>
@@ -182,6 +199,22 @@ const Product = () => {
                   >
                     {product.status}
                   </span>
+                </td>
+                <td>
+                  {product.imageUrl ? (
+                    <Image
+                      src={product.imageUrl}
+                      alt={product.ProductName}
+                      width={100} // Adjust width as needed
+                      height={100} // Adjust height as needed
+                      style={{
+                        objectFit: "cover",
+                        marginTop: "10px",
+                      }}
+                    />
+                  ) : (
+                    "No image"
+                  )}
                 </td>
                 <td>
                   <div className={styles.buttons}>
@@ -219,28 +252,26 @@ const Product = () => {
             ))
           ) : (
             <tr>
-              <td colSpan={8}>No products available</td>
+              <td colSpan={9}>No products available</td>
             </tr>
           )}
         </tbody>
       </table>
       <Pagination />
 
-      {/* Add Product Dialog */}
       <AddProductDialog
         open={openAddDialog}
         onClose={handleCloseAddDialog}
         onAddProduct={handleAddProduct}
       />
 
-      {/* Edit Product Dialog */}
       {selectedProductId && (
         <EditProductDialog
           open={openEditDialog}
           onClose={handleCloseEditDialog}
           onEditProduct={handleEditProduct}
           ProductID={selectedProductId}
-          onSuccess={fetchProducts} // Pass the fetchProducts function as onSuccess
+          onSuccess={fetchProducts}
         />
       )}
     </div>

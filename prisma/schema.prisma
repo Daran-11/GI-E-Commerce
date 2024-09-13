@@ -18,7 +18,7 @@ model Product {
   Price       Int      @db.SmallInt
   Amount      Int      @db.MediumInt
   status      String
-  ProductPic  Bytes?   @db.Blob
+  imageUrl    String?
   DateCreated DateTime @default(now()) @db.Timestamp(0)
   cartItems   CartItem[]
   Orders      Order[]
@@ -79,14 +79,12 @@ model Order {
   deliveryId    Int?
   quantity      Int
   totalPrice    Float
-  addressText   String   //store the address in text form
+  addressText   String   // New field to store the address in text form
   status        String   @default("Pending")
   deliveryStatus String  @default("Preparing") // status for the delivery process
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-
-  //Relationships
   user          User     @relation(fields: [userId], references: [id])
   product       Product  @relation(fields: [productId], references: [ProductID])
   delivery      Delivery_Detail? @relation(fields: [deliveryId], references: [id])
@@ -120,14 +118,13 @@ model Address {
   postalCode  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  isDefault   Boolean  @default(false)// New field to indicate the default address
 
-  //Relationships
   user       User     @relation(fields: [userId], references: [id])
   province   Province @relation(fields: [provinceId], references: [id])
   amphoe     Amphoe   @relation(fields: [amphoeId], references: [id])
   tambon     Tambon   @relation(fields: [tambonId], references: [id])
-
+  
+  isDefault   Boolean  @default(false)// New field to indicate the default address
 
 }
 
@@ -153,8 +150,6 @@ model Amphoe {
   deleted_at  DateTime?   @default(now())
   tambons     Tambon[]
   addresses   Address[]
-
-  //Relationships
   province    Province   @relation(fields: [province_id], references: [id])
 }
 
@@ -164,13 +159,11 @@ model Tambon {
   name_en    String
   amphoeId   Int
   zip_code   Int
+  amphoe     Amphoe    @relation(fields: [amphoeId], references: [id])
   addresses  Address[]
   created_at  DateTime  @default(now())
   updated_at  DateTime  @updatedAt
   deleted_at  DateTime?   @default(now())
-
-  //Relationships
-  amphoe     Amphoe    @relation(fields: [amphoeId], references: [id])
 }
 
 enum Role {
@@ -203,8 +196,6 @@ model Certificate {
   status          String
   imageUrl        String
   farmerId        Int
-
-  //Relationships
   farmer          Farmer   @relation(fields: [farmerId], references: [id])
 }
 
