@@ -11,7 +11,7 @@ export const CartProvider = ({ children }) => {
 
   useEffect(() => {
     const fetchCartItems = async () => {
-      if (status === 'authenticated') {
+      if (status === 'authenticated' && session) {
         const response = await fetch('http://localhost:3000/api/auth/cart', {
           headers: {
             'Cache-Control': 'no-cache',
@@ -19,9 +19,10 @@ export const CartProvider = ({ children }) => {
         });
         if (response.ok) {
           const data = await response.json();
-          
+          console.log("the cart data: ",data)
+          // Normalize server data to match the local storage structure
           setCartItems(data);
-          
+    
           const uniqueItemsCount = new Set(data.map(item => item.productId)).size;
           setCartItemCount(Math.min(uniqueItemsCount, 99));
         }
@@ -34,7 +35,7 @@ export const CartProvider = ({ children }) => {
     };
 
     fetchCartItems();
-  }, [status]);
+  }, [session , session ]);
 
   useEffect(() => {
     if (session) {
