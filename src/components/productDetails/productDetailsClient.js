@@ -1,13 +1,16 @@
 "use client";
 import QuantityHandler from '@/components/quantityhandler';
 import { useCart } from '@/context/cartContext';
+import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { formatDateToThaiBuddhist } from '../../../utils/formatDate';
 import Breadcrumb from '../BreadCrumb';
 
-export default function ProductDetailsClient({ product, totalReviewsCount }) {
+export default function ProductDetailsClient({ product, totalReviewsCount ,ProductID }) {
+
   const router = useRouter();
+  const { data: session, status } = useSession();
   const [quantity, setQuantity] = useState(1);
   const [reviews, setReviews] = useState(product.reviews || []);
   const [reviewsToShow, setReviewsToShow] = useState(5); // Initially show 5 reviews
@@ -31,7 +34,8 @@ export default function ProductDetailsClient({ product, totalReviewsCount }) {
       productType: productData.ProductType,
       productPrice: productData.Price,
       productAmount: productData.Amount,
-      farmerId: productData.farmerId
+      farmerId: productData.farmerId,
+      Description: productData.Description
     };
 
     try {
@@ -44,28 +48,37 @@ export default function ProductDetailsClient({ product, totalReviewsCount }) {
   };
 
   const buyNow = async () => {
-    const productResponse = await fetch(`http://localhost:3000/api/product/${product.ProductID}`);
-    const productData = await productResponse.json();
 
-    const item = {
-      productId: productData.ProductID,
-      quantity: quantity,
-      productName: productData.ProductName,
-      productType: productData.ProductType,
-      productPrice: productData.Price,
-      productAmount: productData.Amount,
-      farmerId: productData.farmerId
-    };
-
-    try {
-      localStorage.setItem('selectedItems', JSON.stringify([item]));
-      console.log('Buy:',item);
-      router.push('/checkout');
-
-    } catch (error) {
-      console.error('Error adding product to cart:', error);
-      alert('Failed to add product to cart');
+    if ( status === 'authenticated' && session) {
+      console.log("Product Id", ProductID)
+      const productResponse = await fetch(`http://localhost:3000/api/product/${ProductID}`);
+      const productData = await productResponse.json();
+  
+      const item = {
+        productId: productData.ProductID,
+        quantity: quantity,
+        productName: productData.ProductName,
+        productType: productData.ProductType,
+        productPrice: productData.Price,
+        productAmount: productData.Amount,
+        farmerId: productData.farmerId
+      };
+  
+      try {
+        localStorage.setItem('selectedItems', JSON.stringify([item]));
+        console.log('Buy:',item);
+        router.push('/checkout');
+  
+      } catch (error) {
+        console.error('Error adding product to cart:', error);
+        alert('Failed to add product to cart');
+      }
     }
+    else {
+      router.push('/login');
+    }
+
+
   };
 
 
@@ -124,21 +137,21 @@ export default function ProductDetailsClient({ product, totalReviewsCount }) {
 
             <p className=' text-[#4eac14] text-[40px] mb-4'>{product.Price} บาท/กิโล</p>
 
-            <div className="flex flex-col space-y-4 w-[600px] text-[#767676] text-xl mb-5">
+            <div className="  space-y-4 w-[600px] text-[#767676] text-[20px] mb-5">
               {/* Row 1 */}
-              <div className="flex">
+              <div className="">
                 <div className="w-[250px] ">คำอธิบาย</div>
-                <div className="w-full">{product.Description}</div>
+                <div className="w-full text-[#535353]">{product.Description}</div>
               </div>
 
               {/* Row 2 */}
-              <div className="flex">
+              <div className="">
                 <div className="w-[250px]">ช่องทางติดต่อ</div>
-                <div className="w-full">{product.farmer.contactLine}</div>
+                <div className="w-full text-[#535353]">{product.farmer.contactLine}</div>
               </div>
               
               {/* Row 3 */}
-              <div className="flex items-center">
+              <div className=" items-center">
                 <div className="w-[250px]">จำนวน(กิโล)</div>
                 <div className="w-full flex items-center">              
                   <QuantityHandler
@@ -146,7 +159,7 @@ export default function ProductDetailsClient({ product, totalReviewsCount }) {
                   productAmount={product.Amount}
                   productId={product.ProductID}
                   onQuantityChange={handleQuantityChange}/>
-                <p className='ml-3'>มีสินค้า {product.Amount} กิโลกรัม</p>  
+                <p className='ml-3  text-[#535353]'>มีสินค้า {product.Amount} กิโลกรัม</p>  
                 </div>
               </div>
             </div>
@@ -189,21 +202,27 @@ export default function ProductDetailsClient({ product, totalReviewsCount }) {
         <div className='text-2xl h-fit'>
           รีวิว    
           {reviews.length > 0 ? (
-        reviews.map((review) => (
-          <div key={review.id} className='text-xl border-2 p-2'>
-            <p><strong>User:</strong> {review.user.name}</p>
-            <p><strong>Rating:</strong> {review.rating} / 5</p>
-            <p><strong>Review:</strong> {review.review || "No review text provided."}</p>
-            <p><strong>Date:</strong> {formatDateToThaiBuddhist(review.createdAt)}</p>
+          <div>
+            {reviews.map((review) => (
+              <div key={review.id} className="text-xl border-2 p-2">
+                <p>{review.user.name}</p>
+                <p>คะแนนรีวิว: {review.rating} / 5</p>
+                <p>{review.review || "No review text provided."}</p>
+                <p>วันที่: {formatDateToThaiBuddhist(review.createdAt)}</p>
+              </div>
+            ))}
+            {/* Place Load More button here */}
+            {hasMore && !loading && (
+              <button onClick={loadMoreReviews} className="mt-4 p-2 bg-blue-500 text-white rounded">
+                Load More Reviews
+              </button>
+            )}
+            {loading && <p>Loading...</p>}
           </div>
-        ))
-      ) : (
-        <p>No reviews for this product yet.</p>
-      )}
-  
-  {hasMore && !loading && (
-      <button onClick={loadMoreReviews}>Load More Reviews</button>
-    )}
+        ) : (
+          <p>No reviews for this product yet.</p>
+        )}
+
         </div>
 
 

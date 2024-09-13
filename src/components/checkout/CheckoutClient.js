@@ -39,6 +39,7 @@ export default function CheckoutClient({ userId }) {
     if (selectedItems.length && selectedAddressId) {
       try {
         const orderPromises = selectedItems.map(async (item) => {
+          const productDetails = item.product ? item.product : item;
           const orderResponse = await fetch('http://localhost:3000/api/orders', {
             method: 'POST',
             headers: {
@@ -46,12 +47,12 @@ export default function CheckoutClient({ userId }) {
             },
             body: JSON.stringify({
               userId,
-              productId: item.productId,
+              productId: productDetails.ProductID || productDetails.productId,
               quantity: item.quantity,
-              productName: item.productName || item.product.ProductName,
-              productPrice: item.productPrice || item.product.Price,
+              productName: productDetails.ProductName || item.productName,
+              productPrice: productDetails.Price || item.productPrice,
               addressId: selectedAddressId,
-              farmerId: item.farmerId
+              farmerId: productDetails.farmerId || item.farmerId  // Get `farmerId` from the correct structure
             }),
           });
 

@@ -1,6 +1,6 @@
 'use client';
 import { useCart } from '@/context/cartContext';
-import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from '@nextui-org/react';
+import { Button, Dropdown, DropdownItem, DropdownMenu, PopoverTrigger } from '@nextui-org/react';
 import { signOut, useSession } from 'next-auth/react';
 import Link from "next/link";
 import { usePathname } from 'next/navigation';
@@ -99,12 +99,16 @@ export const Navbar = () => {
                             ) : status === 'authenticated' && session?.user ? (
                             <>
                             <Dropdown
-                                showArrow ='true'
+                            placement="top-end"
+                                showArrow ={true}
+                               
                             >
-                                <DropdownTrigger>
+                                <PopoverTrigger>
+
                                     <Button 
                                     variant="bordered" 
                                     disableRipple="true"
+                                    backdrop="blur"
                                     >
                                         <svg 
                                              className={`fill-current hover:text-[#4EAC14] ${activePaths.includes(currentPath) ? 'text-[#4EAC14]' : 'text-[#595959]'}`}
@@ -114,14 +118,15 @@ export const Navbar = () => {
                                                 <path d="M170-254.62q-12.75 0-21.37-8.63-8.63-8.62-8.63-21.38 0-12.75 8.63-21.37 8.62-8.61 21.37-8.61h620q12.75 0 21.37 8.62 8.63 8.63 8.63 21.39 0 12.75-8.63 21.37-8.62 8.61-21.37 8.61H170ZM170-450q-12.75 0-21.37-8.63-8.63-8.63-8.63-21.38 0-12.76 8.63-21.37Q157.25-510 170-510h620q12.75 0 21.37 8.63 8.63 8.63 8.63 21.38 0 12.76-8.63 21.37Q802.75-450 790-450H170Zm0-195.39q-12.75 0-21.37-8.62-8.63-8.63-8.63-21.39 0-12.75 8.63-21.37 8.62-8.61 21.37-8.61h620q12.75 0 21.37 8.63 8.63 8.62 8.63 21.38 0 12.75-8.63 21.37-8.62 8.61-21.37 8.61H170Z"/>
                                         </svg>
                                     </Button>
-                                </DropdownTrigger>
-
+                                </PopoverTrigger>
+                            
                                 <DropdownMenu 
                                     aria-label="Static Actions"
-                                    className='pt-10 w-[300px] h-[500px] bg-white border shadow-lg rounded-lg flex-auto '
+                                    
+                                    className='pl-[30px]  pb-[10px]  pt-[30px] w-[250px] h-fit bg-white border shadow-lg rounded-lg  '
                                 >
                                     <DropdownItem 
-                                        className={`dropdown-item ${currentPath === '/account/user/profile' ? 'text-[#4EAC14]' : 'text-[#595959]'}`}
+                                        className={`dropdown-item ${currentPath === '/account/user/profile' ? 'text-[#4EAC14]' : 'text-[#595959]'} text-left `}
                                         textValue="โปรไฟล์"
                                         href="/account/user/profile"
                                         >
@@ -130,7 +135,7 @@ export const Navbar = () => {
                                     
                                     <DropdownItem 
                                         key="farmer register " 
-                                        className={`dropdown-item ${currentPath === '/about' ? 'text-[#4EAC14]' : 'text-[#595959]'}`}
+                                        className={`dropdown-item ${currentPath === '/about' ? 'text-[#4EAC14]' : 'text-[#595959]'} text-left `}
                                         textValue="ลงทะเบียนเกษตรกร" 
                                         href='/about'
                                     >
@@ -144,7 +149,7 @@ export const Navbar = () => {
                                     
 
                                     
-                                    <DropdownItem key="signout" className='dropdown-item text-red-500 hover:text-red-500' textValue="ออกจากระบบ">
+                                    <DropdownItem key="signout" className='dropdown-item text-red-500 hover:text-red-500 text-left' textValue="ออกจากระบบ">
                                         <button onClick={() => signOut({ callbackUrl: '/' })}>
                                             ออกจากระบบ
                                         </button>
