@@ -10,6 +10,7 @@ export async function GET() {
         ProductType: true,
         Amount: true,
         Price: true,
+        imageUrl: true,
         farmer: {
           select: {
             farmerName: true,  // Select specific fields from the Farmer model

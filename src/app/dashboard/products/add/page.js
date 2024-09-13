@@ -1,3 +1,4 @@
+// ตัวform/model ไว้เพิ่มข้อมูลในหน้productของfarmer
 "use client";
 import {
   Button,
@@ -14,6 +15,9 @@ import {
   styled,
   TextField,
 } from "@mui/material";
+import { useSession } from 'next-auth/react';
+import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 
 // Styled Paper component
@@ -26,7 +30,19 @@ const CustomPaper = styled(Paper)(({ theme }) => ({
   height: "auto",
 }));
 
+const DropZone = styled("div")(({ theme }) => ({
+  border: "2px dashed #cccccc",
+  borderRadius: "4px",
+  padding: theme.spacing(2),
+  textAlign: "center",
+  cursor: "pointer",
+  backgroundColor: "#f5f5f5",
+  marginTop: theme.spacing(2),
+}));
+
 const AddProductDialog = ({ open, onClose, onAddProduct }) => {
+  const { data: session, status } = useSession()
+  const router = useRouter()
   const [formData, setFormData] = useState({
     plotCode: "",
     ProductName: "",
@@ -34,9 +50,13 @@ const AddProductDialog = ({ open, onClose, onAddProduct }) => {
     Price: "",
     Amount: "",
     status: "",
+    description: "",
+    imageUrl: null, // File input for image
   });
 
-  // Format price with commas
+  const [imagePreview, setImagePreview] = useState(null); // Image preview state
+
+  // Format Price with commas
   const formatPrice = (value) => {
     const cleanValue = value.replace(/[^0-9.]/g, "");
     const [integerPart, decimalPart] = cleanValue.split(".");
@@ -49,10 +69,11 @@ const AddProductDialog = ({ open, onClose, onAddProduct }) => {
       : formattedIntegerPart;
   };
 
+
   // Handle input change
   const handleChange = (e) => {
     const { name, value } = e.target;
-    if (name === "price") {
+    if (name === "Price") {
       const formattedValue = formatPrice(value);
       setFormData((prev) => ({ ...prev, [name]: formattedValue }));
     } else {
@@ -60,19 +81,94 @@ const AddProductDialog = ({ open, onClose, onAddProduct }) => {
     }
   };
 
-  // Handle form submission
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  // Handle file upload change and generate preview
+  const handleFileChange = (file) => {
+    setFormData((prev) => ({ ...prev, imageUrl: file }));
 
-    // Convert price with commas to float
-    const formattedData = {
-      ...formData,
-      Price: parseFloat(formData.Price.replace(/,/g, "")).toFixed(2),
+    // Create a preview URL using FileReader
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result); // Set image preview URL
     };
-
-    await onAddProduct(formattedData);
-    handleClose();
+    if (file) {
+      reader.readAsDataURL(file); // Read the file as a data URL
+    }
   };
+
+  // Handle drag over event
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.dataTransfer.dropEffect = "copy";
+  };
+
+  // Handle drop event
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const file = e.dataTransfer.files[0];
+    if (file) {
+      handleFileChange(file);
+    }
+  };
+
+  // Handle file input change
+  const handleInputFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      handleFileChange(file);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault(); // Ensure preventDefault is called before the conditions
+  
+    console.log("handle submit triggered");
+  
+    // Check for session and authenticated status
+    if (status === "authenticated" && session) {
+      // Convert Price with commas to float
+      const formattedData = {
+        ...formData,
+        Price: parseFloat(formData.Price.replace(/,/g, "")).toFixed(2),
+      };
+  
+      // Create a FormData object to handle both text fields and file upload
+      const formDataToSend = new FormData();
+      formDataToSend.append("plotCode", formattedData.plotCode);
+      formDataToSend.append("ProductName", formattedData.ProductName);
+      formDataToSend.append("ProductType", formattedData.ProductType);
+      formDataToSend.append("Price", formattedData.Price);
+      formDataToSend.append("Amount", formattedData.Amount);
+      formDataToSend.append("status", formattedData.status);
+      formDataToSend.append("description", formattedData.description);
+  
+      if (formData.imageUrl) {
+        formDataToSend.append("imageUrl", formData.imageUrl);
+      }
+  
+      try {
+        const response = await fetch(`/api/users/${session.user.id}/product/add`, {
+          method: "POST",
+          body: formDataToSend,
+        });
+  
+        if (!response.ok) {
+          throw new Error("Error creating product");
+        }
+  
+        const result = await response.json();
+        console.log("Product added:", result);
+        await onAddProduct(formattedData);
+  
+      } catch (error) {
+        console.error("Failed to add product:", error);
+      }
+    } else if (status === "unauthenticated") {
+      router.push("/login");
+    }
+  };
+  
 
   // Handle dialog close and reset form
   const handleClose = useCallback(() => {
@@ -83,7 +179,10 @@ const AddProductDialog = ({ open, onClose, onAddProduct }) => {
       Price: "",
       Amount: "",
       status: "",
+      description: "",
+      imageUrl: null,
     });
+    setImagePreview(null); // Clear the image preview
     onClose();
   }, [onClose]);
 
@@ -118,7 +217,7 @@ const AddProductDialog = ({ open, onClose, onAddProduct }) => {
             <Grid item xs={12}>
               <TextField
                 name="ProductType"
-                label="สายพันธุ์"
+                label="ประเภทสินค้า"
                 variant="outlined"
                 fullWidth
                 value={formData.ProductType}
@@ -162,6 +261,47 @@ const AddProductDialog = ({ open, onClose, onAddProduct }) => {
                   <MenuItem value="Out of Stock">Out of Stock</MenuItem>
                 </Select>
               </FormControl>
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                name="description"
+                label="รายละเอียดสินค้า"
+                variant="outlined"
+                fullWidth
+                multiline
+                rows={4}
+                value={formData.description}
+                onChange={handleChange}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <DropZone
+                onDragOver={handleDragOver}
+                onDrop={handleDrop}
+                onClick={() => document.getElementById('fileInput').click()}
+              >
+                <input
+                  type="file"
+                  id="fileInput"
+                  hidden
+                  onChange={handleInputFileChange}
+                />
+                <p>ลากและวางรูปภาพที่นี่ หรือคลิกเพื่อเลือกไฟล์</p>
+              </DropZone>
+            </Grid>
+            <Grid item xs={12}>
+              {imagePreview && (
+                <div style={{ position: 'relative', width: '100%', height: 'auto', marginTop: '10px' }}>
+                  <Image
+                    src={imagePreview}
+                    alt="Image Preview"
+                    layout="responsive"
+                    width={800} // Adjust the width as needed
+                    height={600} // Adjust the height as needed
+                    objectFit="cover"
+                  />
+                </div>
+              )}
             </Grid>
             <Grid item xs={12}>
               <Button
