@@ -27,8 +27,10 @@ export default async function ProductDetails({ params }) {
       ProductType: true,
       Amount: true,
       Price: true,
+      Description:true,
       farmer: {
         select: {
+          id:true,
           farmerName: true,  // Select specific fields from the Farmer model
           location: true,
           contactLine: true,  // You can include more fields as needed
@@ -67,6 +69,7 @@ export default async function ProductDetails({ params }) {
     <main>
       <div className="top-container">
         <ProductDetailsClient product={product}
+          ProductID = {product.ProductID}
          totalReviewsCount={totalReviewsCount} />
       </div>
     </main>

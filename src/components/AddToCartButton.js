@@ -18,7 +18,7 @@ export default function AddToCartButton({product}) {
           productPrice: productData.Price,
           productAmount: productData.Amount,
           Description: productData.Description,
-          farmerId: productData.farmerId
+          farmerId: productData.farmerId,
         };
     
         try {
