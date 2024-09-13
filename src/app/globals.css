@@ -35,11 +35,15 @@
 }
 
 .dropdown-item {
-  @apply w-full h-[40px] pb-4 pl-[50px] hover:text-[#4EAC14];
+  @apply pb-2 text-left hover:text-[#4EAC14];
 }
 
 .icon-hover {
   @apply text-[#595959] hover:text-[#4EAC14];
+}
+
+.cart-data {
+  @apply py-[5px]
 }
 
 :root {
