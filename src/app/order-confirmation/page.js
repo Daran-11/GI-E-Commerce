@@ -4,18 +4,18 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function OrderConfirmation() {
-  const [orders, setOrders] = useState([]);
+  const [order, setOrder] = useState(null);
   const [error, setError] = useState(null);
   const { data: session, status } = useSession();
   const router = useRouter();
 
   useEffect(() => {
-    const orderIds = sessionStorage.getItem('orderIds');
-    if (!orderIds) {
-      // Redirect to another page if orderIds is not found in local storage
+    const orderId = sessionStorage.getItem('orderId');
+    if (!orderId) {
+      // Redirect to another page if orderId is not found in session storage
       router.push('/');
     }
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -24,61 +24,61 @@ export default function OrderConfirmation() {
     }
 
     if (status === "authenticated") {
-      const orderIdsString = sessionStorage.getItem('orderIds');
-      const orderIds = JSON.parse(orderIdsString);
-      if (orderIds) {
-        console.log("OrderId:",orderIds);
-        const idsQueryParam = orderIds.join(',');
-        const fetchOrders = async () => {
+      const orderIdString = sessionStorage.getItem('orderId');
+      const orderId = JSON.parse(orderIdString);
+      if (orderId) {
+        const fetchOrder = async () => {
           try {
-            const response = await fetch(`/api/orders?ids=${idsQueryParam}`);
+            const response = await fetch(`/api/orders?id=${orderId}`);
             if (response.ok) {
               const data = await response.json();
-              setOrders(data);
+              setOrder(data.order);
+
+              sessionStorage.removeItem('orderId');
             } else {
-              setError("Orders not found");
+              setError("Order not found");
             }
           } catch (error) {
             setError("Failed to fetch order details");
           }
         };
-        fetchOrders();
+        fetchOrder();
       } else {
-        setError("No order IDs provided");
+        setError("No order ID provided");
       }
     }
   }, [status, router]);
-
-
-  useEffect(() => {
-    // Remove orderIds from localStorage after successful confirmation
-    if (orders.length > 0) {
-      sessionStorage.removeItem('orderIds');
-    }
-  }, [orders]);
 
   if (error) {
     return <div>{error}</div>;
   }
 
-  if (orders.length === 0) {
+  if (!order) {
     return <div>Loading...</div>;
   }
-
 
   return (
     <div className="top-container">
       <h1>Order Summary</h1>
-      {orders.map((order) => (
-        <div key={order.id} className="order-summary">
-          <p><strong>Order ID:</strong> {order.id}</p>
-          <p><strong>Product Name:</strong> {order.product?.ProductName} {order.product?.ProductType}</p>
-          <p><strong>Quantity:</strong> {order.quantity}</p>
-          <p><strong>Price:</strong> {order.product?.Price}</p>
-          <p><strong>Total:</strong> {order.quantity * (order.product?.Price || 0)}</p>
-          <p><strong>Address:</strong> {order.addressText}</p>
-        </div>
-      ))}
+      <div className="order-summary">
+        <p><strong>Order ID:</strong> {order.id}</p>
+        <p><strong>Status:</strong> {order.status}</p>
+        <p><strong>Delivery Status:</strong> {order.deliveryStatus}</p>
+        <p><strong>Payment Status:</strong> {order.paymentStatus}</p>
+        <p><strong>Total Price:</strong> ${order.totalPrice}</p>
+        <p><strong>Address:</strong> {order.addressText}</p>
+
+        <h2>Order Items</h2>
+        {order.orderItems.map((item) => (
+          <div key={item.id} className="order-item">
+            <p><strong>Product Name:</strong> {item.product.name}</p>
+            <p><strong>Farmer:</strong> {item.farmer.name}</p>
+            <p><strong>Quantity:</strong> {item.quantity}</p>
+            <p><strong>Price:</strong> ${item.price}</p>
+            <p><strong>Total:</strong> ${(item.quantity * item.price).toFixed(2)}</p>
+          </div>
+        ))}
+      </div>
       <p>Thank you for your purchase!</p>
     </div>
   );

@@ -14,7 +14,7 @@ export default function PaymentPage() {
 
   useEffect(() => {
     // Retrieve the order IDs and selected items from cart from sessionStorage)
-    const storedOrderIds = sessionStorage.getItem('orderIds');
+    const storedOrderIds = sessionStorage.getItem('orderId');
 
     const storedItems = localStorage.getItem("selectedItems");
 

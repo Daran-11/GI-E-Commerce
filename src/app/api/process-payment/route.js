@@ -32,7 +32,9 @@ export async function POST(request) {
         orderIdsInt.map(async (id) => {
           return prisma.order.update({
             where: { id },
-            data: { status: 'paid' },
+            data: { 
+              paymentStatus: 'Completed', // Use the enum value correctly
+            },
           });
         })
       );
