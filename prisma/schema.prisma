@@ -15,13 +15,18 @@ model Product {
   ProductName String   @db.VarChar(11)
   ProductType String   @db.VarChar(11)
   Description String?  @db.VarChar(200)
-  Price       Int      @db.SmallInt
+  Price       Int      @db.SmallInt     // ราคาขาย
+  Cost        Int      @db.SmallInt     // ราคาต้นทุน
   Amount      Int      @db.MediumInt
   status      String
   imageUrl    String?
+  isDeleted   Boolean  @default(false)// New field to indicate the is the product deleted
+  soldCount   Int      @default(0)
   DateCreated DateTime @default(now()) @db.Timestamp(0)
+
+
   cartItems   CartItem[]
-  Orders      Order[]
+  OrderItems  OrderItem[]
   reviews     RatingReview[]
   
   // Relationships
@@ -72,24 +77,64 @@ model CartItem {
 }
 
 model Order {
+  id               Int              @id @default(autoincrement())
+  userId           Int
+  deliveryId       Int?
+  totalPrice       Float
+  addressText      String           // Stores the delivery address in text form
+  status           orderStatus      @default(Pending)
+  deliveryStatus   DeliveryStatus   @default(Preparing) // Delivery process status
+  paymentStatus    paymentStatus    @default(Pending)   // New field for tracking payment status
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  user             User             @relation(fields: [userId], references: [id])
+  delivery         Delivery_Detail? @relation(fields: [deliveryId], references: [id])
+  orderItems       OrderItem[]      // Relation to OrderItem table (1-to-many)
+}
+
+model OrderItem {
   id            Int      @id @default(autoincrement())
-  userId        Int
+  orderId       Int
   productId     Int
   farmerId      Int
-  deliveryId    Int?
   quantity      Int
-  totalPrice    Float
-  addressText   String   // New field to store the address in text form
-  status        String   @default("Pending")
-  deliveryStatus String  @default("Preparing") // status for the delivery process
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  price         Float // Store the price for this specific product
 
-  user          User     @relation(fields: [userId], references: [id])
-  product       Product  @relation(fields: [productId], references: [ProductID])
-  delivery      Delivery_Detail? @relation(fields: [deliveryId], references: [id])
-  farmer        Farmer    @relation(fields: [farmerId], references: [id])
+  order         Order   @relation(fields: [orderId], references: [id])
+  product       Product @relation(fields: [productId], references: [ProductID])
+  farmer        Farmer  @relation(fields: [farmerId], references: [id])
 }
+
+
+enum orderStatus {
+  Pending
+  Completed
+}
+
+enum paymentStatus {
+  Pending
+  Completed
+  Failed
+  Refunded
+  Processing
+}
+
+enum DeliveryStatus {
+  Preparing
+  Shipped
+  OutForDelivery
+  Delivered
+
+  Canceled
+  Returned
+  FailedDelivery
+  AwaitingPickup
+  RefundProcessed
+}
+
+
+
 
 model Delivery_Service{
   id      Int @id @default(autoincrement())
@@ -129,15 +174,15 @@ model Address {
 }
 
 model Province {
-  id       Int       @id @default(autoincrement())
-  name_th  String
-  name_en  String
-  geography_id Int
-  created_at DateTime @default(now())
-  updated_at  DateTime   @updatedAt
-  deleted_at  DateTime?   @default(now())
-  amphoes  Amphoe[]
-  addresses Address[]
+  id            Int       @id @default(autoincrement())
+  name_th       String
+  name_en       String
+  geography_id  Int
+  created_at    DateTime @default(now())
+  updated_at    DateTime   @updatedAt
+  deleted_at    DateTime?   @default(now())
+  amphoes       Amphoe[]
+  addresses     Address[]
 }
 
 model Amphoe {
@@ -180,7 +225,7 @@ model Farmer {
   contactLine    String        @db.VarChar(15)    // Farmer's contact
   certificates   Certificate[]
   products       Product[]
-  orders         Order[]
+  OrderItems     OrderItem[]
 
   //Relationships
   user           User           @relation(fields: [userId], references: [id])
