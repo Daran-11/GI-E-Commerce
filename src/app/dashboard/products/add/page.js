@@ -48,6 +48,7 @@ const AddProductDialog = ({ open, onClose, onAddProduct }) => {
     ProductName: "",
     ProductType: "",
     Price: "",
+    Cost: "",
     Amount: "",
     status: "",
     description: "",
@@ -139,6 +140,7 @@ const AddProductDialog = ({ open, onClose, onAddProduct }) => {
       formDataToSend.append("ProductName", formattedData.ProductName);
       formDataToSend.append("ProductType", formattedData.ProductType);
       formDataToSend.append("Price", formattedData.Price);
+      formDataToSend.append("Cost", formattedData.Cost);
       formDataToSend.append("Amount", formattedData.Amount);
       formDataToSend.append("status", formattedData.status);
       formDataToSend.append("description", formattedData.description);
@@ -152,9 +154,14 @@ const AddProductDialog = ({ open, onClose, onAddProduct }) => {
           method: "POST",
           body: formDataToSend,
         });
+
+        if (response.ok) {
+
+          
+        }
   
         if (!response.ok) {
-          throw new Error("Error creating product");
+          throw new Error("Error creating product", error);
         }
   
         const result = await response.json();
@@ -177,6 +184,7 @@ const AddProductDialog = ({ open, onClose, onAddProduct }) => {
       ProductName: "",
       ProductType: "",
       Price: "",
+      Cost: "",
       Amount: "",
       status: "",
       description: "",
@@ -232,6 +240,17 @@ const AddProductDialog = ({ open, onClose, onAddProduct }) => {
                 variant="outlined"
                 fullWidth
                 value={formData.Price}
+                onChange={handleChange}
+                required
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                name="Cost"
+                label="ต้นทุน"
+                variant="outlined"
+                fullWidth
+                value={formData.Cost}
                 onChange={handleChange}
                 required
               />

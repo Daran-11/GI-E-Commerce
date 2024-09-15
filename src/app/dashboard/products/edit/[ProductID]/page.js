@@ -48,6 +48,7 @@ const EditProductDialog = ({open,onClose ,ProductID,onSuccess,}) => {
     ProductName: "",
     ProductType: "",
     Price: "",
+    Cost: "",
     Amount: "",
     status: "",
     Description: "",
@@ -62,12 +63,15 @@ const EditProductDialog = ({open,onClose ,ProductID,onSuccess,}) => {
         console.log(`Fetching product with ID: ${ProductID}`); // Debugging line
         const response = await fetch(`/api/users/${session.user.id}/product/get?ProductID=${ProductID}`);
         if (response.ok) {
+          
           const data = await response.json();
+          
           setFormData({
             plotCode: data.plotCode || "",
             ProductName: data.ProductName || "",
             ProductType: data.ProductType || "",
             Price: parseFloat(data.Price).toFixed(2) || "",
+            Cost: parseInt(data.Cost) || "",
             Amount: data.Amount || "",
             status: data.status || "",
             Description: data.Description || "",
@@ -145,6 +149,7 @@ const EditProductDialog = ({open,onClose ,ProductID,onSuccess,}) => {
     formDataToSend.append("ProductName", formData.ProductName);
     formDataToSend.append("ProductType", formData.ProductType);
     formDataToSend.append("Price", formData.Price);
+    formDataToSend.append("Cost", formData.Cost);
     formDataToSend.append("Amount", formData.Amount);
     formDataToSend.append("status", formData.status);
     formDataToSend.append("Description", formData.Description);
@@ -234,6 +239,17 @@ const EditProductDialog = ({open,onClose ,ProductID,onSuccess,}) => {
                 variant="outlined"
                 fullWidth
                 value={formData.Price}
+                onChange={handleChange}
+                required
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                name="Cost"
+                label="ต้นทุน"
+                variant="outlined"
+                fullWidth
+                value={formData.Cost}
                 onChange={handleChange}
                 required
               />
