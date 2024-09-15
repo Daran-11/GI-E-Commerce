@@ -17,22 +17,22 @@ export const Navbar = () => {
     return (
 
         <div className="fixed top-0 left-0 w-full bg-white shadow-lg z-50">
-            <div className="header flex  w-[80%] justify-between m-auto pt-[20px] pb-[15px]">
-                <div className='flex items-center w-[800px]'>
-                    <div className="sm:w-[250px] lg:w-[280px] xl:w-[300px] sm:text-2xl  xl:text-3xl text-[#4EAC14]">
+            <div className="header flex w-[95%]  xl:w-[80%] justify-between m-auto pt-[20px] pb-[15px]">
+                <div className='flex items-center w-[1200px]'>
+                    <div className="w-[200px] text-start lg:w-[280px] xl:w-[300px] sm:text-2xl text-lg  xl:text-3xl text-[#4EAC14]">
                         
                         <a href ='/'>GI Pineapple</a>
                         
                     </div>
 
-                    <div className="ml-5 w-full  ">
+                    <div className="ml-5 w-fit lg:w-full ">
                         <SearchBar/>
                     </div>                    
                 </div>
 
-                <div className="menu mt-auto mb-auto">
+                <div className="menu mt-auto mb-auto w-full">
                     <nav>
-                        <ul className="menulist items-center text-[#595959] md:text-sm lg:text-base xl:text-lg flex xl:gap-x-[40px] lg:gap-x-[20px] md:gap-x-[20px] sm:gap-x-[15px]">
+                        <ul className="menulist items-center text-[#595959] text-sm lg:text-base xl:text-lg flex justify-end xl:gap-x-[40px] lg:gap-x-[20px] md:gap-x-[20px] sm:gap-x-[15px] ">
                             <li>
                                 <Link 
                                     href='/'
@@ -103,12 +103,16 @@ export const Navbar = () => {
                                 showArrow ={true}
                                
                             >
-                                <PopoverTrigger>
+                                <PopoverTrigger >
+                                   
+
+                                    
 
                                     <Button 
                                     variant="bordered" 
                                     disableRipple="true"
                                     backdrop="blur"
+                                    className = "flex items-center p-0"
                                     >
                                         <svg 
                                              className={`fill-current hover:text-[#4EAC14] ${activePaths.includes(currentPath) ? 'text-[#4EAC14]' : 'text-[#595959]'}`}
@@ -118,6 +122,7 @@ export const Navbar = () => {
                                                 <path d="M170-254.62q-12.75 0-21.37-8.63-8.63-8.62-8.63-21.38 0-12.75 8.63-21.37 8.62-8.61 21.37-8.61h620q12.75 0 21.37 8.62 8.63 8.63 8.63 21.39 0 12.75-8.63 21.37-8.62 8.61-21.37 8.61H170ZM170-450q-12.75 0-21.37-8.63-8.63-8.63-8.63-21.38 0-12.76 8.63-21.37Q157.25-510 170-510h620q12.75 0 21.37 8.63 8.63 8.63 8.63 21.38 0 12.76-8.63 21.37Q802.75-450 790-450H170Zm0-195.39q-12.75 0-21.37-8.62-8.63-8.63-8.63-21.39 0-12.75 8.63-21.37 8.62-8.61 21.37-8.61h620q12.75 0 21.37 8.63 8.63 8.62 8.63 21.38 0 12.75-8.63 21.37-8.62 8.61-21.37 8.61H170Z"/>
                                         </svg>
                                     </Button>
+                                  
                                 </PopoverTrigger>
                             
                                 <DropdownMenu 
