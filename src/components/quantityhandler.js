@@ -80,7 +80,7 @@ export default function QuantityHandler({ productAmount, productId, initialQuant
         <div className='items-center justify-center'>
         <input
           type="number"
-          className=" w-8 h-10 mx-1 text-center appearance-none"
+          className="w-6 h-5 lg:w-8 lg:h-10 lg:mx-1 text-center appearance-none"
           value={quantity}
           onChange={handleInputChange}
           onBlur={handleBlur}

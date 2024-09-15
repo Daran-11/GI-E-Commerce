@@ -27,6 +27,7 @@ export async function GET() {
       productPrice: item.product.Price,
       farmerId: item.product.farmerId,
       quantity: item.quantity,
+      imageUrl: item.product.imageUrl,
     }));
 
     return NextResponse.json(flatCartItems);

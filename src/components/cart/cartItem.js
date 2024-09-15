@@ -71,33 +71,34 @@ export default function CartItem({ initialItems }) {
   };
 
   return (
-    <div className=" w-[80%] ml-auto mr-auto mt-[100px] ">
+    <div className="w-full xl:w-[80%] ml-auto mr-auto mt-[100px] ">
 
-    <div className="flex justify-between ">
-      <div className="w-fit bg-white p-5 rounded-xl h-screen ">
+    <div className="xl:flex  lg:justify-start ">
+
+      <div className="w-full xl:w-[60vw] bg-white xl:p-5 rounded-xl h-fit p-[16px]">
         <div className="text-4xl text-[#535353] pb-2 border-b-2 mb-5">
           <a>
           ตะกร้าสินค้า
           </a>
         </div>
 
-        <table className="">
+        <table className="w-full xl:w-[57vw]">
           <thead className="">
-            <tr className="text-xl  text-[#535353]">
-              <th className=" pr-[50px]">เลือก</th>
-              <th className=" pr-[50px]">รูป</th>
-              <th className=" pr-[200px]">สินค้า</th>
-              <th className=" pr-[80px] ">ราคาต่อกิโล</th>
-              <th className=" pr-[150px]">จำนวน</th>
-              <th className=" pr-[60px]">ราคารวม</th>
-              <th className=" pr-[60px]">แอ็คชั่น</th>
+            <tr className="text-base lg:text-xl text-[#535353]">
+              <th className=" w-[50px]  text-start">เลือก</th>
+              <th className=" w-[100px] text-start">รูป</th>
+              <th className=" w-[120px] text-start">สินค้า</th>
+              <th className=" w-[100px] text-start">ราคา/กิโล</th>
+              <th className=" w-[80px] text-start">จำนวน</th>
+              <th className=" w-[100px] text-start">ราคารวม</th>
+              <th className=" w-[60px] text-start">แอ็คชั่น</th>
             </tr>
           </thead>
           <tbody className="">
           <tr className="h-4"></tr>
             {cartItems.length > 0 ? (
               cartItems.map((item) => (
-                <tr className="border-b-2 text-lg " key={item.productId}>
+                <tr className="border-b-2 text-base lg:text-lg " key={item.productId}>
                   <td className="cart-data items-center justify-center ">
                     <input
                       type="checkbox"
@@ -105,22 +106,22 @@ export default function CartItem({ initialItems }) {
                       onChange={() => selectItem(item.productId)}
                     />
                   </td>
-                  <td className="cart-data pr-4">              
+                  <td className="cart-data pr-[35px]">              
                     {item.imageUrl ? (
                     <Image
                       src={item.imageUrl}
                       alt={item.ProductName}
                       width={0} // Adjust width as needed
                       height={0} // Adjust height as needed
-                
-                      className='w-[45px] h-[45px] object-cover rounded-2xl'
+                      sizes="100vw" 
+                      className='w-[75px] h-[75px] object-cover rounded-2xl'
                     />
                   ) : (
                     <img className="w-[75px] h-[75px] object-cover rounded-2xl" src="/phulae.jpg" alt="Card Image" />
                   )}</td>
                   <td className="cart-data">{item.productName || item.product.ProductName} {item.productType || item.product.ProductType}</td>
                   <td className="cart-data ">{item.productPrice || item.product.Price}</td>
-                  <td className="cart-data ">
+                  <td className="cart-data  pr-[5px]">
                     <QuantityHandler 
                       productAmount={item.productAmount || item.product.Amount} 
                       productId={item.productId || item.product.ProductID} 
@@ -130,29 +131,33 @@ export default function CartItem({ initialItems }) {
                   </td>
                   <td className="cart-data ">{item.quantity * (item.productPrice || item.product.Price)}</td>
                   <td className="cart-data ">
-                    <button  onClick={() => handleDelete(item.productId)} className=" text-red-500 hover:text-red-800 w-10 h-10">
-                      ลบ
-                    </button>
+                    <div className=" flex justify-start">
+                      <button  onClick={() => handleDelete(item.productId)} className=" text-red-500 hover:text-red-800 w-10 h-10">
+                        ลบ
+                      </button>                      
+                    </div>
+
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="6">No items in the cart.</td>
+                <td colSpan={7} className="bg-slate-100 text-gray-500 w-full px-4 py-2 rounded-lg text-center">-ยังไม่มีสินค้าในตะกร้า</td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
-      <div className="bg-white h-screen flex justify-center  w-[470px] rounded-xl ">
-      <div className="fixed bg-white w-fit h-[60vh] p-4 rounded-xl">
+
+      <div className=" flex justify-start  xl:justify-center w-fit  xl:w-[20vw] rounded-xl ">
+      <div className="fixed bottom-2 xl:top-[100px] bg-white h-fit w-full   xl:w-[40vh] xl:h-[65vh] p-4 rounded-xl">
           
-          <div className="w-[380px] flex flex-col " >
+          <div className="flex flex-col " >
           <div className="text-4xl text-[#535353] border-b-2 mt-1 pb-2 mb-5 ">สินค้าที่เลือก </div>
           
           {selectedItems.length > 0 ? (
             <>
-            <div className="flex-grow w-full  px-4 py-2 rounded-md text-lg overflow-y-auto h-[50vh] bg-slate-100  ">
+            <div className="flex-grow w-full  px-4 py-2 rounded-md text-lg overflow-y-auto h-fit 2xl:h-[40vh] bg-slate-100  ">
               {cartItems
                 .filter(item => selectedItems.includes(item.productId))
                 .map((item,index) => (
@@ -179,7 +184,7 @@ export default function CartItem({ initialItems }) {
             </>      
         ) : (
           <>
-          <div className="flex justify-center items-center w-full  rounded-xl bg-slate-100 h-[50vh] ">
+          <div className="flex justify-center items-center w-full  rounded-xl bg-slate-100 xl:h-[40vh] h-[10vh] ">
           <div className=" text-gray-500  px-2 ">-ยังไม่ได้เลือกสินค้า-</div>
           </div>
           </>  
