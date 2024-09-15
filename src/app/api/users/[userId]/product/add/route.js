@@ -1,13 +1,11 @@
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { writeFile } from "fs/promises";
 import { getServerSession } from "next-auth";
-import { NextResponse } from "next/server"; // Ensure you import NextResponse
+import { NextResponse } from "next/server";
 import path from "path";
 import prisma from "../../../../../../../lib/prisma";
 
-
-
-// Config to disable body parsing since we handle it manually this shit will disabled for the whole file bruh
+// Config to disable body parsing since we handle it manually
 export const config = {
   api: {
     bodyParser: false,
@@ -45,15 +43,12 @@ async function handleFileUpload(file) {
   }
 }
 
-export async function POST(request,{ params }) {
-
+export async function POST(request, { params }) {
   const session = await getServerSession({ request, ...authOptions });
   const { userId } = params;
 
-
-  console.log('checking Session for adding product:', session); // Debug session
+  console.log('Checking session for adding product:', session); // Debug session
   console.log('User ID:', session?.user?.id); // Debug user ID
-
 
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -63,36 +58,35 @@ export async function POST(request,{ params }) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
-    // Fetch the farmer data using the userId
-    const farmer = await prisma.farmer.findUnique({
-      where: { userId: parseInt(userId) }
-    });
+  // Fetch the farmer data using the userId
+  const farmer = await prisma.farmer.findUnique({
+    where: { userId: parseInt(userId) }
+  });
 
   if (!farmer) {
-    console.log("Farmer data not found in Farmer table")
+    console.log("Farmer data not found in Farmer table");
     return NextResponse.json({ error: 'Farmer profile not found for this user.' }, { status: 404 });
-    
   }
 
   try {
+    // Parse form data
+    const formData = await request.formData();
 
-      // Parse form data
-      const formData = await request.formData();
+    // Extract fields from formData
+    const plotCode = formData.get("plotCode");
+    const ProductName = formData.get("ProductName");
+    const ProductType = formData.get("ProductType");
+    const Price = formData.get("Price");
+    const Cost = formData.get("Cost");
+    const Amount = formData.get("Amount");
+    const status = formData.get("status");
 
-      // Extract fields from formData
-      const plotCode = formData.get("plotCode");
-      const ProductName = formData.get("ProductName");
-      const ProductType = formData.get("ProductType");
-      const Price = formData.get("Price");
-      const Amount = formData.get("Amount");
-      const status = formData.get("status");
-        
-      // Extract file (if provided)
-      const imageFile = formData.get("imageUrl");
-      let imageUrl = null;
-      
-      // Handle file upload if the image file is provided
-      if (imageFile && imageFile.size > 0) {
+    // Extract file (if provided)
+    const imageFile = formData.get("imageUrl");
+    let imageUrl = null;
+
+    // Handle file upload if the image file is provided
+    if (imageFile && imageFile.size > 0) {
       imageUrl = await handleFileUpload(imageFile);
     }
 
@@ -103,19 +97,20 @@ export async function POST(request,{ params }) {
         ProductType,
         Price: parseFloat(Price), // Convert to Float
         Amount: parseInt(Amount, 10), // Convert to Int
+        Cost: parseInt(Cost, 10), // Ensure Cost is converted to Int
         status,
-        farmerId: farmer.id,  // Link the product to the farmer
+        farmerId: farmer.id, // Link the product to the farmer
         imageUrl: imageUrl,
       },
     });
+
+    console.log("Product added successfully:", product); // Debug successful addition
     return NextResponse.json(product, { status: 201 });
   } catch (error) {
-    console.error("Failed to add product:", error);
+    console.error("Failed to add product:", error); // Enhanced error logging
     return NextResponse.json(
-      { error: "Failed to add product" },
+      { error: error.message || "Failed to add product" },
       { status: 500 }
     );
   }
 }
-
-

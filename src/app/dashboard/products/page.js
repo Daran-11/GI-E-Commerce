@@ -93,21 +93,6 @@ const Product = () => {
   };
 
   const handleAddProduct = async (productData) => {
-    const response = await fetch(`/api/users/${session.user.id}/product`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(productData),
-    });
-
-    if (response.ok) {
-      alert("Product added successfully");
-      fetchProducts(); // Refetch products after adding a new product
-      handleCloseAddDialog();
-    } else {
-      alert("Failed to add product");
-    }
     const formData = new FormData();
     formData.append("plotCode", productData.plotCode);
     formData.append("ProductName", productData.ProductName);
@@ -125,6 +110,7 @@ const Product = () => {
         handleCloseAddDialog();
      
   };
+
 
   const handleEditProduct = async (ProductID, productData) => {
     const response = await fetch(`/api/users/${session.user.id}/product/put/${ProductID}`, {

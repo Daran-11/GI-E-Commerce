@@ -12,7 +12,7 @@ export async function GET(request,{ params }) {
     const { userId} = params;
   
   
-    console.log('chk Session for addresses:', session); // Debug session
+    console.log('chk Session for receiving product info:', session); // Debug session
     console.log('User ID:', session?.user?.id); // Debug user ID
   
     if (!session) {
@@ -36,8 +36,10 @@ export async function GET(request,{ params }) {
       try {
         
         const product = await prisma.product.findUnique({
-          where: 
-          { ProductID: parseInt(ProductID, 10), 
+          where:
+          { 
+            isDeleted: false,
+            ProductID: parseInt(ProductID, 10), 
             farmer: {
               userId: parseInt(userId),
             },
@@ -66,6 +68,7 @@ export async function GET(request,{ params }) {
         const products = await prisma.product.findMany(
           {
             where: {
+              isDeleted: false,
               farmer: {
                 userId: parseInt(userId),
               },
