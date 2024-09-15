@@ -36,7 +36,8 @@ export default function ProductDetailsClient({ product, totalReviewsCount ,Produ
       productPrice: productData.Price,
       productAmount: productData.Amount,
       farmerId: productData.farmerId,
-      Description: productData.Description
+      Description: productData.Description,
+      imageUrl: productData.imageUrl,
     };
 
     try {
@@ -62,7 +63,8 @@ export default function ProductDetailsClient({ product, totalReviewsCount ,Produ
         productType: productData.ProductType,
         productPrice: productData.Price,
         productAmount: productData.Amount,
-        farmerId: productData.farmerId
+        farmerId: productData.farmerId,
+        imageUrl: productData.imageUrl,
       };
   
       try {

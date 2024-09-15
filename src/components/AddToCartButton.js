@@ -19,6 +19,7 @@ export default function AddToCartButton({product}) {
           productAmount: productData.Amount,
           Description: productData.Description,
           farmerId: productData.farmerId,
+          imageUrl: productData.imageUrl,
         };
     
         try {
