@@ -1,6 +1,7 @@
 "use client"
 import { useCart } from "@/context/cartContext";
 import { useSession } from "next-auth/react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import QuantityHandler from "../quantityhandler";
@@ -84,6 +85,7 @@ export default function CartItem({ initialItems }) {
           <thead className="">
             <tr className="text-xl  text-[#535353]">
               <th className=" pr-[50px]">เลือก</th>
+              <th className=" pr-[50px]">รูป</th>
               <th className=" pr-[200px]">สินค้า</th>
               <th className=" pr-[80px] ">ราคาต่อกิโล</th>
               <th className=" pr-[150px]">จำนวน</th>
@@ -103,6 +105,19 @@ export default function CartItem({ initialItems }) {
                       onChange={() => selectItem(item.productId)}
                     />
                   </td>
+                  <td className="cart-data pr-4">              
+                    {item.imageUrl ? (
+                    <Image
+                      src={item.imageUrl}
+                      alt={item.ProductName}
+                      width={0} // Adjust width as needed
+                      height={0} // Adjust height as needed
+                
+                      className='w-[45px] h-[45px] object-cover rounded-2xl'
+                    />
+                  ) : (
+                    <img className="w-[75px] h-[75px] object-cover rounded-2xl" src="/phulae.jpg" alt="Card Image" />
+                  )}</td>
                   <td className="cart-data">{item.productName || item.product.ProductName} {item.productType || item.product.ProductType}</td>
                   <td className="cart-data ">{item.productPrice || item.product.Price}</td>
                   <td className="cart-data ">
@@ -130,14 +145,14 @@ export default function CartItem({ initialItems }) {
         </table>
       </div>
       <div className="bg-white h-screen flex justify-center  w-[470px] rounded-xl ">
-      <div className="fixed bg-white w-fit h-screen p-4 rounded-xl">
+      <div className="fixed bg-white w-fit h-[60vh] p-4 rounded-xl">
           
-          <div className="w-[380px] flex flex-col h-[600px]" >
+          <div className="w-[380px] flex flex-col " >
           <div className="text-4xl text-[#535353] border-b-2 mt-1 pb-2 mb-5 ">สินค้าที่เลือก </div>
           
           {selectedItems.length > 0 ? (
             <>
-            <div className="flex-grow overflow-y-auto w-full h-fit px-4 py-2 rounded-md bg-slate-100 text-lg ">
+            <div className="flex-grow w-full  px-4 py-2 rounded-md text-lg overflow-y-auto h-[50vh] bg-slate-100  ">
               {cartItems
                 .filter(item => selectedItems.includes(item.productId))
                 .map((item,index) => (
@@ -164,12 +179,13 @@ export default function CartItem({ initialItems }) {
             </>      
         ) : (
           <>
-          <div className="flex justify-center items-center w-full  h-[600px] rounded-xl bg-slate-100">
+          <div className="flex justify-center items-center w-full  rounded-xl bg-slate-100 h-[50vh] ">
           <div className=" text-gray-500  px-2 ">-ยังไม่ได้เลือกสินค้า-</div>
           </div>
           </>  
         )}
         </div>
+
         <div className="flex justify-center w-full">
         <button 
           onClick={handleCheckout}
