@@ -1,0 +1,113 @@
+.container {
+  /* ... */
+}
+
+.mainContent {
+  /* ... */
+}
+
+.title {
+  font-size: 24px;
+}
+
+.subtitle {
+  font-size: 20px;
+  margin-bottom: 20px;
+}
+
+.formContainer {
+  display: flex;
+  gap: 20px;
+}
+
+.formLeft, .formRight {
+  flex: 1;
+}
+
+.formGroup {
+  margin-bottom: 15px;
+}
+
+.formLabel {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.formInput {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 15px;
+  box-sizing: border-box;
+  font-size: 16px;
+}
+
+.formInput[type="file"] {
+  padding: 5px;
+}
+
+.buttonGroup {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.buttonSubmit {
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  background-color: #4378FF;
+  color: white;
+  border: none;
+  border-radius: 10px;
+}
+
+.buttonCancel {
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  background-color: #ccc;
+  color: black;
+  border: none;
+  border-radius: 10px;
+}
+
+.filePreview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.fileInfo {
+  margin-top: 5px;
+  font-size: 14px;
+  text-align: center;
+}
+
+.iconButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 15rem;
+  padding: 5px;
+  transition: color 0.3s ease;
+}
+
+.iconButton.edit {
+  color: #4CAF50;
+}
+
+.iconButton.edit:hover {
+  color: #45a049;
+}
+
+.iconButton.delete {
+  color: #f44336;
+}
+
+.iconButton.delete:hover {
+  color: #da190b;
+}

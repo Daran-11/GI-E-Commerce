@@ -86,7 +86,7 @@ const Historycer = () => {
                 <td>
                   <div className={styles.buttons}>
                     <Link
-                      href={`/dashboard_municipality/certificate/approve/${certificate.id}`}
+                      href={`/dashboard_municipality/certificate/edit/${certificate.id}`}
                     >
                       <button className={`${styles.button} ${styles.view}`}>
                         ตรวจสอบใบรับรอง

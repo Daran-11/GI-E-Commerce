@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
+import Image from "next/image";
 import "./add.css";
 
 // Fix for the missing marker icon in Leaflet
@@ -22,10 +23,10 @@ const Register = () => {
     latitude: "",
     longitude: "",
     productionQuantity: "",
-    hasGAP: false,
-    hasGI: false,
+    standards: [],
   });
 
+  const [standards, setStandards] = useState([]);
   const [errors, setErrors] = useState({});
   const [farmerId, setFarmerId] = useState(null);
   const router = useRouter();
@@ -37,6 +38,23 @@ const Register = () => {
     } else {
       console.error("Farmer ID not found in localStorage");
     }
+
+    // Fetch standards
+    const fetchStandards = async () => {
+      try {
+        const response = await fetch("/api/standards");
+        if (response.ok) {
+          const data = await response.json();
+          setStandards(data);
+        } else {
+          throw new Error("Failed to fetch standards");
+        }
+      } catch (error) {
+        console.error("Error fetching standards:", error);
+      }
+    };
+
+    fetchStandards();
   }, []);
 
   const handleChange = (e) => {
@@ -46,6 +64,29 @@ const Register = () => {
       [name]: type === "checkbox" ? checked : value,
     }));
     setErrors((prev) => ({ ...prev, [name]: "" }));
+  };
+
+  const handleStandardChange = (standard, checked) => {
+    setFormData((prev) => {
+      const updatedStandards = checked
+        ? [...prev.standards, { 
+            id: standard.id, 
+            name: standard.name, 
+            logo: standard.logoUrl,
+            certImage: null 
+          }]
+        : prev.standards.filter(s => s.id !== standard.id);
+      return { ...prev, standards: updatedStandards };
+    });
+  };
+
+  const handleStandardImageUpload = (standardId, file) => {
+    setFormData((prev) => {
+      const updatedStandards = prev.standards.map(s => 
+        s.id === standardId ? { ...s, certImage: file } : s
+      );
+      return { ...prev, standards: updatedStandards };
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -59,8 +100,19 @@ const Register = () => {
 
     const formDataToSend = new FormData();
     for (const key in formData) {
-      formDataToSend.append(key, formData[key]);
+      if (key !== 'standards') {
+        formDataToSend.append(key, formData[key]);
+      }
     }
+
+    formData.standards.forEach((standard, index) => {
+      formDataToSend.append(`standards[${index}][id]`, standard.id);
+      formDataToSend.append(`standards[${index}][name]`, standard.name);
+      formDataToSend.append(`standards[${index}][logo]`, standard.logo);
+      if (standard.certImage) {
+        formDataToSend.append(`standards[${index}][certImage]`, standard.certImage);
+      }
+    });
 
     if (farmerId) {
       formDataToSend.append("farmerId", farmerId);
@@ -174,8 +226,8 @@ const Register = () => {
 
             <p className="section-name">พิกัด</p>
             <MapContainer
-              center={[13.736717, 100.523186]} // Default location
-              zoom={6}
+              center={[20.046061226911785, 99.890654]} // Default location
+              zoom={15}
               style={{ height: "400px", width: "100%" }}
             >
               <TileLayer
@@ -192,7 +244,7 @@ const Register = () => {
             <p className="section-name">จำนวนผลผลิต (กิโลกรัม)</p>
             <input
               name="productionQuantity"
-              type="text"
+              type="number"
               placeholder="จำนวนผลผลิต (กิโลกรัม)"
               value={formData.productionQuantity}
               onChange={handleChange}
@@ -203,26 +255,27 @@ const Register = () => {
               <p className="error">{errors.productionQuantity}</p>
             )}
 
-            <p className="section-name">ใบรับรอง</p>
-            <div className="checkbox-container">
-              <label>
-                <input
-                  type="checkbox"
-                  name="hasGAP"
-                  checked={formData.hasGAP}
-                  onChange={handleChange}
-                />{" "}
-                GAP
-              </label>
-              <label>
-                <input
-                  type="checkbox"
-                  name="hasGI"
-                  checked={formData.hasGI}
-                  onChange={handleChange}
-                />{" "}
-                GI
-              </label>
+            <p className="section-name">มาตรฐาน</p>
+            <div className="standards-container">
+              {standards.map((standard) => (
+                <div key={standard.id} className="standard-item">
+                  <label>
+                    <input
+                      type="checkbox"
+                      onChange={(e) => handleStandardChange(standard, e.target.checked)}
+                    />
+                    <Image src={standard.logoUrl} alt={standard.name} width={50} height={50} className="standard-logo" />
+                    {standard.name}
+                  </label>
+                  {formData.standards.some(s => s.id === standard.id) && (
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleStandardImageUpload(standard.id, e.target.files[0])}
+                    />
+                  )}
+                </div>
+              ))}
             </div>
           </div>
 

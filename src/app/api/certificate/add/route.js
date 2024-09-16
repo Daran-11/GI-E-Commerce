@@ -9,13 +9,11 @@ export async function POST(request) {
   try {
     const formData = await request.formData();
 
-    // รับค่า farmerId จาก formData
     const farmerId = formData.get('farmerId');
     if (!farmerId) {
       throw new Error("Farmer ID is not provided in the form data.");
     }
 
-    // ตรวจสอบและเก็บค่าพิกัด
     const latitude = parseFloat(formData.get('latitude'));
     const longitude = parseFloat(formData.get('longitude'));
     
@@ -23,7 +21,25 @@ export async function POST(request) {
       throw new Error("Invalid latitude or longitude values.");
     }
 
-    // จัดการข้อมูลจากฟอร์ม
+    const standards = [];
+    for (let i = 0; formData.get(`standards[${i}][id]`); i++) {
+      const standard = {
+        id: parseInt(formData.get(`standards[${i}][id]`), 10),
+        name: formData.get(`standards[${i}][name]`),
+        logo: formData.get(`standards[${i}][logo]`),
+      };
+
+      const certImage = formData.get(`standards[${i}][certImage]`);
+      if (certImage) {
+        const fileName = `${Date.now()}_${certImage.name}`;
+        const filePath = path.join(process.cwd(), 'public', 'uploads', fileName);
+        await writeFile(filePath, Buffer.from(await certImage.arrayBuffer()));
+        standard.certImageUrl = `/uploads/${fileName}`;
+      }
+
+      standards.push(standard);
+    }
+
     const certificateData = {
       type: formData.get('type'),
       variety: formData.get('variety'),
@@ -31,17 +47,15 @@ export async function POST(request) {
       latitude,
       longitude,
       productionQuantity: parseInt(formData.get('productionQuantity'), 10),
-      hasGAP: formData.get('hasGAP') === 'true',  // รับค่าเป็น boolean
-      hasGI: formData.get('hasGI') === 'true',    // รับค่าเป็น boolean
-      status: 'รอตรวจสอบใบรับรอง',  // ค่าเริ่มต้นของสถานะ
+      standards: JSON.stringify(standards),
+      status: 'รอตรวจสอบใบรับรอง',
       registrationDate: new Date(),
-      expiryDate: new Date(),  // ค่าเริ่มต้นของวันหมดอายุ (สามารถแก้ไขได้)
+      expiryDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)), // Set expiry to 1 year from now
       farmer: {
         connect: { id: parseInt(farmerId, 10) },
       },
     };
 
-    // สร้างใบรับรองใหม่ในฐานข้อมูล
     const certificate = await prisma.certificate.create({
       data: certificateData,
     });
@@ -53,27 +67,41 @@ export async function POST(request) {
   }
 }
 
-
-
 export async function PUT(request) {
   try {
-    const data = await request.json();
+    const formData = await request.formData();
+    const id = parseInt(formData.get('id'), 10);
+
+    const standards = [];
+    for (let i = 0; formData.get(`standards[${i}][id]`); i++) {
+      const standard = {
+        id: parseInt(formData.get(`standards[${i}][id]`), 10),
+        name: formData.get(`standards[${i}][name]`),
+        logo: formData.get(`standards[${i}][logo]`),
+      };
+
+      const certImage = formData.get(`standards[${i}][certImage]`);
+      if (certImage) {
+        const fileName = `${Date.now()}_${certImage.name}`;
+        const filePath = path.join(process.cwd(), 'public', 'uploads', fileName);
+        await writeFile(filePath, Buffer.from(await certImage.arrayBuffer()));
+        standard.certImageUrl = `/uploads/${fileName}`;
+      }
+
+      standards.push(standard);
+    }
 
     const updatedCertificate = await prisma.certificate.update({
-      where: { id: parseInt(data.id, 10) },
+      where: { id },
       data: {
-        type: data.type,
-        variety: data.variety,
-        plotCode: data.plotCode,
-        latitude: parseFloat(data.latitude),
-        longitude: parseFloat(data.longitude),
-        productionQuantity: parseFloat(data.productionQuantity),
-        hasCertificate: data.hasCertificate,
-        imageUrl: data.hasCertificate ? data.imageUrl : null,
-        status: data.status,
-        farmer: {
-          connect: { id: parseInt(data.farmerId, 10) }, // Connect farmer by id
-        },
+        type: formData.get('type'),
+        variety: formData.get('variety'),
+        plotCode: formData.get('plotCode'),
+        latitude: parseFloat(formData.get('latitude')),
+        longitude: parseFloat(formData.get('longitude')),
+        productionQuantity: parseInt(formData.get('productionQuantity'), 10),
+        standards: JSON.stringify(standards),
+        status: formData.get('status'),
       },
     });
     return NextResponse.json(updatedCertificate, { status: 200 });
@@ -88,13 +116,10 @@ export async function PUT(request) {
 
 export async function DELETE(request) {
   try {
-    const { searchParams, href } = new URL(request.url);
-
-    console.log("Request URL:", href);
+    const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
 
     if (!id) {
-      console.warn("No 'id' provided in the URL query string:", href);
       return NextResponse.json({ error: "No id provided" }, { status: 400 });
     }
 
@@ -114,26 +139,38 @@ export async function DELETE(request) {
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const farmerId = searchParams.get('farmerId');
-
-  if (!farmerId) {
-    return NextResponse.json({ error: "Farmer ID is required" }, { status: 400 });
-  }
+  const id = searchParams.get('id');
 
   try {
-    const certificates = await prisma.certificate.findMany({
-      where: {
-        farmerId: parseInt(farmerId, 10)
-      },
-      include: {
-        farmer: {
-          select: {
-            name: true
+    if (id) {
+      const certificate = await prisma.certificate.findUnique({
+        where: { id: parseInt(id, 10) },
+        include: {
+          farmer: {
+            select: {
+              name: true
+            }
           }
         }
-      }
-    });
-
-    return NextResponse.json(certificates);
+      });
+      return NextResponse.json(certificate);
+    } else if (farmerId) {
+      const certificates = await prisma.certificate.findMany({
+        where: {
+          farmerId: parseInt(farmerId, 10)
+        },
+        include: {
+          farmer: {
+            select: {
+              name: true
+            }
+          }
+        }
+      });
+      return NextResponse.json(certificates);
+    } else {
+      return NextResponse.json({ error: "Either id or farmerId is required" }, { status: 400 });
+    }
   } catch (error) {
     console.error("Error fetching certificates:", error);
     return NextResponse.json({ error: "Error fetching certificates" }, { status: 500 });

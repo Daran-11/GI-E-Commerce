@@ -7,32 +7,42 @@ export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
 
+  console.log("Received GET request with id:", id);
+
   if (id) {
     try {
       const certificate = await prisma.certificate.findUnique({
         where: { 
           id: parseInt(id, 10),
-          status: "รอตรวจสอบใบรับรอง" // เพิ่มเงื่อนไขสถานะ
         },
         include: { farmer: true },
       });
+      
+      console.log("Found certificate:", certificate);
+
       if (certificate) {
-        return NextResponse.json(certificate);
+        if (certificate.status === "รอตรวจสอบใบรับรอง") {
+          return NextResponse.json(certificate);
+        } else {
+          return NextResponse.json(
+            { error: `Certificate found but status is ${certificate.status}` },
+            { status: 400 }
+          );
+        }
       } else {
         return NextResponse.json(
-          { error: "Certificate not found or not in 'รอตรวจสอบใบรับรอง' status" },
+          { error: "Certificate not found" },
           { status: 404 }
         );
       }
     } catch (error) {
       console.error("Error fetching certificate:", error);
       return NextResponse.json(
-        { error: "Error fetching certificate" },
+        { error: "Error fetching certificate", details: error.message },
         { status: 500 }
       );
     }
   } else {
-    // Fetching all certificates with 'รอตรวจสอบใบรับรอง' status
     try {
       const certificates = await prisma.certificate.findMany({
         where: {
@@ -51,28 +61,36 @@ export async function GET(request) {
   }
 }
 
-
 export async function POST(request) {
   try {
-    const data = await request.json();
-    const certificate = await prisma.certificate.create({
-      data: {
-        variety: data.variety,
-        plotCode: data.plotCode,
-        registrationDate: new Date(data.registrationDate),
-        expiryDate: new Date(data.expiryDate),
-        status: data.status,
-        municipalComment: data.municipalComment || null, // Add municipalComment field
-        farmer: {
-          connect: { id: parseInt(data.farmerId, 10) }, // Convert farmerId to integer
-        },
+    const formData = await request.formData();
+    const data = Object.fromEntries(formData);
+
+    const certificateData = {
+      type: data.type,
+      variety: data.variety,
+      plotCode: data.plotCode,
+      latitude: parseFloat(data.latitude),
+      longitude: parseFloat(data.longitude),
+      productionQuantity: parseInt(data.productionQuantity, 10),
+      standards: data.standards ? JSON.parse(data.standards) : [],
+      registrationDate: new Date(data.registrationDate),
+      expiryDate: new Date(data.expiryDate),
+      status: "รอตรวจสอบใบรับรอง",
+      farmer: {
+        connect: { id: parseInt(data.farmerId, 10) },
       },
+    };
+
+    const certificate = await prisma.certificate.create({
+      data: certificateData,
     });
+
     return NextResponse.json(certificate, { status: 201 });
   } catch (error) {
     console.error("Failed to add certificate:", error);
     return NextResponse.json(
-      { error: "Failed to add certificate" },
+      { error: "Failed to add certificate", details: error.message },
       { status: 500 }
     );
   }
@@ -83,19 +101,9 @@ export async function PUT(request) {
     const formData = await request.formData();
     console.log("Received formData:", Object.fromEntries(formData));
 
-    let id = formData.get('id');
-    let action = formData.get('action');
-    let comment = formData.get('comment');
-
-    console.log("Initial values:", { id, action, comment });
-
-    // Backwards compatibility: If action is not provided, assume it's an approval
-    if (!action && formData.get('type')) {
-      action = "อนุมัติ";
-      id = formData.get('id');
-      comment = `Approved: ${formData.get('plotCode')} -${formData.get('type')} - ${formData.get('variety')}`;
-      console.log("Backwards compatibility applied:", { id, action, comment });
-    }
+    const id = formData.get('id');
+    const action = formData.get('action');
+    const municipalComment = formData.get('municipalComment');
 
     if (!id || !action) {
       console.log("Missing required fields:", { id, action });
@@ -103,20 +111,15 @@ export async function PUT(request) {
     }
 
     let status;
-    let municipalComment = null;
-
-    console.log("Processing action:", action);
 
     if (action === "อนุมัติ") {
       status = "อนุมัติ";
-      municipalComment = comment || "อนุมัติ";
     } else if (action === "ไม่อนุมัติ") {
       status = "ไม่อนุมัติ";
-      if (!comment) {
+      if (!municipalComment) {
         console.log("Missing comment for rejection");
         return NextResponse.json({ error: "Comment is required for rejection" }, { status: 400 });
       }
-      municipalComment = comment;
     } else {
       console.log("Invalid action:", action);
       return NextResponse.json({ error: "Invalid action", received: action }, { status: 400 });
@@ -142,17 +145,13 @@ export async function PUT(request) {
     );
   }
 }
-  
 
 export async function DELETE(request) {
   try {
-    const { searchParams, href } = new URL(request.url);
-
-    console.log("Request URL:", href); // Log the entire URL
+    const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
 
     if (!id) {
-      console.warn("No 'id' provided in the URL query string:", href);
       return NextResponse.json({ error: "No id provided" }, { status: 400 });
     }
 

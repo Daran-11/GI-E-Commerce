@@ -30,6 +30,7 @@ const menuItems = [
     list: [
       { title: 'จัดการผู้ใช้', path: '/dashboard_municipality/users', icon: <MdSupervisedUserCircle /> },
       { title: 'ตรวจสอบใบรับรอง', path: '/dashboard_municipality/certificate', icon: <MdSupervisedUserCircle /> },
+      { title: 'จัดการมาตราฐาน', path: '/dashboard_municipality/manage_standards', icon: <MdSupervisedUserCircle /> },
     ],
   },
   {
