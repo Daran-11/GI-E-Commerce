@@ -32,15 +32,23 @@ model Certificate {
   latitude           Float
   longitude          Float
   productionQuantity Int
-  hasGAP             Boolean
-  hasGI              Boolean
   registrationDate   DateTime
   expiryDate         DateTime
   status             String    @default("รอตรวจสอบใบรับรอง")
   farmerId           Int
   farmer             Farmer    @relation(fields: [farmerId], references: [id])
-  municipalComment   String?   // Optional field for municipal comment
+  municipalComment   String?
+  standards          Json      // เก็บข้อมูลมาตรฐานเป็น JSON
   createdAt          DateTime  @default(now())
+}
+
+model Standard {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  logoUrl     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 

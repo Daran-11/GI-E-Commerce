@@ -82,49 +82,42 @@ export async function POST(request) {
 
 export async function PUT(request) {
   try {
-    const formData = await request.formData();
-    console.log("Received formData:", Object.fromEntries(formData));
+    console.log("Received PUT request");
+    
+    // Check content type
+    const contentType = request.headers.get("content-type");
+    let data;
 
-    let id = formData.get('id');
-    let action = formData.get('action');
-    let comment = formData.get('comment');
-
-    console.log("Initial values:", { id, action, comment });
-
-    // Backwards compatibility: If action is not provided, assume it's an approval
-    if (!action && formData.get('type')) {
-      action = "อนุมัติ";
-      id = formData.get('id');
-      comment = `Approved: ${formData.get('plotCode')} -${formData.get('type')} - ${formData.get('variety')}`;
-      console.log("Backwards compatibility applied:", { id, action, comment });
+    if (contentType && contentType.includes("multipart/form-data")) {
+      // Handle multipart/form-data
+      const formData = await request.formData();
+      data = Object.fromEntries(formData);
+    } else {
+      // Handle JSON
+      const bodyText = await request.text();
+      data = JSON.parse(bodyText);
     }
 
+    console.log("Parsed data:", data);
+
+    const { id, action, municipalComment } = data;
+
     if (!id || !action) {
-      console.log("Missing required fields:", { id, action });
       return NextResponse.json({ error: "Missing required fields", received: { id, action } }, { status: 400 });
     }
 
     let status;
-    let municipalComment = null;
-
-    console.log("Processing action:", action);
 
     if (action === "อนุมัติ") {
       status = "อนุมัติ";
-      municipalComment = comment || "อนุมัติ";
     } else if (action === "ไม่อนุมัติ") {
       status = "ไม่อนุมัติ";
-      if (!comment) {
-        console.log("Missing comment for rejection");
+      if (!municipalComment) {
         return NextResponse.json({ error: "Comment is required for rejection" }, { status: 400 });
       }
-      municipalComment = comment;
     } else {
-      console.log("Invalid action:", action);
       return NextResponse.json({ error: "Invalid action", received: action }, { status: 400 });
     }
-
-    console.log("Before database update:", { id, status, municipalComment });
 
     const updatedCertificate = await prisma.certificate.update({
       where: { id: parseInt(id, 10) },
@@ -134,7 +127,6 @@ export async function PUT(request) {
       },
     });
 
-    console.log("After database update:", updatedCertificate);
     return NextResponse.json(updatedCertificate, { status: 200 });
   } catch (error) {
     console.error("Failed to update certificate:", error);
@@ -144,7 +136,6 @@ export async function PUT(request) {
     );
   }
 }
-  
 
 export async function DELETE(request) {
   try {

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
+import Image from "next/image";
 import "@/app/dashboard/certificate/add/add.css";
 
 // Fix for the missing marker icon in Leaflet
@@ -22,13 +23,10 @@ const ApproveCertificatePage = ({ params }) => {
     latitude: "",
     longitude: "",
     productionQuantity: "",
-    hasGAP: false,
-    hasGI: false,
-    hasCertificate: false,
+    standards: [],
     municipalComment: "",
   });
   const [showCommentField, setShowCommentField] = useState(false);
-  const [imagePreview, setImagePreview] = useState(null);
   const [errors, setErrors] = useState({});
   const router = useRouter();
   const { id } = params;
@@ -46,18 +44,13 @@ const ApproveCertificatePage = ({ params }) => {
             latitude: data.latitude || "",
             longitude: data.longitude || "",
             productionQuantity: data.productionQuantity || "",
-            hasGAP: data.hasGAP || false,      
-            hasGI: data.hasGI || false,
-            hasCertificate: data.hasCertificate || false,
+            standards: JSON.parse(data.standards) || [],
             farmerId: data.farmer?.id || "",
             registrationDate: new Date(data.registrationDate).toISOString().split("T")[0],
             expiryDate: new Date(data.expiryDate).toISOString().split("T")[0],
             status: data.status || "",
             municipalComment: "",
           });
-          if (data.imageUrl) {
-            setImagePreview(data.imageUrl);
-          }
         } else {
           alert("Failed to fetch certificate");
         }
@@ -70,29 +63,18 @@ const ApproveCertificatePage = ({ params }) => {
   }, [id]);
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value,
+      [name]: value,
     }));
     setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
   const handleSubmit = async (action) => {
     const newErrors = {};
-    if (!formData.type) newErrors.type = "กรุณากรอกชนิด";
-    if (!formData.variety) newErrors.variety = "กรุณากรอกสายพันธุ์";
-    if (!formData.plotCode) newErrors.plotCode = "กรุณากรอกรหัสแปลงปลูก";
-    if (!formData.latitude) newErrors.latitude = "กรุณากรอกพิกัดแกน X (ละติจูด)";
-    if (!formData.longitude) newErrors.longitude = "กรุณากรอกพิกัดแกน Y (ลองจิจูด)";
-    if (!formData.productionQuantity) newErrors.productionQuantity = "กรุณากรอกจำนวนผลผลิต";
-    if (formData.hasCertificate && !formData.imageUrl) newErrors.imageUrl = "กรุณาอัปโหลดรูปใบรับรอง";
-    if (!formData.farmerId) newErrors.farmerId = "กรุณากรอกรหัสเกษตร";
-    if (!formData.registrationDate) newErrors.registrationDate = "กรุณากรอกวันจดทะเบียน";
-    if (!formData.expiryDate) newErrors.expiryDate = "กรุณากรอกวันหมดอายุ";
-    
     if (action === "ไม่อนุมัติ" && !formData.municipalComment) {
-      newErrors.municipalComment = "กรุณากรอกความคิดเห็นเมื่อไม่อนุมัติใบรับรอง"; // Validate comment on rejection
+      newErrors.municipalComment = "กรุณากรอกความคิดเห็นเมื่อไม่อนุมัติใบรับรอง";
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -102,22 +84,8 @@ const ApproveCertificatePage = ({ params }) => {
 
     const formDataToSend = new FormData();
     formDataToSend.append("id", id);
-    formDataToSend.append("type", formData.type);
-    formDataToSend.append("variety", formData.variety);
-    formDataToSend.append("plotCode", formData.plotCode);
-    formDataToSend.append("latitude", formData.latitude);
-    formDataToSend.append("longitude", formData.longitude);
-    formDataToSend.append("productionQuantity", formData.productionQuantity);
-    formDataToSend.append("hasGAP", formData.hasGAP);
-    formDataToSend.append("hasGI", formData.hasGI);
-    formDataToSend.append("hasCertificate", formData.hasCertificate);
     formDataToSend.append("action", action);
-    formDataToSend.append("comment", formData.municipalComment);
-    if (action === "ไม่อนุมัติ") {
-      formDataToSend.append("municipalComment", formData.municipalComment); // Add comment to request
-    }
-
-    console.log("FormData being sent:", Object.fromEntries(formDataToSend));
+    formDataToSend.append("municipalComment", formData.municipalComment);
 
     try {
       const response = await fetch("/api/approvecertificate", {
@@ -127,7 +95,7 @@ const ApproveCertificatePage = ({ params }) => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "ไม่สามารถอัพเดดใบรับรอง");
+        throw new Error(errorData.message || "ไม่สามารถอัพเดตใบรับรอง");
       }
       const result = await response.json();
       console.log("Response from server:", result);
@@ -144,15 +112,10 @@ const ApproveCertificatePage = ({ params }) => {
     setShowCommentField(true);
   };
 
-   const LocationMarker = () => {
-    useMapEvents({
-      click(e) {
-        const { lat, lng } = e.latlng;
-        setFormData((prev) => ({
-          ...prev,
-          latitude: lat,
-          longitude: lng,
-        }));
+  const LocationMarker = () => {
+    const map = useMapEvents({
+      load() {
+        map.setView([formData.latitude, formData.longitude], 13);
       },
     });
 
@@ -161,79 +124,43 @@ const ApproveCertificatePage = ({ params }) => {
     ) : null;
   };
 
-  const getCurrentLocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          setFormData((prev) => ({
-            ...prev,
-            latitude,
-            longitude,
-          }));
-        },
-        (error) => {
-          console.error("Error getting location:", error);
-          alert("ไม่สามารถดึงตำแหน่งปัจจุบันได้");
-        }
-      );
-    } else {
-      alert("Geolocation is not supported by this browser.");
-    }
-  };
-
   return (
     <div className="container">
       <main className="mainContent">
         <h1 className="title-name">อนุมัติใบรับรอง</h1>
         <form onSubmit={(e) => e.preventDefault()} className="space-y-4">
-        <div className="form-container">
+          <div className="form-container">
             <p className="section-name">ชนิด</p>
-            <select
+            <input
               name="type"
+              type="text"
               value={formData.type}
-              onChange={handleChange}
-              className="formInput"
+              className="form-input"
               disabled
-              required
-            >
-              <option value="" disabled hidden>
-                -
-              </option>
-              <option value="สับปะรด">สับปะรด</option>
-            </select>
-            {errors.type && <p className="error">{errors.type}</p>}
+            />
 
             <p className="section-name">สายพันธุ์</p>
             <input
               name="variety"
               type="text"
-              placeholder="สายพันธุ์"
               value={formData.variety}
-              onChange={handleChange}
               className="form-input"
               disabled
-              required
             />
-            {errors.variety && <p className="error">{errors.variety}</p>}
 
             <p className="section-name">รหัสแปลงปลูก</p>
             <input
               name="plotCode"
               type="text"
-              placeholder="รหัสแปลงปลูก"
               value={formData.plotCode}
-              onChange={handleChange}
               className="form-input"
               disabled
-              required
             />
-            {errors.plotCode && <p className="error">{errors.plotCode}</p>}
 
             <p className="section-name">พิกัด</p>
             <MapContainer
-              center={[13.736717, 100.523186]} // Default location
-              zoom={6}
+              center={[20.046061226911785, 99.890654]} // Default location
+              zoom={15}
               style={{ height: "400px", width: "100%" }}
             >
               <TileLayer
@@ -241,51 +168,31 @@ const ApproveCertificatePage = ({ params }) => {
               />
               <LocationMarker />
             </MapContainer>
-            <p>พิกัดที่เลือก: ละติจูด {formData.latitude}, ลองจิจูด {formData.longitude}</p>
-
-            <button type="button" className="button-location" onClick={getCurrentLocation}>
-              ตำแหน่งปัจจุบัน
-            </button>
+            <p>พิกัด: ละติจูด {formData.latitude}, ลองจิจูด {formData.longitude}</p>
 
             <p className="section-name">จำนวนผลผลิต (กิโลกรัม)</p>
             <input
               name="productionQuantity"
               type="text"
-              placeholder="จำนวนผลผลิต (กิโลกรัม)"
               value={formData.productionQuantity}
-              onChange={handleChange}
               className="form-input"
               disabled
-              required
             />
-            {errors.productionQuantity && (
-              <p className="error">{errors.productionQuantity}</p>
-            )}
 
-            <p className="section-name">ใบรับรอง</p>
-            <div className="checkbox-container">
-              <label>
-                <input
-                  type="checkbox"
-                  name="hasGAP"
-                  checked={formData.hasGAP}
-                  onChange={handleChange}
-                  disabled
-                />{" "}
-                GAP
-              </label>
-              <label>
-                <input
-                  type="checkbox"
-                  name="hasGI"
-                  checked={formData.hasGI}
-                  onChange={handleChange}
-                  disabled
-                />{" "}
-                GI
-              </label>
+            <p className="section-name">มาตรฐาน</p>
+            <div className="standards-container">
+              {formData.standards.map((standard, index) => (
+                <div key={index} className="standard-item">
+                  <Image src={standard.logo} alt={standard.name} width={50} height={50} />
+                  <span>{standard.name}</span>
+                  {standard.certImageUrl && (
+                    <Image src={standard.certImageUrl} alt="Certificate" width={100} height={100} />
+                  )}
+                </div>
+              ))}
             </div>
           </div>
+          
           {showCommentField && (
             <div className="form-container">
               <p className="section-name">ความคิดเห็น (เหตุผลที่ไม่อนุมัติ)</p>
@@ -301,32 +208,32 @@ const ApproveCertificatePage = ({ params }) => {
             </div>
           )}
           
-           <div className="button-group">
-      <button
-        type="button"
-        className="button-submitt"
-        onClick={() => handleSubmit("อนุมัติ")}
-      >
-        อนุมัติใบรับรอง
-      </button>
-      <button
-        type="button"
-        className="button-submittt"
-        onClick={handleReject}
-      >
-        ไม่อนุมัติใบรับรอง
-      </button>
-    </div>
+          <div className="button-group">
+            <button
+              type="button"
+              className="button-submitt"
+              onClick={() => handleSubmit("อนุมัติ")}
+            >
+              อนุมัติใบรับรอง
+            </button>
+            <button
+              type="button"
+              className="button-submittt"
+              onClick={handleReject}
+            >
+              ไม่อนุมัติใบรับรอง
+            </button>
+          </div>
     
-    {showCommentField && (
-      <button
-        type="button"
-        className="button-submittt"
-        onClick={() => handleSubmit("ไม่อนุมัติ")}
-      >
-        ยืนยันการไม่อนุมัติ
-      </button>
-    )}
+          {showCommentField && (
+            <button
+              type="button"
+              className="button-submittt"
+              onClick={() => handleSubmit("ไม่อนุมัติ")}
+            >
+              ยืนยันการไม่อนุมัติ
+            </button>
+          )}
         </form>
       </main>
     </div>
