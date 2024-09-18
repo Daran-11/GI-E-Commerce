@@ -15,12 +15,10 @@ export async function GET(request) {
       where: { userId: session.user.id },
       orderBy: { createdAt: 'desc' },
       include: {
-        product: true,
-        address: {
+        orderItems: {
           include: {
-            province: true,
-            amphoe: true,
-            tambon: true,
+            product: true,  // Include product details for each order item
+            farmer: true,   // Include farmer details for each order item
           },
         },
       },
