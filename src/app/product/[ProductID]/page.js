@@ -1,7 +1,7 @@
 import ProductDetailsClient from '@/components/productDetails/productDetailsClient';
 import prisma from '../../../../lib/prisma';
 
-export const revalidate = 60;
+export const revalidate = 30
 
 export async function generateStaticParams() {
   const products = await prisma.product.findMany({

@@ -1,14 +1,47 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import { Rating } from 'react-simple-star-rating';
 import AddToCartButton from './addToCartButton';
+
 const ProductCard = ({products}) => {
+  const [starSize, setStarSize] = useState(15); // Default star size
+
+  useEffect(() => {
+    // Function to update star size based on screen width
+    const updateStarSize = () => {
+      const screenWidth = window.innerWidth;
+
+      if (screenWidth >= 1280) { // xl screen
+        setStarSize(20);
+      } else if (screenWidth >= 1024) { // lg screen
+        setStarSize(15);
+      } else if (screenWidth >= 768) { // md screen
+        setStarSize(15);
+      } else { // sm screen
+        setStarSize(15);
+      }
+    };
+
+    // Call it once on mount
+    updateStarSize();
+
+    // Add event listener to resize
+    window.addEventListener('resize', updateStarSize);
+
+    // Cleanup event listener on unmount
+    return () => window.removeEventListener('resize', updateStarSize);
+  }, []); // Empty array ensures this runs only on mount/unmount
+
+
     return (
       <div className="grid grid-cols-2  md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5  lg:gap-[30px] xl:gap-[30px]  gap-[20px]">
         {products.map((product) => (
           
-              <div key={product.ProductName} className="Card flex-col justify-center w-full h-fit lg:h-[350px] xl:h-full rounded-2xl pb-4 bg-[#FBFBFB] shadow-lg transition duration-500 ease-in-out transform hover:scale-105 ">
+              <div key={product.ProductName} className="Card flex-col w-full justify-center h-fit lg:h-[350px] xl:h-full rounded-2xl pb-4 bg-[#FBFBFB] shadow-lg transition duration-500 ease-in-out transform hover:scale-105 ">
                   <Link key={product.ProductID} href={`/product/${product.ProductID}${product.ProductName}${product.ProductType}`}>
+                  
 
                   <div className="w-full h-[125px] xl:h-[200px] justify-center">
                   {product.imageUrl ? (
@@ -25,15 +58,33 @@ const ProductCard = ({products}) => {
                   )}
                       
                   </div>
+      
 
-                  <div className="px-[18px] h-[70px]">
-                      <div className="text-lg sm:text-xl xl:text-2xl text-[#535353] lg:mt-3  ">
+                  <div className="px-[18px] h-[80px] md:h-[90px]">
+                      <div className="text-lg mt-2 sm:text-xl xl:text-2xl text-[#535353] lg:mt-3  ">
                           <p>{product.ProductName}{product.ProductType} </p>
                       </div>
+                      
                       <div className="mt-[2px] text-[#767676] text-base xl:text-lg ">
-                          <p>ผู้ขาย {product.farmer.farmerName} </p>                    
+                          <p>ผู้ขาย {product.farmer.farmerName} </p> 
+                          {/* Star Rating Component */}
                       </div>
+                      <div className='flex items-center'>
+                        
+                      <Rating
+                            readonly
+                            initialValue={product.averageRating} // Pass the average rating value
+                            size={starSize} // Set star size
+                            iconsCount={5}
+                            allowFraction='true'
+                            
+                        />
+                        <div className="ml-2 text-sm text-center text-gray-600">{product.averageRating} ({product.reviews.length})</div> {/* Number of reviews */}
+
+                      </div>
+
                   </div>
+                  
                   </Link> 
 
                   <div className= 'flex md:grid  grid-cols-2 xl:grid-cols-2  px-[18px] lg:pt-[10px] text-[#4eac14] justify-between items-center border-t-[1px]'>
@@ -48,6 +99,7 @@ const ProductCard = ({products}) => {
                   <AddToCartButton product={product}/>  
 
                   </div>                 
+
 
               </div>
         )

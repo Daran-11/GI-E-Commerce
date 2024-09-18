@@ -89,9 +89,9 @@ export default function CartItem({ initialItems }) {
               <th className=" w-[100px] text-start">รูป</th>
               <th className=" w-[120px] text-start">สินค้า</th>
               <th className=" w-[100px] text-start">ราคา/กิโล</th>
-              <th className=" w-[80px] text-start">จำนวน</th>
+              <th className=" w-[80px] text-center">จำนวน</th>
               <th className=" w-[100px] text-start">ราคารวม</th>
-              <th className=" w-[60px] text-start">แอ็คชั่น</th>
+              <th className=" w-[60px] text-right">แอ็คชั่น</th>
             </tr>
           </thead>
           <tbody className="">
@@ -121,7 +121,7 @@ export default function CartItem({ initialItems }) {
                   )}</td>
                   <td className="cart-data">{item.productName || item.product.ProductName} {item.productType || item.product.ProductType}</td>
                   <td className="cart-data ">{item.productPrice || item.product.Price}</td>
-                  <td className="cart-data  pr-[5px]">
+                  <td className="cart-data text-center ">
                     <QuantityHandler 
                       productAmount={item.productAmount || item.product.Amount} 
                       productId={item.productId || item.product.ProductID} 
@@ -130,8 +130,8 @@ export default function CartItem({ initialItems }) {
                     />
                   </td>
                   <td className="cart-data ">{item.quantity * (item.productPrice || item.product.Price)}</td>
-                  <td className="cart-data ">
-                    <div className=" flex justify-start">
+                  <td className="cart-data text-right ">
+                    <div className=" flex justify-end">
                       <button  onClick={() => handleDelete(item.productId)} className=" text-red-500 hover:text-red-800 w-10 h-10">
                         ลบ
                       </button>                      

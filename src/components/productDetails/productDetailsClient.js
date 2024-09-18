@@ -4,7 +4,8 @@ import { useCart } from '@/context/cartContext';
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { Rating } from 'react-simple-star-rating';
 import { formatDateToThaiBuddhist } from '../../../utils/formatDate';
 import Breadcrumb from '../BreadCrumb';
 
@@ -18,6 +19,7 @@ export default function ProductDetailsClient({ product, totalReviewsCount ,Produ
   const { addItemToCart } = useCart();
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const [avgRating, setAvgRating] = useState(0);
 
   const handleQuantityChange = (productId, newQuantity) => {
     setQuantity(newQuantity);
@@ -85,6 +87,20 @@ export default function ProductDetailsClient({ product, totalReviewsCount ,Produ
   };
 
 
+  useEffect(() => {
+    const fetchReviews = async () => {
+      const res = await fetch(`/api/product/${product.ProductID}/reviews`);
+      const data = await res.json();
+
+      if (res.ok) {
+        setAvgRating(data.avgRating);
+      }
+    };
+
+    fetchReviews();
+  }, [product.ProductID]);
+
+
   // Load more reviews when button is clicked
   const loadMoreReviews = async () => {
     setLoading(true);
@@ -93,6 +109,8 @@ export default function ProductDetailsClient({ product, totalReviewsCount ,Produ
       const lastReviewId = reviews.length > 0 ? reviews[reviews.length - 1].id : null;
       const res = await fetch(`/api/product/${product.ProductID}/reviews?take=${reviewsToShow + 5}&lastReviewId=${lastReviewId}`);
       const data = await res.json();
+      
+
   
       if (res.ok && data.reviews) {
         // Check if there are more reviews to load
@@ -105,6 +123,7 @@ export default function ProductDetailsClient({ product, totalReviewsCount ,Produ
         
         setReviews((prevReviews) => [...prevReviews, ...newReviews]); // Append new reviews to existing ones
         setReviewsToShow((prev) => prev + 5); // Increase the count of reviews to show
+      
       } else {
         console.error('Failed to fetch reviews');
       }
@@ -124,6 +143,7 @@ export default function ProductDetailsClient({ product, totalReviewsCount ,Produ
     <>
     <div className='w-full h-[45px] bg-white rounded-2xl mb-[20px] flex items-center justify-start pl-2'>
     <Breadcrumb />
+
     </div>
       <div className='container-detail  w-full h-full flex justify-start '> 
         <div className='w-full h-[500px] bg-white  rounded-2xl flex items-center justify-center text-center '>
@@ -213,8 +233,15 @@ export default function ProductDetailsClient({ product, totalReviewsCount ,Produ
         </div>
 
 
-        <div className='text-2xl h-fit'>
-          รีวิว    
+        <div className='text-2xl'>
+          รีวิว
+          <Rating
+            readonly
+            initialValue={avgRating} // Pass the average rating value
+            size={25} // Set star size
+            iconsCount={5}
+          />
+          <p><strong>คะแนนรีวิวเฉลี่ย</strong> {avgRating} / 5</p> {/* Display avg rating */}
           {reviews.length > 0 ? (
           <div>
             {reviews.map((review) => (

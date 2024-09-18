@@ -181,7 +181,7 @@ export default function AddressManagement() {
           amphoeId: parseInt(amphoeId, 10),
           tambonId: parseInt(tambonId, 10),
           postalCode,
-          isDefault: false, // Set to true or false based on the logic
+          isDefault: true, // Set to true or false based on the logic
         }),
       });
   
@@ -248,29 +248,20 @@ export default function AddressManagement() {
 
   return (
     <div>
-      <h1>Manage Addresses</h1>
-      <button onClick={() => setIsFormVisible(!isFormVisible)}>
-        {isFormVisible ? "Cancel" : "Add Address"}
-      </button>
+
       {isFormVisible && (
         <form>
-          <div>
-            <label>Address Line</label>
-            <input
-              type="text"
-              name="addressLine"
-              value={addressForm.addressLine}
-              onChange={handleAddressChange}
-            />
-          </div>
-          <div>
-            <label>Province</label>
+
+          <div className="flex justify-start gap-x-2">
+          
+          <div className="">
             <select
               name="provinceId"
               value={addressForm.provinceId}
               onChange={handleProvinceChange}
+              className="input-address p-2 w-[250px] h-15"
             >
-              <option value="">Select Province</option>
+              <option value="" >เลือกจังหวัด</option>
               {provinces.map((province) => (
                 <option key={province.id} value={province.id}>
                   {province.name_th}
@@ -278,14 +269,16 @@ export default function AddressManagement() {
               ))}
             </select>
           </div>
+
+
           <div>
-            <label>Amphoe</label>
             <select
               name="amphoeId"
               value={addressForm.amphoeId}
               onChange={handleAmphoeChange}
+              className="input-address p-2 w-[250px] h-15"              
             >
-              <option value="">Select Amphoe</option>
+              <option value="">เลือกอำเภอ</option>
               {amphoes.map((amphoe) => (
                 <option key={amphoe.id} value={amphoe.id}>
                   {amphoe.name_th}
@@ -293,61 +286,116 @@ export default function AddressManagement() {
               ))}
             </select>
           </div>
+
           <div>
-            <label>Tambon</label>
             <select
               name="tambonId"
               value={addressForm.tambonId}
               onChange={handleAddressChange}
+              className="input-address p-2 w-[250px] h-15"
             >
-              <option value="">Select Tambon</option>
+              <option value="" className="">เลือกตำบล</option>
               {tambons.map((tambon) => (
                 <option key={tambon.id} value={tambon.id}>
                   {tambon.name_th}
                 </option>
               ))}
             </select>
+          </div>                    
           </div>
+
           <div>
-            <label>Postal Code</label>
+            <input
+              type="text"
+              name="addressLine"
+              className="input-address p-2 w-[500px] h-15"
+              value={addressForm.addressLine}
+              onChange={handleAddressChange}
+              placeholder="บ้านเลขที่ ซอย หมู่ ถนน/แขวง ตำบล"
+            />
+          </div>
+
+          <div>
             <input
               type="text"
               name="postalCode"
               value={addressForm.postalCode}
               onChange={handleAddressChange}
+              className="input-address p-2 w-[200px] h-15"
+              placeholder="รหัสไปรษณีย์"
             />
           </div>
 
-          <div>
-            <label>
+          <div className="">
+            
               <input
                 type="checkbox"
+                className=""
                 name="default"
                 checked={addressForm.isDefault}
                 onChange={(e) => setAddressForm({ ...addressForm, isDefault: e.target.checked })}
               />
-              Set as default address
+             <label className="ml-1"> เลือกเป็นที่อยู่ตั้งต้น
             </label>
           </div>
 
-          <button type="button" onClick={handleSave}>
-            {addressForm.id ? "Update Address" : "Save Address"}
-          </button>
+        <div className="border-b-2 pb-3 mb-3">
+          {isFormVisible ?        
+            <button
+            className="text-gray-400 w-fit rounded-lg bg-gray-200 hover:bg-gray-300 h-fit  mt-4 mr-5 p-2"
+            onClick={() => {
+              setIsFormVisible(false);
+              setAddressForm({
+                id: "",
+                addressLine: "",
+                provinceId: "",
+                amphoeId: "",
+                tambonId: "",
+                postalCode: "",
+                isDefault: false,
+              });
+            }}
+          >
+              ยกเลิก
+            </button> : ""
+          }
+
+            <button className="w-fit h-fit p-2 text-blue-500 border-2 border-blue-400 rounded-lg hover:bg-blue-500 hover:text-white" type="button" onClick={handleSave}>
+              {addressForm.id ? "อัปเดตที่อยู่" : "บันทึกที่อยู่"}
+            </button>          
+        </div>
+
         </form>
       )}
 
-      <h2>Saved Addresses</h2>
+
       <ul>
+        <div className="">
         {addresses.length > 0 && addresses.map((address) => (
-          <li key={address.id}>
-            {address.addressLine}, {address.province.name_th}, {address.amphoe.name_th}, {address.tambon.name_th}, {address.postalCode}, {address.isDefault}
-            <button className=" w-20 text-[#4EAC14]" onClick={() => handleEdit(address)}>Edit</button>
-            <button className="w-20 text-red-700"  onClick={() => handleDelete(address.id)}>Delete</button>
-            <button  className={`text-black ${address.isDefault ? 'text-gray-600' : 'text-blue-600 hover:text-blue-300'}`} onClick={() => handleSetDefault(address.id)}>
-              {address.isDefault ? "Default" : "Set as Default"}
-            </button>
+          <li className="flex justify-between " key={address.id}>
+            <div>
+            {address.addressLine}, {address.province.name_th}, {address.amphoe.name_th}, {address.tambon.name_th}, {address.postalCode}, {address.isDefault}              
+            </div>
+            <div className="flex justify-end items-center gap-x-8">
+              <button className=" w-15 text-[#4EAC14]" onClick={() => handleEdit(address)}>แก้ไข</button>
+              <button className="w-15 text-red-700"  onClick={() => handleDelete(address.id)}>ลบ</button>
+              <button  className={`text-black ${address.isDefault ? 'text-gray-600' : 'text-blue-600 hover:text-blue-300'}`} onClick={() => handleSetDefault(address.id)}>
+                {address.isDefault ? "ที่อยู่ตั้งต้น" : "เลือกเป็นที่อยู่ตั้งต้น"}
+              </button>              
+            </div>
+
           </li>
-        ))}
+        ))}          
+        </div>
+
+        <li>
+        {isFormVisible ? "":       
+      <button
+      className={isFormVisible? "text-gray-400" : "text-blue-500"}
+      onClick={() => setIsFormVisible(!isFormVisible)}>
+        เพิ่ม
+      </button>}
+        </li>
       </ul>
     </div>
   );
