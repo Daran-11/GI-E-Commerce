@@ -8,12 +8,19 @@ CREATE TABLE `Product` (
     `Price` SMALLINT NOT NULL,
     `Amount` MEDIUMINT NOT NULL,
     `status` VARCHAR(191) NOT NULL,
-    `imageUrl` VARCHAR(191) NULL,
-    `ProductPic` BLOB NULL,
     `DateCreated` TIMESTAMP(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
 
     UNIQUE INDEX `ProductID`(`ProductID`),
     PRIMARY KEY (`ProductID`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `ProductImage` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `imageUrl` VARCHAR(255) NOT NULL,
+    `productId` INTEGER NOT NULL,
+
+    PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
@@ -137,6 +144,9 @@ CREATE TABLE `Certificate` (
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- AddForeignKey
+ALTER TABLE `ProductImage` ADD CONSTRAINT `ProductImage_productId_fkey` FOREIGN KEY (`productId`) REFERENCES `Product`(`ProductID`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `CartItem` ADD CONSTRAINT `CartItem_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
