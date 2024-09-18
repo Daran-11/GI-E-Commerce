@@ -11,7 +11,17 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+
+padding-bottom: 20px;
 }
+
+
+.filterButtons {
+  display: flex; /* or display: grid; */
+  gap: 10px; /* Adjust the value to control the space between buttons */
+  padding-bottom: 10px;
+}
+
 
 /* Add new button styles */
 .addButton {
@@ -71,7 +81,7 @@
   ); /* Using rgba for better color transparency */
 }
 
-.Available {
+.มีสินค้า {
   background-color: rgba(175, 214, 238, 0.75);
 }
 
@@ -79,6 +89,6 @@
   background-color: #f77373bf;
 }
 
-.Out-of-Stock {
+.หมดสต็อก {
   background-color: #afafaf;
 }

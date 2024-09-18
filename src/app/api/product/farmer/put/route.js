@@ -1,55 +1,13 @@
-// เปลียนข้อมูลที่มีอยู่ก่่อนหน้า
-import { NextResponse } from "next/server";
-import prisma from "../../../../../../lib/prisma";
-import { writeFile, unlink } from "fs/promises";
-import path from "path";
-
-// Helper function to handle file uploads
-async function handleFileUpload(file) {
-  try {
-    if (!file) {
-      throw new Error("No file uploaded");
-    }
-
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    const filename =
-      file.name.replace(/\.[^/.]+$/, "") +
-      "-" +
-      uniqueSuffix +
-      path.extname(file.name);
-
-    const uploadDir = path.join(process.cwd(), "public", "uploads");
-    const filepath = path.join(uploadDir, filename);
-
-    // Write file to the filesystem
-    await writeFile(filepath, buffer);
-
-    // Return the file's public URL
-    return `/uploads/${filename}`;
-  } catch (error) {
-    console.error("Error in file upload:", error);
-    throw error;
-  }
-}
-
-// Function to delete a file from the filesystem
-async function deleteFile(filePath) {
-  try {
-    await unlink(filePath);
-    console.log(`Successfully deleted file: ${filePath}`);
-  } catch (error) {
-    console.error(`Failed to delete file: ${filePath}`, error);
-    throw error;
-  }
-}
+import { NextResponse } from 'next/server';
+import prisma from '../../../../../../lib/prisma';
+import path from 'path';
+import fs from 'fs';
+import { handleFileUpload, deleteFile } from '../../../../../../utils/file-utils';
 
 export async function PUT(request) {
   try {
     const formData = await request.formData();
-    
+
     const id = formData.get("ProductID");
     const plotCode = formData.get("plotCode");
     const ProductName = formData.get("ProductName");
@@ -57,37 +15,42 @@ export async function PUT(request) {
     const Price = formData.get("Price");
     const Amount = formData.get("Amount");
     const status = formData.get("status");
+    const Description = formData.get("Description");
+    const newImageFiles = formData.getAll("images");
+    const imagesToDelete = formData.getAll("imagesToDelete");
 
-    // Extract file (if provided)
-    const newImageFile = formData.get("imageUrl");
-    let imageUrl = null;
-
-    // Fetch existing product to get the old image URL
     const existingProduct = await prisma.product.findUnique({
       where: { ProductID: parseInt(id, 10) },
+      include: { images: true },
     });
 
-    // Handle file upload if the image file is provided
-    if (newImageFile && newImageFile.size > 0) {
-      // Delete old image if it exists
-      if (existingProduct && existingProduct.imageUrl) {
-        const oldImagePath = path.join(
-          process.cwd(),
-          "public",
-          "uploads",
-          path.basename(existingProduct.imageUrl)
-        );
-        await deleteFile(oldImagePath);
-      }
+    if (imagesToDelete.length > 0) {
+      const deletePromises = imagesToDelete.map(async (imageUrl) => {
+        const filePath = path.join(process.cwd(), "public", "uploads", path.basename(imageUrl));
+        if (fs.existsSync(filePath)) {
+          await deleteFile(filePath);
+        }
+      });
+      await Promise.all(deletePromises);
 
-      // Upload new image and get the URL
-      imageUrl = await handleFileUpload(newImageFile);
-    } else {
-      // Use existing image URL if no new image is uploaded
-      imageUrl = existingProduct?.imageUrl || null;
+      await prisma.productImage.deleteMany({
+        where: { imageUrl: { in: imagesToDelete } },
+      });
     }
 
-    // Update the product in the database
+    let existingImageUrls = existingProduct?.images.map(image => image.imageUrl) || [];
+    let newImageUrls = [];
+
+    if (newImageFiles.length > 0) {
+      const uploadPromises = newImageFiles.map(async (file) => {
+        const imageUrl = await handleFileUpload(file);
+        return imageUrl;
+      });
+      newImageUrls = await Promise.all(uploadPromises);
+    }
+
+    const allImageUrls = [...new Set([...existingImageUrls, ...newImageUrls])];
+
     const updatedProduct = await prisma.product.update({
       where: { ProductID: parseInt(id, 10) },
       data: {
@@ -97,18 +60,27 @@ export async function PUT(request) {
         Price: parseFloat(Price),
         Amount: parseFloat(Amount),
         status,
-        imageUrl, // Update the image URL if changed
+        Description,
       },
     });
 
-    console.log("updated:", updatedProduct);
+    const imagesToAdd = allImageUrls.filter(url => !existingImageUrls.includes(url));
+
+    if (imagesToAdd.length > 0) {
+      await prisma.productImage.createMany({
+        data: imagesToAdd.map(url => ({
+          imageUrl: url,
+          productId: parseInt(id, 10),
+        })),
+      });
+    }
 
     return NextResponse.json(updatedProduct, { status: 200 });
   } catch (error) {
     console.error("Failed to update product:", error);
     return NextResponse.json(
       { error: "Failed to update product" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

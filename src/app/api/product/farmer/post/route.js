@@ -1,4 +1,3 @@
-// เเพิมข้อมูลเข้ไปยังเว็บ
 import { NextResponse } from "next/server";
 import prisma from "../../../../../../lib/prisma";
 import { writeFile } from "fs/promises";
@@ -42,7 +41,7 @@ async function handleFileUpload(file) {
   }
 }
 
-// POST: Create a new product with file upload
+// POST: Create a new product with file uploads
 export async function POST(request) {
   try {
     // Parse form data
@@ -55,14 +54,18 @@ export async function POST(request) {
     const Price = formData.get("Price");
     const Amount = formData.get("Amount");
     const status = formData.get("status");
+    const Description = formData.get("Description");
 
-    // Extract file (if provided)
-    const imageFile = formData.get("imageUrl");
-    let imageUrl = null;
+    // Handle multiple image files
+    const imageFiles = formData.getAll("images"); // Adjusted for multiple images
+    const imageUrls = [];
 
-    // Handle file upload if the image file is provided
-    if (imageFile && imageFile.size > 0) {
-      imageUrl = await handleFileUpload(imageFile);
+    // Handle file uploads for each image
+    for (const imageFile of imageFiles) {
+      if (imageFile && imageFile.size > 0) {
+        const imageUrl = await handleFileUpload(imageFile);
+        imageUrls.push(imageUrl);
+      }
     }
 
     // Create the new product in the database
@@ -71,19 +74,33 @@ export async function POST(request) {
         plotCode,
         ProductName,
         ProductType,
+        Description: Description,
         Price: parseFloat(Price),
         Amount: parseInt(Amount, 10),
         status,
-        imageUrl: imageUrl, // Store the uploaded image URL
+        // Initially, no image URLs here since they are stored in a different model
       },
     });
+
+    // Now, add the associated images in the ProductImage model
+    if (imageUrls.length > 0) {
+      const imagePromises = imageUrls.map((url) =>
+        prisma.productImage.create({
+          data: {
+            imageUrl: url,
+            productId: product.ProductID, // Link the image to the created product
+          },
+        })
+      );
+      await Promise.all(imagePromises);
+    }
 
     return NextResponse.json(product, { status: 201 });
   } catch (error) {
     console.error("Failed to add product:", error);
     return NextResponse.json(
       { error: "Failed to add product" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
