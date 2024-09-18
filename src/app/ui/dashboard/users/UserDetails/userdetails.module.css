@@ -21,6 +21,7 @@
   font-weight: bold;
   margin-bottom: 16px;
   text-align: center;
+  margin-top: 20px;
 }
 
 /* Section for user details */
@@ -46,6 +47,7 @@
   font-size: 24px; /* Font size set to 18px */
   font-weight: bold;
   margin-bottom: 5px;
+  margin-top: 10px;
 }
 /* Button group container */
 .button-group {
@@ -56,26 +58,36 @@
   margin-top: 20px;
 }
 
-/* Approve button styling */
 .button-submitt {
-  background-color: #4CAF50;
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 16px;
+  background-color: #4CAF50; /* Green background for approval */
+  color: white; /* White text color */
+  padding: 10px 20px; /* Padding inside the button */
+  border: none; /* Remove border */
+  border-radius: 10px; /* Rounded corners */
+  cursor: pointer; /* Pointer cursor on hover */
+  font-size: 16px; /* Font size */
+  transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth transition effects */
 }
 
-/* Reject button styling */
+.button-submitt:hover {
+  background-color: #45a049; /* Darker green on hover */
+  transform: scale(1.05); /* Slightly enlarge button on hover */
+}
+
 .button-submittt {
-  background-color: #f44336;
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 16px;
+  background-color: #f44336; /* Red background for rejection */
+  color: white; /* White text color */
+  padding: 10px 20px; /* Padding inside the button */
+  border: none; /* Remove border */
+  border-radius: 10px; /* Rounded corners */
+  cursor: pointer; /* Pointer cursor on hover */
+  font-size: 16px; /* Font size */
+  transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth transition effects */
+}
+
+.button-submittt:hover {
+  background-color: #d32f2f; /* Darker red on hover */
+  transform: scale(1.05); /* Slightly enlarge button on hover */
 }
 
 /* Hover effects */

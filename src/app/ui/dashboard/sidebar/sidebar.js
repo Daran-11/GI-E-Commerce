@@ -54,14 +54,15 @@ const menuItems = [
 const Sidebar = () => {
   const pathname = usePathname();
   const router = useRouter();
-  const [user, setUser] = useState({ name: 'Loading...', role: 'Loading...' });
+  const [user, setUser] = useState({ name: 'Loading...', lastname: 'Loading...', role: 'Loading...' });
 
   useEffect(() => {
     const name = localStorage.getItem('name');
+    const lastname = localStorage.getItem('lastname');
     const role = localStorage.getItem('role');
   
-    if (name && role) {
-      setUser({ name, role });
+    if (name && lastname && role) {
+      setUser({ name, lastname, role });
 
       // Redirect to dashboard_municipality if role is เทศบาล or admin
       if (role === 'เทศบาล' || role === 'admin') {
@@ -85,7 +86,7 @@ const Sidebar = () => {
       <div className={styles.user}>
         <Image className={styles.userImage} src="/dinosaur.png" alt="" width="50" height="50" />
         <div className={styles.userDetail}>
-          <span className={styles.username}>{user.name}</span>
+          <span className={styles.username}>{user.name} {user.lastname}</span>
           <span className={styles.userTitle}>{user.role}</span>
         </div>
       </div>

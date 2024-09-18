@@ -16,7 +16,7 @@ export default async function UsersPage() {
     <div className={styles.container}>
       <div className={styles.top}>
         <Link href="/dashboard_municipality/users/account">
-          <button className={styles.addButton}>ผู้ใช้ที่ได้รับอนุมัติ</button>
+          <button className={styles.addButton}>บัญชีผู้ใช้ ทั้งหมด</button>
         </Link>
       </div>
       <table className={styles.table}>
@@ -40,7 +40,7 @@ export default async function UsersPage() {
               <tr key={user.id}>
                
                <td>{index + 1}</td>
-                <td>{user.title} {user.name} {user.lastname}</td>
+                <td>{user.title}{user.name}  &nbsp;{user.lastname}</td>
                 <td>{user.address}</td>
                 <td>{user.sub_district}</td>
                 <td>{user.district}</td>
