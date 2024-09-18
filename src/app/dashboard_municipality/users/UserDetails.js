@@ -43,8 +43,8 @@ export default function UserDetails({ user }) {
         </div>
 
         <div className={styles['button-group']}>
-          <button onClick={handleApproval} className={styles['button-submitt']}>Approve</button>
-          <button onClick={handleRejection} className={styles['button-submittt']}>Reject</button>
+          <button onClick={handleApproval} className={styles['button-submitt']}>อนุมัติ</button>
+          <button onClick={handleRejection} className={styles['button-submittt']}>ไม่อนุมัติ</button>
         </div>
       </main>
     </div>

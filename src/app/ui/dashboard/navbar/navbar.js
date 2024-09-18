@@ -14,6 +14,9 @@ const Navbar = () => {
     transactions: "ประวัติการขาย",
     certificate: "ลงทะเบียนใบรับรอง",
     add: "ลงทะเบียนใบรับรอง",
+    users: "จัดการผู้ใช้",
+    manage_standards: "จัดการมาตราฐาน",
+
     // Add more pathnames and corresponding Thai titles as needed
   };
 

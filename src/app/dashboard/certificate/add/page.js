@@ -10,7 +10,8 @@ import "./add.css";
 // Fix for the missing marker icon in Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
-  iconRetinaUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
+  iconRetinaUrl:
+    "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
   iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
   shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
 });
@@ -32,7 +33,7 @@ const Register = () => {
   const router = useRouter();
 
   useEffect(() => {
-    const storedFarmerId = localStorage.getItem('farmerId');
+    const storedFarmerId = localStorage.getItem("farmerId");
     if (storedFarmerId) {
       setFarmerId(storedFarmerId);
     } else {
@@ -69,20 +70,23 @@ const Register = () => {
   const handleStandardChange = (standard, checked) => {
     setFormData((prev) => {
       const updatedStandards = checked
-        ? [...prev.standards, { 
-            id: standard.id, 
-            name: standard.name, 
-            logo: standard.logoUrl,
-            certImage: null 
-          }]
-        : prev.standards.filter(s => s.id !== standard.id);
+        ? [
+            ...prev.standards,
+            {
+              id: standard.id,
+              name: standard.name,
+              logo: standard.logoUrl,
+              certImage: null,
+            },
+          ]
+        : prev.standards.filter((s) => s.id !== standard.id);
       return { ...prev, standards: updatedStandards };
     });
   };
 
   const handleStandardImageUpload = (standardId, file) => {
     setFormData((prev) => {
-      const updatedStandards = prev.standards.map(s => 
+      const updatedStandards = prev.standards.map((s) =>
         s.id === standardId ? { ...s, certImage: file } : s
       );
       return { ...prev, standards: updatedStandards };
@@ -100,7 +104,7 @@ const Register = () => {
 
     const formDataToSend = new FormData();
     for (const key in formData) {
-      if (key !== 'standards') {
+      if (key !== "standards") {
         formDataToSend.append(key, formData[key]);
       }
     }
@@ -110,7 +114,10 @@ const Register = () => {
       formDataToSend.append(`standards[${index}][name]`, standard.name);
       formDataToSend.append(`standards[${index}][logo]`, standard.logo);
       if (standard.certImage) {
-        formDataToSend.append(`standards[${index}][certImage]`, standard.certImage);
+        formDataToSend.append(
+          `standards[${index}][certImage]`,
+          standard.certImage
+        );
       }
     });
 
@@ -230,14 +237,19 @@ const Register = () => {
               zoom={15}
               style={{ height: "400px", width: "100%" }}
             >
-              <TileLayer
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              />
+              <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
               <LocationMarker />
             </MapContainer>
-            <p>พิกัดที่เลือก: ละติจูด {formData.latitude}, ลองจิจูด {formData.longitude}</p>
+            <p>
+              พิกัดที่เลือก: ละติจูด {formData.latitude}, ลองจิจูด{" "}
+              {formData.longitude}
+            </p>
 
-            <button type="button" className="button-location" onClick={getCurrentLocation}>
+            <button
+              type="button"
+              className="button-location"
+              onClick={getCurrentLocation}
+            >
               ตำแหน่งปัจจุบัน
             </button>
 
@@ -259,21 +271,43 @@ const Register = () => {
             <div className="standards-container">
               {standards.map((standard) => (
                 <div key={standard.id} className="standard-item">
-                  <label>
-                    <input
-                      type="checkbox"
-                      onChange={(e) => handleStandardChange(standard, e.target.checked)}
-                    />
-                    <Image src={standard.logoUrl} alt={standard.name} width={50} height={50} className="standard-logo" />
-                    {standard.name}
-                  </label>
-                  {formData.standards.some(s => s.id === standard.id) && (
+                  <div key={standard.id} className="standard-item-container">
+                    <label>
+                      <input
+                        type="checkbox"
+                        onChange={(e) =>
+                          handleStandardChange(standard, e.target.checked)
+                        }
+                      />
+                      <div className="standard-item">
+                        <Image
+                          src={standard.logoUrl}
+                          alt={standard.name}
+                          width={80}
+                          height={80}
+                          className="standard-logo"
+                        />
+                        <span className="standard-name">{standard.name}</span>
+                      </div>
+                    </label>
+                  </div>
+
+                  <br></br>
+                  <div className="upload-image">
+                    
+                  {formData.standards.some((s) => s.id === standard.id) && (
                     <input
                       type="file"
                       accept="image/*"
-                      onChange={(e) => handleStandardImageUpload(standard.id, e.target.files[0])}
+                      onChange={(e) =>
+                        handleStandardImageUpload(
+                          standard.id,
+                          e.target.files[0]
+                        )
+                      }
                     />
                   )}
+                  </div>
                 </div>
               ))}
             </div>

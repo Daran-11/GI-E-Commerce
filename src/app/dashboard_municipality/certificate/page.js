@@ -70,7 +70,7 @@ const Certificate = () => {
               <tr key={certificate.id}>
                 <td>{index + 1}</td> {/* Display serial number starting from 1 */}
                 <td>
-                  {certificate.farmer?.name || "N/A"}
+                {certificate.farmer?.title}{certificate.farmer?.name} &nbsp; {certificate.farmer?.lastname}
                   <br />
                 </td>
                 <td>{certificate.type}</td>
