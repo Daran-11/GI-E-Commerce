@@ -71,8 +71,8 @@ export default function OrderConfirmation() {
         <h2>Order Items</h2>
         {order.orderItems.map((item) => (
           <div key={item.id} className="order-item">
-            <p><strong>Product Name:</strong> {item.product.name}</p>
-            <p><strong>Farmer:</strong> {item.farmer.name}</p>
+            <p><strong>Product Name:</strong> {item.product.ProductName}{item.product.ProductType}</p>
+            <p><strong>Farmer:</strong> {item.farmer.farmerName}</p>
             <p><strong>Quantity:</strong> {item.quantity}</p>
             <p><strong>Price:</strong> ${item.price}</p>
             <p><strong>Total:</strong> ${(item.quantity * item.price).toFixed(2)}</p>

@@ -14,6 +14,32 @@
   margin-right: auto;
 }
 
+.transition-height {
+  transition: height 1.5s ease-out, opacity 0.3s ease-out;
+}
+.collapse {
+  height: 0;
+  opacity: 0;
+  overflow: hidden;
+}
+.expand {
+  height: auto;
+  opacity: 1;
+}
+
+/* Force the star rating to display horizontally */
+[class^="style-module_starRatingWrap"] {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+}
+
+[class^="style-module_starRatingWrap"] svg {
+  display: inline-block !important;
+  margin-right: 1px !important;
+}
+
 .action-button {
   @apply w-[170px] h-[50px] rounded-xl text-2xl;
 }
@@ -24,6 +50,10 @@
 
 .input-box {
   @apply block mb-5 bg-white border-2  rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+}
+
+.input-address {
+  @apply block mb-3 bg-white border-2  rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
 }
 
 .label {

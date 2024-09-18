@@ -15,7 +15,7 @@ export default function page() {
       }, [status, router])
 
   return (
-    <div>
+    <div className='w-full h-screen bg-white rounded-xl p-6'>
           <AddressManagement/>          
         
 

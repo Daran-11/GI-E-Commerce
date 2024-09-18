@@ -80,27 +80,65 @@ export default function CheckoutClient({ userId }) {
     }
   };
 
+
+
   return (
-    <div className="top-container">
-      <h1>Checkout</h1>
+    <div className="w-[65%]  ml-auto mr-auto mt-[100px]">
+      <div className="bg-white w-full h-fit p-5 rounded-xl text-[#535353] ">
+        <h1 className="text-4xl pb-2 border-b-2 mb-5">เช็คเอาท์</h1>
+        <h1 className="text-2xl mb-2"> ที่อยู่สำหรับจัดส่ง</h1>
+        <AddressManagement />
+      </div>
 
-      {/* Product Summary */}
-      <h2>Product Summary</h2>
-      {selectedItems.map(item => (
-        <div key={item.productId}>
-          <p><strong>Product Name:</strong> {item.productName || item.product.ProductName}</p>
-          <p><strong>Quantity:</strong> {item.quantity}</p>
-          <p><strong>Price:</strong> {item.productPrice || item.product.Price}</p>
-          <p><strong>Total:</strong> {(item.productPrice || item.product.Price) * item.quantity}</p>
-        </div>
-      ))}
 
-      <h2>Delivery Address</h2>
-      <AddressManagement />
+      <div className="bg-white w-full h-fit p-5 rounded-xl mt-5 text-[#535353]">
+        <h2 className="text-2xl mb-2 ">สรุปสินค้า</h2>
 
-      <button className="w-[200px] h-[50px] font-light rounded-xl text-white bg-[#4EAC14] hover:bg-[#84d154]" type="button" onClick={handleConfirmOrder}>
+          <table className="w-full">
+          <thead>
+            <tr className="text-base lg:text-xl  text-start">
+              <th className="w-[200px]  text-start">สินค้า</th>
+              <th className="w-[150px]  text-start">จำนวน</th>
+              <th className="w-[100px]  text-start">ราคา</th>
+              <th className="w-[50px]  text-right">รวม</th>
+            </tr>
+          </thead>
+          <tbody className="text-base lg:text-lg">
+          <tr className="h-4"></tr>
+          {selectedItems.map((item,index )=> (
+            <tr className="">
+              <td className="pb-[5px]">{index + 1}.{item.productName || item.product.ProductName}{item.productType || item.product.ProductType}</td>
+              <td className="pb-[5px]">{item.quantity} กิโลกรัม</td>
+              <td className="pb-[5px]">{item.productPrice || item.product.Price} บาท</td>
+              <td className="pb-[5px] text-right">{(item.productPrice || item.product.Price) * item.quantity} บาท</td>
+            </tr>
+                    ))}
+          </tbody>
+          <tfoot>
+                <tr className="text-base lg:text-xl ">
+                  <td colSpan="3" className="text-right font-bold pr-2">รวมทั้งหมด  :</td>
+                  <td className="text-right font-semibold">
+                    {
+                      selectedItems.reduce((total, item) => 
+                        total + ((item.productPrice || item.product.Price) * item.quantity), 
+                        0
+                      ).toFixed(2)
+                    } บาท
+                  </td>
+                </tr>
+              </tfoot>
+        </table>
+
+        
+      </div>
+
+
+<div className="flex justify-end">
+  <button className="w-[200px] h-[50px] mt-5 font-light rounded-xl text-white bg-[#4EAC14] hover:bg-[#84d154]" type="button" onClick={handleConfirmOrder}>
         ชำระเงิน
-      </button>
+  </button>
+</div>
+
     </div>
   );
 }
