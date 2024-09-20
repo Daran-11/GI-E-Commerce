@@ -7,7 +7,6 @@ export async function generateStaticParams() {
   const products = await prisma.product.findMany({
     select: {
       ProductID: true,
-      
     },
   });
 
@@ -19,6 +18,7 @@ export async function generateStaticParams() {
 export default async function ProductDetails({ params }) {
   const product = await prisma.product.findUnique({
     where: {
+<<<<<<< HEAD
       ProductID: parseInt(params.ProductID, 10),
     },
     select: {
@@ -51,6 +51,9 @@ export default async function ProductDetails({ params }) {
           },
         },
       },
+=======
+      ProductID: parseInt(params.ProductID, 10), // Ensure ProductID is an integer
+>>>>>>> parent of 93831e9 (pick from 58b13bcf new)
     },
   });
 
@@ -58,19 +61,16 @@ export default async function ProductDetails({ params }) {
     return <p>Product not found</p>;
   }
 
-    // Count the total number of reviews (for load more functionality)
-    const totalReviewsCount = await prisma.ratingReview.count({
-      where: {
-        productId:  parseInt(params.ProductID, 10),
-      },
-    });
-
   return (
     <main>
       <div className="top-container">
+<<<<<<< HEAD
         <ProductDetailsClient product={product}
           ProductID = {product.ProductID}
          totalReviewsCount={totalReviewsCount} />
+=======
+        <ProductDetailsClient product={product} />
+>>>>>>> parent of 93831e9 (pick from 58b13bcf new)
       </div>
     </main>
   );

@@ -71,7 +71,7 @@ export default function SearchBar() {
   return (
     <div>
       <form onSubmit={handleSearch}>
-        <div className="flex w-full h-full justify-between ">
+        <div className="flex justify-between">
           <input
             type="text"
             value={query}

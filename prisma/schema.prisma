@@ -61,8 +61,6 @@ model Order {
   id            Int      @id @default(autoincrement())
   userId        Int
   productId     Int
-  farmerId      Int
-  deliveryId    Int?
   quantity      Int
   totalPrice    Float
   addressText   String   // New field to store the address in text form
@@ -73,25 +71,6 @@ model Order {
 
   user          User     @relation(fields: [userId], references: [id])
   product       Product  @relation(fields: [productId], references: [ProductID])
-  delivery      Delivery_Detail? @relation(fields: [deliveryId], references: [id])
-  farmer        Farmer    @relation(fields: [farmerId], references: [id])
-}
-
-model Delivery_Service{
-  id      Int @id @default(autoincrement())
-  name    String
-
-  deliveryOrder Delivery_Detail[]
-}
-
-model Delivery_Detail {
-  id            Int  @id @default(autoincrement())
-  deliveryId    Int 
-  trackingNum   String    
-
-  order                 Order[]
-  deliveryService       Delivery_Service  @relation(fields: [deliveryId], references: [id])
-
 }
 
 model Address {
@@ -164,8 +143,6 @@ model Farmer {
   location   String
   certificates Certificate[]
   user      User    @relation(fields: [userId], references: [id])
-
-  Order Order[]
 }
 
 model Certificate {

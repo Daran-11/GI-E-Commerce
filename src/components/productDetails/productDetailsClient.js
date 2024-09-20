@@ -4,19 +4,17 @@ import { useCart } from '@/context/cartContext';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { formatDateToThaiBuddhist } from '../../../utils/formatDate';
-import Breadcrumb from '../BreadCrumb';
 
+<<<<<<< HEAD
 export default function ProductDetailsClient({ product, totalReviewsCount ,ProductID }) {
 
+=======
+export default function ProductDetailsClient({ product }) {
+>>>>>>> parent of 93831e9 (pick from 58b13bcf new)
   const router = useRouter();
   const { data: session, status } = useSession();
   const [quantity, setQuantity] = useState(1);
-  const [reviews, setReviews] = useState(product.reviews || []);
-  const [reviewsToShow, setReviewsToShow] = useState(5); // Initially show 5 reviews
   const { addItemToCart } = useCart();
-  const [loading, setLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
 
   const handleQuantityChange = (productId, newQuantity) => {
     setQuantity(newQuantity);
@@ -26,7 +24,6 @@ export default function ProductDetailsClient({ product, totalReviewsCount ,Produ
     const productResponse = await fetch(`http://localhost:3000/api/product/${product.ProductID}`);
     const productData = await productResponse.json();
 
-
     const item = {
       productId: productData.ProductID,
       quantity: quantity,
@@ -34,7 +31,10 @@ export default function ProductDetailsClient({ product, totalReviewsCount ,Produ
       productType: productData.ProductType,
       productPrice: productData.Price,
       productAmount: productData.Amount,
+<<<<<<< HEAD
       farmerId: productData.farmerId,
+=======
+>>>>>>> parent of 93831e9 (pick from 58b13bcf new)
       Description: productData.Description
     };
 
@@ -49,6 +49,7 @@ export default function ProductDetailsClient({ product, totalReviewsCount ,Produ
 
   const buyNow = async () => {
 
+<<<<<<< HEAD
     if ( status === 'authenticated' && session) {
       console.log("Product Id", ProductID)
       const productResponse = await fetch(`http://localhost:3000/api/product/${ProductID}`);
@@ -73,6 +74,23 @@ export default function ProductDetailsClient({ product, totalReviewsCount ,Produ
         console.error('Error adding product to cart:', error);
         alert('Failed to add product to cart');
       }
+=======
+    const item = {
+      productId: productData.ProductID,
+      quantity: quantity,
+      productName: productData.ProductName,
+      productType: productData.ProductType,
+      productPrice: productData.Price,
+      productAmount: productData.Amount,
+    };
+
+    try {
+      await addItemToCart(item);
+      router.push('/cart');
+    } catch (error) {
+      console.error('Error adding product to cart:', error);
+      alert('Failed to add product to cart');
+>>>>>>> parent of 93831e9 (pick from 58b13bcf new)
     }
     else {
       router.push('/login');
@@ -82,45 +100,14 @@ export default function ProductDetailsClient({ product, totalReviewsCount ,Produ
   };
 
 
-  // Load more reviews when button is clicked
-  const loadMoreReviews = async () => {
-    setLoading(true);
-  
-    try {
-      const lastReviewId = reviews.length > 0 ? reviews[reviews.length - 1].id : null;
-      const res = await fetch(`/api/product/${product.ProductID}/reviews?take=${reviewsToShow + 5}&lastReviewId=${lastReviewId}`);
-      const data = await res.json();
-  
-      if (res.ok && data.reviews) {
-        // Check if there are more reviews to load
-        if (data.reviews.length < reviewsToShow + 5) {
-          setHasMore(false); // No more reviews to load
-        }
-  
-        // Remove duplicates if any
-        const newReviews = data.reviews.filter(review => !reviews.some(r => r.id === review.id));
-        
-        setReviews((prevReviews) => [...prevReviews, ...newReviews]); // Append new reviews to existing ones
-        setReviewsToShow((prev) => prev + 5); // Increase the count of reviews to show
-      } else {
-        console.error('Failed to fetch reviews');
-      }
-    } catch (error) {
-      console.error('Error loading more reviews:', error);
-    }
-  
-    setLoading(false);
-  };
-  
-  
-
-
 
 
   return (
     <>
     <div className='w-full h-[45px] bg-white rounded-2xl mb-[20px] flex items-center justify-start pl-2'>
-    <Breadcrumb />
+      <p>
+        breadcrumb
+      </p>
     </div>
       <div className='container-detail  w-full h-full flex justify-start '> 
         <div className='w-full h-[500px] bg-white  rounded-2xl flex items-center justify-center text-center '>
@@ -135,7 +122,7 @@ export default function ProductDetailsClient({ product, totalReviewsCount ,Produ
               <p className=''> ขายแล้ว ... กิโลกรัม</p>
             </div>
 
-            <p className=' text-[#4eac14] text-[40px] mb-4'>{product.Price} บาท/กิโล</p>
+            <p className=' text-[#4eac14] text-[40px] mb-4'>{product.Price} บาท</p>
 
             <div className="  space-y-4 w-[600px] text-[#767676] text-[20px] mb-5">
               {/* Row 1 */}
@@ -147,7 +134,11 @@ export default function ProductDetailsClient({ product, totalReviewsCount ,Produ
               {/* Row 2 */}
               <div className="">
                 <div className="w-[250px]">ช่องทางติดต่อ</div>
+<<<<<<< HEAD
                 <div className="w-full text-[#535353]">{product.farmer.contactLine}</div>
+=======
+                <div className="w-full">เฟสบุ้ค</div>
+>>>>>>> parent of 93831e9 (pick from 58b13bcf new)
               </div>
               
               {/* Row 3 */}
@@ -199,6 +190,7 @@ export default function ProductDetailsClient({ product, totalReviewsCount ,Produ
         </div>
 
 
+<<<<<<< HEAD
         <div className='text-2xl h-fit'>
           รีวิว    
           {reviews.length > 0 ? (
@@ -223,6 +215,13 @@ export default function ProductDetailsClient({ product, totalReviewsCount ,Produ
           <p>No reviews for this product yet.</p>
         )}
 
+=======
+        <div className='text-2xl h-[300px]'>
+          รีวิว
+          <div>
+
+          </div>
+>>>>>>> parent of 93831e9 (pick from 58b13bcf new)
         </div>
 
 
