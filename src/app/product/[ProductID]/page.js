@@ -7,6 +7,7 @@ export async function generateStaticParams() {
   const products = await prisma.product.findMany({
     select: {
       ProductID: true,
+      
     },
   });
 
@@ -18,7 +19,36 @@ export async function generateStaticParams() {
 export default async function ProductDetails({ params }) {
   const product = await prisma.product.findUnique({
     where: {
-      ProductID: parseInt(params.ProductID, 10), // Ensure ProductID is an integer
+      ProductID: parseInt(params.ProductID, 10),
+    },
+    select: {
+      ProductID: true,
+      ProductName: true,
+      ProductType: true,
+      Amount: true,
+      Price: true,
+      farmer: {
+        select: {
+          farmerName: true,  // Select specific fields from the Farmer model
+          location: true,
+          contactLine: true,  // You can include more fields as needed
+        },
+      },
+      reviews: {
+        take: 5, // Limit the number of reviews fetched initially
+        select: {
+          id: true,
+          rating: true,
+          review: true,
+          createdAt: true,
+          user: {
+            select: {
+              id: true,
+              name: true, // Fetch the user who wrote the review
+            }
+          },
+        },
+      },
     },
   });
 
@@ -26,10 +56,18 @@ export default async function ProductDetails({ params }) {
     return <p>Product not found</p>;
   }
 
+    // Count the total number of reviews (for load more functionality)
+    const totalReviewsCount = await prisma.ratingReview.count({
+      where: {
+        productId:  parseInt(params.ProductID, 10),
+      },
+    });
+
   return (
     <main>
       <div className="top-container">
-        <ProductDetailsClient product={product} />
+        <ProductDetailsClient product={product}
+         totalReviewsCount={totalReviewsCount} />
       </div>
     </main>
   );

@@ -11,8 +11,8 @@ import { authOptions } from '../auth/[...nextauth]/route';
     }
   
     const userId = session.user.id;
-    const { productId, quantity, productName, productPrice } = await request.json();
-    if (!productId || quantity == null || !productPrice) {
+    const { productId, quantity, productName, productPrice, farmerId } = await request.json();
+    if (!productId || quantity == null || !productPrice || !farmerId) {
       console.log('Missing required fields');
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
@@ -42,6 +42,9 @@ import { authOptions } from '../auth/[...nextauth]/route';
         data: {
           user: { connect: { id: userId } },
           product: { connect: { ProductID: parseInt(productId, 10) } },
+          farmer: {
+            connect: { id: farmerId } // ID of the farmer you want to associate with the order
+          },
           quantity: parseInt(quantity, 10),
           totalPrice: parseFloat(quantity * productPrice),
           addressText: addressText,
