@@ -89,7 +89,7 @@ export default function CartItem({ initialItems }) {
               <th className=" w-[100px] text-start">รูป</th>
               <th className=" w-[120px] text-start">สินค้า</th>
               <th className=" w-[100px] text-start">ราคา/กิโล</th>
-              <th className=" w-[80px] text-center">จำนวน</th>
+              <th className=" w-[80px] text-start">จำนวน</th>
               <th className=" w-[100px] text-start">ราคารวม</th>
               <th className=" w-[60px] text-right">แอ็คชั่น</th>
             </tr>
@@ -121,7 +121,7 @@ export default function CartItem({ initialItems }) {
                   )}</td>
                   <td className="cart-data">{item.productName || item.product.ProductName} {item.productType || item.product.ProductType}</td>
                   <td className="cart-data ">{item.productPrice || item.product.Price}</td>
-                  <td className="cart-data text-center ">
+                  <td className="cart-data ">
                     <QuantityHandler 
                       productAmount={item.productAmount || item.product.Amount} 
                       productId={item.productId || item.product.ProductID} 

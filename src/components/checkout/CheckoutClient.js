@@ -38,8 +38,18 @@ export default function CheckoutClient({ userId }) {
   const handleConfirmOrder = async () => {
     if (selectedItems.length && selectedAddressId) {
       try {
-        const orderPromises = selectedItems.map(async (item) => {
-          const productDetails = item.product ? item.product : item;
+        // Group selected items by farmerId
+        const itemsByFarmer = selectedItems.reduce((acc, item) => {
+          const { farmerId } = item;
+          if (!acc[farmerId]) {
+            acc[farmerId] = [];
+          }
+          acc[farmerId].push(item);
+          return acc;
+        }, {});
+  
+        // Send each group of items as a separate order
+        const orderPromises = Object.entries(itemsByFarmer).map(async ([farmerId, items]) => {
           const orderResponse = await fetch('http://localhost:3000/api/orders', {
             method: 'POST',
             headers: {
@@ -47,31 +57,27 @@ export default function CheckoutClient({ userId }) {
             },
             body: JSON.stringify({
               userId,
-              productId: productDetails.ProductID || productDetails.productId,
-              quantity: item.quantity,
-              productName: productDetails.ProductName || item.productName,
-              productPrice: productDetails.Price || item.productPrice,
+              items,  // Send grouped items for each farmer
               addressId: selectedAddressId,
-              farmerId: productDetails.farmerId || item.farmerId  // Get `farmerId` from the correct structure
+              farmerId: parseInt(farmerId),  // Pass the farmerId explicitly
             }),
           });
-
+  
           if (orderResponse.ok) {
-            return await orderResponse.json();
+            const orderData = await orderResponse.json();
+            return orderData.order.id;  // Return the orderId for further use
           } else {
             throw new Error('Failed to create order');
           }
         });
-
-        const orders = await Promise.all(orderPromises);
-        const orderId = orders.map(order => order.order.id);
-        
-        // Store the order IDs in localStorage for later use
-        sessionStorage.setItem("orderId", JSON.stringify(orderId));
-
+  
+        const orderIds = await Promise.all(orderPromises);  // Wait for all orders to be created
+  
+        // Store the order IDs in sessionStorage for later use
+        sessionStorage.setItem("orderId", JSON.stringify(orderIds));
+  
         // Redirect to payment page with the order IDs
         router.push('/payment');
-
       } catch (error) {
         console.error('Error:', error);
       }
@@ -79,6 +85,7 @@ export default function CheckoutClient({ userId }) {
       alert("Please select items and an address to checkout.");
     }
   };
+  
 
 
 
@@ -114,10 +121,10 @@ export default function CheckoutClient({ userId }) {
             </tr>
                     ))}
           </tbody>
-          <tfoot>
-                <tr className="text-base lg:text-xl ">
-                  <td colSpan="3" className="text-right font-bold pr-2">รวมทั้งหมด  :</td>
-                  <td className="text-right font-semibold">
+          <tfoot className="  ">
+                <tr className="text-base lg:text-xl  border-t-2 ">
+                  <td colSpan="3" className="text-right font-bold pr-2 pt-2">รวมทั้งหมด  :</td>
+                  <td className="text-right font-semibold pt-2">
                     {
                       selectedItems.reduce((total, item) => 
                         total + ((item.productPrice || item.product.Price) * item.quantity), 

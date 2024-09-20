@@ -10,14 +10,12 @@ export async function POST(request) {
   try {
     const body = await request.json();
     console.log('Request Body:', body); // Log the request body for debugging
-    const { token, orderIds, totalAmount } = body;
+    const { token, orderId, totalAmount, quantity, productId } = body;
 
-    // Validate the orders array
-    if (!Array.isArray(orderIds) || orderIds.length === 0) {
-      return NextResponse.json({ success: false, message: 'Invalid orders data' }, { status: 400 });
+    // Validate the order ID(s)
+    if (!orderId || !orderId.length) {
+      return NextResponse.json({ success: false, message: 'Invalid order ID' }, { status: 400 });
     }
-
-    const orderIdsInt = orderIds.map(id => parseInt(id, 10));
 
     // Create a charge with Omise
     const charge = await omise.charges.create({
@@ -27,17 +25,33 @@ export async function POST(request) {
     });
 
     if (charge.status === 'successful') {
-      // Update orders to 'paid'
+      // Update multiple orders to 'Completed'
       await Promise.all(
-        orderIdsInt.map(async (id) => {
+        orderId.map(async (id) => {
           return prisma.order.update({
-            where: { id },
+            where: { id: parseInt(id, 10) }, // Ensure the ID is an integer
             data: { 
               paymentStatus: 'Completed', // Use the enum value correctly
             },
           });
         })
       );
+
+      // Update product amounts based on the quantities from the order
+      await Promise.all(
+        productId.map(async (id, index) => {
+          const qty = quantity[index]; // Corresponding quantity for the product
+          return prisma.product.update({
+            where: { ProductID: parseInt(id, 10) }, // Ensure the ID is an integer
+            data: {
+              Amount: {
+                decrement: qty, // Decrease the amount by the quantity ordered
+              },
+            },
+          });
+        })
+      );
+
       return NextResponse.json({ success: true }, { status: 200 });
     } else {
       return NextResponse.json({ success: false, message: charge.failure_message }, { status: 400 });

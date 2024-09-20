@@ -80,6 +80,7 @@ model Order {
   id               Int              @id @default(autoincrement())
   userId           Int
   deliveryId       Int?
+  farmerId         Int
   totalPrice       Float
   addressText      String           // Stores the delivery address in text form
   status           orderStatus      @default(Pending)
@@ -88,6 +89,8 @@ model Order {
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
 
+
+  farmer           Farmer           @relation(fields: [farmerId], references: [id]) // Farmer relation
   user             User             @relation(fields: [userId], references: [id])
   delivery         Delivery_Detail? @relation(fields: [deliveryId], references: [id])
   orderItems       OrderItem[]      // Relation to OrderItem table (1-to-many)
@@ -226,6 +229,7 @@ model Farmer {
   certificates   Certificate[]
   products       Product[]
   OrderItems     OrderItem[]
+  Orders          Order[]
 
   //Relationships
   user           User           @relation(fields: [userId], references: [id])

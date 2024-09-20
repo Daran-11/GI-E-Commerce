@@ -3,7 +3,6 @@ import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
-
 // Map of deliveryStatus to Thai translations
 const deliveryStatusTranslations = {
   Preparing: 'กำลังเตรียมสินค้า',
@@ -26,6 +25,7 @@ function Purchases() {
   const [filteredPurchases, setFilteredPurchases] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [expandedOrder, setExpandedOrder] = useState(null); // Track the expanded order
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
@@ -142,85 +142,91 @@ function Purchases() {
             <table className='w-full'>
               <thead>
                 <tr>
-                  <th className='w-[150px]  text-start'> </th>
+                  <th className='w-[100px]  text-start'> </th>
                   <th className='w-fit text-start'> </th>
                   <th className='w-fit text-right'> </th>
                   <th className='w-[100px]'></th> {/* Add this column for the details link */}
                 </tr>
               </thead>
               <tbody>
-                
-
-              {filteredPurchases.map((order) => (
-
-                  <>
-                  {order.orderItems.map((item) => (
-                    <tr className=' border-b-2'>
-                      <td className='cart-data pr-5'>
-                        <div className=' h-fit'> 
-                        {item.product.imageUrl ? (
-                          <Image
-                            src={item.product.imageUrl}
-                            alt={item.product.ProductName}
-                            width={0} // Adjust width as needed
-                            height={0} // Adjust height as needed
-                            sizes="100vw"
-                            className='w-fit h-[100px]  object-cover rounded-2xl' />
-                        ) : (
-                          <img className=" w-fit h-[100px] object-cover rounded-2xl" src="/phulae.jpg" alt="Card Image" />
-                        )}
-                        </div>
+  {filteredPurchases.map((order) => (
+    <>
+      <tr className='border-b-2'>
+      
+      <td className='cart-data pr-5 flex justify-start'>
 
 
-                      </td>
-
-                      <td className='cart-data pr-5'>
-                        <p className='text-xl'>{item.product.ProductName} {item.product.ProductType}</p>
-                        <p> {item.farmer.farmerName}</p>
-                        <p> จำนวน {item.quantity} กิโล</p>
-
-                      </td>
-
-
-                      <td className='cart-data text-right'>
-                        <p className="text-xl"> {deliveryStatusTranslations[order.deliveryStatus]}</p>
-                        <p> {order.totalPrice.toFixed(2)} บาท</p>
-                      </td>
-
-                      {/* Add More Details Link */}
-                      <td className='pl-5'>
-                        <button
-                          onClick={() => router.push(`/account/user/purchases/${order.id}`)}
-                          className="bg-blue-500 text-white px-4 py-2 rounded"
-                        >
-                          ดูรายละเอียด
-                        </button>
-                      </td>
-                    </tr>
-
-                  ))}
-                <div>
-                  </div></>
+        <div className=''>
+        {order.orderItems[0].product.imageUrl ? (
+        <Image
+            src={order.orderItems[0].product.imageUrl}
+            alt={order.orderItems[0].product.ProductName}
+            width={0} // Adjust width as needed
+            height={0} // Adjust height as needed
+            sizes="100vw"
+            className='w-fit h-[100px]  object-cover rounded-2xl' />
+        ) : (
+          <img className=" w-fit h-[90px] object-cover rounded-2xl" src="/phulae.jpg" alt="Card Image" />
+        )}
+        </div>
 
 
-            ))}
-              </tbody>
+
+
+        </td>
+      <td className=''>
+        <div className='flex flex-col '>
+        <p>สั่งซื้อเมื่อ {new Date(order.createdAt).toLocaleDateString('th-TH', {
+          year: '2-digit',
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        })}</p>
+        <p className=''>{order.farmer.farmerName} Order#{order.id}</p> {/* Show farmer name */}       
+        <p className='text-lg'>{order.orderItems.length} รายการ</p>
+   
+        </div>
+
+        </td>
+        
+
+        <td className='cart-data text-right pr-5'>
+          <p className="text-lg text-blue-500 ">{deliveryStatusTranslations[order.deliveryStatus]}</p>
+          
+          <p className='text-xl'>{order.totalPrice} บาท</p> {/* Assuming totalPrice is available in order */}
+        </td>
+
+        <td >
+          <button
+            onClick={() => router.push(`/account/user/purchases/${order.id}`)}
+            className="bg-[#4eac14] text-white px-4 py-2 rounded"
+          >
+            ดูรายละเอียด
+          </button>
+        </td>
+      </tr>
+
+
+    </>
+  ))}
+</tbody>
             </table>
           </div>
         )}
 
         {/* Pagination Controls */}
-        <div className="flex justify-between mt-4">
+        <div className="flex justify-between items-center mt-4">
           <button
-            className="px-4 py-2 disabled:bg-gray-300 bg-[#4eac14] text-white "
+            className="px-4 py-2 disabled:bg-gray-300 rounded-xl bg-[#4eac14] text-white "
             onClick={handlePreviousPage}
             disabled={currentPage === 1}
           >
             ย้อนกลับ
           </button>
-          <span>Page {currentPage} of {totalPages}</span>
+          <span>หน้า {currentPage} / {totalPages}</span>
           <button
-            className="px-4 py-2 disabled:bg-gray-300 bg-[#4eac14] text-white "
+            className="px-4 py-2 disabled:bg-gray-300  rounded-xl bg-[#4eac14] text-white "
             onClick={handleNextPage}
             disabled={currentPage === totalPages}
           >
