@@ -70,13 +70,11 @@ function OrderDetails({ params }) {
   }
 
   return (
-    <div className="top-container">
+    <div className="w-full h-screen bg-white p-6 rounded-xl">
       <h1>Order Summary</h1>
       <div className="order-summary">
         <p><strong>Order ID:</strong> {orderDetails.id}</p>
-        <p><strong>Status:</strong> {orderDetails.status}</p>
         <p><strong>Delivery Status:</strong> {orderDetails.deliveryStatus}</p>
-        <p><strong>Payment Status:</strong> {orderDetails.paymentStatus}</p>
         <p><strong>Total Price:</strong> ${orderDetails.totalPrice}</p>
         <p><strong>Address:</strong> {orderDetails.addressText}</p>
 

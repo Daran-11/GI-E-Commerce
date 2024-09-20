@@ -3,7 +3,8 @@ import prisma from '../../../../../lib/prisma';
 
 export async function GET(request) {
   const url = new URL(request.url);
-  const ids = url.searchParams.get('ids');
+  const ids = url.searchParams.get('id'); // Now expect a single order ID
+
   
   if (!ids) {
     return NextResponse.json({ error: 'No order IDs provided' }, { status: 400 });

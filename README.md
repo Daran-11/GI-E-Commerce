@@ -19,24 +19,25 @@
  - [ ] Farmer Order Filter & search bar & pagination
  - [ ] เชื่อมข้อมูลหน้า Dashboard 
  - [ ] ทำให้ใส่รูปสินค้าหลายรูปได้
- - [ ] ทำหน้าดูคำสั่งซื้อของลูกค้าให้ครบตามสถานะสินค้า การโชว์รายละเอียดสำคัญต่างๆ (Preparing, ShippedOutForDelivery, DeliveredCanceled, Returned, FailedDelivery, AwaitingPickup, RefundProcessed)
+ - [x] ทำหน้าดูคำสั่งซื้อของลูกค้าให้ครบตามสถานะสินค้า การโชว์รายละเอียดสำคัญต่างๆ (Preparing, ShippedOutForDelivery, DeliveredCanceled, Returned, FailedDelivery, AwaitingPickup, RefundProcessed)
  - [ ] ช่องทางการขอ Refund ?
  - [ ] หน้าไว้ดูออเดอร์ของผู้ขาย (ระบบจัดการออเดอร์ )
  - [ ] หน้าประวัติสินค้าที่เคยวางขาย
  - [ ] Filter สินค้าในหน้าหลัก(Filter ราคา, ใหม่สุด เก่าสุด ,ขายดีที่สุด)
- - [ ] ทำ Component ดาวสำหรับรีวิว
- - [ ] ใส่ดาว Review (คะแนนเฉลี่ย) ไว้ที่ Product Card หน้าหลัก 
- - [ ] ใส่ดาว Review (คะแนนเฉลี่ย) ไว้ที่หน้ารายละเอียดสินค้า
+ - [x] ทำ Component ดาวสำหรับรีวิว
+ - [x] ใส่ดาว Review (คะแนนเฉลี่ย) ไว้ที่ Product Card หน้าหลัก 
+ - [x] ใส่ดาว Review (คะแนนเฉลี่ย) ไว้ที่หน้ารายละเอียดสินค้า
  - [ ] UI ส่วน Review ข้างล่างหน้ารายละเอียดสินค้า
- - [ ] UI หน้า Checkout
+ - [x] UI หน้า Checkout
  - [ ] UI หน้า Confirmed-Order
  - [ ] UI หน้า Account/Profile
- - [ ] UI หน้า Account/Mypurchases
+ - [x] UI หน้า Account/Mypurchases
  - [ ] UI หน้า Account/Addresses
  - [ ] Admin หน้าเพิ่ม Role ดูการ Transactions ล่าสุดจากทุกคน
  - [ ] Admin แจ้งข่าวสารเว็บ สามารถเปลี่ยนslider รูป ที่หน้าหลักได้
  - [ ] ทำหน้ารายงานปัญหา 
  - [ ] แถบแจ้งเตือน ? สำหรับแจ้งเตือนการส่งสินค้า และเกี่ยวกับเว็บไซต์
+ - [ ] หน้า shop ผู้ขาย ที่จะมีรายละเอียดเกี่ยวกับตัวเขา สินค้าที่ขาย
 
 
 

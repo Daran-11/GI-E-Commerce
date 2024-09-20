@@ -31,7 +31,9 @@ export async function GET(req, { params }) {
             userId: userId,
             ...(statusFilter && { deliveryStatus: statusFilter }), // Add filter if status is provided
           },
-          include: {        
+          orderBy: { createdAt: 'desc' },
+          include: {   
+            farmer:true,     
             orderItems: {
               include: {
                 product: true,  // Include product details for each order item
