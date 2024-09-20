@@ -51,6 +51,7 @@ export default function CheckoutClient({ userId }) {
               productName: item.productName || item.product.ProductName,
               productPrice: item.productPrice || item.product.Price,
               addressId: selectedAddressId,
+              farmerId: item.farmerId
             }),
           });
 
