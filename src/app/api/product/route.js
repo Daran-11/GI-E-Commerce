@@ -10,12 +10,6 @@ export async function GET() {
         ProductType: true,
         Amount: true,
         Price: true,
-        farmer: {
-          select: {
-            farmerName: true,  // Select specific fields from the Farmer model
-            location: true,
-          },
-        },
       },
     });
     return NextResponse.json(products, { status: 200 });

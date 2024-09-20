@@ -70,6 +70,7 @@ export default function CartItem({ initialItems }) {
   };
 
   return (
+<<<<<<< HEAD
     <div className=" w-[80%] ml-auto mr-auto mt-[100px] ">
 
     <div className="flex justify-between ">
@@ -89,6 +90,19 @@ export default function CartItem({ initialItems }) {
               <th className=" pr-[150px]">จำนวน</th>
               <th className=" pr-[60px]">ราคารวม</th>
               <th className=" pr-[60px]">แอ็คชั่น</th>
+=======
+    <div className="top-container grid grid-cols-10">
+      <div className="col-span-8">
+        <table>
+          <thead>
+            <tr>
+              <th className="pr-[50px]">เลือก</th>
+              <th className="pr-[200px]">สินค้า</th>
+              <th className="pr-[80px]">ราคาต่อกิโล</th>
+              <th className="pr-[75px]">จำนวน</th>
+              <th className="pr-[60px]">ราคารวม</th>
+              <th className="pr-[100px]">แอ็คชั่น</th>
+>>>>>>> parent of 93831e9 (pick from 58b13bcf new)
             </tr>
           </thead>
           <tbody className="">

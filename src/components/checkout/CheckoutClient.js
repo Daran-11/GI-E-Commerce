@@ -52,7 +52,10 @@ export default function CheckoutClient({ userId }) {
               productName: productDetails.ProductName || item.productName,
               productPrice: productDetails.Price || item.productPrice,
               addressId: selectedAddressId,
+<<<<<<< HEAD
               farmerId: productDetails.farmerId || item.farmerId  // Get `farmerId` from the correct structure
+=======
+>>>>>>> parent of 93831e9 (pick from 58b13bcf new)
             }),
           });
 

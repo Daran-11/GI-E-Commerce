@@ -18,21 +18,21 @@ export const Navbar = () => {
 
         <div className="fixed top-0 left-0 w-full bg-white shadow-lg z-50">
             <div className="header flex  w-[80%] justify-between m-auto pt-[20px] pb-[15px]">
-                <div className='flex items-center w-[800px]'>
-                    <div className="sm:w-[250px] lg:w-[280px] xl:w-[300px] sm:text-2xl  xl:text-3xl text-[#4EAC14]">
+                <div className='flex justify-start'>
+                    <div className="logo mr-10 mb-auto mt-auto text-3xl text-[#4EAC14]">
                         
                         <a href ='/'>GI Pineapple</a>
                         
                     </div>
 
-                    <div className="ml-5 w-full  ">
+                    <div className="search w-[550px] ml-5">
                         <SearchBar/>
                     </div>                    
                 </div>
 
-                <div className="menu mt-auto mb-auto">
+                <div className="menu mt-auto mb-auto ml-10">
                     <nav>
-                        <ul className="menulist items-center text-[#595959] md:text-sm lg:text-base xl:text-lg flex xl:gap-x-[40px] lg:gap-x-[20px] md:gap-x-[20px] sm:gap-x-[15px]">
+                        <ul className="menulist text-lg items-center text-[#595959] flex xl:gap-x-[40px] md:gap-x-[20px]">
                             <li>
                                 <Link 
                                     href='/'
