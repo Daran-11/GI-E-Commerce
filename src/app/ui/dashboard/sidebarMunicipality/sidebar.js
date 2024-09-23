@@ -13,6 +13,8 @@ import {
   MdHelpCenter,
   MdLogout,
   MdMoney,
+  MdAssignment,
+  MdGavel,
 } from "react-icons/md";
 import MenuLink from "./menuLink/menuLink";
 import Image from "next/image";
@@ -40,12 +42,12 @@ const menuItems = [
       {
         title: "ตรวจสอบใบรับรอง",
         path: "/dashboard_municipality/certificate",
-        icon: <MdSupervisedUserCircle />,
+        icon: <MdAssignment />,
       },
       {
         title: "จัดการมาตราฐาน",
         path: "/dashboard_municipality/manage_standards",
-        icon: <MdSupervisedUserCircle />,
+        icon: <MdGavel />,
       },
     ],
   },

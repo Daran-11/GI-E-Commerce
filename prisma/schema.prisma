@@ -28,7 +28,6 @@ model Certificate {
   id                 Int       @id @default(autoincrement())
   type               String
   variety            String
-  plotCode           String
   latitude           Float
   longitude          Float
   productionQuantity Int
@@ -40,6 +39,7 @@ model Certificate {
   municipalComment   String?
   standards          Json      // เก็บข้อมูลมาตรฐานเป็น JSON
   createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 }
 
 model Standard {

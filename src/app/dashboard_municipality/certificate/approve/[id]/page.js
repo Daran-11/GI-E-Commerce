@@ -10,8 +10,7 @@ import "@/app/dashboard/certificate/add/add.css";
 // Fix for the missing marker icon in Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
-  iconRetinaUrl:
-    "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
+  iconRetinaUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
   iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
   shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
 });
@@ -20,7 +19,6 @@ const ApproveCertificatePage = ({ params }) => {
   const [formData, setFormData] = useState({
     type: "",
     variety: "",
-    plotCode: "",
     latitude: "",
     longitude: "",
     productionQuantity: "",
@@ -47,9 +45,7 @@ const ApproveCertificatePage = ({ params }) => {
             productionQuantity: data.productionQuantity || "",
             standards: JSON.parse(data.standards) || [],
             farmerId: data.farmer?.id || "",
-            registrationDate: new Date(data.registrationDate)
-              .toISOString()
-              .split("T")[0],
+            registrationDate: new Date(data.registrationDate).toISOString().split("T")[0],
             expiryDate: new Date(data.expiryDate).toISOString().split("T")[0],
             status: data.status || "",
             municipalComment: "",
@@ -77,8 +73,7 @@ const ApproveCertificatePage = ({ params }) => {
   const handleSubmit = async (action) => {
     const newErrors = {};
     if (action === "ไม่อนุมัติ" && !formData.municipalComment) {
-      newErrors.municipalComment =
-        "กรุณากรอกความคิดเห็นเมื่อไม่อนุมัติใบรับรอง";
+      newErrors.municipalComment = "กรุณากรอกความคิดเห็นเมื่อไม่อนุมัติใบรับรอง";
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -104,11 +99,7 @@ const ApproveCertificatePage = ({ params }) => {
       const result = await response.json();
       console.log("Response from server:", result);
 
-      alert(
-        `ใบรับรอง${
-          action === "อนุมัติ" ? "ได้รับการอนุมัติ" : "ถูกปฏิเสธ"
-        }เรียบร้อยแล้ว`
-      );
+      alert(`ใบรับรอง${action === "อนุมัติ" ? "ได้รับการอนุมัติ" : "ถูกปฏิเสธ"}เรียบร้อยแล้ว`);
       router.push("/dashboard_municipality/certificate");
     } catch (error) {
       console.error("Error:", error);
@@ -156,18 +147,10 @@ const ApproveCertificatePage = ({ params }) => {
               disabled
             />
 
-            <p className="section-name">รหัสแปลงปลูก</p>
-            <input
-              name="plotCode"
-              type="text"
-              value={formData.plotCode}
-              className="form-input"
-              disabled
-            />
 
             <p className="section-name">พิกัด</p>
             <MapContainer
-              center={[20.046061226911785, 99.890654]} // Default location
+              center={[20.046061226911785, 99.890654]}
               zoom={15}
               style={{ height: "400px", width: "100%" }}
             >
@@ -192,23 +175,26 @@ const ApproveCertificatePage = ({ params }) => {
               {formData.standards.map((standard, index) => (
                 <div key={index} className="standard-item">
                   <div key={standard.id} className="standard-item-container">
-                    <span className="title-standard">{standard.name}</span>
+                    <span className="title-standard">{standard.logoUrl}</span>
                     <div className="standard-image">
                       {standard.certImageUrl && (
                         <Image
-                          src={standard.certImageUrl}
-                          alt="Certificate"
-                          layout="responsive" // หรือ "fill" ตามความเหมาะสม
-                          width={600} // กำหนดขนาดที่ต้องการ
-                          height={400} // กำหนดขนาดที่ต้องการ
-                          className="cert-image"
-                          quality={100} // กำหนดคุณภาพของรูปภาพ
+                          src={standard.logoUrl}
+                          alt={standard.name}
+                          width={80}
+                          height={80}
+                          className="standard-logo"
                         />
                       )}
                     </div>
                   </div>
+                  <span className="standard-name">{standard.name}</span>
+                  <p>เลขที่ใบรับรอง: {standard.certNumber}</p>
+                  <p>วันที่ใบรับรอง: {standard.certDate}</p>
                 </div>
+
               ))}
+              
             </div>
           </div>
 
@@ -229,23 +215,22 @@ const ApproveCertificatePage = ({ params }) => {
             </div>
           )}
 
-<div className="button-group">
-  <button
-    type="button"
-    className="button-submitt"
-    onClick={() => handleSubmit("อนุมัติ")}
-  >
-    อนุมัติใบรับรอง
-  </button>
-  <button
-    type="button"
-    className="button-submittt"
-    onClick={handleReject}
-  >
-    ไม่อนุมัติใบรับรอง
-  </button>
-</div>
-
+          <div className="button-group">
+            <button
+              type="button"
+              className="button-submitt"
+              onClick={() => handleSubmit("อนุมัติ")}
+            >
+              อนุมัติใบรับรอง
+            </button>
+            <button
+              type="button"
+              className="button-submittt"
+              onClick={handleReject}
+            >
+              ไม่อนุมัติใบรับรอง
+            </button>
+          </div>
 
           {showCommentField && (
             <button

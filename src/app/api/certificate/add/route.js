@@ -27,23 +27,15 @@ export async function POST(request) {
         id: parseInt(formData.get(`standards[${i}][id]`), 10),
         name: formData.get(`standards[${i}][name]`),
         logo: formData.get(`standards[${i}][logo]`),
+        certNumber: formData.get(`standards[${i}][certNumber]`),
+        certDate: formData.get(`standards[${i}][certDate]`),
       };
-
-      const certImage = formData.get(`standards[${i}][certImage]`);
-      if (certImage) {
-        const fileName = `${Date.now()}_${certImage.name}`;
-        const filePath = path.join(process.cwd(), 'public', 'uploads', fileName);
-        await writeFile(filePath, Buffer.from(await certImage.arrayBuffer()));
-        standard.certImageUrl = `/uploads/${fileName}`;
-      }
-
       standards.push(standard);
     }
 
     const certificateData = {
       type: formData.get('type'),
       variety: formData.get('variety'),
-      plotCode: formData.get('plotCode'),
       latitude,
       longitude,
       productionQuantity: parseInt(formData.get('productionQuantity'), 10),
@@ -78,16 +70,9 @@ export async function PUT(request) {
         id: parseInt(formData.get(`standards[${i}][id]`), 10),
         name: formData.get(`standards[${i}][name]`),
         logo: formData.get(`standards[${i}][logo]`),
+        certNumber: formData.get(`standards[${i}][certNumber]`),
+        certDate: formData.get(`standards[${i}][certDate]`),
       };
-
-      const certImage = formData.get(`standards[${i}][certImage]`);
-      if (certImage) {
-        const fileName = `${Date.now()}_${certImage.name}`;
-        const filePath = path.join(process.cwd(), 'public', 'uploads', fileName);
-        await writeFile(filePath, Buffer.from(await certImage.arrayBuffer()));
-        standard.certImageUrl = `/uploads/${fileName}`;
-      }
-
       standards.push(standard);
     }
 
@@ -96,7 +81,6 @@ export async function PUT(request) {
       data: {
         type: formData.get('type'),
         variety: formData.get('variety'),
-        plotCode: formData.get('plotCode'),
         latitude: parseFloat(formData.get('latitude')),
         longitude: parseFloat(formData.get('longitude')),
         productionQuantity: parseInt(formData.get('productionQuantity'), 10),
