@@ -1,11 +1,14 @@
 import { NextResponse } from 'next/server';
 import prisma from "../../../../lib/prisma";
-//endpoint สำหรับ display สับปะรดในหน้าหลัก
-export async function GET() {
+
+export async function GET(req) {
+  const { searchParams } = new URL(req.url);
+  const sortBy = searchParams.get('sortBy');
+
   try {
     const products = await prisma.product.findMany({
       where: {
-        isDeleted: false, // Fetch only products where isDeleted is false
+        isDeleted: false,
       },
       select: {
         ProductID: true,
@@ -14,18 +17,25 @@ export async function GET() {
         Amount: true,
         Price: true,
         imageUrl: true,
+        DateCreated: true, // Assuming you have a created date field
         farmer: {
           select: {
-            farmerName: true,  // Select specific fields from the Farmer model
+            farmerName: true,
             location: true,
           },
         },
         reviews: {
           select: {
-            rating: true
-          }
-        }
+            rating: true,
+          },
+        },
       },
+      orderBy:
+        sortBy === 'newest'
+          ? { DateCreated: 'desc' }
+          : sortBy === 'oldest'
+          ? { DateCreated: 'asc' }
+          : undefined,
     });
 
     // Calculate average rating for each product
@@ -38,13 +48,19 @@ export async function GET() {
 
       return {
         ...product,
-        averageRating // Include the average rating in the product data
+        averageRating,
       };
     });
 
+    // Sort by average rating if specified
+    if (sortBy === 'highest-review') {
+      productsWithRating.sort((a, b) => b.averageRating - a.averageRating);
+    } else if (sortBy === 'lowest-review') {
+      productsWithRating.sort((a, b) => a.averageRating - b.averageRating);
+    }
 
     return NextResponse.json(productsWithRating, { status: 200 });
   } catch (error) {
-    return  NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }

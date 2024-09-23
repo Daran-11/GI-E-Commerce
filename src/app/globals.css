@@ -2,6 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scaleX(1);
+  }
+  50% {
+    transform: scaleX(1.02);
+  }
+}
+
+.pulse {
+  animation: pulse 2s infinite;
+  transform-origin: left; /* Ensure the pulsing occurs from the right */
+}
+
+
 .container {
   max-width: 80%;
   margin-left: auto;
@@ -13,6 +29,8 @@
   margin-left: auto;
   margin-right: auto;
 }
+
+
 
 .transition-height {
   transition: height 1.5s ease-out, opacity 0.3s ease-out;
@@ -27,6 +45,8 @@
   opacity: 1;
 }
 
+
+
 /* Force the star rating to display horizontally */
 [class^="style-module_starRatingWrap"] {
   display: flex !important;
@@ -39,6 +59,10 @@
   display: inline-block !important;
   margin-right: 1px !important;
 }
+
+
+
+
 
 .action-button {
   @apply w-[170px] h-[50px] rounded-xl text-2xl;
@@ -53,7 +77,7 @@
 }
 
 .input-address {
-  @apply block mb-3 bg-white border-2  rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+  @apply block mb-3 bg-white border-2  rounded-2xl border-r-8 border-transparent  ring-2 ring-[#e5e7eb] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
 }
 
 .label {
