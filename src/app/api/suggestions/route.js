@@ -12,6 +12,7 @@ export async function GET(req) {
   try {
     const suggestions = await prisma.Product.findMany({
       where: {
+        isDeleted: false,
         OR: [
           {
             ProductName: {

@@ -49,20 +49,22 @@ export const Navbar = () => {
 
     return (
         <div className="fixed top-0 left-0 w-full bg-white shadow-lg z-50">
-            <div className="header flex gap-x-5 md:gap-x-0 w-[95%] 2xl:w-[80%] justify-between m-auto pt-[20px] pb-[15px]">
+                    <div className='md:hidden w-[95%] m-auto mt-[5px] text-[#4EAC14] flex justify-center '>
+                        <a className='text-start'  href='/'>GI Pineapple Chiang Rai</a>
+                    </div>
 
-                    <div className='hidden sm:flex items-center'>
+            <div className="header flex gap-x-5 md:gap-x-0 w-[95%] 2xl:w-[80%] justify-between m-auto pt-[5px] md:pt-[20px] pb-[15px]">
+                
+
+                    <div className='hidden md:flex items-center'>
                         <div className=" lg:w-[150px]  xl:w-[200px] lg:pl-4 text-lg w-fit sm:text-xl xl:text-2xl text-[#4EAC14]">
                             <a href='/'>GI Pineapple</a>
                         </div>                        
                     </div>
 
-
-                    <div className="ml-2 w-full sm:w-[400px] 2xl:w-[650px] xl:w-[500px] lg:w-[400px] md:w-[600px]">
+                    <div className="md:ml-2 w-full 2xl:w-[650px] xl:w-[500px] lg:w-[400px] md:w-[600px]">
                         <SearchBar />
                     </div>
-
-                    
 
 
                 {/* Hamburger Icon */}
@@ -191,7 +193,7 @@ export const Navbar = () => {
                 {/* Mobile Menu (shown when the hamburger icon is clicked) */}
                 {isMenuOpen && (
                     <div 
-                    className="dropdown-button lg:hidden  absolute top-[70px] right-0 w-full bg-white shadow-lg ">
+                    className="dropdown-button lg:hidden  absolute top-[90px] right-0 w-full bg-white shadow-lg ">
                         <ul className="flex flex-col items-start p-4 ">
                             <div className='w-full text-lg'>
                                 <li>
