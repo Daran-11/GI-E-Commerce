@@ -4,6 +4,7 @@ import styles from "@/app/ui/dashboard/certificate/certificate.module.css";
 import Link from "next/link";
 import Pagination from "@/app/ui/dashboard/pagination/pagination";
 import Search from "@/app/ui/dashboard/search/search";
+import Image from "next/image";
 
 const Certificate = () => {
   const [certificates, setCertificates] = useState([]);
@@ -52,59 +53,69 @@ const Certificate = () => {
       <table className={styles.table}>
         <thead>
           <tr>
-            <td>#</td>
-            <td>ชื่อเกษตรกร</td>
-            <td>ประเภท</td>
+          <td>#</td>
+            <td>ชนิด</td>
             <td>สายพันธุ์</td>
-            <td>รหัสแปลงปลูก</td>
-            <td>GAP</td>
-            <td>GI</td>
+            <td>มาตรฐาน</td>
             <td>จำนวนผลผลิต</td>
             <td>สถานะ</td>
             <td></td>
           </tr>
         </thead>
         <tbody>
-          {certificates.length > 0 ? (
-            certificates.map((certificate, index) => (
-              <tr key={certificate.id}>
-                <td>{index + 1}</td> {/* Display serial number starting from 1 */}
-                <td>
-                {certificate.farmer?.title}{certificate.farmer?.name} &nbsp; {certificate.farmer?.lastname}
-                  <br />
-                </td>
-                <td>{certificate.type}</td>
-                <td>{certificate.variety}</td>
-                <td>{certificate.plotCode}</td>
-                <td>{certificate.hasGAP ? "มี" : "ไม่มี"}</td> {/* Display GAP status */}
-                <td>{certificate.hasGI ? "มี" : "ไม่มี"}</td> {/* Display GI status */}
-                <td>{certificate.productionQuantity}</td>
-                <td>
-                  <span
-                    className={`${styles.status} ${styles[certificate.status]}`}
-                  >
-                    {certificate.status}
-                  </span>
-                </td>
-                <td>
-                  <div className={styles.buttons}>
-                    <Link
-                      href={`/dashboard_municipality/certificate/approve/${certificate.id}`}
-                    >
-                      <button className={`${styles.button} ${styles.view}`}>
-                        ตรวจสอบใบรับรอง
-                      </button>
-                    </Link>
-                  </div>
-                </td>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan={10}>ไม่พบใบรับรอง</td> {/* Adjust colSpan if necessary */}
-            </tr>
-          )}
-        </tbody>
+  {certificates.length > 0 ? (
+    certificates.map((certificate, index) => {
+      const standards = JSON.parse(certificate.standards); // Parse standards if needed
+      return (
+        <tr key={certificate.id}>
+          <td>{index + 1}</td>
+          <td>{certificate.type}</td>
+          <td>{certificate.variety}</td>
+          <td>
+            {standards.length > 0 ? (
+              standards.map((standard) => (
+                <div key={standard.id}>
+                  <Image 
+                    src={standard.logo} 
+                    alt={standard.name} 
+                    width={40} 
+                    height={40} 
+                  />
+                </div>
+              ))
+            ) : (
+              "ไม่มี"
+            )}
+          </td>
+          <td>{certificate.productionQuantity}</td>
+          <td>
+            <span
+              className={`${styles.status} ${styles[certificate.status]}`}
+            >
+              {certificate.status}
+            </span>
+          </td>
+          <td>
+            <div className={styles.buttons}>
+              <Link
+                href={`/dashboard_municipality/certificate/approve/${certificate.id}`}
+              >
+                <button className={`${styles.button} ${styles.view}`}>
+                  ตรวจสอบใบรับรอง
+                </button>
+              </Link>
+            </div>
+          </td>
+        </tr>
+      );
+    })
+  ) : (
+    <tr>
+      <td colSpan={10}>ไม่พบใบรับรอง</td> {/* Adjust colSpan if necessary */}
+    </tr>
+  )}
+</tbody>
+
       </table>
       <Pagination />
     </div>

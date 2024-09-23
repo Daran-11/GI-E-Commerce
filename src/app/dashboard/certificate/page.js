@@ -18,7 +18,6 @@ const Certificate = () => {
       setFarmerId(storedFarmerId);
     } else {
       console.error("Farmer ID not found in localStorage");
-      // Redirect to login page if farmerId is not found
       router.push('/login');
     }
   }, [router]);
@@ -72,9 +71,7 @@ const Certificate = () => {
             <td>#</td>
             <td>ชนิด</td>
             <td>สายพันธุ์</td>
-            <td>รหัสแปลงปลูก</td>
-            <td>GAP</td>
-            <td>GI</td>
+            <td>มาตรฐาน</td>
             <td>จำนวนผลผลิต</td>
             <td>สถานะ</td>
             <td></td>
@@ -82,37 +79,53 @@ const Certificate = () => {
         </thead>
         <tbody>
           {certificates.length > 0 ? (
-            certificates.map((certificate, index) => (
-              <tr key={certificate.id}>
-                <td>{index + 1}</td>
-                <td>{certificate.type}</td>
-                <td>{certificate.variety}</td>
-                <td>{certificate.plotCode}</td>
-                <td>{certificate.hasGAP ? "มี" : "ไม่มี"}</td> {/* Display GAP status */}
-                <td>{certificate.hasGI ? "มี" : "ไม่มี"}</td> {/* Display GI status */}
-                <td>{certificate.productionQuantity}</td>
-                <td>
-                  <span
-                    className={`${styles.status} ${styles[certificate.status]}`}
-                  >
-                    {certificate.status}
-                  </span>
-                </td>
-                <td>
-                  <div className={styles.buttons}>
-                    <button
-                      className={`${styles.button} ${styles.delete}`}
-                      onClick={() => handleDelete(certificate.id)}
+            certificates.map((certificate, index) => {
+              const standards = JSON.parse(certificate.standards); // Parse standards if needed
+              return (
+                <tr key={certificate.id}>
+                  <td>{index + 1}</td>
+                  <td>{certificate.type}</td>
+                  <td>{certificate.variety}</td>
+                  <td>
+                    {standards.length > 0 ? (
+                      standards.map((standard) => (
+                        <div key={standard.id}>
+                          <Image 
+                            src={standard.logo} 
+                            alt={standard.name} 
+                            width={40} 
+                            height={40} 
+                          />
+                        </div>
+                      ))
+                    ) : (
+                      "ไม่มี"
+                    )}
+                  </td>
+                  <td>{certificate.productionQuantity}</td>
+                  <td>
+                    <span
+                      className={`${styles.status} ${styles[certificate.status]}`}
                     >
-                      ลบใบรับรอง
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))
+                      {certificate.status}
+                    </span>
+                  </td>
+                  <td>
+                    <div className={styles.buttons}>
+                      <button
+                        className={`${styles.button} ${styles.delete}`}
+                        onClick={() => handleDelete(certificate.id)}
+                      >
+                        ลบใบรับรอง
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })
           ) : (
             <tr>
-              <td colSpan={8}>ไม่มีใบรับรอง</td>
+              <td colSpan={7}>ไม่มีใบรับรอง</td>
             </tr>
           )}
         </tbody>

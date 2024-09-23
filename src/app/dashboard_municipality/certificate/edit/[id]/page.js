@@ -19,7 +19,6 @@ const ApproveCertificatePage = ({ params }) => {
   const [formData, setFormData] = useState({
     type: "",
     variety: "",
-    plotCode: "",
     latitude: "",
     longitude: "",
     productionQuantity: "",
@@ -150,27 +149,19 @@ const ApproveCertificatePage = ({ params }) => {
               disabled
             />
 
-            <p className="section-name">รหัสแปลงปลูก</p>
-            <input
-              name="plotCode"
-              type="text"
-              value={formData.plotCode}
-              className="form-input"
-              disabled
-            />
 
             <p className="section-name">พิกัด</p>
             <MapContainer
-              center={[20.046061226911785, 99.890654]} // Default location
+              center={[20.046061226911785, 99.890654]}
               zoom={15}
               style={{ height: "400px", width: "100%" }}
             >
-              <TileLayer
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              />
+              <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
               <LocationMarker />
             </MapContainer>
-            <p>พิกัด: ละติจูด {formData.latitude}, ลองจิจูด {formData.longitude}</p>
+            <p>
+              พิกัด: ละติจูด {formData.latitude}, ลองจิจูด {formData.longitude}
+            </p>
 
             <p className="section-name">จำนวนผลผลิต (กิโลกรัม)</p>
             <input
@@ -185,16 +176,30 @@ const ApproveCertificatePage = ({ params }) => {
             <div className="standards-container">
               {formData.standards.map((standard, index) => (
                 <div key={index} className="standard-item">
-                  <Image src={standard.logo} alt={standard.name} width={50} height={50} />
-                  <span>{standard.name}</span>
-                  {standard.certImageUrl && (
-                    <Image src={standard.certImageUrl} alt="Certificate" width={100} height={100} />
-                  )}
+                  <div key={standard.id} className="standard-item-container">
+                    <span className="title-standard">{standard.logoUrl}</span>
+                    <div className="standard-image">
+                      {standard.certImageUrl && (
+                        <Image
+                          src={standard.logoUrl}
+                          alt={standard.name}
+                          width={80}
+                          height={80}
+                          className="standard-logo"
+                        />
+                      )}
+                    </div>
+                  </div>
+                  <span className="standard-name">{standard.name}</span>
+                  <p>เลขที่ใบรับรอง: {standard.certNumber}</p>
+                  <p>วันที่ใบรับรอง: {standard.certDate}</p>
                 </div>
+
               ))}
+              
             </div>
           </div>
-          
+
           {showCommentField && (
             <div className="form-container">
               <p className="section-name">ความคิดเห็น (เหตุผลที่ไม่อนุมัติ)</p>
@@ -206,10 +211,12 @@ const ApproveCertificatePage = ({ params }) => {
                 rows="4"
                 required
               />
-              {errors.municipalComment && <p className="error">{errors.municipalComment}</p>}
+              {errors.municipalComment && (
+                <p className="error">{errors.municipalComment}</p>
+              )}
             </div>
           )}
-          
+
           <div className="button-group">
             <button
               type="button"
@@ -226,7 +233,7 @@ const ApproveCertificatePage = ({ params }) => {
               ไม่อนุมัติใบรับรอง
             </button>
           </div>
-    
+
           {showCommentField && (
             <button
               type="button"

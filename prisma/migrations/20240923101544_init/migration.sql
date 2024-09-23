@@ -21,17 +21,29 @@ CREATE TABLE `Certificate` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `type` VARCHAR(191) NOT NULL,
     `variety` VARCHAR(191) NOT NULL,
-    `plotCode` VARCHAR(191) NOT NULL,
     `latitude` DOUBLE NOT NULL,
     `longitude` DOUBLE NOT NULL,
     `productionQuantity` INTEGER NOT NULL,
-    `hasGAP` BOOLEAN NOT NULL,
-    `hasGI` BOOLEAN NOT NULL,
     `registrationDate` DATETIME(3) NOT NULL,
     `expiryDate` DATETIME(3) NOT NULL,
     `status` VARCHAR(191) NOT NULL DEFAULT 'รอตรวจสอบใบรับรอง',
     `farmerId` INTEGER NOT NULL,
+    `municipalComment` VARCHAR(191) NULL,
+    `standards` JSON NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `Standard` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(191) NOT NULL,
+    `description` VARCHAR(191) NULL,
+    `logoUrl` VARCHAR(191) NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;

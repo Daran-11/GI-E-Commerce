@@ -10,8 +10,7 @@ import "./add.css";
 // Fix for the missing marker icon in Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
-  iconRetinaUrl:
-    "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
+  iconRetinaUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
   iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
   shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
 });
@@ -20,7 +19,6 @@ const Register = () => {
   const [formData, setFormData] = useState({
     type: "",
     variety: "",
-    plotCode: "",
     latitude: "",
     longitude: "",
     productionQuantity: "",
@@ -76,7 +74,8 @@ const Register = () => {
               id: standard.id,
               name: standard.name,
               logo: standard.logoUrl,
-              certImage: null,
+              certNumber: "",
+              certDate: "",
             },
           ]
         : prev.standards.filter((s) => s.id !== standard.id);
@@ -84,10 +83,10 @@ const Register = () => {
     });
   };
 
-  const handleStandardImageUpload = (standardId, file) => {
+  const handleStandardDetailChange = (standardId, field, value) => {
     setFormData((prev) => {
       const updatedStandards = prev.standards.map((s) =>
-        s.id === standardId ? { ...s, certImage: file } : s
+        s.id === standardId ? { ...s, [field]: value } : s
       );
       return { ...prev, standards: updatedStandards };
     });
@@ -113,12 +112,8 @@ const Register = () => {
       formDataToSend.append(`standards[${index}][id]`, standard.id);
       formDataToSend.append(`standards[${index}][name]`, standard.name);
       formDataToSend.append(`standards[${index}][logo]`, standard.logo);
-      if (standard.certImage) {
-        formDataToSend.append(
-          `standards[${index}][certImage]`,
-          standard.certImage
-        );
-      }
+      formDataToSend.append(`standards[${index}][certNumber]`, standard.certNumber);
+      formDataToSend.append(`standards[${index}][certDate]`, standard.certDate);
     });
 
     if (farmerId) {
@@ -219,18 +214,6 @@ const Register = () => {
             />
             {errors.variety && <p className="error">{errors.variety}</p>}
 
-            <p className="section-name">รหัสแปลงปลูก</p>
-            <input
-              name="plotCode"
-              type="text"
-              placeholder="รหัสแปลงปลูก"
-              value={formData.plotCode}
-              onChange={handleChange}
-              className="form-input"
-              required
-            />
-            {errors.plotCode && <p className="error">{errors.plotCode}</p>}
-
             <p className="section-name">พิกัด</p>
             <MapContainer
               center={[20.046061226911785, 99.890654]} // Default location
@@ -292,22 +275,26 @@ const Register = () => {
                     </label>
                   </div>
 
-                  <br></br>
-                  <div className="upload-image">
-                    
                   {formData.standards.some((s) => s.id === standard.id) && (
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) =>
-                        handleStandardImageUpload(
-                          standard.id,
-                          e.target.files[0]
-                        )
-                      }
-                    />
+                    <div className="standard-details">
+                      <input
+                        type="text"
+                        placeholder="เลขที่ใบรับรอง"
+                        onChange={(e) =>
+                          handleStandardDetailChange(standard.id, "certNumber", e.target.value)
+                        }
+                        required
+                      />
+                      <input
+                        type="date"
+                        placeholder="วันที่ใบรับรอง"
+                        onChange={(e) =>
+                          handleStandardDetailChange(standard.id, "certDate", e.target.value)
+                        }
+                        required
+                      />
+                    </div>
                   )}
-                  </div>
                 </div>
               ))}
             </div>
