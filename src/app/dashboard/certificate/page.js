@@ -108,6 +108,8 @@ const Certificate = () => {
                       className={`${styles.status} ${styles[certificate.status]}`}
                     >
                       {certificate.status}
+                      <br/>
+                      {certificate.municipalComment}
                     </span>
                   </td>
                   <td>

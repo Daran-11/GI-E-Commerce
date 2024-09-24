@@ -177,15 +177,13 @@ const ApproveCertificatePage = ({ params }) => {
                   <div key={standard.id} className="standard-item-container">
                     <span className="title-standard">{standard.logoUrl}</span>
                     <div className="standard-image">
-                      {standard.certImageUrl && (
                         <Image
-                          src={standard.logoUrl}
+                          src={standard.logo}
                           alt={standard.name}
                           width={80}
                           height={80}
                           className="standard-logo"
                         />
-                      )}
                     </div>
                   </div>
                   <span className="standard-name">{standard.name}</span>
