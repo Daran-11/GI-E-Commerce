@@ -26,6 +26,14 @@
   font-size: 1.1rem;
   width: 100%;
 }
+.form-input1 {
+  margin-top: 10px;
+  padding: 0.5rem 0.5rem 0.5rem 1.5rem;
+  border: 1.5px solid #ddd;
+  border-radius: 10px;
+  font-size: 1.1rem;
+  width: 100%;
+}
 
 /* Error Message Styles */
 .error {
@@ -146,8 +154,8 @@
 /* Standard Item Styles */
 .standard-logo {
   margin-bottom: 10px;
-  width: 150px;
-  height: 150px;
+  width: 100%;
+  height: 100%;
   transition: transform 0.3s ease; /* Smooth transition effect */
 }
 
@@ -158,9 +166,13 @@
 }
 
 .standards-container {
+  margin-left: 60px;
+
+  text-align: center;
+  align-items: center;
   display: grid;
   grid-template-columns: repeat(2, 1fr); /* Create 2 columns */
-  gap: 20px; /* Space between images */
+  gap: 30px; /* Space between images */
 }
 
 .standard-item-container {
@@ -172,9 +184,11 @@
   text-align: center;
 }
 
-.standard-logo {
-  width: 150px; /* ขนาดของรูปภาพ */
-  height: 150px; /* ขนาดของรูปภาพ */
+.standard-item{
+  text-align: center;
+  padding: 10px;
+  border: 1.5px solid #ddd;
+  border-radius: 10px;
 }
 
 input[type="checkbox"] {
@@ -217,20 +231,19 @@ input[type="checkbox"]:checked + .standard-item::after {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 100%;  /* หรือขนาดที่คุณต้องการ */
-  height: auto;
+  width: 150px;  /* หรือขนาดที่คุณต้องการ */
+  height: 150px;
   position: relative;
-  overflow: hidden;border: 1px solid #ccc;       /* เพิ่มเส้นขอบรอบๆ รูปภาพ (ถ้าต้องการ) */
-  border-radius: 8px;           /* เพิ่มการโค้งมนให้กับมุมของขอบ (ถ้าต้องการ) */
-  background-color: #f9f9f9;    /* เพิ่มพื้นหลังให้กับพื้นที่รอบๆ รูปภาพ (ถ้าต้องการ) */
+ 
 }
 
 .standard-image img {
-  width: 400px;    /* กำหนดความกว้างของรูปภาพ */
-  height: 550px;   /* กำหนดความสูงของรูปภาพ */
+  width: 150px;    /* กำหนดความกว้างของรูปภาพ */
+  height: 150px;   /* กำหนดความสูงของรูปภาพ */
   object-fit: cover; /* ควบคุมการจัดการรูปภาพให้พอดีกับขนาดที่กำหนด */
   object-position: center; /* จัดตำแหน่งของรูปภาพให้ตรงกลาง */
 }
+
 .button-group {
   display: flex;
   gap: 10px; /* Adjust spacing between buttons */
@@ -248,7 +261,7 @@ input[type="checkbox"]:checked + .standard-item::after {
 .button-submittt {
   background-color: #4CAF50; /* Default green background for approval */
   color: white; /* White text color */
-  padding: 10px 20px; /* Padding inside the button */
+  padding: 10px 10px; /* Padding inside the button */
   border: none; /* Remove border */
   border-radius: 10px; /* Rounded corners */
   cursor: pointer; /* Pointer cursor on hover */
@@ -274,3 +287,69 @@ input[type="checkbox"]:checked + .standard-item::after {
   transform: scale(1.05); /* Slightly enlarge button on hover */
 }
 
+.standard-item-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border: 2px solid transparent;
+  padding: 20px;
+  transition: border-color 0.3s ease;
+  margin: 10px; /* เพิ่ม margin ระหว่างรายการ */
+}
+
+.standard-item-container.selected {
+  border-color: #3182ce; /* กำหนดสีฟ้าขอบเมื่อเลือกแล้ว */
+}
+
+.standard-item-container label {
+  position: relative;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; /* จัดให้อยู่ซ้าย */
+  flex-direction: row; /* จัดเรียงเป็นแถว */
+}
+
+.standard-item-container input[type="checkbox"] {
+  position: absolute;
+  top: 10px; /* ตำแหน่งในแนวตั้ง */
+  left: -90px; /* ตำแหน่งในแนวนอน */
+  z-index: 2; /* วาง checkbox อยู่ด้านหน้า */
+  width: 20px;
+  height: 20px;
+}
+
+.standard-item-container input[type="checkbox"]:checked + .standard-logo::after {
+  content: '✔'; /* แสดงเครื่องหมายติ๊กเมื่อ checkbox ถูกเลือก */
+  position: absolute;
+  top: 10px; /* ตำแหน่งในแนวตั้ง */
+  left: -90px; /* ตำแหน่งในแนวนอน */
+  width: 20px;
+  height: 20px;
+  background-color: #3182ce; /* พื้นหลังสีฟ้าของเครื่องหมายติ๊ก */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 16px; /* ขนาดของเครื่องหมายติ๊ก */
+  border-radius: 2px; /* ทำให้มุมโค้ง */
+}
+
+.standard-item-container .standard-logo {
+  position: relative;
+}
+
+.standard-item-container .standard-logo::before {
+  content: ''; /* สร้างกล่องว่าง */
+  position: absolute;
+  top: 10px; /* ตำแหน่งในแนวตั้ง */
+  left: -90px; /* ตำแหน่งในแนวนอน */
+  width: 20px; /* ขนาดของกล่อง */
+  height: 20px; /* ขนาดของกล่อง */
+  border: 2px solid #ccc; /* ขอบกล่อง */
+  border-radius: 2px; /* ทำให้มุมโค้ง */
+  background-color: transparent; /* พื้นหลังโปร่งใส */
+}

@@ -10,7 +10,8 @@ import "./add.css";
 // Fix for the missing marker icon in Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
-  iconRetinaUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
+  iconRetinaUrl:
+    "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
   iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
   shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
 });
@@ -112,7 +113,10 @@ const Register = () => {
       formDataToSend.append(`standards[${index}][id]`, standard.id);
       formDataToSend.append(`standards[${index}][name]`, standard.name);
       formDataToSend.append(`standards[${index}][logo]`, standard.logo);
-      formDataToSend.append(`standards[${index}][certNumber]`, standard.certNumber);
+      formDataToSend.append(
+        `standards[${index}][certNumber]`,
+        standard.certNumber
+      );
       formDataToSend.append(`standards[${index}][certDate]`, standard.certDate);
     });
 
@@ -253,43 +257,62 @@ const Register = () => {
             <p className="section-name">มาตรฐาน</p>
             <div className="standards-container">
               {standards.map((standard) => (
-                <div key={standard.id} className="standard-item">
-                  <div key={standard.id} className="standard-item-container">
-                    <label>
-                      <input
-                        type="checkbox"
-                        onChange={(e) =>
-                          handleStandardChange(standard, e.target.checked)
-                        }
+                <div
+                  key={standard.id}
+                  className={`standard-item-container ${
+                    formData.standards.some((s) => s.id === standard.id)
+                      ? "selected"
+                      : ""
+                  }`}
+                >
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={formData.standards.some(
+                        (s) => s.id === standard.id
+                      )}
+                      onChange={(e) =>
+                        handleStandardChange(standard, e.target.checked)
+                      }
+                    />
+                    <span className="standard-logo">
+                      <Image
+                        src={standard.logoUrl}
+                        alt={standard.name}
+                        width={80}
+                        height={80}
                       />
-                      <div className="standard-item">
-                        <Image
-                          src={standard.logoUrl}
-                          alt={standard.name}
-                          width={80}
-                          height={80}
-                          className="standard-logo"
-                        />
-                        <span className="standard-name">{standard.name}</span>
-                      </div>
-                    </label>
-                  </div>
-
+                    </span>
+                    
+                    
+                  </label>
+                  <span className="standard-name">{standard.name}</span>
                   {formData.standards.some((s) => s.id === standard.id) && (
                     <div className="standard-details">
                       <input
                         type="text"
+                        className="form-input1"
                         placeholder="เลขที่ใบรับรอง"
                         onChange={(e) =>
-                          handleStandardDetailChange(standard.id, "certNumber", e.target.value)
+                          handleStandardDetailChange(
+                            standard.id,
+                            "certNumber",
+                            e.target.value
+                          )
                         }
                         required
                       />
+                      <br />
                       <input
                         type="date"
+                        className="form-input1"
                         placeholder="วันที่ใบรับรอง"
                         onChange={(e) =>
-                          handleStandardDetailChange(standard.id, "certDate", e.target.value)
+                          handleStandardDetailChange(
+                            standard.id,
+                            "certDate",
+                            e.target.value
+                          )
                         }
                         required
                       />
@@ -302,7 +325,7 @@ const Register = () => {
 
           <div className="button-group">
             <button type="submit" className="button-submit">
-              เพิ่มใบรับรอง
+            ขอใบรับรอง
             </button>
           </div>
         </form>

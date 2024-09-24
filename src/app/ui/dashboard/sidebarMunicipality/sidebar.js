@@ -140,8 +140,8 @@ const Sidebar = () => {
           className={styles.userImage}
           src="/dinosaur.png"
           alt=""
-          width="150"
-          height="150"
+          width="50"
+          height="50"
         />
         <div className={styles.userDetail}>
           <span className={styles.username}>
