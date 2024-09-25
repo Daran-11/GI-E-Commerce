@@ -24,6 +24,7 @@ export async function GET(request, { params }) {
         id: parseInt(orderId), // This is the ID from the 'Order' table
       },
       include: {
+        farmer:true, 
         orderItems: {
           include: {
             product: true,
