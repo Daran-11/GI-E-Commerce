@@ -110,7 +110,7 @@ export default function CartItem({ initialItems }) {
                     {item.imageUrl ? (
                     <Image
                       src={item.imageUrl}
-                      alt={item.ProductName}
+                      alt={item.productName}
                       width={0} // Adjust width as needed
                       height={0} // Adjust height as needed
                       sizes="100vw" 
@@ -161,7 +161,7 @@ export default function CartItem({ initialItems }) {
               {cartItems
                 .filter(item => selectedItems.includes(item.productId))
                 .map((item,index) => (
-                  <div className=" flex justify-between">
+                  <div className=" flex justify-between"key={item.productId}>
                   <div className="" key={item.productId}>
                   <span className="mr-2">{index + 1}. </span> 
                     {item.productName || item.product.ProductName}{item.productType || item.product.ProductType}
