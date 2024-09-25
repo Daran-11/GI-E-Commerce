@@ -140,13 +140,13 @@ export default function ProductDetailsClient({ product, totalReviewsCount ,Produ
 
 
   return (
-    <>
-    <div className='w-full h-[45px] bg-white rounded-2xl mb-[20px] flex items-center justify-start pl-2'>
-    <Breadcrumb />
-
-    </div>
-      <div className='container-detail  w-full h-full flex justify-start '> 
-        <div className='w-full h-[500px] bg-white  rounded-2xl flex items-center justify-center text-center '>
+    <div className=' flex flex-col w-[95%] md:w-[60%] ml-auto mr-auto mt-[120px]  '>
+      <div className='w-full h-[45px] bg-white rounded-2xl mb-[20px] pl-2 flex items-center'>
+      <Breadcrumb />
+      </div>
+      
+      <div className='detail  flex justify-center md:justify-start '> 
+        <div className='hidden md:flex w-full h-[500px] bg-white  rounded-2xl items-center justify-center text-center '>
               {product.imageUrl ? (
                     <Image
                       src={product.imageUrl}
@@ -160,44 +160,72 @@ export default function ProductDetailsClient({ product, totalReviewsCount ,Produ
                     <img className="w-full h-full object-cover rounded-2xl" src="/phulae.jpg" alt="Card Image" />
                   )}
         </div>
-        <div className=' w-[700px] h-[500px]  bg-white ml-[25px] rounded-2xl '>
-          <div className='product-name m-[25px] text-[#535353]'>
-            <p className=' text-5xl  '>{product.ProductName} {product.ProductType}</p>
-
-            <div className='flex w-[560px] text-[#767676] text-xl'>
-              <div className='mr-5'> ดาว </div>
-              <p className=''> ขายแล้ว ... กิโลกรัม</p>
+        <div className=' w-full h-fit lg:h-[500px]  bg-white lg:ml-[25px] rounded-2xl p-6'>
+          <div className=' text-[#535353]'>
+            <div className='lg:hidden flex justify-center'>
+                      {product.imageUrl ? (
+                            <Image
+                              src={product.imageUrl}
+                              alt={product.ProductName}
+                              width={0} // Adjust width as needed
+                              height={0} // Adjust height as needed
+                              sizes="100vw"
+                              className='w-full h-[30vh] object-center rounded-2xl'
+                            />
+                          ) : (
+                            <img className="w-full h-full object-cover rounded-2xl" src="/phulae.jpg" alt="Card Image" />
+                          )}
+            </div>
+            <div className='flex justify-start'>
+              <p className='mt-3 text-4xl lg:text-5xl'>{product.ProductName} {product.ProductType}</p>                 
             </div>
 
-            <p className=' text-[#4eac14] text-[35px] mb-4 mt-2'>{Number(product.Price).toLocaleString()} บาท/กิโล</p>
+            <div className='flex w-full text-[#767676] text-xl'>
+              
+              <div className=' mr-5  flex justify-start items-center'>
+              <Rating
+                readonly
+                initialValue={avgRating} // Pass the average rating value
+                size={20} // Set star size
+                iconsCount={5}
+                allowFraction='true'                
+              />
+              <p className='text-sm'>{avgRating} / 5</p> {/* Display avg rating */}
+            </div>
 
-            <div className="  space-y-4 w-[600px] text-[#767676] text-[20px] mb-5">
+              <p className='hidden md:flex'> ขายแล้ว ... กิโลกรัม</p>
+            </div>
+            <p className='md:hidden'> ขายแล้ว ... กิโลกรัม</p>
+
+            <p className=' text-[#4eac14] text-[35px] lg:mb-4 lg:mt-2'>{Number(product.Price).toLocaleString()} บาท/กิโล</p>
+
+            <div className=" space-y-2  md:space-y-4 w-fit lg:w-[600px] text-[#767676] text-[20px] mb-5">
               {/* Row 1 */}
-              <div className="">
+              <div className="w-fit">
                 <div className="w-[250px] ">คำอธิบาย</div>
                 <div className="w-full text-[#535353]">{product.Description}</div>
               </div>
 
               {/* Row 2 */}
-              <div className="">
+              <div className="w-fit">
                 <div className="w-[250px]">ช่องทางติดต่อ</div>
                 <div className="w-full text-[#535353]">{product.farmer.contactLine}</div>
               </div>
               
               {/* Row 3 */}
-              <div className=" items-center">
-                <div className="w-[250px]">จำนวน(กิโล)</div>
-                <div className="w-full flex items-center">              
+              <div className="w-fit">
+                <div className="w-fit">จำนวน(กิโล)</div>
+                <div className="w-fit flex items-center">              
                   <QuantityHandler
                   initialQuantity={quantity}
                   productAmount={product.Amount}
                   productId={product.ProductID}
-                  onQuantityChange={handleQuantityChange}/>
-                <p className='ml-3  text-[#535353]'>มีสินค้า {product.Amount} กิโลกรัม</p>  
+                  onQuantityChange={handleQuantityChange}/> 
+                <p className='ml-3   text-[#535353]'>มีสินค้า {product.Amount} กิโลกรัม</p>  
                 </div>
               </div>
             </div>
-
+            <div className='flex justify-between md:justify-start'>
               <button 
               className='action-button bg-[#4EAC14] rounded-xl text-white w-[150px] h-[50px] font-light'
               onClick={buyNow}>
@@ -208,60 +236,57 @@ export default function ProductDetailsClient({ product, totalReviewsCount ,Produ
               className='action-button ml-4 text-[#4EAC14] border-2  border-gray-500 rounded-xl  ' 
               onClick={addToCart}>
               เพิ่มในตะกร้า
-              </button>              
+              </button>                
+            </div>
+            
           </div>
   
 
         </div>
       </div>
 
-  
-  <div className='flex items-start justify-start my-5'>
-    <div className='w-[100px] h-[100px] bg-white rounded-2xl '>
 
-    </div>
-  </div>
+      <div className='flex items-start justify-start my-5'>
+        <div className='w-full h-[100px] bg-white rounded-2xl '>
+                            
+        </div>
+      </div>
 
   <div className='flex item- w-full h-fit bg-white rounded-2xl ' >
 
       <div className=' w-full m-[25px] text-[#535353]'>
-        <div className='text-2xl h-[300px]'>
-          รายละเอียดเพิ่มเติม
-          <div>
-            
-          </div>
-        </div>
 
 
-        <div className='text-2xl'>
-          รีวิว
-          <Rating
-            readonly
-            initialValue={avgRating} // Pass the average rating value
-            size={25} // Set star size
-            iconsCount={5}
-          />
-          <p><strong>คะแนนรีวิวเฉลี่ย</strong> {avgRating} / 5</p> {/* Display avg rating */}
+        <div className='text-3xl'>
+          รีวิวของสินค้า
+
           {reviews.length > 0 ? (
           <div>
             {reviews.map((review) => (
-              <div key={review.id} className="text-xl border-2 p-2">
-                <p>{review.user.name}</p>
-                <p>คะแนนรีวิว: {review.rating} / 5</p>
-                <p>{review.review || "No review text provided."}</p>
-                <p>วันที่: {formatDateToThaiBuddhist(review.createdAt)}</p>
+              <div key={review.id} className="text-base border-b-2 p-2 ">
+                <p className='text-[#2b2b2b]'>{review.user.name}</p>
+ 
+                  <Rating
+                  readonly
+                  initialValue={review.rating} // Pass the average rating value
+                  size={15} // Set star size
+                  iconsCount={5}
+                  allowFraction='true'                
+                />
+                <p className='text-sm'>{formatDateToThaiBuddhist(review.createdAt)}</p>           
+                <p className='mt-3'>{review.review || "ไม่มีข้อความรีวิว"}</p>
               </div>
             ))}
             {/* Place Load More button here */}
             {hasMore && !loading && (
-              <button onClick={loadMoreReviews} className="mt-4 p-2 bg-blue-500 text-white rounded">
-                Load More Reviews
+              <button onClick={loadMoreReviews} className="mt-4 p-2 text-base bg-blue-500 text-white rounded">
+                ดูรีวิวเพิ่มเติม
               </button>
             )}
             {loading && <p>Loading...</p>}
           </div>
         ) : (
-          <p>No reviews for this product yet.</p>
+          <p>ยังไม่มีรีวิวสำหรับสินค้านี้</p>
         )}
 
         </div>
@@ -271,7 +296,7 @@ export default function ProductDetailsClient({ product, totalReviewsCount ,Produ
   </div>
 
 
-    </>
+    </div>
   );
 }
 
