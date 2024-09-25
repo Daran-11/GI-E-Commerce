@@ -298,7 +298,7 @@ const Product = () => {
             ))
           ) : (
             <tr>
-              <td colSpan={9}>No products available</td>
+              <td colSpan={9}>ไม่มีสินค้า</td>
             </tr>
           )}
         </tbody>
