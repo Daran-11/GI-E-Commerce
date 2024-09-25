@@ -18,22 +18,33 @@ export default function Profile() {
   // When after loading success and have session, show profile
   return (
     status === 'authenticated' && session.user && (
-      <div className=" flex w-full h-screen bg-white p-6 rounded-xl">
-        <div className=" ">
-          <p className='text-3xl text-[#535353]'>โปรไฟล์</p>
-          <p>
-            Welcome, <b>{session.user.name}!</b>
-          </p>
-          <p>Email: {session.user.email}</p>
-          <p>Role: {session.user.role}</p>
-          <button
-            onClick={() => signOut({ callbackUrl: '/' })}
-            className="w-full bg-blue-500 text-white py-2 rounded"
-          >
-            Logout
-          </button>
+      <div className="  w-full h-fit bg-white p-6 rounded-xl">
+          <div className='w-full h-fit'>
+            <p className='page-header'>โปรไฟล์</p>
+          </div>
+
+          <div className='flex justify-start space-x-8'>
+            <div className='bg-gray-200 w-[200px] h-[200px] rounded-xl'>
+
+            </div>
+              <div className='flex w-fit h-fit '>
+
+                <div className='w-full h-fit'>
+                  <p className=''>ขื่อ <b>{session.user.name}!</b></p>
+                  <p>อีเมล {session.user.email}</p>
+                  <p>เบอร์โทร: {session.user.phone}</p> 
+                  <button
+                      onClick={() => signOut({ callbackUrl: '/' })}
+                      className="w-[150px] mt-5 bg-red-500 hover:bg-red-700 text-white py-2 rounded"
+                      >
+                      ออกจากระบบ
+                  </button>                     
+
+                </div>
+              </div>            
+          </div>
+
         </div>
-      </div>
     )
   )
 }
