@@ -8,6 +8,29 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Bank {
+  id         Int    @id @default(autoincrement())
+  brand      String
+  imageUrl   String
+  isAvailable Boolean @default(true)
+  BankAccounts BankAccount[]
+}
+
+
+model BankAccount {
+  id            Int       @id @default(autoincrement())
+  accountNumber String    // หมายเลขบัญชีธนาคาร
+  accountName   String    // ชื่อเจ้าของบัญชี
+  bankId        Int       // ความสัมพันธ์กับตาราง Bank
+  bank          Bank      @relation(fields: [bankId], references: [id])
+  userId        Int?      // ใช้ถ้าเป็นบัญชีของ user
+  farmerId      Int?      // ใช้ถ้าเป็นบัญชีของ farmer
+  user          User?     @relation(fields: [userId], references: [id])
+  farmer        Farmer?   @relation(fields: [farmerId], references: [id])
+  recipientId   String?   // เก็บ Omise Recipient ID
+  isDefault     Boolean   @default(false) // ระบุว่าบัญชีนี้เป็นบัญชีหลัก
+}
+
 model Product {
   ProductID   Int      @id @unique(map: "ProductID") @default(autoincrement())
   farmerId    Int
@@ -61,6 +84,7 @@ model User {
   Addresses       Address[]
   Farmer          Farmer[]
   Reviews         RatingReview[]
+  BankAccounts    BankAccount[] 
 }
 
 model CartItem {
@@ -230,7 +254,9 @@ model Farmer {
   products       Product[]
   OrderItems     OrderItem[]
   Orders          Order[]
-
+  BankAccounts    BankAccount[]
+  
+  
   //Relationships
   user           User           @relation(fields: [userId], references: [id])
 
