@@ -104,6 +104,7 @@ export async function POST(request) {
           id: { in: orderIds },
         },
         include: {
+          farmer: true,
           orderItems: {
             include: {
               product: true,  // Include product details for each order item

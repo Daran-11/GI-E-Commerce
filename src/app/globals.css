@@ -101,7 +101,7 @@
 }
 
 .page-header {
-  @apply text-4xl text-[#535353] pb-2 border-b-2 mb-4
+  @apply text-4xl text-[#535353] pb-1 border-b-2 mb-4
 }
 
 :root {
