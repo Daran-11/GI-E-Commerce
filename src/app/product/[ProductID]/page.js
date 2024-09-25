@@ -67,12 +67,12 @@ export default async function ProductDetails({ params }) {
     });
 
   return (
-    <main>
-      <div className="top-container">
+
+      <div >
         <ProductDetailsClient product={product}
           ProductID = {product.ProductID}
          totalReviewsCount={totalReviewsCount} />
       </div>
-    </main>
+
   );
 }
