@@ -35,7 +35,7 @@ export default function OrderConfirmation() {
               console.log('data is:',data); // Add this to inspect the API response
               setOrders(data.orders);
 
-              //sessionStorage.removeItem('orderId');
+              sessionStorage.removeItem('orderId');
             } else {
               setError("Order not found");
             }
