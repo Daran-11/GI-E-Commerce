@@ -16,7 +16,13 @@ export async function GET() {
   try {
     const cartItems = await prisma.cartItem.findMany({
       where: { userId },
-      include: { product: true }
+      include: { 
+        product: {
+          include: {
+            farmer: true,
+          }
+        }
+      }
     });
     
     const flatCartItems = cartItems.map(item => ({
@@ -26,6 +32,7 @@ export async function GET() {
       productType: item.product.ProductType,
       productPrice: item.product.Price,
       farmerId: item.product.farmerId,
+      farmerName: item.product.farmer.farmerName,
       quantity: item.quantity,
       imageUrl: item.product.imageUrl,
     }));
