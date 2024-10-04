@@ -26,7 +26,7 @@ export default function ProductDetailsClient({ product, totalReviewsCount ,Produ
   };
 
   const addToCart = async () => {
-    const productResponse = await fetch(`http://localhost:3000/api/product/${product.ProductID}`);
+    const productResponse = await fetch(`/api/product/${product.ProductID}`);
     const productData = await productResponse.json();
 
 
@@ -55,7 +55,7 @@ export default function ProductDetailsClient({ product, totalReviewsCount ,Produ
 
     if ( status === 'authenticated' && session) {
       console.log("Product Id", ProductID)
-      const productResponse = await fetch(`http://localhost:3000/api/product/${ProductID}`);
+      const productResponse = await fetch(`/api/product/${ProductID}`);
       const productData = await productResponse.json();
   
       const item = {

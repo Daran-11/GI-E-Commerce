@@ -12,7 +12,7 @@ export const CartProvider = ({ children }) => {
   useEffect(() => {
     const fetchCartItems = async () => {
       if (status === 'authenticated' && session) {
-        const response = await fetch('http://localhost:3000/api/auth/cart', {
+        const response = await fetch('/api/auth/cart', {
           headers: {
             'Cache-Control': 'no-cache',
           },
@@ -47,7 +47,7 @@ export const CartProvider = ({ children }) => {
   const syncCartWithServer = async (session) => {
     const localCart = JSON.parse(localStorage.getItem('cart')) || [];
     for (const item of localCart) {
-      await fetch('http://localhost:3000/api/auth/cart/add', {
+      await fetch('/api/auth/cart/add', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -61,7 +61,7 @@ export const CartProvider = ({ children }) => {
 
     // Fetch updated cart items from server
     if (status === 'authenticated') {
-      const response = await fetch('http://localhost:3000/api/auth/cart', {
+      const response = await fetch('/api/auth/cart', {
         headers: {
           'Cache-Control': 'no-cache',
         },
@@ -80,7 +80,7 @@ export const CartProvider = ({ children }) => {
   const addItemToCart = async (item) => {
     
     if (status === 'authenticated') {
-      const response = await fetch('http://localhost:3000/api/auth/cart/add', {
+      const response = await fetch('/api/auth/cart/add', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -139,7 +139,7 @@ export const CartProvider = ({ children }) => {
 
   const removeItemFromCart = (productId) => {
     if (status === 'authenticated') {
-      fetch('http://localhost:3000/api/auth/cart/delete', {
+      fetch('/api/auth/cart/delete', {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -162,7 +162,7 @@ export const CartProvider = ({ children }) => {
 
   const updateItemQuantity = (productId, newQuantity) => {
     if (status === 'authenticated') {
-      fetch('http://localhost:3000/api/auth/cart/update', {
+      fetch('/api/auth/cart/update', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

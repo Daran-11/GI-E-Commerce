@@ -2,13 +2,13 @@
 import { useCart } from "@/context/cartContext";
 
 
-export default function AddToCartButton({product}) {
+export default function AddToCartButton({product, ProductID}) {
     const { addItemToCart } = useCart();
 
     const addToCart = async () => {
-        const productResponse = await fetch(`http://localhost:3000/api/product/${product.ProductID}`);
+
+        const productResponse = await fetch(`/api/product/${ProductID}`);
         const productData = await productResponse.json();
-    
     
         const item = {
           productId: productData.ProductID,

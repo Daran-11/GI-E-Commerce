@@ -19,7 +19,7 @@ export default function SearchBar() {
 
   const fetchSuggestions = async (query) => {
     try {
-      const res = await fetch(`http://localhost:3000/api/suggestions?query=${query}`);
+      const res = await fetch(`/api/suggestions?query=${query}`);
       if (res.ok) {
         const data = await res.json();
         setSuggestions(data.suggestions);
