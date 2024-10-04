@@ -21,7 +21,7 @@ export async function GET(request, { params }) {
     });
 
     if (!defaultAddress) {
-      return NextResponse.json({ error: "Default address not found" }, { status: 404 });
+      return new Response(JSON.stringify({ error: 'ไม่พบที่อยู่จัดส่ง' }), { status: 404 });
     }
 
     return NextResponse.json(defaultAddress);

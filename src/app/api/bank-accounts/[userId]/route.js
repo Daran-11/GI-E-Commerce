@@ -29,6 +29,7 @@ export async function POST(request, { params }) {
     // Unset other default accounts
     await prisma.bankAccount.updateMany({
       where: { userId: parseInt(params.userId), isDefault: true },
+      
       data: { isDefault: false },
     });
   }
