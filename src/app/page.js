@@ -7,7 +7,7 @@ import ProductCard from "../components/productcard";
 async function fetchProducts(sortBy = '') {
   console.log('Fetching products...');
   try {
-    const res = await fetch(`http://localhost:3000/api/product?sortBy=${sortBy}`);
+    const res = await fetch(`/api/product?sortBy=${sortBy}`);
     if (!res.ok) {
       return { error: 'ไม่สามารถเชื่อมต่อข้อมูลได้ในขณะนี้' };
     }
@@ -78,8 +78,8 @@ export default function Home() {
   return (
     <div className=''>
      
-      <div className=" w-[95%] md:w-[80%] m-auto md:ml-auto md:mr-auto mt-5 md:mt-5  md:p-6 rounded-xl">
-      <div className="image bg-pineapple w-auto h-[300px] lg:h-[250px] mt-[50px] bg-no-repeat bg-cover bg-scroll bg-center rounded-xl"></div>
+      <div className=" w-[95%] md:w-[80%] m-auto md:ml-auto md:mr-auto mt-[100px] md:mt-5   md:p-6 rounded-xl">
+      <div className="hidden  md:block image bg-pineapple w-auto h-[300px] mt-[50px] lg:h-[250px]  bg-no-repeat bg-cover bg-scroll bg-center rounded-xl"></div>
         <div className="mb-5 md:mt-5 bg-white p-2 md:p-6 rounded-xl ">
           ค้นหาจากราคา
           <div className="flex gap-2 md:gap-4 items-center ">

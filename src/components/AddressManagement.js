@@ -39,7 +39,7 @@ export default function AddressManagement() {
 
   const fetchAddresses = async () => {
     if (session?.user?.id) {
-      const res = await fetch(`http://localhost:3000/api/users/${session.user.id}/addresses`);
+      const res = await fetch(`/api/users/${session.user.id}/addresses`);
       if (res.ok) {
         const data = await res.json();
         console.log('Fetched Addresses:', data); // Debug the response
@@ -54,19 +54,19 @@ export default function AddressManagement() {
 
 
   const fetchProvinces = async () => {
-    const res = await fetch("http://localhost:3000/api/provinces");
+    const res = await fetch("/api/provinces");
     const data = await res.json();
     setProvinces(data);
   };
 
   const fetchAmphoes = async (provinceId) => {
-    const res = await fetch(`http://localhost:3000/api/provinces/${provinceId}/amphoes`);
+    const res = await fetch(`/api/provinces/${provinceId}/amphoes`);
     const data = await res.json();
     setAmphoes(data);
   };
 
   const fetchTambons = async (amphoeId) => {
-    const res = await fetch(`http://localhost:3000/api/amphoes/${amphoeId}/tambons`);
+    const res = await fetch(`/api/amphoes/${amphoeId}/tambons`);
     const data = await res.json();
     setTambons(data);
   };
@@ -113,8 +113,8 @@ export default function AddressManagement() {
 
     const method = addressForm.id ? "PUT" : "POST";
     const url = addressForm.id
-      ? `http://localhost:3000/api/users/${session.user.id}/addresses`
-      : `http://localhost:3000/api/users/${session.user.id}/addresses`;
+      ? `/api/users/${session.user.id}/addresses`
+      : `/api/users/${session.user.id}/addresses`;
   
     const res = await fetch(url, {
       method,
@@ -171,7 +171,7 @@ export default function AddressManagement() {
         return;
       }
   
-      const response = await fetch(`http://localhost:3000/api/users/${userId}/addresses`, {
+      const response = await fetch(`/api/users/${userId}/addresses`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -217,10 +217,7 @@ export default function AddressManagement() {
       const userId = session.user.id;
   
       // Ensure that there are at least 2 addresses before allowing deletion
-      if (addresses.length <= 1) {
-        alert('You must have at least one address.');
-        return;
-      }
+
   
       try {
         const response = await fetch(`/api/users/${userId}/addresses/${addressId}`, {
@@ -252,14 +249,14 @@ export default function AddressManagement() {
       {isFormVisible && (
         <form>
 
-          <div className="flex justify-start gap-x-2">
+          <div className="md:flex  gap-x-2">
           
           <div className="">
             <select
               name="provinceId"
               value={addressForm.provinceId}
               onChange={handleProvinceChange}
-              className="input-address p-2 w-[250px] h-15"
+              className="input-address p-2 w-full md:w-[200px] h-15"
             >
               <option value="" >เลือกจังหวัด</option>
               {provinces.map((province) => (
@@ -276,7 +273,7 @@ export default function AddressManagement() {
               name="amphoeId"
               value={addressForm.amphoeId}
               onChange={handleAmphoeChange}
-              className="input-address p-2 w-[250px] h-15"              
+              className="input-address p-2 w-full md:w-[200px] h-15"              
             >
               <option value="">เลือกอำเภอ</option>
               {amphoes.map((amphoe) => (
@@ -286,13 +283,12 @@ export default function AddressManagement() {
               ))}
             </select>
           </div>
-
-          <div>
+          <div className="hidden md:flex">
             <select
               name="tambonId"
               value={addressForm.tambonId}
               onChange={handleAddressChange}
-              className="input-address p-2 w-[250px] h-15"
+              className="input-address p-2 w-full md:w-[150px] h-15"
             >
               <option value="" className="">เลือกตำบล</option>
               {tambons.map((tambon) => (
@@ -301,14 +297,33 @@ export default function AddressManagement() {
                 </option>
               ))}
             </select>
-          </div>                    
+          </div>  
+                 
           </div>
 
-          <div>
-            <input
+ 
+
+          <div className="md:hidden">
+            <select
+              name="tambonId"
+              value={addressForm.tambonId}
+              onChange={handleAddressChange}
+              className="input-address p-2 w-full md:w-[150px] h-15"
+            >
+              <option value="" className="">เลือกตำบล</option>
+              {tambons.map((tambon) => (
+                <option key={tambon.id} value={tambon.id}>
+                  {tambon.name_th}
+                </option>
+              ))}
+            </select>
+          </div>   
+
+          <div className="">
+            <textarea 
               type="text"
               name="addressLine"
-              className="input-address p-2 w-[500px] h-15"
+              className="input-address p-2 w-full  md:w-[500px]"
               value={addressForm.addressLine}
               onChange={handleAddressChange}
               placeholder="บ้านเลขที่ ซอย หมู่ ถนน/แขวง ตำบล"
@@ -321,7 +336,7 @@ export default function AddressManagement() {
               name="postalCode"
               value={addressForm.postalCode}
               onChange={handleAddressChange}
-              className="input-address p-2 w-[200px] h-15"
+              className="input-address p-2 w-full md:w-[200px] h-15"
               placeholder="รหัสไปรษณีย์"
             />
           </div>
@@ -372,16 +387,17 @@ export default function AddressManagement() {
       <ul>
         <div className="">
         {addresses.length > 0 && addresses.map((address) => (
-          <li className="flex justify-between " key={address.id}>
-            <div>
+          <li className="flex justify-between bg-slate-100 rounded-xl px-2 py-2 my-2" key={address.id}>
+            <div className="text-sm md:text-base ">
             {address.addressLine}, {address.province.name_th}, {address.amphoe.name_th}, {address.tambon.name_th}, {address.postalCode}, {address.isDefault}              
             </div>
-            <div className="flex justify-end items-center gap-x-8">
-              <button className=" w-15 text-[#4EAC14]" onClick={() => handleEdit(address)}>แก้ไข</button>
-              <button className="w-15 text-red-700"  onClick={() => handleDelete(address.id)}>ลบ</button>
-              <button  className={`text-black ${address.isDefault ? 'text-gray-600' : 'text-blue-600 hover:text-blue-300'}`} onClick={() => handleSetDefault(address.id)}>
-                {address.isDefault ? "ที่อยู่ตั้งต้น" : "เลือกเป็นที่อยู่ตั้งต้น"}
-              </button>              
+            <div className="flex justify-end items-center gap-x-4 md:gap-x-8 text-sm md:text-base">
+            <button disabled={address.isDefault}  className={`text-[#4eac14]  ${address.isDefault ? 'text-gray-500' : 'text-[#4eac14] hover:text-[#7ddb43]'}`} onClick={() => handleSetDefault(address.id)}>
+                {address.isDefault ? "ที่อยู่หลัก" : "เลือกเป็นที่อยู่หลัก"}
+              </button>     
+              <button className="hidden sm:flex w-15 text-blue-500" onClick={() => handleEdit(address)}>แก้ไข</button>
+              <button className="hidden sm:flex w-15 text-red-700"  onClick={() => handleDelete(address.id)}>ลบ</button>
+         
             </div>
 
           </li>
