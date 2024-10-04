@@ -74,13 +74,13 @@ export default function QuantityHandler({ productAmount, productId, initialQuant
   return (
     <div>
       <div className='flex items-center w-fit '>
-        <button className='btn w-10 h-10 border-2 rounded-full  text-center' onClick={decrement}>
+        <button className='btn w-10 h-10 text-3xl md:text-2xl md:border-2  rounded-full  text-center' onClick={decrement}>
           -
         </button>
         <div className='items-center justify-center'>
         <input
           type="number"
-          className="w-6 h-5 lg:w-8 lg:h-10 lg:mx-1 text-center appearance-none"
+          className="w-4 h-5 lg:w-8 lg:h-10 lg:mx-1 text-center appearance-none"
           value={quantity}
           onChange={handleInputChange}
           onBlur={handleBlur}
@@ -88,7 +88,7 @@ export default function QuantityHandler({ productAmount, productId, initialQuant
           max={productAmount}
         />
         </div>
-        <button className='btn w-10 h-10 border-2 rounded-full ' onClick={increment}>
+        <button className='btn w-10 h-10 text-3xl md:text-2xl md:border-2 rounded-full' onClick={increment}>
           +
         </button>
       </div>

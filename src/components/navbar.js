@@ -18,6 +18,8 @@ export const Navbar = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false); // State to handle the menu toggle
     const [isDropdownOpen, setIsDropdownOpen] = useState(false); // State for dropdown menu
     const dropdownRef = useRef(null);
+    const toggleButtonRef = useRef(null); // Ref for the hamburger icon
+     const [menuAnimation, setMenuAnimation] = useState(false);
 
     // Function to toggle the menu
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
@@ -28,15 +30,26 @@ export const Navbar = () => {
     // Close dropdown menu when clicking outside of it
     useEffect(() => {
         const handleClickOutside = (event) => {
-            // Check if the click is outside of the dropdown or its button
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target) && !event.target.closest('.dropdown-button')) {
-                setIsDropdownOpen(false);
+            // Check if the click is outside the menu AND not on the toggle button
+            if (
+                dropdownRef.current && !dropdownRef.current.contains(event.target) &&
+                toggleButtonRef.current && !toggleButtonRef.current.contains(event.target)
+            ) {
+                toggleMenu(); // Close the menu
             }
         };
-    
+
+        // Add both 'mousedown' and 'touchstart' events to handle desktop and mobile
         document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
+        document.addEventListener('touchstart', handleClickOutside);
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('touchstart', handleClickOutside);
+        };
+    }, [dropdownRef, toggleMenu]);
+    
+    
 
         // Function to handle dropdown toggle and close the mobile menu
         const handleDropdownToggle = () => {
@@ -46,6 +59,14 @@ export const Navbar = () => {
             }
         };
 
+            // Trigger animation when the menu opens/closes
+    useEffect(() => {
+        if (isMenuOpen) {
+            setMenuAnimation(true);
+        } else {
+            setMenuAnimation(false);
+        }
+    }, [isMenuOpen]);
 
     return (
         <div className="fixed top-0 left-0 w-full bg-white shadow-lg z-50">
@@ -68,7 +89,7 @@ export const Navbar = () => {
 
 
                 {/* Hamburger Icon */}
-                <div className="lg:hidden flex items-center">
+                <div ref={toggleButtonRef} className="lg:hidden flex items-center">
                     <button onClick={toggleMenu}>
                         <svg className="w-6 h-6 text-[#595959]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7" />
@@ -163,13 +184,6 @@ export const Navbar = () => {
                                     >
                                             ลงทะเบียนเกษตรกร
                                     </DropdownItem>  
-                                 
-                                    
-                                   
-                                    
-                                                                    
-                                    
-
                                     
                                     <DropdownItem key="signout" className='dropdown-item text-red-500 hover:text-red-500 text-left' textValue="ออกจากระบบ">
                                         <button onClick={() => signOut({ callbackUrl: '/' })}>
@@ -192,9 +206,11 @@ export const Navbar = () => {
 
                 {/* Mobile Menu (shown when the hamburger icon is clicked) */}
                 {isMenuOpen && (
-                    <div 
-                    className="dropdown-button lg:hidden  absolute top-[90px] right-0 w-full bg-white shadow-lg ">
-                        <ul className="flex flex-col items-start p-4 ">
+                    <div  ref={dropdownRef}
+                    className={`dropdown-button lg:hidden absolute top-[90px] right-0 w-full bg-white shadow-lg transition-all duration-300 ease-in-out transform ${
+                        menuAnimation ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
+                    }`}>
+                        <ul className="flex flex-col items-start p-4 " >
                             <div className='w-full text-lg'>
                                 <li>
                                     <Link href='/' 
@@ -269,7 +285,7 @@ export const Navbar = () => {
                                 ) : (
                                     <li>
                                         <Link href='/login'
-                                            className={currentPath === "/login" ? "text-[#4EAC14] block px-4 py-2 text-sm" : "block  px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"}
+                                            className={currentPath === "/login" ? "text-[#4EAC14] block px-4 py-2 " : "block  px-4 py-2  text-gray-700 hover:bg-gray-100"}
                                         onClick={toggleMenu}>
                                             เข้าสู่ระบบ
                                         </Link>

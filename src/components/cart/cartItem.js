@@ -76,29 +76,29 @@ export default function CartItem({ initialItems }) {
     <div className="xl:flex  lg:justify-start ">
 
       <div className="w-full xl:w-[60vw] bg-white xl:p-5 rounded-xl h-fit p-[16px]">
-        <div className="text-4xl text-[#535353] pb-2 border-b-2 mb-5">
+        <div className="text-4xl text-[#535353] pb-2 border-b-2 md:mb-2">
           <a>
           ตะกร้าสินค้า
           </a>
         </div>
 
-        <table className="w-full xl:w-[57vw]">
+        <table className="min-w-full table-auto">
           <thead className="">
-            <tr className="text-base lg:text-xl text-[#535353]">
-              <th className=" w-[50px]  text-start">เลือก</th>
-              <th className=" w-[100px] text-start">รูป</th>
-              <th className=" w-[120px] text-start">สินค้า</th>
-              <th className=" w-[100px] text-start">ราคา/กิโล</th>
-              <th className=" w-[80px] text-start">จำนวน</th>
-              <th className=" w-[100px] text-start">ราคารวม</th>
-              <th className=" w-[60px] text-right">แอ็คชั่น</th>
+            <tr className=" text-base lg:text-xl text-[#535353]">
+              <th className="hidden md:table-cell px-2 text-start">เลือก</th>
+              <th className="hidden md:table-cell  px-2 text-start">รูป</th>
+              <th className="hidden md:table-cell px-2 text-start">สินค้า</th>
+              <th className="hidden md:table-cell px-2 text-start">ราคา/กิโล</th>
+              <th className="hidden md:table-cell px-2 text-start">จำนวน</th>
+              <th className="hidden md:table-cell px-2 text-start">ราคารวม</th>
+              <th className="hidden md:table-cell px-2 text-right">แอ็คชั่น</th>
             </tr>
           </thead>
           <tbody className="">
           <tr className="h-4"></tr>
             {cartItems.length > 0 ? (
               cartItems.map((item) => (
-                <tr className="border-b-2 text-base lg:text-lg " key={item.productId}>
+                <tr className="border-b-2 text-sm md:text-base " key={item.productId}>
                   <td className="cart-data items-center justify-center ">
                     <input
                       type="checkbox"
@@ -106,7 +106,7 @@ export default function CartItem({ initialItems }) {
                       onChange={() => selectItem(item.productId)}
                     />
                   </td>
-                  <td className="cart-data pr-[35px]">              
+                  <td className="cart-data px-2">              
                     {item.imageUrl ? (
                     <Image
                       src={item.imageUrl}
@@ -119,8 +119,32 @@ export default function CartItem({ initialItems }) {
                   ) : (
                     <img className="w-[75px] h-[75px] object-cover rounded-2xl" src="/phulae.jpg" alt="Card Image" />
                   )}</td>
-                  <td className="cart-data">{item.productName || item.product.ProductName} {item.productType || item.product.ProductType}</td>
-                  <td className="cart-data ">{item.productPrice || item.product.Price}</td>
+                  <td className="cart-data px-2">
+                    <div className="md:hidden">
+                      <strong>
+                      {item.farmerName}                        
+                      </strong>
+                    </div>
+                    <div className="hidden md:flex">
+                    <strong>
+                    {item.farmerName}                       
+                    </strong>
+
+                    </div>
+                    <div>        
+                      {item.productName || item.product.ProductName}{item.productType || item.product.ProductType}                            
+
+                    </div>
+                    <div className="md:hidden">
+                      {item.productPrice || item.product.Price} บาท/กก.                     
+                    </div>
+                    <div className="md:hidden">
+                    รวม {item.quantity * (item.productPrice || item.product.Price)} บาท                
+                    </div>
+
+
+                  </td>
+                  <td className="hidden md:table-cell">{item.productPrice || item.product.Price}</td>
                   <td className="cart-data ">
                     <QuantityHandler 
                       productAmount={item.productAmount || item.product.Amount} 
@@ -129,7 +153,7 @@ export default function CartItem({ initialItems }) {
                       onQuantityChange={handleUpdateQuantity} 
                     />
                   </td>
-                  <td className="cart-data ">{item.quantity * (item.productPrice || item.product.Price)}</td>
+                  <td className="cart-data hidden md:table-cell">{item.quantity * (item.productPrice || item.product.Price)}</td>
                   <td className="cart-data text-right ">
                     <div className=" flex justify-end">
                       <button  onClick={() => handleDelete(item.productId)} className=" text-red-500 hover:text-red-800 w-10 h-10">
@@ -161,7 +185,7 @@ export default function CartItem({ initialItems }) {
               {cartItems
                 .filter(item => selectedItems.includes(item.productId))
                 .map((item,index) => (
-                  <div className=" flex justify-between"key={item.productId}>
+                  <div className=" flex justify-between text-base"key={item.productId}>
                   <div className="" key={item.productId}>
                   <span className="mr-2">{index + 1}. </span> 
                     {item.productName || item.product.ProductName}{item.productType || item.product.ProductType}
