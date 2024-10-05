@@ -7,30 +7,26 @@ export default function PaymentPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
-  const [orderIds, setOrderIds] = useState([]);
+  const [orderId, setOrderId] = useState([]);
   const [totalAmount, setTotalAmount] = useState(0);
   const [selectedItems, setSelectedItems] = useState([]);
 
 
   useEffect(() => {
-    // Retrieve the order IDs and selected items from cart from sessionStorage)
-    const storedOrderIds = sessionStorage.getItem('orderIds');
-
+    const storedOrderId = sessionStorage.getItem('orderId'); // Expecting a single order ID now
     const storedItems = localStorage.getItem("selectedItems");
-
-
-    if (!storedOrderIds) {
-      // Redirect to another page if orderIds is not found in local storage
+  
+    if (!storedOrderId) {
       router.push('/');
+      return; // Ensure you exit if no order ID is found
     }
-
-    if (storedOrderIds) {
-      const parsedOrderIds = JSON.parse(storedOrderIds);
-      setOrderIds(parsedOrderIds);
-
-      // Fetch total amount for these order IDs or perform any other operations
-      fetchTotalAmount(parsedOrderIds);
-    }
+  
+    // Parse the order ID
+    const parsedOrderId = JSON.parse(storedOrderId);
+    console.log("order ID", parsedOrderId);
+    setOrderId(parsedOrderId); // Set single order ID
+    fetchTotalAmount(parsedOrderId); // Fetch total amount with the single ID
+  
     if (storedItems) {
       setSelectedItems(JSON.parse(storedItems));
     }
@@ -38,9 +34,9 @@ export default function PaymentPage() {
 
   
 
-  const fetchTotalAmount = async (orderIds) => {
+  const fetchTotalAmount = async (orderId) => {
     try {
-      const res = await fetch(`/api/orders/total-amount?ids=${orderIds.join(',')}`);
+      const res = await fetch(`/api/orders/total-amount?id=${orderId.join(',')}`);
       const data = await res.json();
       setTotalAmount(data.totalAmount);
     } catch (error) {
@@ -49,7 +45,7 @@ export default function PaymentPage() {
     }
   };
 
-  const handlePaymentSuccess = async (orderIds) => {
+  const handlePaymentSuccess = async (orderId) => {
     if (selectedItems.length) {
       setLoading(true);
       try {
@@ -86,11 +82,12 @@ export default function PaymentPage() {
   return (
     <div>
       <h1>Payment Page</h1>
-      {/* Pass the totalAmount and orderIds as props to the PaymentForm */}
-      {orderIds.length > 0 && (
+      {/* Pass the totalAmount and orderId as props to the PaymentForm */}
+      {orderId.length > 0 && (
         <PaymentForm
           totalAmount={totalAmount}
-          orderIds={orderIds}
+          orderId={orderId}
+          selectedItems={selectedItems} // Pass selected items to the PaymentForm
           onPaymentSuccess={handlePaymentSuccess}
         />
       )}

@@ -1,3 +1,4 @@
+// หน้าหลักของproduct-farmer 
 "use client";
 
 import AddProductDialog from "@/app/dashboard/products/add/page";
@@ -5,9 +6,11 @@ import EditProductDialog from "@/app/dashboard/products/edit/[ProductID]/page";
 import Pagination from "@/app/ui/dashboard/pagination/pagination";
 import Search from "@/app/ui/dashboard/search/search";
 import Button from "@mui/material/Button";
+import { useSession } from 'next-auth/react';
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import SortSelect from "@/app/ui/dashboard/sort/dropdown";
 import styles from "@/app/ui/dashboard/products/products.module.css";
 import IconButton from '@mui/material/IconButton';
@@ -17,6 +20,7 @@ import AddBoxIcon from '@mui/icons-material/AddBox';
 import Tooltip from '@mui/material/Tooltip';
 
 const Product = () => {
+
   const searchParams = useSearchParams();
   const { replace } = useRouter();
   const query = searchParams.get("query") || ""; // Get the search query
@@ -26,78 +30,120 @@ const Product = () => {
 
   const [products, setProducts] = useState([]);
   const [totalItems, setTotalItems] = useState(0);
+  const { data: session, status } = useSession()
   const [loading, setLoading] = useState(true);
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [selectedProductId, setSelectedProductId] = useState(null);
+  const router = useRouter()
   const [filter, setFilter] = useState("แสดงทั้งหมด"); // Add state for filtering
 
+
+
+
   const fetchProducts = async (page = 1) => {
-    setLoading(false); // Set loading to true before fetching
+    setLoading(false); // Set loading to true when fetching starts
     try {
-      const response = await fetch(
-        `/api/product/farmer/get?query=${query}&sortOrder=${sortOrder}&page=${page}&pageSize=${pageSize}`
-      );
+      const response = await fetch(`/api/users/${session.user.id}/product/get?query=${query}&sortOrder=${sortOrder}&page=${page}&pageSize=${pageSize}`);
       if (!response.ok) {
-        throw new Error("Network response was not ok");
+        const errorMessage = await response.text();
+        console.error("Error fetching products:", errorMessage);
+        throw new Error(`HTTP error! Status: ${response.status}`);
       }
+
       const data = await response.json();
-      const formattedData = data.products.map((product) => {
-        const firstImage = product.images[0]?.imageUrl || ""; // Get the first image URL
-        return {
-          ...product,
-          Price: formatPrice(product.Price),
-          status: product.Amount === 0 ? "หมดสต็อก" : "มีสินค้า",
-          imageUrl: firstImage, // Use only the first image URL
-        };
-      });
-      setProducts(formattedData);
+
+      // Ensure data structure matches what is expected
+      if (data.products && Array.isArray(data.products)) {
+        const formattedData = data.products.map((product) => {
+          const firstImage = product.images?.[0]?.imageUrl || ""; // Get the first image URL
+          return {
+            ...product,
+            Price: formatPrice(product.Price), // Format the price
+            status: product.Amount === 0 ? "หมดสต็อก" : "มีสินค้า", // Set status based on amount
+            imageUrl: firstImage, // Include the first image URL
+          };
+        });
+
+        setProducts(formattedData); // Set the formatted products
+        setTotalItems(data.totalItems); // Extract totalItems directly from the response
+      } else {
+        console.error("Invalid product data:", data);
+      }
     } catch (error) {
       console.error("Failed to fetch products:", error);
-    } finally {
-
     }
   };
+
+
+
+
 
   const fetchTotalCount = async () => {
     try {
       const response = await fetch(
-        `/api/product/farmer/count?query=${query}&sortOrder=${sortOrder}`
+        `/api/users/${session.user.id}/product/get?query=${query}&sortOrder=${sortOrder}`
       );
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
       const data = await response.json();
-      setTotalItems(data.total);
+
+      // console.log("Total count response:", data); // Log the response
+      setTotalItems(data.totalItems); // Make sure this line corresponds to the correct property
     } catch (error) {
       console.error("Failed to fetch total count:", error);
     }
   };
-  
+
+
+  const filteredProducts = products.filter((product) => {
+    if (filter === "แสดงทั้งหมด") return true;
+    if (filter === "มีสินค้า") return product.status === "มีสินค้า";
+    if (filter === "หมดสต็อก") return product.status === "หมดสต็อก";
+    return false;
+  });
+
+
+  // console.log(`In Stock: ${inStockCount}, Out of Stock: ${outOfStockCount}`);
+
+
 
   useEffect(() => {
-    fetchProducts(page);
-    fetchTotalCount(); // Fetch total count initially
-  }, [query, sortOrder, page]); // Refetch products and total count when query, sort order, or page changes
+    if (status === "unauthenticated") {
+      router.push("/login");
+    }
+
+    if (status === "authenticated" && session?.user?.id) {
+      fetchTotalCount(); // First fetch total count
+      fetchProducts(page); // Then fetch products
+    }
+  }, [query, sortOrder, page, status, session, router]);
+
+
 
   const formatPrice = (Price) => {
     return Price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
 
+
+
   const handleDelete = async (ProductID) => {
     if (window.confirm("Are you sure you want to delete this product?")) {
       try {
-        const response = await fetch(
-          `/api/product/farmer/delete?ProductID=${ProductID}`,
-          {
-            method: "DELETE",
-            headers: { "Content-Type": "application/json" },
-          }
+        const response = await fetch(`/api/users/${session.user.id}/product/${ProductID}/delete`, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json"
+          },
+        }
         );
+
         if (response.ok) {
           // After successful deletion, refetch the products and total count
           fetchProducts(page);
           fetchTotalCount(); // Fetch total count separately
+          setProducts(products.filter((product) => product.ProductID !== ProductID));
         } else {
           alert("Failed to delete product");
         }
@@ -141,38 +187,35 @@ const Product = () => {
 
 
   const handlePageChange = (newPage) => {
-    // Update the URL with the new page number
     const params = new URLSearchParams(searchParams.toString());
     params.set("page", newPage);
+    params.set("query", query);
+    params.set("sortOrder", sortOrder);
     const newUrl = `${window.location.pathname}?${params.toString()}`;
     replace(newUrl);
+    fetchProducts(newPage); // Fetch products for the new page
   };
 
+
   const handleEditProduct = async (ProductID, productData) => {
-    try {
-      const response = await fetch(`/api/product/farmer/put?ProductID=${ProductID}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(productData),
-      });
-      if (response.ok) {
-        alert("Product updated successfully");
-        fetchProducts(page);
-        fetchTotalCount(); // Fetch total count separately
-        handleCloseEditDialog();
-      } else {
-        alert("Failed to update product");
-      }
-    } catch (error) {
-      console.error("Failed to update product:", error);
+    const response = await fetch(`/api/users/${session.user.id}/product/${ProductID}/put`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(productData),
+    });
+
+    if (response.ok) {
+      alert("Product updated successfully");
+      fetchProducts(); // Refetch products after editing
+      fetchTotalCount(); // Fetch total count separately
+      handleCloseEditDialog();
+    } else {
+      alert("Failed to update product");
     }
   };
 
-  // Filter products based on the selected filter
-  const filteredProducts = products.filter((product) => {
-    if (filter === "แสดงทั้งหมด") return true;
-    return product.status === filter;
-  });
 
   if (loading) {
     return <div>Loading...</div>;
@@ -205,21 +248,21 @@ const Product = () => {
       <div className={styles.filterButtons}>
 
         <Button
-          onClick={() => setFilter("แสดงทั้งหมด")}
+          onClick={() => handleFilterChange("แสดงทั้งหมด")}
           variant={filter === "แสดงทั้งหมด" ? "contained" : "outlined"}
           style={{ backgroundColor: filter === "แสดงทั้งหมด" ? "#98de6d" : "#ffffff", color: filter === "แสดงทั้งหมด" ? "black" : "#388e3c" }}
         >
           แสดงทั้งหมด
         </Button>
         <Button
-          onClick={() => setFilter("หมดสต็อก")}
+          onClick={() => handleFilterChange("หมดสต็อก")}
           variant={filter === "หมดสต็อก" ? "contained" : "outlined"}
           style={{ backgroundColor: filter === "หมดสต็อก" ? "#98de6d" : "#ffffff", color: filter === "หมดสต็อก" ? "black" : "#388e3c" }}
         >
           หมดสต็อก
         </Button>
         <Button
-          onClick={() => setFilter("มีสินค้า")}
+          onClick={() => handleFilterChange("มีสินค้า")}
           variant={filter === "มีสินค้า" ? "contained" : "outlined"}
           style={{ backgroundColor: filter === "มีสินค้า" ? "#98de6d" : "#ffffff", color: filter === "มีสินค้า" ? "black" : "#388e3c" }}
         >
@@ -227,6 +270,7 @@ const Product = () => {
         </Button>
         <SortSelect currentSortOrder={sortOrder} />
       </div>
+
 
 
       <table className={styles.table}>
@@ -309,6 +353,7 @@ const Product = () => {
         totalItems={totalItems}
         itemsPerPage={pageSize}
         onPageChange={handlePageChange}
+
       />
 
       <AddProductDialog

@@ -2,7 +2,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-export default function PaymentForm({ totalAmount, orderIds, onPaymentSuccess }) {
+export default function PaymentForm({ totalAmount, orderId, onPaymentSuccess, selectedItems }) {
   const router = useRouter();
   const [cardNumber, setCardNumber] = useState("");
   const [cardName, setCardName] = useState("");
@@ -87,7 +87,7 @@ export default function PaymentForm({ totalAmount, orderIds, onPaymentSuccess })
   // Separate function to handle the payment processing
 const handlePayment = async (token) => {
   try {
-    console.log('Order IDs:', orderIds); // Log order IDs to ensure they are correct
+    console.log('Order IDs:', orderId); // Log order IDs to ensure they are correct
     console.log('Total Amount:', totalAmount); // Log total amount
 
     const res = await fetch('/api/process-payment', {
@@ -97,8 +97,11 @@ const handlePayment = async (token) => {
       },
       body: JSON.stringify({
         token,
-        orderIds,
+        orderId,
         totalAmount,
+              // Assuming you want to send quantities and product IDs as well
+          quantity: selectedItems.map(item => item.quantity),
+          productId: selectedItems.map(item => item.productId),
       }),
     });
 
@@ -106,8 +109,8 @@ const handlePayment = async (token) => {
     console.log('Response from process-payment API:', data); // Log the response from your API
 
     if (data.success) {
-      console.log("order Id:",orderIds);
-      onPaymentSuccess(orderIds);
+      console.log("order Id:",orderId);
+      onPaymentSuccess(orderId);
 
     } else {
       setError(data.message || "Payment failed. Please try again.");

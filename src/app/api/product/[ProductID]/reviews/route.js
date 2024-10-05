@@ -13,6 +13,18 @@ export async function GET(request, { params }) {
   }
 
   try {
+
+    // Find the product and its reviews
+    const product = await prisma.product.findUnique({
+      where: {
+        ProductID: parseInt(ProductID, 10),
+      },
+    });
+
+    if (!product) {
+      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+    }
+
     // Fetch reviews with pagination
     const reviews = await prisma.ratingReview.findMany({
       where: {
@@ -27,6 +39,16 @@ export async function GET(request, { params }) {
       },
     });
 
+        // Calculate the average rating
+        const avgRating = await prisma.ratingReview.aggregate({
+          where: {
+            productId: parseInt(ProductID, 10),
+          },
+          _avg: {
+            rating: true,
+          },
+        });
+
     // Determine if there are more reviews to load
     const hasMoreReviews = reviews.length > take;
     const reviewList = hasMoreReviews ? reviews.slice(0, take) : reviews;
@@ -38,7 +60,11 @@ export async function GET(request, { params }) {
 
 
 
-    return NextResponse.json({ reviews: reviewList, totalReviewsCount }, { status: 200 });
+    return NextResponse.json({ 
+      reviews: reviewList, 
+      totalReviewsCount, 
+      avgRating: avgRating._avg.rating || 0, // Provide a default value of 0 if no reviews
+     }, { status: 200 });
 
   } catch (error) {
     console.error('Error fetching reviews:', error);

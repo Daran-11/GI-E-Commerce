@@ -19,6 +19,7 @@ export default function AddToCartButton({product}) {
           productAmount: productData.Amount,
           Description: productData.Description,
           farmerId: productData.farmerId,
+          imageUrl: productData.imageUrl,
         };
     
         try {
@@ -33,7 +34,7 @@ export default function AddToCartButton({product}) {
   return (
       
         <button 
-        className="w-[100px] h-[35px] text-white bg-[#4eac14] rounded-xl hover:bg-[#316b0c]"
+        className="w-full h-[35px] text-white bg-[#4eac14] rounded-md hover:bg-[#316b0c]"
         onClick={addToCart}>
             เพิ่มในตะกร้า
         </button>

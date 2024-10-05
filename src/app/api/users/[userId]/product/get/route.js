@@ -1,72 +1,64 @@
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
-import prisma from "../../../../../../lib/prisma";
+import prisma from "../../../../../../../lib/prisma";
 
-// Get all products for a specific farmer or a single product by ProductID
+// GET API endpoint to fetch products
 export async function GET(request, { params }) {
     const session = await getServerSession({ request, ...authOptions });
     const { searchParams } = new URL(request.url);
     const ProductID = searchParams.get("ProductID");
-    const { userId } = params;
-
-    // console.log('Session for receiving product info:', session); // Debug session
-    // console.log('User ID:', session?.user?.id); // Debug user ID
+    const userId = Number(params.userId); // Ensure userId is a number
 
     if (!session) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    if (session.user.id !== parseInt(userId) && session.user.role !== "farmer") {
+    // Check if the user is authorized to access the farmer's products
+    if (session.user.id !== userId && session.user.role !== "farmer") {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     const farmer = await prisma.farmer.findUnique({
-        where: { userId: parseInt(userId) }
+        where: { userId }
     });
 
     if (!farmer) {
         return NextResponse.json({ error: 'Farmer profile not found for this user' }, { status: 404 });
     }
 
-    if (ProductID) {
-        // Fetching a single product by ProductID
-        try {
+    try {
+        if (ProductID) {
+            // Fetching a single product by ProductID
             const product = await prisma.product.findUnique({
                 where: {
+                    ProductID: Number(ProductID),
                     isDeleted: false,
-                    ProductID: parseInt(ProductID, 10),
                     farmer: {
-                        userId: parseInt(userId),
+                        userId,
                     },
                 },
                 include: { images: true }, // Include related images
             });
 
-            console.log("Get product Id:", ProductID);
             if (product) {
-                return NextResponse.json(product);
+                return NextResponse.json(product); 
             } else {
                 return NextResponse.json({ error: "Product not found" }, { status: 404 });
             }
-        } catch (error) {
-            console.error("Error fetching product:", error);
-            return NextResponse.json({ error: "Error fetching product" }, { status: 500 });
-        }
-    } else {
-        // Fetching products with optional search query, sort order, and pagination
-        const query = searchParams.get("query") || ""; // Get the search query
-        const sortOrder = searchParams.get("sortOrder") || "asc"; // Sort order (default to ascending)
-        const page = parseInt(searchParams.get("page")) || 1; // Current page
-        const pageSize = parseInt(searchParams.get("pageSize")) || 10; // Number of items per page
+        } else {
+            // Fetching products with search, sorting, and pagination
+            const query = searchParams.get("query") || ""; // Search query
+            const sortOrder = searchParams.get("sortOrder") || "asc"; // Sort order (default: ascending)
+            const page = Math.max(1, Number(searchParams.get("page")) || 1); // Ensure page is at least 1
+            const pageSize = Math.min(Math.max(1, Number(searchParams.get("pageSize")) || 10), 100); // Limit pageSize to max of 100
 
-        try {
-            const [products, total] = await Promise.all([
+            const [products, totalItems] = await Promise.all([
                 prisma.product.findMany({
                     where: {
                         isDeleted: false,
                         farmer: {
-                            userId: parseInt(userId),
+                            userId,
                         },
                         OR: [
                             {
@@ -82,17 +74,17 @@ export async function GET(request, { params }) {
                         ],
                     },
                     orderBy: {
-                        DateCreated: sortOrder, // Sort based on creation date
+                        DateCreated: sortOrder, // Sort by creation date
                     },
-                    skip: (page - 1) * pageSize, // Offset for pagination
-                    take: pageSize, // Limit the number of items per page
+                    skip: (page - 1) * pageSize, // Pagination: Skip items
+                    take: pageSize, // Pagination: Limit items per page
                     include: { images: true }, // Include related images
                 }),
                 prisma.product.count({
                     where: {
                         isDeleted: false,
                         farmer: {
-                            userId: parseInt(userId),
+                            userId,
                         },
                         OR: [
                             {
@@ -110,10 +102,10 @@ export async function GET(request, { params }) {
                 }),
             ]);
 
-            return NextResponse.json({ products, total });
-        } catch (error) {
-            console.error("Error fetching products:", error);
-            return NextResponse.json({ error: "Error fetching products" }, { status: 500 });
+            return NextResponse.json({ products, totalItems }); // Return products directly
         }
+    } catch (error) {
+        console.error("Error fetching products:", error);
+        return NextResponse.json({ error: "Error fetching products: " + error.message }, { status: 500 });
     }
 }

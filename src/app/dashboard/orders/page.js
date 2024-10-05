@@ -32,11 +32,12 @@ const Product = () => {
   const [selectedProductId, setSelectedProductId] = useState(null);
   const [filter, setFilter] = useState("แสดงทั้งหมด"); // Add state for filtering
 
-  const fetchProducts = async (page = 1) => {
-    setLoading(false); // Set loading to true before fetching
+  // Fetch products based on query, sort order, and page
+  const fetchProducts = async (currentPage = page) => {
+    setLoading(true); // Set loading to true before fetching
     try {
       const response = await fetch(
-        `/api/product/farmer/get?query=${query}&sortOrder=${sortOrder}&page=${page}&pageSize=${pageSize}`
+        `/api/product/farmer/get?query=${query}&sortOrder=${sortOrder}&page=${currentPage}&pageSize=${pageSize}`
       );
       if (!response.ok) {
         throw new Error("Network response was not ok");
@@ -55,7 +56,7 @@ const Product = () => {
     } catch (error) {
       console.error("Failed to fetch products:", error);
     } finally {
-
+      setLoading(false); // Set loading to false after fetching
     }
   };
 
@@ -68,35 +69,39 @@ const Product = () => {
         throw new Error("Network response was not ok");
       }
       const data = await response.json();
+      console.log("Total Products Count:", data.total); // Debugging line
       setTotalItems(data.total);
     } catch (error) {
       console.error("Failed to fetch total count:", error);
     }
   };
+  
 
+  // Effect to fetch products and total count on params change
   useEffect(() => {
-    fetchProducts(page);
+    fetchProducts(page); // Fetch products based on the current page
     fetchTotalCount(); // Fetch total count initially
   }, [query, sortOrder, page]); // Refetch products and total count when query, sort order, or page changes
 
-  const formatPrice = (Price) => {
-    return Price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  // Format price with commas
+  const formatPrice = (price) => {
+    return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
 
-  const handleDelete = async (ProductID) => {
+  // Handle product deletion
+  const handleDelete = async (productId) => {
     if (window.confirm("Are you sure you want to delete this product?")) {
       try {
         const response = await fetch(
-          `/api/product/farmer/delete?ProductID=${ProductID}`,
+          `/api/product/farmer/delete?ProductID=${productId}`,
           {
             method: "DELETE",
             headers: { "Content-Type": "application/json" },
           }
         );
         if (response.ok) {
-          // After successful deletion, refetch the products and total count
-          fetchProducts(page);
-          fetchTotalCount(); // Fetch total count separately
+          fetchProducts(page); // Refresh product list after deletion
+          fetchTotalCount(); // Refresh total count after deletion
         } else {
           alert("Failed to delete product");
         }
@@ -106,19 +111,19 @@ const Product = () => {
     }
   };
 
+  // Handlers for opening/closing dialogs
   const handleOpenAddDialog = () => setOpenAddDialog(true);
   const handleCloseAddDialog = () => setOpenAddDialog(false);
-
-  const handleOpenEditDialog = (ProductID) => {
-    setSelectedProductId(ProductID);
+  const handleOpenEditDialog = (productId) => {
+    setSelectedProductId(productId);
     setOpenEditDialog(true);
   };
-
   const handleCloseEditDialog = () => {
     setSelectedProductId(null);
     setOpenEditDialog(false);
   };
 
+  // Handle adding a new product
   const handleAddProduct = async (productData) => {
     const formData = new FormData();
     formData.append("plotCode", productData.plotCode);
@@ -132,32 +137,35 @@ const Product = () => {
     }
 
     alert("Product added successfully");
-    fetchProducts(page);
-    fetchTotalCount(); // Fetch total count separately
+    fetchProducts(page); // Refresh product list after adding
+    fetchTotalCount(); // Refresh total count after adding
     handleCloseAddDialog();
   };
 
-
-
   const handlePageChange = (newPage) => {
-    // Update the URL with the new page number
+    if (newPage > Math.ceil(totalItems / pageSize)) {
+      newPage = Math.ceil(totalItems / pageSize); // Reset to last page if out of bounds
+    }
     const params = new URLSearchParams(searchParams.toString());
     params.set("page", newPage);
     const newUrl = `${window.location.pathname}?${params.toString()}`;
-    replace(newUrl);
+    replace(newUrl); // Update URL with new page number
+    fetchProducts(newPage); // Fetch products for the new page
   };
+  
 
-  const handleEditProduct = async (ProductID, productData) => {
+  // Handle editing a product
+  const handleEditProduct = async (productId, productData) => {
     try {
-      const response = await fetch(`/api/product/farmer/put?ProductID=${ProductID}`, {
+      const response = await fetch(`/api/product/farmer/put?ProductID=${productId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(productData),
       });
       if (response.ok) {
         alert("Product updated successfully");
-        fetchProducts(page);
-        fetchTotalCount(); // Fetch total count separately
+        fetchProducts(page); // Refresh product list after updating
+        fetchTotalCount(); // Refresh total count after updating
         handleCloseEditDialog();
       } else {
         alert("Failed to update product");
@@ -174,59 +182,45 @@ const Product = () => {
   });
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <div>Loading...</div>; // Loading state
   }
 
   return (
     <div className={styles.container}>
       <div className={styles.top}>
         <Search placeholder="ค้นหาสินค้า..." />
-
-        <Tooltip
-          title="เพิ่มสินค้า"
-          arrow
-          sx={{
-            typography: 'body2',
-            fontSize: '2rem', // Adjust the font size as needed
-            '.MuiTooltip-tooltip': {
-              fontSize: '2rem', // Ensure this is correct
-            },
-          }}
-        >
-          <IconButton aria-label="add" variant="contained" onClick={handleOpenAddDialog} size="large">
+        <Tooltip title="เพิ่มสินค้า" arrow>
+          <IconButton
+            aria-label="add"
+            onClick={handleOpenAddDialog}
+            size="large"
+          >
             <AddBoxIcon fontSize="inherit" style={{ color: "#388e3c" }} />
           </IconButton>
         </Tooltip>
-
-
       </div>
 
       <div className={styles.filterButtons}>
-
         <Button
           onClick={() => setFilter("แสดงทั้งหมด")}
           variant={filter === "แสดงทั้งหมด" ? "contained" : "outlined"}
-          style={{ backgroundColor: filter === "แสดงทั้งหมด" ? "#98de6d" : "#ffffff", color: filter === "แสดงทั้งหมด" ? "black" : "#388e3c" }}
         >
           แสดงทั้งหมด
         </Button>
         <Button
           onClick={() => setFilter("หมดสต็อก")}
           variant={filter === "หมดสต็อก" ? "contained" : "outlined"}
-          style={{ backgroundColor: filter === "หมดสต็อก" ? "#98de6d" : "#ffffff", color: filter === "หมดสต็อก" ? "black" : "#388e3c" }}
         >
           หมดสต็อก
         </Button>
         <Button
           onClick={() => setFilter("มีสินค้า")}
           variant={filter === "มีสินค้า" ? "contained" : "outlined"}
-          style={{ backgroundColor: filter === "มีสินค้า" ? "#98de6d" : "#ffffff", color: filter === "มีสินค้า" ? "black" : "#388e3c" }}
         >
           มีสินค้า
         </Button>
         <SortSelect currentSortOrder={sortOrder} />
       </div>
-
 
       <table className={styles.table}>
         <thead>
@@ -238,91 +232,67 @@ const Product = () => {
             <td>ราคา</td>
             <td>จำนวน</td>
             <td>สถานะ</td>
-            <td>รูปภาพ</td>
-            <td>Actions</td>
+            <td>จัดการ</td>
           </tr>
         </thead>
         <tbody>
-          {filteredProducts.length > 0 ? (
-            filteredProducts.map((product) => (
-              <tr key={product.ProductID}>
-                <td>{product.ProductID}</td>
-                <td>{product.plotCode}</td>
-                <td>{product.ProductName}</td>
-                <td>{product.ProductType}</td>
-                <td>{product.Price}</td>
-                <td>{product.Amount}</td>
-                <td>
-                  <span
-                    className={`${styles.status} ${styles[product.status.replace(/ /g, "-")]
-                      }`}
-                  >
-                    {product.status}
-                  </span>
-                </td>
-                <td>
-                  {product.imageUrl ? (
-                    <Image
-                      src={product.imageUrl}
-                      alt={product.ProductName}
-                      width={200} // Adjust width as needed
-                      height={200} // Adjust height as needed
-                      style={{
-                        objectFit: "cover",
-                        marginTop: "10px",
-                      }}
-                    />
-                  ) : (
-                    "No image"
-                  )}
-                </td>
-                <td>
-                  <div className={styles.buttons}>
-                    <Tooltip title="แก้ไขสินค้า"
-                      arrow>
-                      <IconButton aria-label="edit" color="success" variant="contained" onClick={() => handleOpenEditDialog(product.ProductID)} size="large">
-                        <EditIcon fontSize="inherit" />
-                      </IconButton>
-                    </Tooltip>
-
-                    <Tooltip title="ลบสินค้า"
-                      arrow>
-                      <IconButton aria-label="delete" color="error" variant="contained" onClick={() => handleDelete(product.ProductID)} size="large">
-                        <DeleteIcon fontSize="inherit" />
-                      </IconButton>
-                    </Tooltip>
-                  </div>
-                </td>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan={9}>No products available</td>
+          {filteredProducts.map((product) => (
+            <tr key={product.ProductID}>
+              <td>{product.ProductID}</td>
+              <td>{product.plotCode}</td>
+              <td>
+                <Image
+                  src={product.imageUrl}
+                  alt={product.ProductName}
+                  width={50}
+                  height={50}
+                  style={{ objectFit: "cover" }}
+                />
+                {product.ProductName}
+              </td>
+              <td>{product.ProductType}</td>
+              <td>{product.Price}</td>
+              <td>{product.Amount}</td>
+              <td>{product.status}</td>
+              <td>
+                <IconButton
+                  aria-label="edit"
+                  onClick={() => handleOpenEditDialog(product.ProductID)}
+                  size="large"
+                >
+                  <EditIcon fontSize="inherit" />
+                </IconButton>
+                <IconButton
+                  aria-label="delete"
+                  onClick={() => handleDelete(product.ProductID)}
+                  size="large"
+                >
+                  <DeleteIcon fontSize="inherit" />
+                </IconButton>
+              </td>
             </tr>
-          )}
+          ))}
         </tbody>
       </table>
 
       <Pagination
-        currentPage={page}
-        totalItems={totalItems}
-        itemsPerPage={pageSize}
+        page={page}
+        count={Math.ceil(totalItems / pageSize)}
         onPageChange={handlePageChange}
       />
 
-      <AddProductDialog
-        open={openAddDialog}
-        onClose={handleCloseAddDialog}
-        onAddProduct={handleAddProduct}
-      />
+      {openAddDialog && (
+        <AddProductDialog
+          onClose={handleCloseAddDialog}
+          onAddProduct={handleAddProduct}
+        />
+      )}
 
-      {selectedProductId && (
+      {openEditDialog && (
         <EditProductDialog
-          open={openEditDialog}
+          productId={selectedProductId}
           onClose={handleCloseEditDialog}
           onEditProduct={handleEditProduct}
-          ProductID={selectedProductId}
-          onSuccess={fetchProducts}
         />
       )}
     </div>
