@@ -117,7 +117,7 @@ export default function CheckoutClient({ userId }) {
       <div className="bg-white w-full h-fit p-5 rounded-xl mt-5 text-[#535353]">
         <h2 className="text-2xl mb-2 ">สรุปสินค้า</h2>
 
-          <table className="w-full">
+        <table className="w-full">
           <thead>
             <tr className="text-base lg:text-xl  text-start">
               <th className="w-[200px]  text-start">สินค้า</th>
@@ -127,32 +127,37 @@ export default function CheckoutClient({ userId }) {
             </tr>
           </thead>
           <tbody className="text-base lg:text-lg">
-          <tr className="h-4"></tr>
-          {selectedItems.map((item,index )=> (
-            <tr className="">
-              <td className="pb-[5px]">{index + 1}.{item.productName || item.product.ProductName}{item.productType || item.product.ProductType}</td>
-              <td className="pb-[5px]">{item.quantity} กิโลกรัม</td>
-              <td className="pb-[5px]">{item.productPrice || item.product.Price} บาท</td>
-              <td className="pb-[5px] text-right">{(item.productPrice || item.product.Price) * item.quantity} บาท</td>
-            </tr>
-                    ))}
+            <tr className="h-4"></tr>
+            {selectedItems.map((item, index) => (
+              <tr key={item.productId || index} className="">
+                <td className="pb-[5px]">
+                  {index + 1}. {item.productName || item.product?.ProductName}{' '}
+                  {item.productType || item.product?.ProductType}
+                </td>
+                <td className="pb-[5px]">{item.quantity} กิโลกรัม</td>
+                <td className="pb-[5px]">{item.productPrice || item.product?.Price} บาท</td>
+                <td className="pb-[5px] text-right">
+                  {(item.productPrice || item.product?.Price) * item.quantity} บาท
+                </td>
+              </tr>
+            ))}
           </tbody>
           <tfoot className="  ">
-                <tr className="text-base lg:text-xl  border-t-2 ">
-                  <td colSpan="3" className="text-right font-bold pr-2 pt-2">รวมทั้งหมด  :</td>
-                  <td className="text-right font-semibold pt-2">
-                    {
-                      selectedItems.reduce((total, item) => 
-                        total + ((item.productPrice || item.product.Price) * item.quantity), 
-                        0
-                      ).toFixed(2)
-                    } บาท
-                  </td>
-                </tr>
-              </tfoot>
+            <tr className="text-base lg:text-xl  border-t-2 ">
+              <td colSpan="3" className="text-right font-bold pr-2 pt-2">รวมทั้งหมด  :</td>
+              <td className="text-right font-semibold pt-2">
+                {
+                  selectedItems.reduce((total, item) =>
+                    total + ((item.productPrice || item.product.Price) * item.quantity),
+                    0
+                  ).toFixed(2)
+                } บาท
+              </td>
+            </tr>
+          </tfoot>
         </table>
 
-        
+
       </div>
 
 

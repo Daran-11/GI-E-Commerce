@@ -1,33 +1,33 @@
-// ตัวform/model ไว้แก้ไขข้อมูลในหน้productของfarmer
-'use client' 
+// completed
+"use client";
+import { useState, useCallback, useEffect } from "react";
+import { useForm, Controller } from "react-hook-form";
 import {
-  Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  FormControl,
-  Grid,
-  InputLabel,
-  MenuItem,
-  Paper,
-  Select,
-  styled,
+  Button,
   TextField,
+  Grid,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  styled,
+  Paper,
 } from "@mui/material";
-import Image from 'next/image';
-import { useCallback, useEffect, useState } from "react";
+import Image from "next/image";
+import { useSession } from "next-auth/react";
 
-import { useSession } from 'next-auth/react';
-
-// Styled Paper component
 const CustomPaper = styled(Paper)(({ theme }) => ({
   borderRadius: "16px",
   padding: theme.spacing(3),
   backgroundColor: "#f5f5f5",
   display: "flex",
   flexDirection: "column",
-  height: "auto",
+  width: "1600px",
+  height: "750px",
 }));
 
 const DropZone = styled("div")(({ theme }) => ({
@@ -38,125 +38,161 @@ const DropZone = styled("div")(({ theme }) => ({
   cursor: "pointer",
   backgroundColor: "#f5f5f5",
   marginTop: theme.spacing(2),
+  marginTop: theme.spacing(2),
 }));
 
-const EditProductDialog = ({open,onClose ,ProductID,onSuccess,}) => {
-  const { data: session, status } = useSession()
-  
-  const [formData, setFormData] = useState({
-    plotCode: "",
-    ProductName: "",
-    ProductType: "",
-    Price: "",
-    Cost: "",
-    Amount: "",
-    status: "",
-    Description: "",
-    imageUrl: null, // File input for image
+const EditProductDialog = ({ open, onClose, ProductID, onSuccess }) => {
+  const { control, handleSubmit, reset, formState: { errors } } = useForm({
+    defaultValues: {
+      plotCode: "",
+      ProductName: "",
+      ProductType: "",
+      Price: "",
+      Cost: "",
+      Amount: "",
+      status: "",
+      Description: "",
+    },
   });
 
-  const [imagePreview, setImagePreview] = useState(null); // Image preview state
+  const [imagePreviews, setImagePreviews] = useState([]);
+  const [imagesToDelete, setImagesToDelete] = useState([]);
+  const [initialImages, setInitialImages] = useState([]);
+  const { data: session, status } = useSession();
 
+
+  
   useEffect(() => {
     const fetchProduct = async () => {
+      if (!session) {
+        console.warn("Session is not available yet.");
+        return;
+      }
+  
+      if (!ProductID) {
+        console.warn("ProductID is not available.");
+        return;
+      }
+  
       try {
-        console.log(`Fetching product with ID: ${ProductID}`); // Debugging line
+        console.log(`Fetching product with ID: ${ProductID}`);
         const response = await fetch(`/api/users/${session.user.id}/product/get?ProductID=${ProductID}`);
-        if (response.ok) {
-          
-          const data = await response.json();
-          
-          setFormData({
-            plotCode: data.plotCode || "",
-            ProductName: data.ProductName || "",
-            ProductType: data.ProductType || "",
-            Price: parseFloat(data.Price).toFixed(2) || "",
-            Cost: parseInt(data.Cost) || "",
-            Amount: data.Amount || "",
-            status: data.status || "",
-            Description: data.Description || "",
-            imageUrl: data.imageUrl || null, // Fetch and set the existing image URL
-          });
-          if (data.imageUrl) {
-            setImagePreview(data.imageUrl); // Set image preview URL
-          }
-        } else {
-          const errorData = await response.text(); // Changed to text() to inspect raw response
-          console.error("Error fetching product:", errorData);
-          alert("Failed to fetch product in edit page");
+  
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("Error fetching product:", errorText);
+          alert("Failed to fetch product data. Please try again.");
+          return;
         }
+  
+        const data = await response.json();
+        console.log("Fetched product data:", data);
+  
+        // Reset the form with fetched data
+        reset({
+          plotCode: data.plotCode || "",
+          ProductName: data.ProductName || "",
+          ProductType: data.ProductType || "",
+          Price: data.Price ? parseFloat(data.Price).toFixed(2) : "",
+          Cost: data.Cost || "",
+          Amount: data.Amount || "",
+          status: data.status || "",
+          Description: data.Description || "",
+        });
+  
+        // Set initial images and previews if available
+        const imageUrls = Array.isArray(data.images) ? data.images.map(img => img.imageUrl) : [];
+        setInitialImages(imageUrls);
+        setImagePreviews(imageUrls);
+  
       } catch (error) {
-        console.error("Failed to fetch product:", error);
+        console.error("Error occurred while fetching product:", error);
         alert("An error occurred while fetching the product data.");
       }
     };
-
+  
     if (ProductID) {
       fetchProduct();
     }
-  }, [ProductID]);
-
-
-  //งดใช้ฟังชั่นนี้พังครับอ้าย เวลาพิม 2,000 บาท มันคิดเป็น 2 บาท เว็บเจ๊งแน่ครับอ้าย
-  const formatPrice = (value) => {
-    // Remove any non-numeric characters except for digits
-    const cleanValue = value.replace(/[^0-9]/g, "");
+  }, [ProductID, reset, session]);
   
-    // Add commas for every thousand
-    const formattedValue = cleanValue.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   
-    return formattedValue;
-  };
+  
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-
-      setFormData((prev) => ({ ...prev, [name]: value }));
-    
-  };
-
-  const handleFileChange = (file) => {
-    if (file) {
-      setFormData((prev) => ({ ...prev, imageUrl: file }));
-
-      // Create a preview URL using FileReader
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result); // Set image preview URL
-      };
-      reader.readAsDataURL(file); // Read the file as a data URL
-    }
+  const handleFileChange = (files) => {
+    const fileArray = Array.from(files);
+    const imageUrls = fileArray.map(file => URL.createObjectURL(file));
+    setImagePreviews(prev => [...prev, ...fileArray]);
   };
 
   const handleDragOver = (e) => {
-    e.preventDefault(); // Prevent default drag behavior
-    e.stopPropagation(); // Stop event from propagating
+    e.preventDefault();
+    e.stopPropagation();
+    e.dataTransfer.dropEffect = "copy";
   };
 
   const handleDrop = (e) => {
-    e.preventDefault(); // Prevent default drop behavior
-    e.stopPropagation(); // Stop event from propagating
-    const file = e.dataTransfer.files[0];
-    handleFileChange(file); // Handle file change through drag-and-drop
+    e.preventDefault();
+    e.stopPropagation();
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      handleFileChange(files);
+    }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleInputFileChange = (e) => {
+    const files = e.target.files;
+    if (files.length > 0) {
+      handleFileChange(files);
+    }
+  };
+
+  const handleImageRemove = (index) => {
+    const imageToRemove = imagePreviews[index];
+    setImagePreviews(prev => prev.filter((_, i) => i !== index));
+
+    if (initialImages.includes(imageToRemove)) {
+      // Mark the image for deletion
+      setImagesToDelete(prev => [...prev, imageToRemove]);
+    }
+  };
+
+  const onSubmit = async (data) => {
+    const userConfirmed = window.confirm("คุณแน่ใจหรือว่าต้องการอัปเดตสินค้านี้?");
+  
+    if (!userConfirmed) {
+      return;
+    }
+  
+    const formattedData = {
+      ...data,
+      Price: parseFloat(data.Price.replace(/,/g, "")).toFixed(2),
+    };
   
     const formDataToSend = new FormData();
     formDataToSend.append("ProductID", ProductID);
-    formDataToSend.append("plotCode", formData.plotCode);
-    formDataToSend.append("ProductName", formData.ProductName);
-    formDataToSend.append("ProductType", formData.ProductType);
-    formDataToSend.append("Price", formData.Price);
-    formDataToSend.append("Cost", formData.Cost);
-    formDataToSend.append("Amount", formData.Amount);
-    formDataToSend.append("status", formData.status);
-    formDataToSend.append("Description", formData.Description);
+    formDataToSend.append("plotCode", formattedData.plotCode);
+    formDataToSend.append("ProductName", formattedData.ProductName);
+    formDataToSend.append("ProductType", formattedData.ProductType);
+    formDataToSend.append("Price", formattedData.Price);
+    formDataToSend.append("Cost", formattedData.Cost);
+    formDataToSend.append("Amount", formattedData.Amount);
+    formDataToSend.append("status", formattedData.status);
+    formDataToSend.append("Description", formattedData.Description);
   
-    if (formData.imageUrl) {
-      formDataToSend.append("imageUrl", formData.imageUrl);
-    }
+    // Append new image files
+    imagePreviews.forEach((file) => {
+      if (file instanceof File) {
+        formDataToSend.append("images", file);
+      }
+    });
+  
+    // Append images to delete
+    imagesToDelete.forEach((imageUrl) => {
+      formDataToSend.append("imagesToDelete", imageUrl);
+    });
+  
+    console.log("Submitting form data:", formDataToSend);
   
     try {
       const response = await fetch(`/api/users/${session.user.id}/product/${ProductID}/put`, {
@@ -164,187 +200,260 @@ const EditProductDialog = ({open,onClose ,ProductID,onSuccess,}) => {
         body: formDataToSend,
       });
   
-      if (response.ok) {
-        const updatedProduct = await response.json();
-        alert("Product updated successfully");
-        handleClose();
-        if (onSuccess) onSuccess(); // Notify parent component of success
-      } else {
-        const errorData = await response.json();
-        alert(`Failed to update product: ${errorData.error}`);
+      if (!response.ok) {
+        const errorData = await response.text();
+        console.error("Error updating product:", errorData);
+        throw new Error("Error updating product");
       }
+  
+      const result = await response.json();
+      await onSuccess();
+      handleClose();
     } catch (error) {
-      console.error("Failed to submit data:", error);
+      console.error("Failed to update product:", error);
+      alert("Failed to update product: " + error.message);
     }
   };
 
   const handleClose = useCallback(() => {
-    setFormData({
+    reset({
       plotCode: "",
       ProductName: "",
       ProductType: "",
       Price: "",
+      Cost: "",
       Amount: "",
       status: "",
       Description: "",
-      imageUrl: null,
     });
-    setImagePreview(null); // Clear the image preview
+    setImagePreviews([]);
+    setImagesToDelete([]);
+    setInitialImages([]);
     onClose();
-  }, [onClose]);
+  }, [reset, onClose]);
 
   return (
-    <Dialog open={open} onClose={handleClose} PaperComponent={CustomPaper}>
+    <Dialog open={open} onClose={handleClose} PaperComponent={CustomPaper} maxWidth="lg">
       <DialogTitle>แก้ไขสินค้า</DialogTitle>
       <DialogContent>
-        <form onSubmit={handleSubmit}>
-          <Grid container spacing={2} marginTop={0}>
-            <Grid item xs={12}>
-              <TextField
-                name="plotCode"
-                label="รหัสแปลงปลูก"
-                variant="outlined"
-                fullWidth
-                value={formData.plotCode}
-                onChange={handleChange}
-                required
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                name="ProductName"
-                label="ชื่อสินค้า"
-                variant="outlined"
-                fullWidth
-                value={formData.ProductName}
-                onChange={handleChange}
-                required
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                name="ProductType"
-                label="ประเภทสินค้า"
-                variant="outlined"
-                fullWidth
-                value={formData.ProductType}
-                onChange={handleChange}
-                required
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                name="Price"
-                label="ราคา"
-                variant="outlined"
-                fullWidth
-                value={formData.Price}
-                onChange={handleChange}
-                required
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                name="Cost"
-                label="ต้นทุน"
-                variant="outlined"
-                fullWidth
-                value={formData.Cost}
-                onChange={handleChange}
-                required
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                name="Amount"
-                label="จำนวน"
-                variant="outlined"
-                type="number"
-                fullWidth
-                value={formData.Amount}
-                onChange={handleChange}
-                required
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <FormControl fullWidth variant="outlined" required>
-                <InputLabel>สถานะ</InputLabel>
-                <Select
-                  name="status"
-                  value={formData.status}
-                  onChange={handleChange}
-                  label="สถานะ"
-                >
-                  <MenuItem value="Available">Available</MenuItem>
-                  <MenuItem value="Out of Stock">Out of Stock</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                name="Description"
-                label="รายละเอียดสินค้า"
-                variant="outlined"
-                fullWidth
-                multiline
-                rows={4}
-                value={formData.Description}
-                onChange={handleChange}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <div
-                style={{
-                  border: "2px dashed #ccc",
-                  borderRadius: "4px",
-                  padding: "20px",
-                  textAlign: "center",
-                  cursor: "pointer",
-                  backgroundColor: "#fafafa",
-                }}
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={7}>
+              <DropZone
                 onDragOver={handleDragOver}
                 onDrop={handleDrop}
-                onClick={() => document.getElementById('fileInput').click()}
+                onClick={() => document.getElementById("fileInput").click()}
               >
                 <input
-                  id="fileInput" // Added ID
                   type="file"
+                  id="fileInput"
                   hidden
-                  onChange={(e) => handleFileChange(e.target.files[0])}
+                  multiple
+                  onChange={handleInputFileChange}
                 />
                 <p>ลากและวางรูปภาพที่นี่ หรือคลิกเพื่อเลือกไฟล์</p>
-              </div>
-            </Grid>
-            <Grid item xs={12}>
-                {imagePreview && (
-                  <div style={{ position: 'relative', width: '100%', height: 'auto', marginTop: '10px' }}>
+              </DropZone>
+
+              <Grid container spacing={2} style={{ marginTop: "10px" }}>
+                {imagePreviews.map((image, index) => (
+                  <Grid
+                    item
+                    key={index}
+                    xs={12}
+                    sm={imagePreviews.length === 1 ? 12 : 6}  // Full width if only 1 image, half width otherwise
+                    style={{ position: "relative" }}
+                  >
                     <Image
-                      src={imagePreview}
+                      src={image instanceof File ? URL.createObjectURL(image) : image}
                       alt="Image Preview"
                       layout="responsive"
-                      width={800} // Adjust the width as needed
-                      height={600} // Adjust the height as needed
+                      width={imagePreviews.length === 1 ? 800 : 400}  // Wider if only 1 image
+                      height={imagePreviews.length === 1 ? 600 : 300}  // Taller if only 1 image
                       objectFit="cover"
                     />
-                  </div>
-              )}
+                    <Button
+                      onClick={() => handleImageRemove(index)}
+                      style={{
+                        position: "absolute",
+                        top: 0,
+                        right: 0,
+                        backgroundColor: "rgba(0, 0, 0, 0.5)",
+                        color: "white",
+                        borderRadius: "50%",
+                        width: "30px",
+                        height: "30px",
+                        minWidth: "unset",
+                        padding: 0,
+                        fontSize: "18px",
+                        lineHeight: "30px",
+                        cursor: "pointer",
+                      }}
+                    >
+                      X
+                    </Button>
+                  </Grid>
+                ))}
+              </Grid>
             </Grid>
-            <Grid item xs={12}>
-              <Button
-                type="submit"
-                variant="contained"
-                color="primary"
-                fullWidth
-              >
-                แก้ไขสินค้า
-              </Button>
+
+            <Grid item xs={12} sm={5}>
+              <Grid container spacing={2} paddingTop={2}>
+                <Grid item xs={12}>
+                  <Controller
+                    name="plotCode"
+                    control={control}
+                    rules={{ required: "รหัสแปลงปลูก is required" }}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        label="รหัสแปลงปลูก"
+                        variant="outlined"
+                        fullWidth
+                        error={!!errors.plotCode}
+                        helperText={errors.plotCode?.message}
+                      />
+                    )}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <Controller
+                    name="ProductName"
+                    control={control}
+                    rules={{ required: "ชื่อสินค้า is required" }}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        label="ชื่อสินค้า"
+                        variant="outlined"
+                        fullWidth
+                        error={!!errors.ProductName}
+                        helperText={errors.ProductName?.message}
+                      />
+                    )}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <FormControl fullWidth>
+                    <InputLabel>ประเภทสินค้า</InputLabel>
+                    <Controller
+                      name="ProductType"
+                      control={control}
+                      render={({ field }) => (
+                        <Select {...field} label="ประเภทสินค้า">
+                          <MenuItem value="นางแล">นางแล</MenuItem>
+                          <MenuItem value="ภูแล">ภูแล</MenuItem>
+                        </Select>
+                      )}
+                    />
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Controller
+                    name="Cost"
+                    control={control}
+                    rules={{ required: "ต้นทุน is required" }}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        label="ต้นทุน"
+                        variant="outlined"
+                        fullWidth
+                        error={!!errors.Cost}
+                        helperText={errors.Cost?.message}
+                        onChange={(e) => {
+                          const formattedCost = e.target.value.replace(/[^0-9]/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                          field.onChange(formattedCost);
+                        }}
+                      />
+                    )}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Controller
+                    name="Price"
+                    control={control}
+                    rules={{ required: "ราคา is required" }}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        label="ราคา"
+                        variant="outlined"
+                        fullWidth
+                        error={!!errors.Price}
+                        helperText={errors.Price?.message}
+                        onChange={(e) => {
+                          const formattedPrice = e.target.value.replace(/[^0-9]/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                          field.onChange(formattedPrice);
+                        }}
+                      />
+                    )}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Controller
+                    name="Amount"
+                    control={control}
+                    rules={{
+                      required: "จำนวน is required",
+                      pattern: {
+                        value: /^\d+$/,
+                        message: "จำนวน must be a valid integer",
+                      },
+                    }}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        label="จำนวน"
+                        variant="outlined"
+                        fullWidth
+                        type="number"
+                        inputProps={{ min: "0", step: "1" }}
+                        error={!!errors.Amount}
+                        helperText={errors.Amount?.message}
+                      />
+                    )}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <FormControl fullWidth>
+                    <InputLabel>สถานะสินค้า</InputLabel>
+                    <Controller
+                      name="status"
+                      control={control}
+                      render={({ field }) => (
+                        <Select {...field} label="สถานะสินค้า">
+                          <MenuItem value="มีสินค้า">มีสินค้า</MenuItem>
+                          <MenuItem value="หมดสต็อก">หมดสต็อก</MenuItem>
+                        </Select>
+                      )}
+                    />
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12}>
+                  <Controller
+                    name="Description"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        label="คำอธิบาย"
+                        variant="outlined"
+                        fullWidth
+                        multiline
+                        rows={4}
+                      />
+                    )}
+                  />
+                </Grid>
+              </Grid>
             </Grid>
           </Grid>
         </form>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose} color="primary">
-          Cancel
+        <Button onClick={handleClose} color="error" variant="contained">ยกเลิก</Button>
+        <Button onClick={handleSubmit(onSubmit)} color="success" variant="contained">
+          อัปเดตสินค้า
         </Button>
       </DialogActions>
     </Dialog>

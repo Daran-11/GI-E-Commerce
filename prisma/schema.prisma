@@ -32,29 +32,33 @@ model BankAccount {
 }
 
 model Product {
-  ProductID   Int      @id @unique(map: "ProductID") @default(autoincrement())
+  ProductID   Int            @id @unique(map: "ProductID") @default(autoincrement())
   farmerId    Int
   plotCode    String
-  ProductName String   @db.VarChar(11)
-  ProductType String   @db.VarChar(11)
-  Description String?  @db.VarChar(200)
-  Price       Int      @db.SmallInt     // ราคาขาย
-  Cost        Int      @db.SmallInt     // ราคาต้นทุน
-  Amount      Int      @db.MediumInt
+  ProductName String          @db.VarChar(11)
+  ProductType String          @db.VarChar(11)
+  Description String?         @db.VarChar(200)
+  Price       Int             @db.SmallInt // ราคาขาย
+  Cost        Int             @db.SmallInt // ราคาต้นทุน
+  Amount      Int             @db.MediumInt
   status      String
-  imageUrl    String?
-  isDeleted   Boolean  @default(false)// New field to indicate the is the product deleted
-  soldCount   Int      @default(0)
-  DateCreated DateTime @default(now()) @db.Timestamp(0)
-
-
+  images      ProductImage[]  @relation("ProductImages")
+  isDeleted   Boolean         @default(false) // New field to indicate the product is deleted
+  soldCount   Int             @default(0)
+  DateCreated DateTime        @default(now()) @db.Timestamp(0)
   cartItems   CartItem[]
   OrderItems  OrderItem[]
   reviews     RatingReview[]
-  
-  // Relationships
-  farmer      Farmer   @relation(fields: [farmerId], references: [id])
+  farmer      Farmer          @relation(fields: [farmerId], references: [id])
 }
+
+model ProductImage {
+  id        Int       @id @default(autoincrement())
+  imageUrl  String    @db.VarChar(255)
+  product   Product   @relation("ProductImages", fields: [productId], references: [ProductID])
+  productId Int
+}
+
 
 model RatingReview {
   id          Int      @id @default(autoincrement())

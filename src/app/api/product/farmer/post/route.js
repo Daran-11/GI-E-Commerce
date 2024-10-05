@@ -1,10 +1,7 @@
-//completed
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { writeFile } from "fs/promises";
-import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
+import prisma from "../../../../../../lib/prisma";
+import { writeFile } from "fs/promises";
 import path from "path";
-import prisma from "../../../../../../../lib/prisma";
 
 // Config to disable body parsing since we handle it manually
 export const config = {
@@ -44,31 +41,8 @@ async function handleFileUpload(file) {
   }
 }
 
-export async function POST(request, { params }) {
-  const session = await getServerSession({ request, ...authOptions });
-  const { userId } = params;
-
-  console.log('Checking session for adding product:', session); // Debug session
-  console.log('User ID:', session?.user?.id); // Debug user ID
-
-  if (!session) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  if (session.user.id !== parseInt(userId) && session.user.role !== "farmer") {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-  }
-
-  // Fetch the farmer data using the userId
-  const farmer = await prisma.farmer.findUnique({
-    where: { userId: parseInt(userId) }
-  });
-
-  if (!farmer) {
-    console.log("Farmer data not found in Farmer table");
-    return NextResponse.json({ error: 'Farmer profile not found for this user.' }, { status: 404 });
-  }
-
+// POST: Create a new product with file uploads
+export async function POST(request) {
   try {
     // Parse form data
     const formData = await request.formData();
@@ -78,7 +52,6 @@ export async function POST(request, { params }) {
     const ProductName = formData.get("ProductName");
     const ProductType = formData.get("ProductType");
     const Price = formData.get("Price");
-    const Cost = formData.get("Cost");
     const Amount = formData.get("Amount");
     const status = formData.get("status");
     const Description = formData.get("Description");
@@ -104,9 +77,7 @@ export async function POST(request, { params }) {
         Description: Description,
         Price: parseFloat(Price),
         Amount: parseInt(Amount, 10),
-        Cost: parseInt(Cost, 10),
         status,
-        farmerId: farmer.id, // Link the product to the farmer
         // Initially, no image URLs here since they are stored in a different model
       },
     });
@@ -124,12 +95,11 @@ export async function POST(request, { params }) {
       await Promise.all(imagePromises);
     }
 
-    console.log("Product added successfully:", product); // Debug successful addition
     return NextResponse.json(product, { status: 201 });
   } catch (error) {
-    console.error("Failed to add product:", error); // Enhanced error logging
+    console.error("Failed to add product:", error);
     return NextResponse.json(
-      { error: error.message || "Failed to add product" },
+      { error: "Failed to add product" },
       { status: 500 }
     );
   }

@@ -19,6 +19,7 @@ export async function GET() {
       include: { 
         product: {
           include: {
+            images: true,
             farmer: true,
           }
         }
@@ -34,7 +35,7 @@ export async function GET() {
       farmerId: item.product.farmerId,
       farmerName: item.product.farmer.farmerName,
       quantity: item.quantity,
-      imageUrl: item.product.imageUrl,
+      imageUrl: item.product.images[0].imageUrl,
     }));
 
     return NextResponse.json(flatCartItems);

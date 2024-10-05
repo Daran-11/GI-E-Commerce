@@ -16,7 +16,7 @@ export async function GET(req) {
         ProductType: true,
         Amount: true,
         Price: true,
-        imageUrl: true,
+        images: true,
         DateCreated: true, // Assuming you have a created date field
         farmer: {
           select: {
