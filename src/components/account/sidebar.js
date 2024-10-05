@@ -13,13 +13,13 @@ const Sidebar = ({ isOpen, toggleDrawer }) => {
   };
 
   return (
-    <div>
-    <aside
-      className={`pt-[150px] lg:ml-[80%] fixed top-0 left-0 z-40 w-64 h-screen text-black transform ${
+<div>
+<aside
+      className={`fixed top-0 left-0 z-40 w-64 h-screen text-black transform ${
         isOpen ? 'translate-x-0' : '-translate-x-full'
       } transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0`}
     >
-        <div className='h-full px-3 py-4 overflow-y-auto bg-gray-50'>
+        <div className='h-full px-3 py-4 overflow-y-auto bg-white'>
       <div className="p-4 flex justify-between lg:hidden">
         <h2 className="text-xl font-bold">Menu</h2>
         <button onClick={toggleDrawer} className="text-black">
@@ -55,7 +55,8 @@ const Sidebar = ({ isOpen, toggleDrawer }) => {
         </div>
 
     </aside>        
-    </div>
+
+</div>
 
   );
 };

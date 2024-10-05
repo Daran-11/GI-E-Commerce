@@ -1,3 +1,4 @@
+// ตัวform/model ไว้เพิ่มข้อมูลในหน้productของfarmer
 "use client";
 import { useState, useCallback } from "react";
 import { useForm, Controller } from "react-hook-form";
@@ -16,8 +17,12 @@ import {
   styled,
   Paper,
 } from "@mui/material";
+import { useSession } from 'next-auth/react';
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
+
+// Custom styled Paper component
 const CustomPaper = styled(Paper)(({ theme }) => ({
   borderRadius: "16px",
   padding: theme.spacing(3),
@@ -28,6 +33,7 @@ const CustomPaper = styled(Paper)(({ theme }) => ({
   height: "750px",
 }));
 
+// Styled DropZone for image uploads
 const DropZone = styled("div")(({ theme }) => ({
   border: "2px dashed #cccccc",
   borderRadius: "4px",
@@ -39,12 +45,14 @@ const DropZone = styled("div")(({ theme }) => ({
 }));
 
 const AddProductDialog = ({ open, onClose, onAddProduct }) => {
-  const { control, handleSubmit, reset, formState: { errors, isValid } } = useForm({
+  const { data: session } = useSession();
+  const { control, handleSubmit, reset, formState: { errors } } = useForm({
     defaultValues: {
       plotCode: "",
       ProductName: "",
       ProductType: "",
       Price: "",
+      Cost: "",
       Amount: "",
       status: "",
       Description: "",
@@ -54,6 +62,7 @@ const AddProductDialog = ({ open, onClose, onAddProduct }) => {
 
   const [imageFiles, setImageFiles] = useState([]);
 
+  // Handle file selection or drag and drop
   const handleFileChange = (files) => {
     const fileArray = Array.from(files);
     setImageFiles(prev => [...prev, ...fileArray]);
@@ -61,13 +70,11 @@ const AddProductDialog = ({ open, onClose, onAddProduct }) => {
 
   const handleDragOver = (e) => {
     e.preventDefault();
-    e.stopPropagation();
     e.dataTransfer.dropEffect = "copy";
   };
 
   const handleDrop = (e) => {
     e.preventDefault();
-    e.stopPropagation();
     const files = e.dataTransfer.files;
     if (files.length > 0) {
       handleFileChange(files);
@@ -86,56 +93,55 @@ const AddProductDialog = ({ open, onClose, onAddProduct }) => {
   };
 
   const onSubmit = async (data) => {
-   
     const userConfirmed = window.confirm("คุณแน่ใจหรือว่าต้องการเพิ่มสินค้านี้?");
-    if (!userConfirmed) {
-      return;
-    }
-  
+    if (!userConfirmed) return;
+
     const formattedData = {
       ...data,
       Price: parseFloat(data.Price.replace(/,/g, "")).toFixed(2),
     };
-  
+
+    // Prepare form data for submission
     const formDataToSend = new FormData();
     formDataToSend.append("plotCode", formattedData.plotCode);
     formDataToSend.append("ProductName", formattedData.ProductName);
     formDataToSend.append("ProductType", formattedData.ProductType);
-    formDataToSend.append("Price", formattedData.Price);
+    formDataToSend.append("Price", parseFloat(formattedData.Price.replace(/,/g, "")).toFixed(2));
+    formDataToSend.append("Cost", formattedData.Cost);
     formDataToSend.append("Amount", formattedData.Amount);
     formDataToSend.append("status", formattedData.status);
     formDataToSend.append("Description", formattedData.Description);
-  
+
+    // Append image files
     imageFiles.forEach((file) => {
       formDataToSend.append("images", file);
     });
-  
+
     try {
-      const response = await fetch("/api/product/farmer/post", {
+      const response = await fetch(`/api/users/${session.user.id}/product/add`, {
         method: "POST",
         body: formDataToSend,
       });
-  
-      if (!response.ok) {
-        const errorData = await response.text();
-        console.error("Error adding product:", errorData);
-        throw new Error("Error adding product");
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log("Product added:", result);
+        onAddProduct(result); // Trigger parent component to refresh product list
+        handleClose(); // Close the dialog and reset form
+      } else {
+        throw new Error("Error creating product");
       }
-  
-      const result = await response.json();
-      console.log("Product added:", result);
-      onAddProduct(result); // Pass the new product data to the parent
-      handleClose();
     } catch (error) {
       console.error("Failed to add product:", error);
       alert("Failed to add product: " + error.message);
     }
   };
-  
+
+  // Handle dialog close and reset form
   const handleClose = useCallback(() => {
-    reset();
-    setImageFiles([]);
-    onClose();
+    reset(); // Reset react-hook-form fields
+    setImageFiles([]); // Clear image files
+    onClose(); // Close the dialog
   }, [reset, onClose]);
 
   return (
@@ -253,6 +259,27 @@ const AddProductDialog = ({ open, onClose, onAddProduct }) => {
                       )}
                     />
                   </FormControl>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Controller
+                    name="Cost"
+                    control={control}
+                    rules={{ required: "ต้นทุน is required" }}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        label="ต้นทุน"
+                        variant="outlined"
+                        fullWidth
+                        error={!!errors.Cost}
+                        helperText={errors.Cost?.message}
+                        onChange={(e) => {
+                          const formattedCost = e.target.value.replace(/[^0-9]/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                          field.onChange(formattedCost);
+                        }}
+                      />
+                    )}
+                  />
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <Controller

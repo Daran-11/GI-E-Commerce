@@ -1,11 +1,16 @@
 // app/account/layout.js
-import AccountLayout from "@/components/account/accountLayout";
+import Sidebar from "@/components/account/sidebar";
 export default function AccountLayoutWrapper({ children }) {
     return (
-        <AccountLayout>
-          <div className="lg:pl-[200px] mt-[130px]  "> {/* Add padding here */}
-            {children}
-          </div>
-        </AccountLayout>
+
+        <div className="w-[80%] flex justify-start m-auto mt-[100px] ">
+        <div className="pr-5">
+        <Sidebar/>           
+        </div>
+            {children}             
+
+             
+            </div>
+
       );
 }

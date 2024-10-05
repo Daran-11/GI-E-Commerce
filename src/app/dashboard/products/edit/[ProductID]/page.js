@@ -17,6 +17,7 @@ import {
   Paper,
 } from "@mui/material";
 import Image from "next/image";
+import { useSession } from "next-auth/react";
 
 const CustomPaper = styled(Paper)(({ theme }) => ({
   borderRadius: "16px",
@@ -36,6 +37,7 @@ const DropZone = styled("div")(({ theme }) => ({
   cursor: "pointer",
   backgroundColor: "#f5f5f5",
   marginTop: theme.spacing(2),
+  marginTop: theme.spacing(2),
 }));
 
 const EditProductDialog = ({ open, onClose, ProductID, onSuccess }) => {
@@ -45,6 +47,7 @@ const EditProductDialog = ({ open, onClose, ProductID, onSuccess }) => {
       ProductName: "",
       ProductType: "",
       Price: "",
+      Cost: "",
       Amount: "",
       status: "",
       Description: "",
@@ -54,39 +57,66 @@ const EditProductDialog = ({ open, onClose, ProductID, onSuccess }) => {
   const [imagePreviews, setImagePreviews] = useState([]);
   const [imagesToDelete, setImagesToDelete] = useState([]);
   const [initialImages, setInitialImages] = useState([]);
+  const { data: session, status } = useSession();
 
+
+  
   useEffect(() => {
     const fetchProduct = async () => {
+      if (!session) {
+        console.warn("Session is not available yet.");
+        return;
+      }
+  
+      if (!ProductID) {
+        console.warn("ProductID is not available.");
+        return;
+      }
+  
       try {
-        const response = await fetch(`/api/product/farmer/get?ProductID=${ProductID}`);
-        if (response.ok) {
-          const data = await response.json();
-          reset({
-            plotCode: data.plotCode || "",
-            ProductName: data.ProductName || "",
-            ProductType: data.ProductType || "",
-            Price: parseFloat(data.Price).toFixed(2) || "",
-            Amount: data.Amount || "",
-            status: data.status || "",
-            Description: data.Description || "",
-          });
-          const imageUrls = data.images.map(img => img.imageUrl);
-          setInitialImages(imageUrls);
-          setImagePreviews(imageUrls);
-        } else {
-          console.error("Error fetching product:", await response.text());
-          alert("Failed to fetch product");
+        console.log(`Fetching product with ID: ${ProductID}`);
+        const response = await fetch(`/api/users/${session.user.id}/product/get?ProductID=${ProductID}`);
+  
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("Error fetching product:", errorText);
+          alert("Failed to fetch product data. Please try again.");
+          return;
         }
+  
+        const data = await response.json();
+        console.log("Fetched product data:", data);
+  
+        // Reset the form with fetched data
+        reset({
+          plotCode: data.plotCode || "",
+          ProductName: data.ProductName || "",
+          ProductType: data.ProductType || "",
+          Price: data.Price ? parseFloat(data.Price).toFixed(2) : "",
+          Cost: data.Cost || "",
+          Amount: data.Amount || "",
+          status: data.status || "",
+          Description: data.Description || "",
+        });
+  
+        // Set initial images and previews if available
+        const imageUrls = Array.isArray(data.images) ? data.images.map(img => img.imageUrl) : [];
+        setInitialImages(imageUrls);
+        setImagePreviews(imageUrls);
+  
       } catch (error) {
-        console.error("Failed to fetch product:", error);
+        console.error("Error occurred while fetching product:", error);
         alert("An error occurred while fetching the product data.");
       }
     };
-
+  
     if (ProductID) {
       fetchProduct();
     }
-  }, [ProductID, reset]);
+  }, [ProductID, reset, session]);
+  
+  
+  
 
   const handleFileChange = (files) => {
     const fileArray = Array.from(files);
@@ -144,6 +174,7 @@ const EditProductDialog = ({ open, onClose, ProductID, onSuccess }) => {
     formDataToSend.append("ProductName", formattedData.ProductName);
     formDataToSend.append("ProductType", formattedData.ProductType);
     formDataToSend.append("Price", formattedData.Price);
+    formDataToSend.append("Cost", formattedData.Cost);
     formDataToSend.append("Amount", formattedData.Amount);
     formDataToSend.append("status", formattedData.status);
     formDataToSend.append("Description", formattedData.Description);
@@ -163,7 +194,7 @@ const EditProductDialog = ({ open, onClose, ProductID, onSuccess }) => {
     console.log("Submitting form data:", formDataToSend);
   
     try {
-      const response = await fetch("/api/product/farmer/put", {
+      const response = await fetch(`/api/users/${session.user.id}/product/${ProductID}/put`, {
         method: "PUT",
         body: formDataToSend,
       });
@@ -175,7 +206,6 @@ const EditProductDialog = ({ open, onClose, ProductID, onSuccess }) => {
       }
   
       const result = await response.json();
-      console.log("Product updated:", result);
       await onSuccess();
       handleClose();
     } catch (error) {
@@ -190,6 +220,7 @@ const EditProductDialog = ({ open, onClose, ProductID, onSuccess }) => {
       ProductName: "",
       ProductType: "",
       Price: "",
+      Cost: "",
       Amount: "",
       status: "",
       Description: "",
@@ -314,6 +345,27 @@ const EditProductDialog = ({ open, onClose, ProductID, onSuccess }) => {
                       )}
                     />
                   </FormControl>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Controller
+                    name="Cost"
+                    control={control}
+                    rules={{ required: "ต้นทุน is required" }}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        label="ต้นทุน"
+                        variant="outlined"
+                        fullWidth
+                        error={!!errors.Cost}
+                        helperText={errors.Cost?.message}
+                        onChange={(e) => {
+                          const formattedCost = e.target.value.replace(/[^0-9]/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                          field.onChange(formattedCost);
+                        }}
+                      />
+                    )}
+                  />
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <Controller

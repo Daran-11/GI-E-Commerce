@@ -4,6 +4,7 @@ import { Button, Dropdown, DropdownItem, DropdownMenu, PopoverTrigger } from '@n
 import { signOut, useSession } from 'next-auth/react';
 import Link from "next/link";
 import { usePathname } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
 import SearchBar from "./searchbar";
 
 export const Navbar = () => {
@@ -14,90 +15,109 @@ export const Navbar = () => {
     //const [cartItemCount, setCartItemCount] = useState(0); //จำนวนสินค้าในตะกร้าตอนนี้
     const activePaths = ['/account/user/profile', '/account/user/settings', '/account/user/orders' ,'/account/user/addresses'];
 
-    return (
+    const [isMenuOpen, setIsMenuOpen] = useState(false); // State to handle the menu toggle
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false); // State for dropdown menu
+    const dropdownRef = useRef(null);
 
+    // Function to toggle the menu
+    const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+
+    // Function to toggle the dropdown menu
+    const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
+
+    // Close dropdown menu when clicking outside of it
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            // Check if the click is outside of the dropdown or its button
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target) && !event.target.closest('.dropdown-button')) {
+                setIsDropdownOpen(false);
+            }
+        };
+    
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+        // Function to handle dropdown toggle and close the mobile menu
+        const handleDropdownToggle = () => {
+            setIsDropdownOpen(!isDropdownOpen);
+            if (isMenuOpen) {
+                setIsMenuOpen(false);
+            }
+        };
+
+
+    return (
         <div className="fixed top-0 left-0 w-full bg-white shadow-lg z-50">
-            <div className="header flex  w-[80%] justify-between m-auto pt-[20px] pb-[15px]">
-                <div className='flex justify-start'>
-                    <div className="logo mr-10 mb-auto mt-auto text-3xl text-[#4EAC14]">
-                        
-                        <a href ='/'>GI Pineapple</a>
-                        
+            <div className="header flex gap-x-5 md:gap-x-0 w-[95%] 2xl:w-[80%] justify-between m-auto pt-[20px] pb-[15px]">
+
+                    <div className='hidden sm:flex items-center'>
+                        <div className=" lg:w-[150px]  xl:w-[200px] lg:pl-4 text-lg w-fit sm:text-xl xl:text-2xl text-[#4EAC14]">
+                            <a href='/'>GI Pineapple</a>
+                        </div>                        
                     </div>
 
-                    <div className="search w-[550px] ml-5">
-                        <SearchBar/>
-                    </div>                    
+
+                    <div className="ml-2 w-full sm:w-[400px] 2xl:w-[650px] xl:w-[500px] lg:w-[400px] md:w-[600px]">
+                        <SearchBar />
+                    </div>
+
+                    
+
+
+                {/* Hamburger Icon */}
+                <div className="lg:hidden flex items-center">
+                    <button onClick={toggleMenu}>
+                        <svg className="w-6 h-6 text-[#595959]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7" />
+                        </svg>
+                    </button>
                 </div>
 
-                <div className="menu mt-auto mb-auto ml-10">
-                    <nav>
-                        <ul className="menulist text-lg items-center text-[#595959] flex xl:gap-x-[40px] md:gap-x-[20px]">
+                {/* Regular Menu (shown on large screens) */}
+                <div className="hidden lg:flex items-center">
+                    <ul className="menulist flex xl:gap-x-3 text-[#595959]">
+                        <div className='flex items-center gap-x-6 text-base w-full'>
                             <li>
-                                <Link 
-                                    href='/'
-                                    className={currentPath === "/" ? "text-[#4EAC14]": "text-[#595959]"}
-                                >
+                                <Link href='/' className={currentPath === "/" ? "text-[#4EAC14]" : "text-[#595959]"}>
                                     หน้าแรก
                                 </Link>
                             </li>
                             <li>
-                                <Link 
-                                    href='/about'
-                                    className={currentPath === "/about" ? "text-[#4EAC14]": "text-[#595959]"}
-                                >
+                                <Link href='/about' className={currentPath === "/about" ? "text-[#4EAC14]" : "text-[#595959]"}>
                                     เกี่ยวกับเรา
                                 </Link>
                             </li>
 
-
-                            {status === 'unauthenticated' &&
-                            <li>
-                                <Link 
-                                    href='/register'
-                                    className={currentPath === "/register" ? "text-[#4EAC14]": "text-[#595959]"}
-                                >
-                                    สมัครสมาชิก
-                                </Link>
-                            </li>
-                            }
-
-                            <li>
-                                <Link 
-                                    href='/cart'
-                                    className={currentPath === "/cart" ? "text-[#4EAC14]": "text-[#595959]"}
-                                >
-                                    ตะกร้า 
-                                </Link>
-                                <span className={`text-white text-base rounded-full ml-1  px-2  ${cartItemCount >= 1 ? "bg-[#4EAC14] ": "bg-[#a8a8a8]"}`}>
-                                    {cartItemCount} 
-                                </span>
-
-                            </li>
-
-                                    {session?.user?.role === 'farmer' && (
-                                    
-                                    <li>
-                                    <Link
-                                    key="farmer dashboard" 
-                                    className={`${currentPath === '/dashboard' ? 'text-[#4EAC14]' : 'text-[#595959]'}`}
-                                    textValue="แดชบอร์ดเกษตรกร" 
-                                    href='/dashboard'>
-                                       แดชบอร์ดเกษตรกร                                                                     
+                            {status === 'unauthenticated' && (
+                                <li>
+                                    <Link href='/register' className={currentPath === "/register" ? "text-[#4EAC14]" : "text-[#595959]"}>
+                                        สมัครสมาชิก
                                     </Link>
-                                    </li>
-                                )}      
+                                </li>
+                            )}
 
-                            {status === 'unauthenticated' ? (
                             <li>
-                                <Link 
-                                    href='/login'
-                                    className={currentPath === "/login" ? "text-[#4EAC14]": "text-[#595959]"}
-                                    >เข้าสู่ระบบ
+                                <Link href='/cart' className={currentPath === "/cart" ? "text-[#4EAC14]" : "text-[#595959]"}>
+                                    ตะกร้า
                                 </Link>
+                                <span className={`text-white text-base rounded-full ml-1 px-2 ${cartItemCount >= 1 ? "bg-[#4EAC14]" : "bg-[#a8a8a8]"}`}>
+                                    {cartItemCount}
+                                </span>
                             </li>
-                            ) : status === 'authenticated' && session?.user ? (
-                            <>
+
+                            {session?.user?.role === 'farmer' && (
+                                <li>
+                                    <Link href='/dashboard' className={currentPath === '/dashboard' ? "text-[#4EAC14]" : "text-[#595959]"}>
+                                        แดชบอร์ดเกษตรกร
+                                    </Link>
+                                </li>
+                            )}                            
+                        </div>
+
+
+                        {status === 'authenticated' && session?.user ? (
+                            <div className="relative inline-block text-left">
                             <Dropdown
                             placement="top-end"
                                 showArrow ={true}
@@ -157,23 +177,110 @@ export const Navbar = () => {
                                   
                                 </DropdownMenu>
                                 </Dropdown>
-                            </>
-
-                            
+                            </div>
                         ) : (
-                            <li>Loading...</li>
+                            <li>
+                                <Link href='/login' className={currentPath === "/login" ? "text-[#4EAC14]" : "text-[#595959]"}>
+                                    เข้าสู่ระบบ
+                                </Link>
+                            </li>
                         )}
-
-
-                        </ul>
-                    </nav>
-            
+                    </ul>
                 </div>
 
+                {/* Mobile Menu (shown when the hamburger icon is clicked) */}
+                {isMenuOpen && (
+                    <div 
+                    className="dropdown-button lg:hidden  absolute top-[70px] right-0 w-full bg-white shadow-lg ">
+                        <ul className="flex flex-col items-start p-4 ">
+                            <div className='w-full text-lg'>
+                                <li>
+                                    <Link href='/' 
+                                    className={currentPath === "/" ? "text-[#4EAC14] block px-4 py-2 " : "block  px-4 py-2  text-gray-700 hover:bg-gray-100"}
+                                    onClick={toggleMenu}>
+                                        หน้าแรก
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link href='/about' 
+                                    className={currentPath === "/about" ? "text-[#4EAC14] block px-4 py-2 " : "block  px-4 py-2  text-gray-700 hover:bg-gray-100"}
+                                    onClick={toggleMenu}>
+                                        เกี่ยวกับเรา
+                                    </Link>
+                                </li>
+                                {status === 'unauthenticated' && (
+                                    <li>
+                                        <Link href='/register' 
+                                        className={currentPath === "/register" ? "text-[#4EAC14] block px-4 py-2 " : "block  px-4 py-2  text-gray-700 hover:bg-gray-100"}
+                                        onClick={toggleMenu}>
+                                            สมัครสมาชิก
+                                        </Link>
+                                    </li>
+                                )}
+                                <li>
+                                    <Link href='/cart' 
+                                    className={currentPath === "/cart" ? "text-[#4EAC14] block px-4 py-2 " : "block  px-4 py-2  text-gray-700 hover:bg-gray-100"}
+                                    onClick={toggleMenu}>
+                                        ตะกร้า
+
+                                        <span 
+                                    className={`text-white text-base rounded-full ml-1 px-2 ${cartItemCount >= 1 ? "bg-[#4EAC14]" : "bg-[#a8a8a8]"}`}>
+                                        {cartItemCount}
+                                    </span>
+                                    </Link>
+
+                                </li>
+                                {session?.user?.role === 'farmer' && (
+                                    <li>
+                                        <Link href='/dashboard' 
+                                        className={currentPath === "/dashboard" ? "text-[#4EAC14] block px-4 py-2 " : "block  px-4 py-2  text-gray-700 hover:bg-gray-100"}
+                                        onClick={toggleMenu}>
+                                            แดชบอร์ดเกษตรกร
+                                        </Link>
+                                    </li>
+                                )}
+                                {status === 'authenticated' && session?.user ? (
+                                    <>
+                                        <li>
+                                            <Link href='/account/user/profile'  onClick={toggleMenu} 
+                                            className={currentPath === "/account/user/profile" ? "text-[#4EAC14] block px-4 py-2 " : "block px-4 py-2  text-gray-700 hover:bg-gray-100"}
+                                            >บัญชีผู้ใช้</Link>
+                                        </li>
+                                        <li>
+                                            <Link href='/about' 
+                                            onClick={toggleMenu}
+                                            className={currentPath === "/about" ? "text-[#4EAC14] block px-4 py-2 " : "block  px-4 py-2  text-gray-700 hover:bg-gray-100"}
+                                            >
+                                            ลงทะเบียนเกษตรกร</Link>
+                                        </li>
+                                        <li  className='text-red-400 block  px-4 py-2   hover:bg-gray-100'> 
+                                            <button
+                                                onClick={() => {
+                                                    signOut({ callbackUrl: '/' });
+                                                    toggleMenu(); // Close the menu on sign out
+                                                }}
+                                            >
+                                                ออกจากระบบ
+                                            </button>
+                                        </li>
+                                    </>
+                                ) : (
+                                    <li>
+                                        <Link href='/login'
+                                            className={currentPath === "/login" ? "text-[#4EAC14] block px-4 py-2 text-sm" : "block  px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"}
+                                        onClick={toggleMenu}>
+                                            เข้าสู่ระบบ
+                                        </Link>
+                                    </li>
+                                )}                                
+                            </div>
+
+                        </ul>
+                    </div>
+                )}
             </div>
         </div>
-
-    )
+    );
 
 
 }

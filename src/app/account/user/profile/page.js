@@ -18,8 +18,9 @@ export default function Profile() {
   // When after loading success and have session, show profile
   return (
     status === 'authenticated' && session.user && (
-      <div className=" flex">
-        <div className="bg-white p-6 rounded-md shadow-md">
+      <div className=" flex w-full h-screen bg-white p-6 rounded-xl">
+        <div className=" ">
+          <p className='text-3xl text-[#535353]'>โปรไฟล์</p>
           <p>
             Welcome, <b>{session.user.name}!</b>
           </p>
