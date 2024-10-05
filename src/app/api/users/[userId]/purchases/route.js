@@ -36,7 +36,11 @@ export async function GET(req, { params }) {
             farmer:true,     
             orderItems: {
               include: {
-                product: true,  // Include product details for each order item
+                product: {
+                  include: {
+                    images: true,
+                  }
+                },
                 farmer: true,   // Include farmer details for each order item
               },
             }, 

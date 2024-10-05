@@ -157,9 +157,9 @@ function Purchases() {
 
 
         <div className=''>
-        {order.orderItems[0].product.imageUrl ? (
+        {order.orderItems[0].product.images?.[0]?.imageUrl ? (
         <Image
-            src={order.orderItems[0].product.imageUrl}
+            src={order.orderItems[0].product.images[0].imageUrl}
             alt={order.orderItems[0].product.ProductName}
             width={0} // Adjust width as needed
             height={0} // Adjust height as needed

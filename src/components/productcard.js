@@ -44,9 +44,10 @@ const ProductCard = ({products}) => {
                   
 
                   <div className="w-full h-[120px] md:h-[150px] xl:h-[160px]">
-                  {product.imageUrl ? (
+                  {product.images?.[0]?.imageUrl ? (
+                    
                     <Image
-                      src={product.imageUrl}
+                      src={product.images[0].imageUrl}
                       alt={product.ProductName}
                       width={0} // Adjust width as needed
                       height={0} // Adjust height as needed

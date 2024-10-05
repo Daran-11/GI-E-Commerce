@@ -1,74 +1,148 @@
-// หน้าหลักของproduct-farmer 
+// หน้าหลักของproduct-farmer completed
 "use client";
+
 import AddProductDialog from "@/app/dashboard/products/add/page";
 import EditProductDialog from "@/app/dashboard/products/edit/[ProductID]/page";
 import Pagination from "@/app/ui/dashboard/pagination/pagination";
-import styles from "@/app/ui/dashboard/products/products.module.css";
 import Search from "@/app/ui/dashboard/search/search";
 import Button from "@mui/material/Button";
 import { useSession } from 'next-auth/react';
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import SortSelect from "@/app/ui/dashboard/sort/dropdown";
+import styles from "@/app/ui/dashboard/products/products.module.css";
+import IconButton from '@mui/material/IconButton';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
+import AddBoxIcon from '@mui/icons-material/AddBox';
+import Tooltip from '@mui/material/Tooltip';
 
 const Product = () => {
-  const { data: session, status } = useSession()
+
+  const searchParams = useSearchParams();
+  const { replace } = useRouter();
+  const query = searchParams.get("query") || ""; // Get the search query
+  const sortOrder = searchParams.get("sortOrder") || "asc"; // Get the sort order
+  const page = parseInt(searchParams.get("page")) || 1; // Current page
+  const pageSize = 10; // Number of items per page
+
   const [products, setProducts] = useState([]);
+  const [totalItems, setTotalItems] = useState(0);
+  const { data: session, status } = useSession()
   const [loading, setLoading] = useState(true);
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [selectedProductId, setSelectedProductId] = useState(null);
   const router = useRouter()
+  const [filter, setFilter] = useState("แสดงทั้งหมด"); // Add state for filtering
 
-  const fetchProducts = async () => {
-    
-    setLoading(true);
+
+
+
+  const fetchProducts = async (page = 1) => {
+    setLoading(false); // Set loading to true when fetching starts
     try {
-      const response = await fetch(`/api/users/${session.user.id}/product/get`);
+      const response = await fetch(`/api/users/${session.user.id}/product/get?query=${query}&sortOrder=${sortOrder}&page=${page}&pageSize=${pageSize}`);
+      if (!response.ok) {
+        const errorMessage = await response.text();
+        console.error("Error fetching products:", errorMessage);
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
       const data = await response.json();
-      const formattedData = data.map((product) => ({
-        ...product,
-        Price: formatPrice(product.Price),
-      }));
-      setProducts(formattedData);
+
+      // Ensure data structure matches what is expected
+      if (data.products && Array.isArray(data.products)) {
+        const formattedData = data.products.map((product) => {
+          const firstImage = product.images?.[0]?.imageUrl || ""; // Get the first image URL
+          return {
+            ...product,
+            Price: formatPrice(product.Price), // Format the price
+            status: product.Amount === 0 ? "หมดสต็อก" : "มีสินค้า", // Set status based on amount
+            imageUrl: firstImage, // Include the first image URL
+          };
+        });
+
+        setProducts(formattedData); // Set the formatted products
+        setTotalItems(data.totalItems); // Extract totalItems directly from the response
+      } else {
+        console.error("Invalid product data:", data);
+      }
     } catch (error) {
       console.error("Failed to fetch products:", error);
-    } finally {
-      setLoading(false);
     }
   };
+
+
+
+
+
+  const fetchTotalCount = async () => {
+    try {
+      const response = await fetch(
+        `/api/users/${session.user.id}/product/get?query=${query}&sortOrder=${sortOrder}`
+      );
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      const data = await response.json();
+
+      // console.log("Total count response:", data); // Log the response
+      setTotalItems(data.totalItems); // Make sure this line corresponds to the correct property
+    } catch (error) {
+      console.error("Failed to fetch total count:", error);
+    }
+  };
+
+
+  const filteredProducts = products.filter((product) => {
+    if (filter === "แสดงทั้งหมด") return true;
+    if (filter === "มีสินค้า") return product.status === "มีสินค้า";
+    if (filter === "หมดสต็อก") return product.status === "หมดสต็อก";
+    return false;
+  });
+
+
+  // console.log(`In Stock: ${inStockCount}, Out of Stock: ${outOfStockCount}`);
+
+
 
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/login");
     }
 
-    if (status === "authenticated") {
-      try {
-        if (session?.user?.id) {
-          fetchProducts();
-        }
-      } catch (error) {
-        setError("An error occurred while fetching products");        
-      }
+    if (status === "authenticated" && session?.user?.id) {
+      fetchTotalCount(); // First fetch total count
+      fetchProducts(page); // Then fetch products
     }
-  }, [status, session ,router]);
+  }, [query, sortOrder, page, status, session, router]);
+
+
 
   const formatPrice = (Price) => {
     return Price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
 
+
+
   const handleDelete = async (ProductID) => {
     if (window.confirm("Are you sure you want to delete this product?")) {
       try {
         const response = await fetch(`/api/users/${session.user.id}/product/${ProductID}/delete`, {
-            method: "DELETE",
-            headers: {
-              "Content-Type": "application/json" },
-          }
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json"
+          },
+        }
         );
 
         if (response.ok) {
+          // After successful deletion, refetch the products and total count
+          fetchProducts(page);
+          fetchTotalCount(); // Fetch total count separately
           setProducts(products.filter((product) => product.ProductID !== ProductID));
         } else {
           alert("Failed to delete product");
@@ -104,16 +178,27 @@ const Product = () => {
       formData.append("imageUrl", productData.imageUrl);
     }
 
-  
-        alert("Product added successfully");
-        fetchProducts();
-        handleCloseAddDialog();
-     
+    alert("Product added successfully");
+    fetchProducts(page);
+    fetchTotalCount(); // Fetch total count separately
+    handleCloseAddDialog();
+  };
+
+
+
+  const handlePageChange = (newPage) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("page", newPage);
+    params.set("query", query);
+    params.set("sortOrder", sortOrder);
+    const newUrl = `${window.location.pathname}?${params.toString()}`;
+    replace(newUrl);
+    fetchProducts(newPage); // Fetch products for the new page
   };
 
 
   const handleEditProduct = async (ProductID, productData) => {
-    const response = await fetch(`/api/users/${session.user.id}/product/put/${ProductID}`, {
+    const response = await fetch(`/api/users/${session.user.id}/product/${ProductID}/put`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -124,11 +209,13 @@ const Product = () => {
     if (response.ok) {
       alert("Product updated successfully");
       fetchProducts(); // Refetch products after editing
+      fetchTotalCount(); // Fetch total count separately
       handleCloseEditDialog();
     } else {
       alert("Failed to update product");
     }
   };
+
 
   if (loading) {
     return <div>Loading...</div>;
@@ -137,22 +224,55 @@ const Product = () => {
   return (
     <div className={styles.container}>
       <div className={styles.top}>
-        <Search placeholder="ค้นหาผู้ใช้..." />
-        <Button
+        <Search placeholder="ค้นหาสินค้า..." />
+
+        <Tooltip
+          title="เพิ่มสินค้า"
+          arrow
           sx={{
-            color: "var(--text)",
-            backgroundColor: "var(--background-add)",
-            padding: "var(--padding)",
-            fontSize: "var(--font-size)",
-            "&:hover": {
-              backgroundColor: "var(--background-hover)",
+            typography: 'body2',
+            fontSize: '2rem', // Adjust the font size as needed
+            '.MuiTooltip-tooltip': {
+              fontSize: '2rem', // Ensure this is correct
             },
           }}
-          onClick={handleOpenAddDialog}
         >
-          เพิ่มสินค้า
-        </Button>
+          <IconButton aria-label="add" variant="contained" onClick={handleOpenAddDialog} size="large">
+            <AddBoxIcon fontSize="inherit" style={{ color: "#388e3c" }} />
+          </IconButton>
+        </Tooltip>
+
+
       </div>
+
+      <div className={styles.filterButtons}>
+
+        <Button
+          onClick={() => handleFilterChange("แสดงทั้งหมด")}
+          variant={filter === "แสดงทั้งหมด" ? "contained" : "outlined"}
+          style={{ backgroundColor: filter === "แสดงทั้งหมด" ? "#98de6d" : "#ffffff", color: filter === "แสดงทั้งหมด" ? "black" : "#388e3c" }}
+        >
+          แสดงทั้งหมด
+        </Button>
+        <Button
+          onClick={() => handleFilterChange("หมดสต็อก")}
+          variant={filter === "หมดสต็อก" ? "contained" : "outlined"}
+          style={{ backgroundColor: filter === "หมดสต็อก" ? "#98de6d" : "#ffffff", color: filter === "หมดสต็อก" ? "black" : "#388e3c" }}
+        >
+          หมดสต็อก
+        </Button>
+        <Button
+          onClick={() => handleFilterChange("มีสินค้า")}
+          variant={filter === "มีสินค้า" ? "contained" : "outlined"}
+          style={{ backgroundColor: filter === "มีสินค้า" ? "#98de6d" : "#ffffff", color: filter === "มีสินค้า" ? "black" : "#388e3c" }}
+        >
+          มีสินค้า
+        </Button>
+        <SortSelect currentSortOrder={sortOrder} />
+      </div>
+
+
+
       <table className={styles.table}>
         <thead>
           <tr>
@@ -168,8 +288,8 @@ const Product = () => {
           </tr>
         </thead>
         <tbody>
-          {products.length > 0 ? (
-            products.map((product) => (
+          {filteredProducts.length > 0 ? (
+            filteredProducts.map((product) => (
               <tr key={product.ProductID}>
                 <td>{product.ProductID}</td>
                 <td>{product.plotCode}</td>
@@ -179,9 +299,8 @@ const Product = () => {
                 <td>{product.Amount}</td>
                 <td>
                   <span
-                    className={`${styles.status} ${
-                      styles[product.status.replace(/ /g, "-")]
-                    }`}
+                    className={`${styles.status} ${styles[product.status.replace(/ /g, "-")]
+                      }`}
                   >
                     {product.status}
                   </span>
@@ -191,8 +310,8 @@ const Product = () => {
                     <Image
                       src={product.imageUrl}
                       alt={product.ProductName}
-                      width={100} // Adjust width as needed
-                      height={100} // Adjust height as needed
+                      width={200} // Adjust width as needed
+                      height={200} // Adjust height as needed
                       style={{
                         objectFit: "cover",
                         marginTop: "10px",
@@ -204,46 +323,38 @@ const Product = () => {
                 </td>
                 <td>
                   <div className={styles.buttons}>
-                    <Button
-                      sx={{
-                        color: "var(--text)",
-                        backgroundColor: "var(--background-view)",
-                        padding: "var(--padding)",
-                        fontSize: "var(--font-size)",
-                        "&:hover": {
-                          backgroundColor: "var(--background-hover)",
-                        },
-                      }}
-                      onClick={() => handleOpenEditDialog(product.ProductID)}
-                    >
-                      แก้ไข
-                    </Button>
-                    <Button
-                      sx={{
-                        color: "var(--text)",
-                        backgroundColor: "var(--background-delete)",
-                        padding: "var(--padding)",
-                        fontSize: "var(--font-size)",
-                        "&:hover": {
-                          backgroundColor: "var(--background-hover)",
-                        },
-                      }}
-                      onClick={() => handleDelete(product.ProductID)}
-                    >
-                      ลบ
-                    </Button>
+                    <Tooltip title="แก้ไขสินค้า"
+                      arrow>
+                      <IconButton aria-label="edit" color="success" variant="contained" onClick={() => handleOpenEditDialog(product.ProductID)} size="large">
+                        <EditIcon fontSize="inherit" />
+                      </IconButton>
+                    </Tooltip>
+
+                    <Tooltip title="ลบสินค้า"
+                      arrow>
+                      <IconButton aria-label="delete" color="error" variant="contained" onClick={() => handleDelete(product.ProductID)} size="large">
+                        <DeleteIcon fontSize="inherit" />
+                      </IconButton>
+                    </Tooltip>
                   </div>
                 </td>
               </tr>
             ))
           ) : (
             <tr>
-              <td colSpan={9}>No products available</td>
+              <td colSpan={9}>ไม่มีสินค้า</td>
             </tr>
           )}
         </tbody>
       </table>
-      <Pagination />
+
+      <Pagination
+        currentPage={page}
+        totalItems={totalItems}
+        itemsPerPage={pageSize}
+        onPageChange={handlePageChange}
+
+      />
 
       <AddProductDialog
         open={openAddDialog}
