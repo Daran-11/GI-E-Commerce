@@ -1,3 +1,4 @@
+//completed
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { writeFile } from "fs/promises";
 import { getServerSession } from "next-auth";

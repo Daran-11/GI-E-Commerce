@@ -1,3 +1,4 @@
+//completed
 import React from "react";
 import styles from "./pagination.module.css"; // Import CSS module for pagination styles
 
@@ -7,7 +8,7 @@ const Pagination = ({ currentPage, totalItems, itemsPerPage, onPageChange }) => 
   // console.log('Items Per Page:', itemsPerPage);
   // console.log('Total Pages:', totalPages);
   // console.log('Current Page:', currentPage);
-  
+
   // Handle page change within valid page range
   const handlePageChange = (page) => {
     if (page >= 1 && page <= totalPages) {
