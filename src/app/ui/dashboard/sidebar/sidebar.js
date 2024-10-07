@@ -38,7 +38,7 @@ const menuItems = [
       },
       {
         title: "ประวัติการขาย",
-        path: "/dashboard/transactions",
+        path: "/dashboard/history",
         icon: <MdAttachMoney />,
       },
 
