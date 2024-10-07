@@ -69,24 +69,25 @@ export async function GET(req,{ params }) {
     } else {
       // Fetching all orders
       try {
-        const orders = await prisma.order.findMany(
-          {
-            where: {
-              farmer: {
-                userId: parseInt(userId),
+        const orders = await prisma.order.findMany({
+          where: {
+            farmer: {
+              userId: parseInt(userId),
+            },
+            deliveryStatus: {
+              not: 'Delivered', // Exclude delivered orders
+            },
+          },
+          orderBy: { createdAt: 'desc' },
+          include: {
+            orderItems: {
+              include: {
+                product: true,  // Include product details for each order item
+                farmer: true,   // Include farmer details for each order item
               },
             },
-            orderBy: { createdAt: 'desc' },
-            include: {      
-            orderItems: {
-                  include: {
-                    product: true,  // Include product details for each order item
-                    farmer: true,   // Include farmer details for each order item
-                  },
-                }, 
-              },
-          }
-        );
+          },
+        });
         return NextResponse.json(orders);
       } catch (error) {
         console.error("Error fetching orders:", error);
