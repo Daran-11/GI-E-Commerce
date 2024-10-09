@@ -51,6 +51,23 @@ model Standard {
   updatedAt   DateTime @updatedAt
 }
 
+model manage_farmer {
+  id        Int      @id @default(autoincrement())
+  firstName String
+  lastName  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  certificates Certificate_farmer[] 
+}
+
+model Certificate_farmer {
+  id                Int      @id @default(autoincrement())
+  standardName      String
+  certificateNumber String
+  approvalDate      DateTime
+  farmer           manage_farmer @relation(fields: [farmerId], references: [id], onDelete: Cascade) // เพิ่ม onDelete ที่นี่
+  farmerId          Int
+}
 
 model Product {
   id           Int      @id @default(autoincrement())

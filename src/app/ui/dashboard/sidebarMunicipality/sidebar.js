@@ -49,6 +49,11 @@ const menuItems = [
         path: "/dashboard_municipality/manage_standards",
         icon: <MdGavel />,
       },
+      {
+        title: "จัดการเกษตกร",
+        path: "/dashboard_municipality/manage_farmer",
+        icon: <MdGavel />,
+      },
     ],
   },
   {

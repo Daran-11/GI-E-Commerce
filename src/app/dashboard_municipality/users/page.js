@@ -23,15 +23,15 @@ export default async function UsersPage() {
         <thead>
           <tr>
             
-            <th>#</th>
-            <th>ชื่อ-นามสกุล</th>
-            <th>ที่อยู่</th>
-            <th>ตำบล</th>
-            <th>อำเภอ</th>
-            <th>จังหวัด</th>
-            <th>รหัสไปรษณีย์</th>
-            <th>เบอร์โทรศัพท์</th>
-            <th></th>
+            <td>#</td>
+            <td>ชื่อ-นามสกุล</td>
+            <td>ที่อยู่</td>
+            <td>ตำบล</td>
+            <td>อำเภอ</td>
+            <td>จังหวัด</td>
+            <td>รหัสไปรษณีย์</td>
+            <td>เบอร์โทรศัพท์</td>
+            <td></td>
           </tr>
         </thead>
         <tbody>
