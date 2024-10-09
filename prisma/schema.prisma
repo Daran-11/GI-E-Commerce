@@ -21,7 +21,19 @@ model Farmer {
   phone              String
   password           String
   role               String
-  certificates       Certificate[]
+  certificates       Certificate[]  // Keep this if you have other certificates
+  manageFarmers      manage_farmer[] // Adding reverse relation
+}
+
+model manage_farmer {
+  id        Int      @id @default(autoincrement())
+  firstName String
+  lastName  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  certificates Certificate_farmer[]
+  farmerId   Int?     // Add farmerId field for the relation
+  farmer     Farmer?  @relation(fields: [farmerId], references: [id]) // Adding the relation
 }
 
 model Certificate {
@@ -51,21 +63,12 @@ model Standard {
   updatedAt   DateTime @updatedAt
 }
 
-model manage_farmer {
-  id        Int      @id @default(autoincrement())
-  firstName String
-  lastName  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  certificates Certificate_farmer[] 
-}
-
 model Certificate_farmer {
   id                Int      @id @default(autoincrement())
   standardName      String
   certificateNumber String
   approvalDate      DateTime
-  farmer           manage_farmer @relation(fields: [farmerId], references: [id], onDelete: Cascade) // เพิ่ม onDelete ที่นี่
+  farmer           manage_farmer @relation(fields: [farmerId], references: [id], onDelete: Cascade)
   farmerId          Int
 }
 
