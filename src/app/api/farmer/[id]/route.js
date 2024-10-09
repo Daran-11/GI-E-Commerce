@@ -3,26 +3,43 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 export async function GET(req, { params }) {
-  const { id } = params;
+  const { name } = params; // Use name instead of id
 
   try {
-    // ดึงข้อมูลชาวนาจากฐานข้อมูลโดยใช้ ID
-    const farmer = await prisma.manage_farmer.findUnique({
-      where: { id: Number(id) }, // เปลี่ยน id ให้เป็น Number
-      select: {
-        firstName: true,
-        lastName: true,
-        // เพิ่ม fields อื่น ๆ ที่คุณต้องการดึงข้อมูล
+    // Fetch the manage_farmer and related Farmer data by Farmer's name
+    const farmerData = await prisma.manage_farmer.findFirst({
+      where: {
+        farmer: {
+          name: name, // Check the farmer's name
+        },
+      },
+      include: {
+        farmer: {
+          select: {
+            name: true,
+            lastname: true,
+          },
+        },
+        certificates: {  // Include the related certificate details
+          select: {
+            standardName: true,  // ชื่อมาตรฐาน (Standard Name)
+            certificateNumber: true,  // หมายเลขใบรับรอง (Certificate Number)
+            approvalDate: true,  // วันที่อนุมัติ (Approval Date)
+          },
+        },
       },
     });
 
-    if (farmer) {
-      return new Response(JSON.stringify(farmer), { status: 200 });
+    if (farmerData) {
+      return new Response(JSON.stringify(farmerData), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
     } else {
-      return new Response(JSON.stringify({ message: "ไม่พบชาวนา" }), { status: 404 });
+      return new Response(JSON.stringify({ message: "ไม่พบเกษตร" }), { status: 404 });
     }
   } catch (error) {
-    console.error("Error fetching farmer:", error);
+    console.error("Error fetching farmer data:", error);
     return new Response(JSON.stringify({ message: "เกิดข้อผิดพลาดในการดึงข้อมูล" }), { status: 500 });
   }
 }
