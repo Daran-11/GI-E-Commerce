@@ -34,6 +34,19 @@ export default function History() {
     }
   };
 
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'Completed':
+      case 'Delivered':
+        return 'text-green-600';
+      case 'Pending':
+      case 'Preparing':
+        return 'text-yellow-600';
+      default:
+        return 'text-gray-600';
+    }
+  };
+
   if (status === 'loading' || loading) {
     return <div>Loading...</div>;
   }
@@ -52,11 +65,11 @@ export default function History() {
       <table className={styles.table}>
         <thead>
           <tr>
-            <th className="border px-4 py-2">Order ID</th>
-            <th className="border px-4 py-2">Total Price</th>
-            <th className="border px-4 py-2">Status</th>
-            <th className="border px-4 py-2">Payment Status</th>
-            <th className="border px-4 py-2">Delivery Status</th>
+            <th className="border px-4 py-2">รหัสคำสั่งซื้อ</th>
+            <th className="border px-4 py-2">ราคารวม</th>
+            <th className="border px-4 py-2">สถานะคำสั่งซื้อ</th>
+            <th className="border px-4 py-2">สถานะการชำระเงิน</th>
+            <th className="border px-4 py-2">สถานะการจัดส่ง</th>
           </tr>
         </thead>
         <tbody>
@@ -65,13 +78,19 @@ export default function History() {
               <tr
                 key={history.id}
                 className="cursor-pointer hover:bg-gray-100"
-                onClick={() => router.push(`/dashboard/orders/${history.id}`)} // Updated route to match history detail page
+                onClick={() => router.push(`/dashboard/orders/${history.id}`)}
               >
                 <td className="border px-4 py-2">{history.id}</td>
                 <td className="border px-4 py-2">{history.totalPrice}</td>
-                <td className="border px-4 py-2">{history.status}</td>
-                <td className="border px-4 py-2">{history.paymentStatus}</td>
-                <td className="border px-4 py-2">{history.deliveryStatus}</td>
+                <td className={`border px-4 py-2 ${getStatusColor(history.status)}`}>
+                  {history.status}
+                </td>
+                <td className={`border px-4 py-2 ${getStatusColor(history.paymentStatus)}`}>
+                  {history.paymentStatus}
+                </td>
+                <td className={`border px-4 py-2 ${getStatusColor(history.deliveryStatus)}`}>
+                  {history.deliveryStatus}
+                </td>
               </tr>
             ))
           ) : (
