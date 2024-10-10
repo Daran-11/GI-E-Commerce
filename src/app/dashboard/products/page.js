@@ -310,8 +310,8 @@ const Product = () => {
                     <Image
                       src={product.imageUrl}
                       alt={product.ProductName}
-                      width={200} // Adjust width as needed
-                      height={200} // Adjust height as needed
+                      width={100} // Adjust width as needed
+                      height={100} // Adjust height as needed
                       style={{
                         objectFit: "cover",
                         marginTop: "10px",

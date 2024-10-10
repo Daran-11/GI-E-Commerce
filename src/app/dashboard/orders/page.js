@@ -70,6 +70,19 @@ export default function IncomingOrders() {
     return null;
   }
 
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'Completed':
+      case 'Delivered':
+        return 'text-green-600';
+      case 'Pending':
+      case 'Preparing':
+        return 'text-yellow-600';
+      default:
+        return 'text-gray-600';
+    }
+  };
+
   const viewOrderDetails = (orderId) => {
     if (orderId) {
       router.push(`/dashboard/orders/${orderId}`);
@@ -85,14 +98,14 @@ export default function IncomingOrders() {
       </div>
 
       <table className={styles.table}>
-        <thead>
+        <thead >
           <tr>
-            <th className="border px-4 py-2">Order ID</th>
-            <th className="border px-4 py-2">Total Price</th>
-            <th className="border px-4 py-2">Status</th>
-            <th className="border px-4 py-2">Payment Status</th>
-            <th className="border px-4 py-2">Delivery Status</th>
-            <th className="border px-4 py-2">Actions</th>
+            <th className="border px-4 py-2">รหัสคำสั่งซื้อ</th>
+            <th className="border px-4 py-2">ราคารวม</th>
+            <th className="border px-4 py-2">สถานะคำสั่งซื้อ</th>
+            <th className="border px-4 py-2">สถานะการชำระเงิน</th>
+            <th className="border px-4 py-2">สถานะการจัดส่ง</th>
+            <th className="border px-4 py-2">จุดทดสอบ</th>
           </tr>
         </thead>
         <tbody>
@@ -104,9 +117,9 @@ export default function IncomingOrders() {
             >
               <td className="border px-4 py-2">{order.id}</td>
               <td className="border px-4 py-2">{order.totalPrice}</td>
-              <td className="border px-4 py-2">{order.status}</td>
-              <td className="border px-4 py-2">{order.paymentStatus}</td>
-              <td className="border px-4 py-2">{order.deliveryStatus}</td>
+              <td className={`border px-4 py-2 ${getStatusColor(order.status)}`}>{order.status}</td>
+              <td className={`border px-4 py-2 ${getStatusColor(order.paymentStatus)}`}>{order.paymentStatus}</td>
+              <td className={`border px-4 py-2 ${getStatusColor(order.deliveryStatus)}`}>{order.deliveryStatus}</td>
               <td className="border px-4 py-2">
                 <button
                   onClick={(e) => {
@@ -124,7 +137,7 @@ export default function IncomingOrders() {
                     e.stopPropagation();
                     changeDeliveryStatus(order.id, 'Preparing');
                   }}
-                  className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
+                  className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-red-600"
                   disabled={updating}
                 >
                   {updating ? 'Updating...' : 'Mark as Preparing'}
