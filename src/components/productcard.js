@@ -96,9 +96,9 @@ const ProductCard = ({products}) => {
 
 
                   </div>
-                  <div className='px-[12px] md:px-[18px] md:mt-[2px] lg:mt-[5px] lg:mb-[10px]'>
+                  <div className='px-[12px] md:px-[18px] md:mt-[2px] lg:mt-[5px] lg:mb-[10px] plausible-event-name=Addcart'>
 
-                  <AddToCartButton product={product} 
+                  <AddToCartButton  product={product} 
                   ProductID ={product.ProductID}
                   />  
 

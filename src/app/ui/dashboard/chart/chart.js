@@ -1,82 +1,143 @@
-"use client"
-import styles from "./chart.module.css"
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend, Line, LineChart } from 'recharts';
+"use client";
+import React, { useEffect, useState } from "react";
+import styles from "./chart.module.css";
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from "recharts";
 
-const data = [
-  {
-    "name": "Page A",
-    "uv": 4000,
-    "pv": 2400,
-    "amt": 2400
-  },
-  {
-    "name": "Page B",
-    "uv": 3000,
-    "pv": 1398,
-    "amt": 2210
-  },
-  {
-    "name": "Page C",
-    "uv": 2000,
-    "pv": 9800,
-    "amt": 2290
-  },
-  {
-    "name": "Page D",
-    "uv": 2780,
-    "pv": 3908,
-    "amt": 2000
-  },
-  {
-    "name": "Page E",
-    "uv": 1890,
-    "pv": 4800,
-    "amt": 2181
-  },
-  {
-    "name": "Page F",
-    "uv": 2390,
-    "pv": 3800,
-    "amt": 2500
-  },
-  {
-    "name": "Page G",
-    "uv": 3490,
-    "pv": 4300,
-    "amt": 2100
-  }
-]
+const siteId = "gipineapple"; // Replace with your actual site ID
+const apiKey = "voNKNzpDiJsvE00ym9bspzvITg2J_XrOKBrX5TPQsWA7YJdyjanQTnwd8lar2aeg"; // Optional, if your Plausible API is private
 
-const chart = () => {
+const Chart = () => {
+  const [data, setData] = useState([]);
+
+  const fetchData = async () => {
+    try {
+      const period = "7d";
+
+      // Fetch timeseries data for visitors
+      const visitorsResponse = await fetch(
+        `https://plausible.io/api/v1/stats/timeseries?site_id=${siteId}&period=${period}`,
+        {
+          headers: {
+            Authorization: `Bearer ${apiKey}`, // Include this if using a private API key
+          },
+        }
+      );
+
+      if (!visitorsResponse.ok) {
+        throw new Error("Failed to fetch data from Plausible.");
+      }
+      const visitorsResult = await visitorsResponse.json();
+      console.log("Visitors Result:", visitorsResult);
+
+      const transformedVisitorsData = visitorsResult.results.map((item) => ({
+        date: item.date,
+        visitors: item.visitors,
+      }));
+
+      // Fetch total page views for the same period
+      const pageViewsResponse = await fetch(
+        `https://plausible.io/api/v1/stats/timeseries?site_id=${siteId}&period=${period}&metrics=pageviews`,
+        {
+          headers: {
+            Authorization: `Bearer ${apiKey}`, // Include if using a private API
+          },
+        }
+      );
+
+      if (!pageViewsResponse.ok) {
+        throw new Error("Failed to fetch page views data.");
+      }
+      const pageViewsResult = await pageViewsResponse.json();
+      console.log("Page Views Result:", pageViewsResult);
+
+      // Transform page views data to match visitors data structure
+      const transformedPageViewsData = pageViewsResult.results.map((item) => ({
+        date: item.date,
+        pageviews: item.pageviews || 0,
+      }));
+
+      console.log("Transformed Page Views Data:", transformedPageViewsData);
+
+      // Merge visitors and page views data
+      const mergedData = transformedVisitorsData.map((visitorData) => {
+        const correspondingPageView = transformedPageViewsData.find(
+          (pageView) => pageView.date === visitorData.date
+        );
+        return {
+          ...visitorData,
+          pageviews: correspondingPageView ? correspondingPageView.pageviews : 0,
+        };
+      });
+
+      console.log("Merged Data:", mergedData);
+
+      setData(mergedData);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+    const intervalId = setInterval(fetchData, 60000); // Refresh data every 60 seconds
+
+    return () => clearInterval(intervalId); // Cleanup interval on unmount
+  }, []);
+
   return (
-
     <div className={styles.container}>
       <h2 className={styles.title}>สรุปรายสัปดาห์</h2>
-      <ResponsiveContainer width="100%" height="90%">
-
-        <AreaChart width={730} height={250} data={data}
-          margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+      <ResponsiveContainer width="100%" height={400}>
+        <AreaChart
+          data={data}
+          margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+        >
           <defs>
-            <linearGradient id="colorUv" x1="0" y1="0" x2="0" y2="1">
+            <linearGradient id="colorVisitors" x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8} />
               <stop offset="95%" stopColor="#8884d8" stopOpacity={0} />
             </linearGradient>
-            <linearGradient id="colorPv" x1="0" y1="0" x2="0" y2="1">
+            <linearGradient id="colorPageviews" x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor="#4EAC14" stopOpacity={0.8} />
               <stop offset="95%" stopColor="#4EAC14" stopOpacity={0} />
             </linearGradient>
           </defs>
-          <XAxis dataKey="name" />
-          <YAxis />
-          <Tooltip contentStyle={{ background: "#151c2c", border: "none" }} />
-          <Area type="monotone" dataKey="uv" stroke="#8884d8" fillOpacity={1} fill="url(#colorUv)" />
-          <Area type="monotone" dataKey="pv" stroke="#4EAC14" fillOpacity={1} fill="url(#colorPv)" />
+          <XAxis dataKey="date" tick={{ fill: "#8884d8" }} />
+          <YAxis tick={{ fill: "#8884d8" }} />
+          <Tooltip
+            contentStyle={{ backgroundColor: "#151c2c", borderRadius: "5px" }}
+            labelStyle={{ color: "#ffffff" }}
+            itemStyle={{ color: "#ffffff" }}
+          />
+          <Legend verticalAlign="top" height={36} />
+          <Area
+            type="monotone"
+            dataKey="visitors"
+            stroke="#8884d8"
+            fillOpacity={1}
+            fill="url(#colorVisitors)"
+            name="Unique Visitors"
+          />
+          <Area
+            type="monotone"
+            dataKey="pageviews"
+            stroke="#4EAC14"
+            fillOpacity={1}
+            fill="url(#colorPageviews)"
+            name="Page Views"
+          />
         </AreaChart>
       </ResponsiveContainer>
-
-     
     </div>
-  )
-}
+  );
+};
 
-export default chart
+export default Chart;
