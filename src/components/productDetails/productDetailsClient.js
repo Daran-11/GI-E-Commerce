@@ -227,13 +227,13 @@ export default function ProductDetailsClient({ product, totalReviewsCount ,Produ
             </div>
             <div className='flex justify-between md:justify-start'>
               <button 
-              className='action-button bg-[#4EAC14] rounded-xl text-white w-[150px] h-[50px] font-light'
+              className='action-button bg-[#4EAC14] rounded-xl text-white w-[150px] h-[50px] font-light plausible-event-name=Addcart'
               onClick={buyNow}>
                 ซื้อเลย
               </button>
       
               <button 
-              className='action-button ml-4 text-[#4EAC14] border-2  border-gray-500 rounded-xl  ' 
+              className='action-button ml-4 text-[#4EAC14] border-2  border-gray-500 rounded-xl plausible-event-name=Addcart ' 
               onClick={addToCart}>
               เพิ่มในตะกร้า
               </button>                
