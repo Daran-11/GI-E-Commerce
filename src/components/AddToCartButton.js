@@ -34,7 +34,7 @@ export default function AddToCartButton({product, ProductID}) {
   return (
       
         <button 
-        className="w-full h-[35px] text-white bg-[#4eac14] rounded-md hover:bg-[#316b0c]"
+        className="w-full h-[35px] text-white bg-[#4eac14] rounded-md hover:bg-[#316b0c] "
         onClick={addToCart}>
             เพิ่มในตะกร้า
         </button>

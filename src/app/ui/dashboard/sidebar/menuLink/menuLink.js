@@ -8,7 +8,7 @@ const activeColors = {
   "หน้าหลัก": styles.activeDashboard,
   "จัดการสินค้า": styles.activeProducts,
   "จัดการคำสั่งซื้อ": styles.activeOrders,
-  "ประวัติการขาย": styles.activeTransactions,
+  "ประวัติการขาย": styles.activeHistory,
   "ตรวจสอบสินค้า": styles.activeCheckProducts,
   "ตรวจสอบย้อนกลับ": styles.activeTraceability,
   "ลงทะเบียนใบรับรอง": styles.activeCertificate,

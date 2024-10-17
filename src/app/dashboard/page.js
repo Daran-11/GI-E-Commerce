@@ -8,6 +8,11 @@ const Card = dynamic(() => import ("../ui/dashboard/card/card"),
     loading: () => <p>Loading...</p>,
   }
 )
+const Notification = dynamic(() => import ("../ui/dashboard/notification/notification"),
+  {
+    loading: () => <p>Loading...</p>,
+  }
+)
 const Chart = dynamic(() => import ("../ui/dashboard/chart/chart"))
 const Transactions = dynamic(() => import ("../ui/dashboard/transactions/transactions"))
 
@@ -20,7 +25,7 @@ const Dashboard = () => {
           <Card />
           <Card />
           <Card />
-          <Card />
+          <Notification />
         </div>
         <div>
         <Transactions />
