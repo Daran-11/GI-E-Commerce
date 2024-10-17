@@ -1,5 +1,6 @@
 "use client";
 
+import Search from '@/app/ui/dashboard/search/search';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import VisibilityRoundedIcon from '@mui/icons-material/VisibilityRounded';
@@ -9,24 +10,15 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from 'react';
 
 const deliveryStatusTranslations = {
-  Preparing: 'เตรียมพัสดุ',
-  Shipped: 'ระหว่างขนส่ง',
-  Delivered: 'จัดส่งสำเร็จ',
+  Preparing: 'กำลังเตรียมสินค้า',
+  Shipped: 'ส่งให้บริษัทขนส่งแล้ว',
+  OutForDelivery: 'กำลังจัดส่ง',
+  Delivered: 'สำเร็จ',
   Canceled: 'ยกเลิก',
   Returned: 'ส่งคืน',
   FailedDelivery: 'การจัดส่งล้มเหลว',
-  RefundProcessed: 'คืนเงิน',
-};
-
-const statusOptions = {
-  Pending: 'ยังไม่ชำระ',
-  Completed: 'ที่ต้องจัดส่ง',
-  Shipped: 'ระหว่างขนส่ง',
-  Delivered: 'จัดส่งสำเร็จ',
-  Canceled: 'ยกเลิก',
-  Returned: 'ส่งคืน',
-  FailedDelivery: 'การจัดส่งล้มเหลว',
-  RefundProcessed: 'คืนเงิน',
+  AwaitingPickup: 'รอการรับ',
+  RefundProcessed: 'คืนเงินเสร็จสิ้น',
 };
 
 const paymentStatusTranslations = {
@@ -66,7 +58,7 @@ const paymentStatusColors = {
 
 const orderStatuses = Object.keys(orderStatusTranslations); // Array of order statuses for filtering
 const paymentStatuses = Object.keys(paymentStatusTranslations); // Array of payment statuses for filtering
-const deliveryStatuses = Object.keys(statusOptions); // Array of delivery statuses for filtering
+const deliveryStatuses = Object.keys(deliveryStatusTranslations); // Array of delivery statuses for filtering
 
 export default function IncomingOrders() {
   const searchParams = useSearchParams();
@@ -81,8 +73,9 @@ export default function IncomingOrders() {
   const [selectedOrderStatus, setSelectedOrderStatus] = useState(''); // State for selected order status
   const [selectedPaymentStatus, setSelectedPaymentStatus] = useState(''); // State for selected payment status
   const [selectedDeliveryStatus, setSelectedDeliveryStatus] = useState(''); // State for selected delivery status
+  const [minPrice, setMinPrice] = useState(''); // State for minimum price
+  const [maxPrice, setMaxPrice] = useState(''); // State for maximum price
   const query = searchParams.get("query") || ""; // Get the search query
-
   const router = useRouter();
 
   const userId = session.user.id;
@@ -175,29 +168,16 @@ export default function IncomingOrders() {
     setMaxPrice('');
   };
 
-  const handleAllFilter = () => {
-    setSelectedPaymentStatus(null); // Reset payment status
-    setSelectedDeliveryStatus(null); // Reset delivery status
-  };
-  
-
+  // Filter orders based on selected statuses
   const filteredOrders = orders.filter(order => {
-    const matchesPaymentStatus = selectedPaymentStatus 
-      ? order.paymentStatus === selectedPaymentStatus 
-      : true;
-  
-    const matchesDeliveryStatus = selectedDeliveryStatus === "Pending"
-      ? order.paymentStatus === "Pending" // Check paymentStatus if deliveryStatus is "Pending"
-      : selectedDeliveryStatus === "Completed"
-      ? order.paymentStatus === "Completed" && order.deliveryStatus === "Preparing" // Check both paymentStatus and deliveryStatus if deliveryStatus is "Completed"
-      : selectedDeliveryStatus 
-      ? order.deliveryStatus === selectedDeliveryStatus 
-      : true;
-  
-    return matchesDeliveryStatus && matchesPaymentStatus;
+    const matchesOrderStatus = selectedOrderStatus ? order.status === selectedOrderStatus : true;
+    const matchesPaymentStatus = selectedPaymentStatus ? order.paymentStatus === selectedPaymentStatus : true;
+    const matchesDeliveryStatus = selectedDeliveryStatus ? order.deliveryStatus === selectedDeliveryStatus : true;
+    const matchesMinPrice = minPrice ? order.totalPrice >= Number(minPrice) : true;
+    const matchesMaxPrice = maxPrice ? order.totalPrice <= Number(maxPrice) : true;
+
+    return matchesOrderStatus && matchesPaymentStatus && matchesDeliveryStatus && matchesMinPrice && matchesMaxPrice;
   });
-  
-  
 
   if (status === 'loading' || loading) {
     return <div>Loading...</div>;
@@ -213,25 +193,100 @@ export default function IncomingOrders() {
 
       <div className='w-full h-fit  bg-white px-6 pt-6 pb-2 rounded-xl'> 
       <h1 className='page-header '>จัดการคำสั่งซื้อ</h1>          
-        {/* Toggle Buttons for Status Filtering */}
-        <div className="flex space-x-2 mb-4">
-        <button onClick={handleAllFilter} className="btn">
-          ทั้งหมด
-        </button>
+      {/* Dropdown for filtering orders by status */}
+      <div className="grid grid-cols md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7  gap-[5px]   ">
+        <div className=''>
+        <Search placeholder="ค้นหาจากรหัสคำสั่งซื้อ..."/>
+        </div>     
+        <div>
+          <label htmlFor="order-status-select">สถานะคำสั่งซื้อ</label>
+          <select
+            id="order-status-select"
+            value={selectedOrderStatus}
+            onChange={(e) => setSelectedOrderStatus(e.target.value)}
+            className='text-[#4eac14]'
+          >
+            <option value="" >
+              ทั้งหมด
+            </option>
+            {orderStatuses.map((status) => (
+              <option key={status} value={status}>
+                {orderStatusTranslations[status]}
+              </option>
+            ))}
+          </select>
+        </div>
 
-        {Object.keys(statusOptions).map((status) => (
-            <Button
-              key={status}
-              variant="contained"
-              color="primary"
-              onClick={() => setSelectedDeliveryStatus(status)}
-            >
-              {statusOptions[status]}
-            </Button>
-          ))}
-      </div>
+        <div>
+          <label htmlFor="payment-status-select">สถานะการชำระเงิน</label>
+          <select
+            id="payment-status-select"
+            value={selectedPaymentStatus}
+            onChange={(e) => setSelectedPaymentStatus(e.target.value)}
+            className='text-[#4eac14]'
+          >
+            <option value="">
+              ทั้งหมด
+            </option>
+            {paymentStatuses.map((status) => (
+              <option key={status} value={status}>
+                {paymentStatusTranslations[status]}
+              </option>
+            ))}
+          </select>
 
-      {/* Dropdown for filtering orders by status */}   
+
+        </div>
+
+        <div>
+          <label htmlFor="delivery-status-select">สถานะการจัดส่ง</label>
+          <select
+            id="delivery-status-select"
+            value={selectedDeliveryStatus}
+            onChange={(e) => setSelectedDeliveryStatus(e.target.value)}
+            className='text-[#4eac14]'
+          >
+            <option value="">
+              ทั้งหมด
+            </option>
+            {deliveryStatuses.map((status) => (
+              <option key={status} value={status}>
+                {deliveryStatusTranslations[status]}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label htmlFor="min-price">มูลค่าต่ำสุด</label>
+          <input
+          className='text-[#4eac14] w-full'
+            type="number"
+            id="min-price"
+            value={minPrice}
+            onChange={(e) => setMinPrice(e.target.value)}
+            placeholder="0"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="max-price">มูลค่าสูงสุด</label>
+          <input
+          className='text-[#4eac14] w-full'
+            type="number"
+            id="max-price"
+            value={maxPrice}
+            onChange={(e) => setMaxPrice(e.target.value)}
+            placeholder="1000"
+          />
+        </div>
+      
+        {/* Button to reset all filters */}
+        <Button variant="outlined" onClick={resetFilters}>
+          ล้าง Filter
+        </Button>
+        
+      </div>      
       </div>
            
       
@@ -240,30 +295,23 @@ export default function IncomingOrders() {
 
       <div className='relative overflow-x-auto rounded-xl'>
   <table className=" min-w-full h-fit border-separate border-spacing-0 bg-white p-6 ">
-    <div></div>
   <thead>
     <tr className='text-xs 2xl:text-base  bg-gray-100'>
       <th scope="col" className="w-[50px] px-2 pt-5 pb-3 border-b border-r text-start font-normal rounded-tl-lg">รหัส</th>
       <th scope="col" className="w-[150px] px-2 pt-5 pb-3 border-b border-r text-start font-normal">สถานะคำสั่งซื้อ</th>
-      <th scope="col" className="w-[120px] border-b px-2 pt-5 pb-3 border-r text-start font-normal">วันที่สั่งซื้อ</th>
+      <th scope="col" className="w-[150px] border-b px-2 pt-5 pb-3 border-r text-start font-normal">วันที่สั่งซื้อ</th>
       <th scope="col" className="w-[100px] border-b px-2 pt-5 pb-3 border-r text-start font-normal">รวม</th>
-      <th scope="col" className="w-[200px] border-b px-2 pt-5 pb-3 border-r text-start font-normal">ทีอยู่จัดส่ง</th>
+      <th scope="col" className="w-[200px] border-b px-2 pt-5 pb-3 border-r text-start font-normal">ทีอยู่</th>
       <th scope="col" className="w-[200px] border-b px-2 pt-5 pb-3 border-r text-start font-normal">ผู้ซื้อ</th>
       <th scope="col" className="w-[150px] border-b px-2 pt-5 pb-3 border-r text-start font-normal">บริการขนส่ง</th>
       <th scope="col" className="w-[100px] border-b px-2 pt-5 pb-3 border-r text-start font-normal">เลขพัสดุ</th>
       <th scope="col" className="w-[180px] border-b px-2 pt-5 pb-3 border-r text-start font-normal">สถานะการชำระเงิน</th>
       <th scope="col" className="w-[180px] border-b px-2 pt-5 pb-3 border-r text-start font-normal">สถานะการจัดส่ง</th>
-      <th scope="col" className="w-[320px] border-b px-2 pt-5 pb-3 border-r text-start font-normal  rounded-tr-lg">แอ็คชั่น</th>
+      <th scope="col" className="w-[350px] border-b px-2 pt-5 pb-3 border-r text-start font-normal  rounded-tr-lg">แอ็คชั่น</th>
     </tr>
   </thead>
   {filteredOrders.length === 0 ? (
-                    <tfoot>
-                    <tr className="bg-gray-100 text-right">
-                      <td colSpan="11" className="border  md:px-4 md:py-2 font-normal text-gray-400 text-left ">
-                        ไม่พบคำสั่งซือในตอนนี้
-                      </td>
-                    </tr>
-                  </tfoot>
+    <p>No incoming orders at the moment</p>
   ) : (
     <tbody>
       {filteredOrders.map((order) => (
@@ -313,8 +361,7 @@ export default function IncomingOrders() {
                 </div>
               </IconButton>
             </Tooltip>
-            
-            {order.deliveryStatus !== "Shipped" && order.deliveryStatus !== "Delivered"  && (
+
             <Tooltip title="เพิ่มเลขพัสดุ" arrow>
               <IconButton
                 aria-label="add-tracking"
@@ -326,8 +373,6 @@ export default function IncomingOrders() {
                 </div>
               </IconButton>
             </Tooltip>
-          )}
-
           </td>
         </tr>
       ))}

@@ -81,7 +81,7 @@ const currentStepIndex = deliveryStatuses.includes(orderDetails.deliveryStatus)
         <p><strong>หมายเลขคำสั่งซื้อ:</strong> {orderDetails.id}</p>
         <p><strong>ผู้ขาย:</strong> {orderDetails.farmer.farmerName}</p>
         <p><strong>สถานะ:</strong> {deliveryStatusTranslations[orderDetails.deliveryStatus]}</p>
-        <p><strong>รวม:</strong> {orderDetails.totalPrice} บาท</p>
+        <p><strong>รวมทั้งสิ้น</strong> {orderDetails.totalPrice} บาท</p>
         <p><strong>ที่อยู่จัดส่ง:</strong> {orderDetails.addressText}</p>
         <p><strong>บริษัทขนส่ง:</strong> </p>
         <p><strong>รหัสพัสดุ:</strong> </p>

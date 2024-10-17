@@ -46,15 +46,16 @@ const ProductCard = ({products}) => {
                   <div className="w-full h-[120px] md:h-[150px] xl:h-[160px]">
                   {product.images?.[0]?.imageUrl ? (
                     
-                    <Image
-                      src={product.images[0].imageUrl}
-                      alt={product.ProductName}
-                      width={0} // Adjust width as needed
-                      height={0} // Adjust height as needed
-                      sizes="100vw"
-                      loading="lazy"
-                      className=' w-full h-full object-cover rounded-t-2xl '
-                    />
+                  <Image
+                    src={product.images[0].imageUrl || "/phulae.jpg"} // Fallback to a default image
+                    alt={product.ProductName}
+                    width={0}
+                    height={0}
+                    sizes="100vw"
+                    loading="lazy"
+                    className='w-full h-full object-cover rounded-t-2xl'
+                    onError={(e) => e.target.src = "/phulae.jpg"} // Fallback if image fails to load
+                  />
                   ) : (
                     <img className="w-full h-full object-cover rounded-t-2xl" src="/phulae.jpg" alt="Card Image" />
                   )}

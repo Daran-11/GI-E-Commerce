@@ -39,7 +39,7 @@ export default function ProductDetailsClient({ product, totalReviewsCount ,Produ
       productAmount: productData.Amount,
       farmerId: productData.farmerId,
       Description: productData.Description,
-      imageUrl: productData.imageUrl,
+      imageUrl: productData.images.imageUrl,
     };
 
     try {
@@ -66,7 +66,7 @@ export default function ProductDetailsClient({ product, totalReviewsCount ,Produ
         productPrice: productData.Price,
         productAmount: productData.Amount,
         farmerId: productData.farmerId,
-        imageUrl: productData.imageUrl,
+        imageUrl: productData.images.imageUrl,
       };
   
       try {
@@ -147,9 +147,9 @@ export default function ProductDetailsClient({ product, totalReviewsCount ,Produ
       
       <div className='detail  flex justify-center md:justify-start '> 
         <div className='hidden md:flex w-full h-[500px] bg-white  rounded-2xl items-center justify-center text-center '>
-              {product.imageUrl ? (
+              {product.images?.[0]?.imageUrl ? (
                     <Image
-                      src={product.imageUrl}
+                      src={product.images[0].imageUrl}
                       alt={product.ProductName}
                       width={0} // Adjust width as needed
                       height={0} // Adjust height as needed
@@ -163,9 +163,9 @@ export default function ProductDetailsClient({ product, totalReviewsCount ,Produ
         <div className=' w-full h-fit lg:h-[500px]  bg-white lg:ml-[25px] rounded-2xl p-6'>
           <div className=' text-[#535353]'>
             <div className='lg:hidden flex justify-center'>
-                      {product.imageUrl ? (
+                      {product.images?.[0]?.imageUrl ? (
                             <Image
-                              src={product.imageUrl}
+                              src={product.images[0].imageUrl}
                               alt={product.ProductName}
                               width={0} // Adjust width as needed
                               height={0} // Adjust height as needed

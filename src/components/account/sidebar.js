@@ -20,41 +20,41 @@ const Sidebar = ({ isOpen, toggleDrawer }) => {
       } transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0`}
     >
         <div className='h-full px-3 py-4 overflow-y-auto bg-white'>
-      <div className="p-4 flex justify-between lg:hidden">
-        <h2 className="text-xl font-bold">Menu</h2>
-        <button onClick={toggleDrawer} className="text-black">
-          Close
-        </button>
-      </div>
-      <ul className="p-4">
-        <li className="mb-2">
-          <button
-            className="flex justify-between w-full text-left"
-            onClick={toggleSubMenu}
-          >
-            จัดการบัญชี
-          </button>
-          {isSubMenuOpen && (
-            <ul className="ml-4 mt-2">
+          <div className="p-4 flex justify-between lg:hidden">
+            <h2 className="text-xl font-bold">Menu</h2>
+            <button onClick={toggleDrawer} className="text-black">
+              Close
+            </button>
+          </div>
+            <ul className="p-4">
               <li className="mb-2">
-                <Link href="/account/user/profile">ข้อมูลของฉัน</Link>
+                <button
+                  className="flex justify-between w-full text-left"
+                  onClick={toggleSubMenu}
+                >
+                  จัดการบัญชี
+                </button>
+                {isSubMenuOpen && (
+                  <ul className="ml-4 mt-2">
+                    <li className="mb-2">
+                      <Link href="/account/user/profile">ข้อมูลของฉัน</Link>
+                    </li>
+                    <li className="mb-2">
+                      <Link href="/account/user/bank-accounts">บัญชีธนาคาร</Link>
+                    </li>
+                    <li className="mb-2">
+                      <Link href="/account/user/addresses">ทีอยู่</Link>
+                    </li>
+                  </ul>
+                )}
               </li>
               <li className="mb-2">
-                <Link href="/account/user/bank-accounts">บัญชีธนาคาร</Link>
+                <Link href="/account/user/purchases">การสั่งซื้อ</Link>
               </li>
               <li className="mb-2">
-                <Link href="/account/user/addresses">ทีอยู่</Link>
+                <Link href="/account/settings">ตั้งค่า</Link>
               </li>
-            </ul>
-          )}
-        </li>
-        <li className="mb-2">
-          <Link href="/account/user/purchases">การสั่งซื้อ</Link>
-        </li>
-        <li className="mb-2">
-          <Link href="/account/settings">ตั้งค่า</Link>
-        </li>
-      </ul>            
+            </ul>            
         </div>
 
     </aside>        

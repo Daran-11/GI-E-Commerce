@@ -1,10 +1,10 @@
 // completed
 'use client'
 
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { useCallback, useState } from "react"
 import { MdSearch } from "react-icons/md"
 import styles from "./search.module.css"
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { useCallback, useEffect, useState } from "react"
 
 // Debounce function
 const debounce = (func, delay) => {
@@ -50,7 +50,7 @@ const Search = ({ placeholder }) => {
   };
 
   return (
-    <div className={styles.container}>
+    <div className="flex items-center gap-2.5 bg-[#F3F3F3] p-2.5 rounded-lg w-full">
       <MdSearch />
       <input 
         type="text" 

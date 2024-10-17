@@ -4,20 +4,19 @@
 import AddProductDialog from "@/app/dashboard/products/add/page";
 import EditProductDialog from "@/app/dashboard/products/edit/[ProductID]/page";
 import Pagination from "@/app/ui/dashboard/pagination/pagination";
-import Search from "@/app/ui/dashboard/search/search";
-import Button from "@mui/material/Button";
-import { useSession } from 'next-auth/react';
-import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
-import SortSelect from "@/app/ui/dashboard/sort/dropdown";
 import styles from "@/app/ui/dashboard/products/products.module.css";
-import IconButton from '@mui/material/IconButton';
+import Search from "@/app/ui/dashboard/search/search";
+import SortSelect from "@/app/ui/dashboard/sort/dropdown";
+import AddBoxIcon from '@mui/icons-material/AddBox';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import AddBoxIcon from '@mui/icons-material/AddBox';
+import Button from "@mui/material/Button";
+import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
+import { useSession } from 'next-auth/react';
+import Image from "next/image";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 const Product = () => {
 
@@ -310,8 +309,8 @@ const Product = () => {
                     <Image
                       src={product.imageUrl}
                       alt={product.ProductName}
-                      width={200} // Adjust width as needed
-                      height={200} // Adjust height as needed
+                      width={100} // Adjust width as needed
+                      height={100} // Adjust height as needed
                       style={{
                         objectFit: "cover",
                         marginTop: "10px",

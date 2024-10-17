@@ -15,7 +15,13 @@ export async function GET(request,{ params }) {
       where: {
         ProductID: parseInt(ProductID, 10),
       },
+      include: {
+        images: true,
+      }
     });
+
+
+
 
     if (!product) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
