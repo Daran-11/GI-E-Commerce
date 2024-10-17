@@ -32,6 +32,7 @@ export async function POST(request) {
             where: { id: parseInt(id, 10) }, // Ensure the ID is an integer
             data: { 
               paymentStatus: 'Completed', // Use the enum value correctly
+              status: 'Processing'
             },
           });
         })

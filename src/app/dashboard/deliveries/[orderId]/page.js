@@ -8,7 +8,7 @@ const deliveryStatusTranslations = {
   Preparing: 'กำลังเตรียมสินค้า',
   Shipped: 'ส่งให้บริษัทขนส่งแล้ว',
   OutForDelivery: 'กำลังจัดส่ง',
-  Delivered: 'จัดส่งสำเร็จ',
+  Delivered: 'พัสดุส่งมอบแล้ว',
   Canceled: 'ยกเลิก',
   Returned: 'ส่งคืน',
   FailedDelivery: 'การจัดส่งล้มเหลว',
@@ -162,7 +162,7 @@ export default function OrderDetails({params}) {
       
       <div className='bg-white w-full h-fit  p-3 md:p-5 rounded-xl '>
       <h3 className='text-2xl border-b-2 pb-2 mb-3'>รายละเอียดสินค้า</h3>
-      <table className="min-w-full h-fit table-auto border-collapse border border-gray-200 mt-4">
+      <table className="min-w-full table-auto border-collapse border border-gray-200 mt-4">
         <thead>
         <tr className="bg-gray-100">
           <th className="border border-gray-300 md:px-2 md:py-2  text-left">ชื่อสินค้า</th>

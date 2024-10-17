@@ -107,20 +107,19 @@ model CartItem {
 model Order {
   id               Int              @id @default(autoincrement())
   userId           Int
-  deliveryId       Int?
+  deliveryId       Int?             // Reference to Delivery_Detail (optional)
   farmerId         Int
   totalPrice       Float
   addressText      String           // Stores the delivery address in text form
   status           orderStatus      @default(Pending)
-  deliveryStatus   DeliveryStatus   @default(Preparing) // Delivery process status
-  paymentStatus    paymentStatus    @default(Pending)   // New field for tracking payment status
+  deliveryStatus   DeliveryStatus   @default(Preparing)
+  paymentStatus    paymentStatus    @default(Pending)
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
 
-
-  farmer           Farmer           @relation(fields: [farmerId], references: [id]) // Farmer relation
+  farmer           Farmer           @relation(fields: [farmerId], references: [id])
   user             User             @relation(fields: [userId], references: [id])
-  delivery         Delivery_Detail? @relation(fields: [deliveryId], references: [id])
+  delivery         Delivery_Detail?
   orderItems       OrderItem[]      // Relation to OrderItem table (1-to-many)
 }
 
@@ -140,6 +139,7 @@ model OrderItem {
 
 enum orderStatus {
   Pending
+  Processing
   Completed
 }
 
@@ -167,21 +167,21 @@ enum DeliveryStatus {
 
 
 
-model Delivery_Service{
-  id      Int @id @default(autoincrement())
-  name    String
-
-  deliveryOrder Delivery_Detail[]
+model Delivery_Service {
+  id          Int              @id @default(autoincrement())
+  name        String
+  isAvailable Boolean @default(true)
+  deliveries  Delivery_Detail[] // One-to-many relationship with Delivery_Detail
 }
 
 model Delivery_Detail {
-  id            Int  @id @default(autoincrement())
-  deliveryId    Int 
-  trackingNum   String    
+  id              Int              @id @default(autoincrement())
+  deliveryId      Int
+  orderId         Int              @unique  // Associate with a specific order and must be unique
+  trackingNum     String           // Tracking number for this specific order
 
-  order                 Order[]
-  deliveryService       Delivery_Service  @relation(fields: [deliveryId], references: [id])
-
+  order           Order            @relation(fields: [orderId], references: [id]) // One-to-one relation with Order
+  deliveryService Delivery_Service @relation(fields: [deliveryId], references: [id]) // Relation with Delivery_Service
 }
 
 model Address {
