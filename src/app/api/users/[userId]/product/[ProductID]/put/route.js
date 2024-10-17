@@ -6,11 +6,6 @@ import { NextResponse } from "next/server";
 import path from "path";
 import prisma from "../../../../../../../../lib/prisma";
 
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
 
 // Helper function to handle file uploads
 async function handleFileUpload(file) {

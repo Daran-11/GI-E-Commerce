@@ -89,6 +89,8 @@ model User {
   Farmer          Farmer[]
   Reviews         RatingReview[]
   BankAccounts    BankAccount[] 
+
+  History History[]
 }
 
 model CartItem {
@@ -121,6 +123,8 @@ model Order {
   user             User             @relation(fields: [userId], references: [id])
   delivery         Delivery_Detail?
   orderItems       OrderItem[]      // Relation to OrderItem table (1-to-many)
+
+  History History[]
 }
 
 model OrderItem {
@@ -264,6 +268,8 @@ model Farmer {
   //Relationships
   user           User           @relation(fields: [userId], references: [id])
 
+
+  History History[]
 }
 
 model Certificate {
@@ -278,3 +284,21 @@ model Certificate {
   farmer          Farmer   @relation(fields: [farmerId], references: [id])
 }
 
+model History {
+  id             Int      @id @default(autoincrement())
+  orderId        Int      // Reference to the completed Order
+  userId         Int      // Reference to the user who placed the order
+  farmerId       Int
+  totalPrice     Float
+  status         orderStatus
+  paymentStatus  paymentStatus
+  deliveryStatus DeliveryStatus
+  completedAt    DateTime @default(now()) // The time when the order was completed
+
+  // Relations
+  order          Order    @relation(fields: [orderId], references: [id])
+  user           User     @relation(fields: [userId], references: [id])
+  farmer         Farmer   @relation(fields: [farmerId], references: [id])
+
+  @@index([orderId, userId])
+}

@@ -50,6 +50,11 @@ export default function OrderConfirmation() {
     }
   }, [status, router]);
 
+  // Function to navigate back to the index page
+  const navigateToHome = () => {
+    router.push('/'); // Navigate to the index page
+  };  
+
   if (error) {
     return <div>{error}</div>;
   }
@@ -57,6 +62,7 @@ export default function OrderConfirmation() {
   if (!orders) {
     return <div>Loading...</div>;
   }
+
 
   const totalSum = orders.reduce((sum, order) => {
     return sum + order.totalPrice;
@@ -141,6 +147,15 @@ export default function OrderConfirmation() {
           </div>
         </div>
           ))} 
+       {/* Add a Back to Home Button */}
+      <div className="mt-8 text-center">
+        <button
+          onClick={navigateToHome}
+          className="w-[200px] px-4 py-2 bg-[#4eac14] text-white rounded-md hover:bg-[#316b0c] transition duration-200"
+        >
+          กลับสู่หน้าหลัก
+        </button>
+      </div>
       </div>
     </div>
   );

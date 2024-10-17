@@ -43,24 +43,26 @@ const ProductCard = ({products}) => {
                   <Link key={product.ProductID} href={`/product/${product.ProductID}${product.ProductName}${product.ProductType}`}>
                   
 
-                  <div className="w-full h-[120px] md:h-[150px] xl:h-[160px]">
+                  <div className="w-full h-[120px] md:h-[120px] xl:h-[160px] flex justify-center items-center ">
                   {product.images?.[0]?.imageUrl ? (
-                    
-                  <Image
-                    src={product.images[0].imageUrl || "/phulae.jpg"} // Fallback to a default image
-                    alt={product.ProductName}
-                    width={0}
-                    height={0}
-                    sizes="100vw"
-                    loading="lazy"
-                    className='w-full h-full object-cover rounded-t-2xl'
-                    onError={(e) => e.target.src = "/phulae.jpg"} // Fallback if image fails to load
-                  />
+                    <Image
+                      src={product.images[0].imageUrl || "/phulae.jpg"} // Fallback to a default image
+                      alt={product.ProductName}
+                      width={100}
+                      height={100}
+                      sizes="50vw"
+                      loading="lazy"
+                      className="object-cover object-center rounded-t-2xl"
+
+                    />
                   ) : (
-                    <img className="w-full h-full object-cover rounded-t-2xl" src="/phulae.jpg" alt="Card Image" />
+                    <img
+                      className="w-full h-full object-cover object-center rounded-t-2xl"
+                      src="/phulae.jpg"
+                      alt="Card Image"
+                    />// Fallback if image fails to load
                   )}
-                      
-                  </div>
+                </div>
       
 
                   <div className="px-[12px] md:px-[18px] h-fit pb-2 -space-y-1 md:space-y-0">
@@ -97,9 +99,9 @@ const ProductCard = ({products}) => {
 
 
                   </div>
-                  <div className='px-[12px] md:px-[18px] md:mt-[2px] lg:mt-[5px] lg:mb-[10px]'>
+                  <div className='px-[12px] md:px-[18px] md:mt-[2px] lg:mt-[5px] lg:mb-[10px] plausible-event-name=Addcart'>
 
-                  <AddToCartButton product={product} 
+                  <AddToCartButton  product={product} 
                   ProductID ={product.ProductID}
                   />  
 

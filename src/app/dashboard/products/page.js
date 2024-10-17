@@ -247,21 +247,21 @@ const Product = () => {
       <div className={styles.filterButtons}>
 
         <Button
-          onClick={() => handleFilterChange("แสดงทั้งหมด")}
+          onClick={() => setFilter("แสดงทั้งหมด")}
           variant={filter === "แสดงทั้งหมด" ? "contained" : "outlined"}
           style={{ backgroundColor: filter === "แสดงทั้งหมด" ? "#98de6d" : "#ffffff", color: filter === "แสดงทั้งหมด" ? "black" : "#388e3c" }}
         >
           แสดงทั้งหมด
         </Button>
         <Button
-          onClick={() => handleFilterChange("หมดสต็อก")}
+          onClick={() => setFilter("หมดสต็อก")}
           variant={filter === "หมดสต็อก" ? "contained" : "outlined"}
           style={{ backgroundColor: filter === "หมดสต็อก" ? "#98de6d" : "#ffffff", color: filter === "หมดสต็อก" ? "black" : "#388e3c" }}
         >
           หมดสต็อก
         </Button>
         <Button
-          onClick={() => handleFilterChange("มีสินค้า")}
+          onClick={() => setFilter("มีสินค้า")}
           variant={filter === "มีสินค้า" ? "contained" : "outlined"}
           style={{ backgroundColor: filter === "มีสินค้า" ? "#98de6d" : "#ffffff", color: filter === "มีสินค้า" ? "black" : "#388e3c" }}
         >

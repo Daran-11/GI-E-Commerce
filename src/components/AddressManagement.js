@@ -388,12 +388,17 @@ export default function AddressManagement() {
         <div className="">
         {addresses.length > 0 && addresses.map((address) => (
           <li className="flex justify-between bg-slate-100 rounded-xl px-2 py-2 my-2" key={address.id}>
-            <div className="text-sm md:text-base ">
+
+            <div className="text-sm md:text-base flex justify-start space-x-3">
+            <div>
             {address.addressLine}, {address.province.name_th}, {address.amphoe.name_th}, {address.tambon.name_th}, {address.postalCode}, {address.isDefault}              
             </div>
+            {address.isDefault && (<div className="px-2 bg-[#4eac14] text-white rounded-xl"> Default </div>)}              
+              </div>
+
             <div className="flex justify-end items-center gap-x-4 md:gap-x-8 text-sm md:text-base">
             <button disabled={address.isDefault}  className={`text-[#4eac14]  ${address.isDefault ? 'text-gray-500' : 'text-[#4eac14] hover:text-[#7ddb43]'}`} onClick={() => handleSetDefault(address.id)}>
-                {address.isDefault ? "ที่อยู่หลัก" : "เลือกเป็นที่อยู่หลัก"}
+                {address.isDefault ? "ที่อยู่จัดส่งหลัก" : "เลือกเป็นที่อยู่จัดส่งหลัก"}
               </button>     
               <button className="hidden sm:flex w-15 text-blue-500" onClick={() => handleEdit(address)}>แก้ไข</button>
               <button className="hidden sm:flex w-15 text-red-700"  onClick={() => handleDelete(address.id)}>ลบ</button>
