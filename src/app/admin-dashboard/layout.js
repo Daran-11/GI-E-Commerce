@@ -1,4 +1,5 @@
-import Sidebar from "../ui/dashboard/sidebar/farmer/sidebar"
+
+import Sidebar from "../ui/dashboard/sidebar/admin/sidebar"
 
 const Layout = ({children}) => {
   return (
