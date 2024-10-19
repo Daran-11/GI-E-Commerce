@@ -50,7 +50,7 @@ const Search = ({ placeholder }) => {
   };
 
   return (
-    <div className="flex items-center gap-2.5 bg-[#F3F3F3] p-2.5 rounded-lg w-full">
+    <div className="flex items-center gap-2.5 bg-[#F3F3F3] p-2.5 rounded-lg ">
       <MdSearch />
       <input 
         type="text" 

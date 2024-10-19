@@ -4,6 +4,7 @@ import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+
 const deliveryStatusTranslations = {
   Preparing: 'กำลังเตรียมสินค้า',
   Shipped: 'ส่งให้บริษัทขนส่งแล้ว',
@@ -24,49 +25,38 @@ const paymentStatusTranslations = {
   Processing: 'กำลังดำเนินการ',
 };
 
-const orderStatusTranslations = {
-  Pending: 'รอดำเนินการ',
-  Processing: 'กำลังดำเนินการ',
-  Completed: 'เสร็จสิ้น',
-};
-
-// Add color mappings for delivery status
 const statusColors = {
-  Preparing: 'text-white bg-yellow-500  border-2 border-yellow-500   focus:outline-none focus:ring-2 focus:ring-yellow-500',
-  Shipped: 'text-white bg-purple-500 border-2 blue-purple-500   focus:outline-none focus:ring-2 focus:ring-blue-500',
-  OutForDelivery: 'text-white  bg-orange-500 border-2 border-orange-500  focus:outline-none focus:ring-2 focus:ring-orange-500',
-  Delivered: 'text-white bg-green-500 border-2 border-green-500  focus:outline-none focus:ring-2 focus:ring-green-500',
-  Canceled: 'text-white bg-red-500 border-2 border-red-500   focus:outline-none focus:ring-2 focus:ring-red-500',
-  Returned: 'text-white bg-purple-500 border-2 border-purple-500  focus:outline-none focus:ring-2 focus:ring-purple-500',
-  FailedDelivery: 'text-white bg-red-600 border-2 border-red-600  focus:outline-none focus:ring-2 focus:ring-red-600',
-  AwaitingPickup: 'text-white bg-gray-500 border-2 border-gray-500  focus:outline-none focus:ring-2 focus:ring-gray-500',
-  RefundProcessed: 'text-white bg-blue-600 border- border-blue-600  focus:outline-none focus:ring-2 focus:ring-blue-500',
+  Preparing: 'text-white bg-yellow-500 border-2 border-yellow-500 focus:outline-none focus:ring-2 focus:ring-yellow-500',
+  Shipped: 'text-white bg-purple-500 border-2 border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500',
+  OutForDelivery: 'text-white bg-orange-500 border-2 border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500',
+  Delivered: 'text-white bg-green-500 border-2 border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500',
+  Canceled: 'text-white bg-red-500 border-2 border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500',
+  Returned: 'text-white bg-purple-500 border-2 border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500',
+  FailedDelivery: 'text-white bg-red-600 border-2 border-red-600 focus:outline-none focus:ring-2 focus:ring-red-600',
+  AwaitingPickup: 'text-white bg-gray-500 border-2 border-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-500',
+  RefundProcessed: 'text-white bg-blue-600 border-2 border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500',
 };
 
 const paymentStatusColors = {
-  Pending: 'text-white bg-yellow-500  border-2 border-yellow-500 ',
-  Completed: 'text-[#4eac14]  ',
-  Failed: 'text-white bg-red-600 border-2 border-red-600  ',
+  Pending: 'text-white bg-yellow-500 border-2 border-yellow-500',
+  Completed: 'text-[#4eac14]',
+  Failed: 'text-white bg-red-600 border-2 border-red-600',
   Refunded: 'text-white bg-purple-500 border-2 border-purple-500',
-  Processing: 'text-white bg-blue-600 border-2 border-blue-600 ',
-}
+  Processing: 'text-white bg-blue-600 border-2 border-blue-600',
+};
 
-
-export default function OrderDetails({params}) {
+export default function OrderDetails({ params }) {
   const { data: session, status } = useSession();
   const [order, setOrder] = useState(null);
   const [deliveryStatus, setDeliveryStatus] = useState('');
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const { orderId } = params;
-  
-  const userId = session.user.id;
 
-  
+  const userId = session.user.id;
 
   useEffect(() => {
     if (status === 'authenticated' && orderId && userId) {
-      // Fetch order details when orderId is available
       fetchOrderDetails(orderId);
     }
   }, [session, status, orderId]);
@@ -79,7 +69,7 @@ export default function OrderDetails({params}) {
       }
       const data = await res.json();
       setOrder(data);
-      setDeliveryStatus(data.deliveryStatus);  // Set the initial delivery status
+      setDeliveryStatus(data.deliveryStatus);
     } catch (error) {
       console.error(error);
     } finally {
@@ -87,20 +77,10 @@ export default function OrderDetails({params}) {
     }
   };
 
-  // Handle loading and undefined cases
-  if (status === 'loading' || loading || !orderId) {
-    return <div>Loading...</div>;
-  }
-
-  if (!order) {
-    return <div>Order not found</div>;
-  }
-
   const handleDeliveryStatusChange = async (e) => {
     const newStatus = e.target.value;
     setDeliveryStatus(newStatus);
-    
-    // Call backend to update delivery status
+
     try {
       const res = await fetch(`/api/users/${session.user.id}/farmer/orders/?order=${orderId}`, {
         method: 'PUT',
@@ -109,29 +89,45 @@ export default function OrderDetails({params}) {
         },
         body: JSON.stringify({ deliveryStatus: newStatus }),
       });
+
       if (!res.ok) throw new Error('Failed to update delivery status');
+
+      // Refetch the order details to reflect the updated status
+      fetchOrderDetails(orderId);
     } catch (error) {
       console.error(error);
     }
   };
 
+  if (status === 'loading' || loading || !orderId) {
+    return <div>Loading...</div>;
+  }
+
+  if (!order) {
+    return <div>Order not found</div>;
+  }
+
   return (
     <div className='w-full h-fit space-y-5'>
       <div className="bg-white w-full h-fit p-4 md:p-6 rounded-xl">
-        <h1 className="page-header  !text-[#4eac14] ">รายละเอียดคำสั่งซื้อ        ORDER#{order.id}</h1>
+        <h1 className="page-header !text-[#4eac14]">รายละเอียดคำสั่งซื้อ ORDER#{order.id}</h1>
 
         <div className='flex justify-start space-x-4'>
-          <div className={`${paymentStatusColors[order.paymentStatus]}  h-fit w-fit p-4  text-center border-2 border-transparent py-1  rounded-3xl`}>
-                {paymentStatusTranslations[order.paymentStatus] === 'ชำระเงินแล้ว' ? <div>  <CheckRoundedIcon/> {paymentStatusTranslations[order.paymentStatus]} </div> : <div>{paymentStatusTranslations[order.paymentStatus]}</div> }
-                
+          <div className={`${paymentStatusColors[order.paymentStatus]} h-fit w-fit p-4 text-center border-2 border-transparent py-1 rounded-3xl`}>
+            {paymentStatusTranslations[order.paymentStatus] === 'ชำระเงินแล้ว' ? (
+              <div><CheckRoundedIcon /> {paymentStatusTranslations[order.paymentStatus]}</div>
+            ) : (
+              <div>{paymentStatusTranslations[order.paymentStatus]}</div>
+            )}
           </div>
-                {/* Delivery Status */}
+
+          {/* Delivery Status */}
           <div className=''>
             <select
               id="deliveryStatus"
               value={deliveryStatus}
               onChange={handleDeliveryStatusChange}
-              className={`${statusColors[deliveryStatus]}  border-r-8 border-transparent py-1  rounded-3xl `}
+              className={`${statusColors[deliveryStatus]} border-r-8 border-transparent py-1 rounded-3xl`}
             >
               {Object.keys(deliveryStatusTranslations).map((status) => (
                 <option key={status} value={status} className="text-black bg-white text-center">
@@ -139,69 +135,58 @@ export default function OrderDetails({params}) {
                 </option>
               ))}
             </select>
-          </div>          
+          </div>
         </div>
-        {/*<p>สถานะคำสั่งซื้อ {orderStatusTranslations[order.status]}</p>*/}
-
       </div>
 
-
-      
-
-      <div className="bg-white w-full h-fit p-4 md:p-6 rounded-xl ">
+      <div className="bg-white w-full h-fit p-4 md:p-6 rounded-xl">
         <p className="text-2xl border-b-2 pb-2 mb-3">ข้อมูลผู้ซื้อ</p>
         <p>ชื่อ {order.user.name}</p>
         <p>อีเมล {order.user.email}</p>
         <p>เบอร์โทร {order.user.phone}</p>
         <div className="my-2">
-            <h3><strong>ทีอยู่สำหรับจัดส่ง</strong></h3>
-            <p>{order.addressText}</p>
-          </div>
+          <h3><strong>ทีอยู่สำหรับจัดส่ง</strong></h3>
+          <p>{order.addressText}</p>
+        </div>
       </div>
 
-      
-      <div className='bg-white w-full h-fit  p-3 md:p-5 rounded-xl '>
-      <h3 className='text-2xl border-b-2 pb-2 mb-3'>รายละเอียดสินค้า</h3>
-      <table className="min-w-full h-fit table-auto border-collapse border border-gray-200 mt-4">
-        <thead>
-        <tr className="bg-gray-100">
-          <th className="border border-gray-300 md:px-2 md:py-2  text-left">ชื่อสินค้า</th>
-          <th className="border border-gray-300 md:px-4 md:py-2">จำนวน</th>
-          <th className="border border-gray-300 md:px-4 md:py-2 ">ราคา (บาท)</th>
-          <th className="border border-gray-300 md:px-4 md:py-2 text-right">ราคารวม (บาท)</th>
-        </tr>
-        </thead>
-        <tbody>
-        {order.orderItems.map((item) => (
-                  <tr key={item.id} className="text-center">
-                    <td className="border border-gray-300 md:px-2 md:py-2 text-left">
-                      {item.product.ProductName}{item.product.ProductType}
-                    </td>
-                    <td className="border border-gray-300 md:px-4 md:py-2">
-                      {item.quantity}
-                    </td>
-                    <td className="border border-gray-300 md:px-4 md:py-2">
-                      {item.price.toFixed(2)} 
-                    </td>
-                    <td className="border border-gray-300 md:px-4 md:py-2 text-right">
-                      {(item.quantity * item.price).toFixed(2)} 
-                    </td>
-                  </tr>
-                ))}
-        </tbody>
-        <tfoot>
-                <tr className="bg-gray-100 text-right">
-                  <td colSpan="3" className="border border-gray-300 md:px-4 md:py-2 font-bold">
-                    รวม:
-                  </td>
-                  <td className="border border-gray-300 md:px-4 md:py-2 font-bold">
-                    {order.totalPrice.toFixed(2)} บาท
-                  </td>
-                </tr>
-        </tfoot>
-      </table>        
+      <div className='bg-white w-full h-fit p-3 md:p-5 rounded-xl'>
+        <h3 className='text-2xl border-b-2 pb-2 mb-3'>รายละเอียดสินค้า</h3>
+        <table className="min-w-full h-fit table-auto border-collapse border border-gray-200 mt-4">
+          <thead>
+            <tr className="bg-gray-100">
+              <th className="border border-gray-300 md:px-2 md:py-2 text-left">ชื่อสินค้า</th>
+              <th className="border border-gray-300 md:px-4 md:py-2">จำนวน</th>
+              <th className="border border-gray-300 md:px-4 md:py-2">ราคา (บาท)</th>
+              <th className="border border-gray-300 md:px-4 md:py-2 text-right">ราคารวม (บาท)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {order.orderItems.map((item) => (
+              <tr key={item.id} className="text-center">
+                <td className="border border-gray-300 md:px-2 md:py-2 text-left">
+                  {item.product.ProductName}{item.product.ProductType}
+                </td>
+                <td className="border border-gray-300 md:px-4 md:py-2">
+                  {item.quantity}
+                </td>
+                <td className="border border-gray-300 md:px-4 md:py-2">
+                  {item.price.toFixed(2)}
+                </td>
+                <td className="border border-gray-300 md:px-4 md:py-2 text-right">
+                  {(item.quantity * item.price).toFixed(2)}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+          <tfoot>
+            <tr className="bg-gray-100 text-right">
+              <td colSpan="3" className="border border-gray-300 md:px-4 md:py-2 font-bold">รวม:</td>
+              <td className="border border-gray-300 md:px-4 md:py-2 font-bold">{order.totalPrice.toFixed(2)} บาท</td>
+            </tr>
+          </tfoot>
+        </table>
       </div>
-
     </div>
   );
 }

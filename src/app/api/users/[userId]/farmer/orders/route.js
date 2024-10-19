@@ -3,6 +3,8 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import prisma from "../../../../../../../lib/prisma";
+import { checkOrderStatus } from "../../../../../../../lib/middleware/orderStatusMiddleware";
+
 
 // Get all orders under that specific farmer parsing userId to check for farmer from params
 export async function GET(req, { params }) {
@@ -31,6 +33,9 @@ export async function GET(req, { params }) {
   if (!farmer) {
     return NextResponse.json({ error: 'Farmer profile not found for this user' }, { status: 404 });
   }
+
+  // Apply middleware to update statuses before proceeding
+  await checkOrderStatus(req, userId);
 
   // Check if an Order ID is provided
   if (OrderId) {

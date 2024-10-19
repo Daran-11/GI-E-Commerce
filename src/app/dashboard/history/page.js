@@ -1,10 +1,11 @@
-// pages/farmer/incoming-orders.js
 "use client";
 import Search from "@/app/ui/dashboard/search/search";
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import styles from "@/app/ui/dashboard/products/products.module.css";
+import { Box, Button, FormControl, IconButton, InputLabel, MenuItem, Modal, Select, TextField, Tooltip } from '@mui/material';
+import VisibilityRoundedIcon from '@mui/icons-material/VisibilityRounded';
 
 export default function History() {
   const { data: session, status } = useSession();
@@ -27,6 +28,7 @@ export default function History() {
       }
       const data = await res.json();
       setOrders(data);
+      console.log("This is the data from history", data)
     } catch (error) {
       console.error(error);
     } finally {
@@ -47,6 +49,17 @@ export default function History() {
     }
   };
 
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('th-TH', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
   if (status === 'loading' || loading) {
     return <div>Loading...</div>;
   }
@@ -64,12 +77,14 @@ export default function History() {
 
       <table className={styles.table}>
         <thead>
-          <tr>
+          <tr className='text-xs 2xl:text-base  bg-gray-100'>
             <th className="border px-4 py-2">รหัสคำสั่งซื้อ</th>
             <th className="border px-4 py-2">ราคารวม</th>
             <th className="border px-4 py-2">สถานะคำสั่งซื้อ</th>
             <th className="border px-4 py-2">สถานะการชำระเงิน</th>
             <th className="border px-4 py-2">สถานะการจัดส่ง</th>
+            <th className="border px-4 py-2">วันที่เสร็จสิ้น</th> 
+            <th className="border px-4 py-2">แอ็คชั่น</th> 
           </tr>
         </thead>
         <tbody>
@@ -77,31 +92,57 @@ export default function History() {
             orders.map((history) => (
               <tr
                 key={history.id}
-                className="cursor-pointer hover:bg-gray-100"
-                onClick={() => router.push(`/dashboard/orders/${history.id}`)}
+                className=" hover:bg-gray-100"
+                
               >
-                <td className="border px-4 py-2">{history.id}</td>
-                <td className="border px-4 py-2">{history.totalPrice}</td>
-                <td className={`border px-4 py-2 ${getStatusColor(history.status)}`}>
+                <td className="border px-4 py-2 text-center">{history.orderId}</td>
+                <td className="border px-4 py-2 text-center">{history.totalPrice}</td>
+                <td className={`border px-4 py-2 text-center ${getStatusColor(history.status)}`}>
                   {history.status}
                 </td>
-                <td className={`border px-4 py-2 ${getStatusColor(history.paymentStatus)}`}>
+                <td className={`border px-4 py-2 text-center ${getStatusColor(history.paymentStatus)}`}>
                   {history.paymentStatus}
                 </td>
-                <td className={`border px-4 py-2 ${getStatusColor(history.deliveryStatus)}`}>
+                <td className={`border px-4 py-2 text-center ${getStatusColor(history.deliveryStatus)}`}>
                   {history.deliveryStatus}
                 </td>
+                <td className="border px-4 py-2 text-center">
+                  {new Date(history.completedAt).toLocaleString('th-TH', {
+                    timeZone: 'Asia/Bangkok',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                  })}
+                </td> {/* Display completedAt with time */}
+
+                <td className="border-b border-r px-2  md:py-2 text-center">
+            <Tooltip title="ดูรายละเอียด" arrow>
+              <IconButton
+                aria-label="view"
+                color="primary"
+                onClick={() => router.push(`/dashboard/orders/${history.orderId}`)}
+              >
+                <div className="border-2 text-sm md:px-2 py-1 rounded-xl">
+                  <VisibilityRoundedIcon /> ดูเพิ่มเติม
+                </div>
+              </IconButton>
+            </Tooltip>
+            </td>
               </tr>
             ))
           ) : (
             <tr>
-              <td colSpan={5} className="border px-4 py-2 text-center">
-                ไม่มีประวัติคำสั่งซื้อ
+              <td colSpan={6} className="border px-4 py-2 text-center">
+                ไม่พบประวัติคำสั่งซื้อ
               </td>
             </tr>
           )}
         </tbody>
       </table>
+
     </div>
   );
 }
