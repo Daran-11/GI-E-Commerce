@@ -132,3 +132,7 @@ a {
   color: inherit;
   text-decoration: none;
 }
+
+.footer-spacing {
+    margin-top: 2rem; /* Adjust as needed */
+}

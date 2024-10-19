@@ -83,8 +83,8 @@ export default function History() {
             <th className="border px-4 py-2">สถานะคำสั่งซื้อ</th>
             <th className="border px-4 py-2">สถานะการชำระเงิน</th>
             <th className="border px-4 py-2">สถานะการจัดส่ง</th>
-            <th className="border px-4 py-2">วันที่เสร็จสิ้น</th> 
-            <th className="border px-4 py-2">แอ็คชั่น</th> 
+            <th className="border px-4 py-2">วันที่เสร็จสิ้น</th>
+            <th className="border px-4 py-2">แอ็คชั่น</th>
           </tr>
         </thead>
         <tbody>
@@ -93,7 +93,7 @@ export default function History() {
               <tr
                 key={history.id}
                 className=" hover:bg-gray-100"
-                
+
               >
                 <td className="border px-4 py-2 text-center">{history.orderId}</td>
                 <td className="border px-4 py-2 text-center">{history.totalPrice}</td>
@@ -119,18 +119,18 @@ export default function History() {
                 </td> {/* Display completedAt with time */}
 
                 <td className="border-b border-r px-2  md:py-2 text-center">
-            <Tooltip title="ดูรายละเอียด" arrow>
-              <IconButton
-                aria-label="view"
-                color="primary"
-                onClick={() => router.push(`/dashboard/orders/${history.orderId}`)}
-              >
-                <div className="border-2 text-sm md:px-2 py-1 rounded-xl">
-                  <VisibilityRoundedIcon /> ดูเพิ่มเติม
-                </div>
-              </IconButton>
-            </Tooltip>
-            </td>
+                  <Tooltip title="ดูรายละเอียด" arrow>
+                    <IconButton
+                      aria-label="view"
+                      color="primary"
+                      onClick={() => router.push(`/dashboard/orders/${history.orderId}`)}
+                    >
+                      <div className="border-2 text-sm md:px-2 py-1 rounded-xl">
+                        <VisibilityRoundedIcon /> ดูเพิ่มเติม
+                      </div>
+                    </IconButton>
+                  </Tooltip>
+                </td>
               </tr>
             ))
           ) : (
