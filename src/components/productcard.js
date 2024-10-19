@@ -48,8 +48,8 @@ const ProductCard = ({products}) => {
                     <Image
                       src={product.images[0].imageUrl || "/phulae.jpg"} // Fallback to a default image
                       alt={product.ProductName}
-                      width={100}
-                      height={100}
+                      width={200}
+                      height={200}
                       sizes="50vw"
                       loading="lazy"
                       className="object-cover object-center rounded-t-2xl"

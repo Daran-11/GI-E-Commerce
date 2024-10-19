@@ -57,13 +57,13 @@ export async function GET(req, { params }) {
           await prisma.history.create({
             data: {
               orderId: order.id,
-              userId: order.userId,  // Assuming the order has a userId field
-              farmerId: order.farmerId, // Assuming the order has a farmerId field
+              userId: order.userId,
+              farmerId: order.farmerId,
               totalPrice: order.totalPrice,
               status: order.status,
               paymentStatus: order.paymentStatus,
               deliveryStatus: order.deliveryStatus,
-              // The completedAt field will default to now()
+              completedAt: new Date() // Manually set the completion time here
             },
           });
 
@@ -84,25 +84,19 @@ export async function GET(req, { params }) {
   } else {
     // Fetch all completed orders for the farmer
     try {
-      const orders = await prisma.order.findMany({
+      const history = await prisma.history.findMany({
         where: {
-          farmer: {
-            userId: parseInt(userId),
-          },
-          deliveryStatus: 'Delivered', // Adjust this based on your requirements
+          farmerId: parseInt(userId),
         },
-        orderBy: { createdAt: 'desc' },
+        orderBy: { completedAt: 'desc' }, // Sort by completion time
         include: {
-          orderItems: {
-            include: {
-              product: true,
-              farmer: true,
-            },
-          },
+          order: true,
+          user: true,
+          farmer: true,
         },
       });
 
-      return NextResponse.json(orders);
+      return NextResponse.json(history);
     } catch (error) {
       console.error("Error fetching orders:", error);
       return NextResponse.json({ error: 'Error fetching orders' }, { status: 500 });
