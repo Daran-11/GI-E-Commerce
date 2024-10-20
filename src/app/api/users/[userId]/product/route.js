@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server"; // Ensure you import NextResponse
 import prisma from "../../../../../../lib/prisma";
 
-export async function GET(request,{ params }) {
+export async function GET(request, { params }) {
   const session = await getServerSession({ request, ...authOptions });
   const { userId, ProductID } = params;
 
@@ -21,7 +21,8 @@ export async function GET(request,{ params }) {
 
   const farmer = await prisma.farmer.findUnique({
     where: {
-      userId: parseInt(userId) }
+      userId: parseInt(userId)
+    }
   });
 
   if (!farmer) {
@@ -30,17 +31,18 @@ export async function GET(request,{ params }) {
 
   if (ProductID) {
     try {
-      
+
       const product = await prisma.product.findUnique({
-        where: 
-        { ProductID: parseInt(ProductID, 10), 
+        where:
+        {
+          ProductID: parseInt(ProductID, 10),
           farmer: {
             userId: parseInt(userId),
           },
-         },
-        
+        },
+
       });
-      console.log("Get product Id:",ProductID)
+      console.log("Get product Id:", ProductID)
       if (product) {
         return NextResponse.json(product);
       } else {
@@ -79,7 +81,7 @@ export async function GET(request,{ params }) {
   }
 }
 
-export async function POST(request,{ params }) {
+export async function POST(request, { params }) {
 
   const session = await getServerSession({ request, ...authOptions });
   const { userId } = params;
@@ -96,20 +98,20 @@ export async function POST(request,{ params }) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
-    // Fetch the farmer data using the userId
-    const farmer = await prisma.farmer.findUnique({
-      where: { userId: parseInt(userId) }
-    });
+  // Fetch the farmer data using the userId
+  const farmer = await prisma.farmer.findUnique({
+    where: { userId: parseInt(userId) }
+  });
 
   if (!farmer) {
     console.log("Farmer data not found in Farmer table")
     return NextResponse.json({ error: 'Farmer profile not found for this user.' }, { status: 404 });
-    
+
   }
 
   try {
     const data = await request.json();
-    console.log("create data:",data)
+    console.log("create data:", data)
     const product = await prisma.product.create({
       data: {
         plotCode: data.plotCode,

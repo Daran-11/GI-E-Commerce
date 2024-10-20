@@ -2,50 +2,54 @@
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
-import prisma from "../../../../../../../lib/prisma";
+import prisma from "../../../../../../../lib/prisma"; // Ensure this path is correct
 import { checkOrderStatus } from "../../../../../../../lib/middleware/orderStatusMiddleware";
 
-
-// Get all orders under that specific farmer parsing userId to check for farmer from params
-export async function GET(req, { params }) {
-  const session = await getServerSession({ req, ...authOptions });
-  const { searchParams } = new URL(req.url);
-  const OrderId = searchParams.get("id");
-  const { userId } = params;
-  const query = searchParams.get("query") || ""; // Search query
-  
-  console.log("user id is ",userId)
-
+// Helper function to check session and permissions
+async function checkPermissions(session, userId) {
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  if (session.user.id !== parseInt(userId) && session.user.role !== "farmer") {
+  if (session.user.id !== parseInt(userId) && session.user.role !== "farmer" && session.user.role !== "admin") {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
+  return null; // No errors
+}
+
+// Get orders or specific order details based on request parameters
+export async function GET(req, { params }) {
+  const session = await getServerSession({ req, ...authOptions });
+  const { searchParams } = new URL(req.url);
+  const orderId = searchParams.get("id"); // Get the order ID from query parameters
+  const { userId } = params; // Get the user ID from route parameters
+  const query = searchParams.get("query") || ""; // Search query
+
+  // Check permissions
+  const permissionError = await checkPermissions(session, userId);
+  if (permissionError) return permissionError;
+
+  // Check for farmer profile only if not admin
   const farmer = await prisma.farmer.findUnique({
     where: {
       userId: parseInt(userId),
-    }
+    },
   });
 
-  if (!farmer) {
+  if (!farmer && session.user.role !== "admin") {
     return NextResponse.json({ error: 'Farmer profile not found for this user' }, { status: 404 });
   }
 
   // Apply middleware to update statuses before proceeding
   await checkOrderStatus(req, userId);
 
-  // Check if an Order ID is provided
-  if (OrderId) {
+  // If orderId is provided, fetch that specific order
+  if (orderId) {
     try {
-      const order = await prisma.order.findFirst({
+      const order = await prisma.order.findUnique({
         where: {
-          id: parseInt(OrderId),
-          farmer: {
-            userId: parseInt(userId), // Checking if the farmer belongs to the user
-          },
+          id: parseInt(orderId),
         },
         include: {
           farmer: true,
@@ -64,36 +68,31 @@ export async function GET(req, { params }) {
           },
         },
       });
-      console.log("Get Order ID:", OrderId);
-      if (order) {
+
+      if (order || session.user.role === "admin") {
         return NextResponse.json(order);
       } else {
-        return NextResponse.json(
-          { error: "Order not found" },
-          { status: 404 }
-        );
+        return NextResponse.json({ error: "Order not found" }, { status: 404 });
       }
     } catch (error) {
       console.error("Error fetching order:", error);
-      return NextResponse.json(
-        { error: "Error fetching order" },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: "Error fetching order" }, { status: 500 });
     }
   } else if (query) {
+    // Fetch orders based on the query (additional logic can be added here)
     try {
       const orders = await prisma.order.findMany({
         where: {
           farmer: {
             userId: parseInt(userId),
           },
-          id: parseInt(query), // Querying for order by ID directly
-          
+          id: parseInt(query), // Modify this as needed based on your search criteria
         },
         include: {
           user: {
             select: {
-              name: true, // Only fetch the name of the user
+              name: true,
+              phone: true,
             },
           },
           delivery: {
@@ -109,17 +108,14 @@ export async function GET(req, { params }) {
           },
         },
       });
-      console.log(orders.user);
+
       return NextResponse.json(orders);
     } catch (error) {
       console.error("Error fetching orders:", error);
-      return NextResponse.json(
-        { error: "Error fetching orders" },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: "Error fetching orders" }, { status: 500 });
     }
   } else {
-    // Fetching all orders if no query or OrderId
+    // Fetching all orders if no query or orderId
     try {
       const orders = await prisma.order.findMany({
         where: {
@@ -133,7 +129,7 @@ export async function GET(req, { params }) {
             select: {
               name: true,
               phone: true,
-            }
+            },
           },
           delivery: {
             include: {
@@ -151,27 +147,20 @@ export async function GET(req, { params }) {
       return NextResponse.json(orders);
     } catch (error) {
       console.error("Error fetching orders:", error);
-      return NextResponse.json(
-        { error: "Error fetching orders" },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: "Error fetching orders" }, { status: 500 });
     }
   }
 }
 
+// Update order delivery status
 export async function PUT(req, { params }) {
   const session = await getServerSession({ req, ...authOptions });
   const { searchParams } = new URL(req.url);
-  const orderId = searchParams.get("order");
-  const { userId } = params;
-  
-  if (!session) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  const orderId = searchParams.get("order"); // Get the order ID from query parameters
+  const { userId } = params; // Get the user ID from route parameters
 
-  if (session.user.id !== parseInt(userId) && session.user.role !== "farmer") {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-  }
+  const permissionError = await checkPermissions(session, userId);
+  if (permissionError) return permissionError;
 
   const farmer = await prisma.farmer.findUnique({
     where: {
@@ -179,15 +168,14 @@ export async function PUT(req, { params }) {
     }
   });
 
-  if (!farmer) {
+  if (!farmer && session.user.role !== "admin") {
     return NextResponse.json({ error: 'Farmer profile not found for this user' }, { status: 404 });
   }
-
 
   try {
     const { deliveryStatus } = await req.json();
 
-    // Validate deliveryStatus if necessary (you can implement your own validation logic)
+    // Validate deliveryStatus if necessary
     const validStatuses = [
       'Preparing',
       'Shipped',
@@ -201,7 +189,7 @@ export async function PUT(req, { params }) {
     ];
 
     if (!validStatuses.includes(deliveryStatus)) {
-      return new Response('Invalid delivery status', { status: 400 });
+      return NextResponse.json({ error: 'Invalid delivery status' }, { status: 400 });
     }
 
     // Update the order delivery status
@@ -214,9 +202,9 @@ export async function PUT(req, { params }) {
       },
     });
 
-    return new Response(JSON.stringify(updatedOrder), { status: 200 });
+    return NextResponse.json(updatedOrder, { status: 200 });
   } catch (error) {
     console.error(error);
-    return new Response('Failed to update delivery status', { status: 500 });
+    return NextResponse.json({ error: 'Failed to update delivery status' }, { status: 500 });
   }
 }

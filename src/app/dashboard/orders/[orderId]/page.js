@@ -4,6 +4,7 @@ import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import Layout from '../../layout'; // Adjust the import path
 
 const deliveryStatusTranslations = {
   Preparing: 'กำลังเตรียมสินค้า',
@@ -53,7 +54,8 @@ export default function OrderDetails({ params }) {
   const router = useRouter();
   const { orderId } = params;
 
-  const userId = session.user.id;
+  const userId = session?.user?.id;
+  const userRole = session?.user?.role;
 
   useEffect(() => {
     if (status === 'authenticated' && orderId && userId) {
@@ -99,6 +101,10 @@ export default function OrderDetails({ params }) {
     }
   };
 
+  const handleGoBack = () => {
+    router.back();
+  };
+
   if (status === 'loading' || loading || !orderId) {
     return <div>Loading...</div>;
   }
@@ -110,9 +116,23 @@ export default function OrderDetails({ params }) {
   return (
     <div className='w-full h-fit space-y-5'>
       <div className="bg-white w-full h-fit p-4 md:p-6 rounded-xl">
-        <h1 className="page-header !text-[#4eac14]">รายละเอียดคำสั่งซื้อ ORDER#{order.id}</h1>
+        {/* Conditionally render the "Go Back" button if the user is an admin */}
+        {userRole === 'admin' && (
+          <div className="mb-4">
+            <button
+              onClick={handleGoBack}
+              className="px-4 py-2 bg-white-100 text-black rounded-2xl border-2 border-\[\#d4d4d4\]  hover:border-[#4EAC14]"
+            >
+              กลับ
+            </button>
+          </div>
+        )}
 
-        <div className='flex justify-start space-x-4'>
+        <h1 className="page-header !text-[#4eac14]">
+          รายละเอียดคำสั่งซื้อ ORDER#{order.id}
+        </h1>
+
+        <div className='flex justify-start space-x-4 mt-4'>
           <div className={`${paymentStatusColors[order.paymentStatus]} h-fit w-fit p-4 text-center border-2 border-transparent py-1 rounded-3xl`}>
             {paymentStatusTranslations[order.paymentStatus] === 'ชำระเงินแล้ว' ? (
               <div><CheckRoundedIcon /> {paymentStatusTranslations[order.paymentStatus]}</div>
@@ -145,7 +165,7 @@ export default function OrderDetails({ params }) {
         <p>อีเมล {order.user.email}</p>
         <p>เบอร์โทร {order.user.phone}</p>
         <div className="my-2">
-          <h3><strong>ทีอยู่สำหรับจัดส่ง</strong></h3>
+          <h3><strong>ที่อยู่สำหรับจัดส่ง</strong></h3>
           <p>{order.addressText}</p>
         </div>
       </div>

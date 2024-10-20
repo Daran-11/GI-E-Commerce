@@ -12,7 +12,8 @@ import {
   MdOutlineSettings,
   MdPeople,
   MdShoppingBag,
-  MdSupervisedUserCircle
+  MdSupervisedUserCircle,
+  MdEmojiPeople
 } from "react-icons/md";
 import MenuLink from './menuLink/menuLink'; // Ensure this path is correct
 // Define the menu items
@@ -22,27 +23,27 @@ const menuItems = [
     list: [
       {
         title: "หน้าหลัก",
-        path: "/dashboard-admin",
+        path: "/admin-dashboard",
         icon: <MdDashboard />,
       },
       {
         title: "จัดการผู้ใช้",
-        path: "/dashboard-admin/user-management",
-        icon: <MdDashboard />,
+        path: "/admin-dashboard/user-management",
+        icon: <MdEmojiPeople />,
       },
       {
         title: "คำร้องเรียน",
-        path: "/dashboard-admin/report",
+        path: "/admin-dashboard/report",
         icon: <MdHelpCenter />,
       },
       {
         title: "จัดการสินค้า",
-        path: "/dashboard-admin/products-management",
+        path: "/admin-dashboard/products-management",
         icon: <MdShoppingBag />,
       },
       {
         title: "ประวัติการทำธุรกรรม",
-        path: "/dashboard-admin/transaction-management",
+        path: "/admin-dashboard/transaction-management",
         icon: <MdAttachMoney />,
       },
 
@@ -54,7 +55,7 @@ const menuItems = [
     list: [
       {
         title: "การตั้งค่า",
-        path: "/dashboard-admin/settings",
+        path: "/admin-dashboard/settings",
         icon: <MdOutlineSettings />,
       },
 
