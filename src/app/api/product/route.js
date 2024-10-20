@@ -3,12 +3,13 @@ import prisma from "../../../../lib/prisma";
 
 export async function GET(req) {
   const { searchParams } = new URL(req.url);
-  const sortBy = searchParams.get('sortBy');
+  const sortBy = searchParams.get('sortBy'); // Get sorting parameter from the query string
 
   try {
+    // Fetch products from the database
     const products = await prisma.product.findMany({
       where: {
-        isDeleted: false,
+        isDeleted: false, // Filter out deleted products
       },
       select: {
         ProductID: true,
@@ -30,10 +31,9 @@ export async function GET(req) {
           },
         },
       },
-      orderBy:
-        sortBy === 'newest'
-          ? { DateCreated: 'desc' }
-          : sortBy === 'oldest'
+      orderBy: sortBy === 'newest'
+        ? { DateCreated: 'desc' }
+        : sortBy === 'oldest'
           ? { DateCreated: 'asc' }
           : undefined,
     });
@@ -61,6 +61,7 @@ export async function GET(req) {
 
     return NextResponse.json(productsWithRating, { status: 200 });
   } catch (error) {
+    console.error("Error fetching products:", error); // Log error for debugging
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
