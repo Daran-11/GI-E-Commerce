@@ -19,10 +19,9 @@ export const CartProvider = ({ children }) => {
         });
         if (response.ok) {
           const data = await response.json();
-          console.log("the cart data: ",data)
-          // Normalize server data to match the local storage structure
+
           setCartItems(data);
-    
+
           const uniqueItemsCount = new Set(data.map(item => item.productId)).size;
           setCartItemCount(Math.min(uniqueItemsCount, 99));
         }
@@ -35,14 +34,14 @@ export const CartProvider = ({ children }) => {
     };
 
     fetchCartItems();
-  }, [session , session ]);
+  }, [session, session]);
 
   useEffect(() => {
     if (session) {
       syncCartWithServer(session);
     }
   }, [session]);
-  
+
   // ใส่ตัวเช็คว่าจำนวนจะเกินไหมใน syncCartwithServer
   const syncCartWithServer = async (session) => {
     const localCart = JSON.parse(localStorage.getItem('cart')) || [];
@@ -69,7 +68,6 @@ export const CartProvider = ({ children }) => {
 
       if (response.ok) {
         const data = await response.json();
-        console.log('cart item updated to server')
         setCartItems(data); // Update state with server data
         const uniqueItemsCount = new Set(data.map(item => item.productId)).size;
         setCartItemCount(Math.min(uniqueItemsCount, 99)); // Update count
@@ -78,7 +76,7 @@ export const CartProvider = ({ children }) => {
   };
 
   const addItemToCart = async (item) => {
-    
+
     if (status === 'authenticated') {
       const response = await fetch('/api/auth/cart/add', {
         method: 'POST',
@@ -92,7 +90,7 @@ export const CartProvider = ({ children }) => {
         console.error('Failed to add item to cart on server:', await response.text());
         return;
       }
-      
+
 
       if (response.ok) {
         setCartItems(prevItems => {
