@@ -1,10 +1,11 @@
-// app/layout.js or app/RootLayout.js
+// src/app/layout.js
 import { getServerSession } from 'next-auth';
 import { Prompt } from 'next/font/google';
 import SessionProvider from '../components/SessionProvider';
 import './globals.css';
 import PlausibleProvider from 'next-plausible';
-import ClientLayout from '../components/ClientLayout'; // Import the ClientLayout
+import ClientLayout from '../components/ClientLayout';
+import CookieConsentBanner from '@/components/CookieConsent';
 
 const prompt = Prompt({
   subsets: ['thai'],
@@ -17,17 +18,21 @@ export default async function RootLayout({ children }) {
   return (
     <html lang="th">
       <head>
-        <PlausibleProvider
-          domain="gipineapple"
-          trackLocalhost={true}
-          enabled={true}
-          taggedEvents={true}
-        />
         <script src="https://cdn.omise.co/omise.js" defer></script>
       </head>
       <body className={`${prompt.className} bg-[#f1f1f1] m-0 p-0`}>
         <SessionProvider session={session}>
-          <ClientLayout session={session}>{children}</ClientLayout>
+          <PlausibleProvider
+            domain="gipineapple" // Ensure this matches your actual production domain
+            trackLocalhost={true} // Allows tracking while developing on localhost
+            enabled={true}
+            taggedEvents={true}
+          >
+            <ClientLayout session={session}>
+              {children}
+              <CookieConsentBanner />
+            </ClientLayout>
+          </PlausibleProvider>
         </SessionProvider>
       </body>
     </html>
