@@ -1,5 +1,5 @@
 "use client";
-
+import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import { useRouter } from "next/navigation";
@@ -31,7 +31,7 @@ const ProductManagement = () => {
 
     // Fetch products data
     const fetchProducts = async () => {
-        setLoading(true); // Set loading state before fetching
+        setLoading(false); // Set loading state before fetching
         try {
             const response = await fetch(`/api/product`);
             if (!response.ok) {
@@ -42,8 +42,6 @@ const ProductManagement = () => {
             setTotalItems(data.length);
         } catch (error) {
             console.error("Failed to fetch products:", error);
-        } finally {
-            setLoading(false); // Reset loading state after fetching
         }
     };
 
@@ -140,8 +138,10 @@ const ProductManagement = () => {
                     <tr>
                         <td>ID</td>
                         <td>Name</td>
+                        <td>Type</td>
                         <td>Price</td>
-                        <td>Actions</td>
+                        <td>Amount</td>
+                        <td>Soldcount</td>
                     </tr>
                 </thead>
                 <tbody>
@@ -150,16 +150,21 @@ const ProductManagement = () => {
                             <tr key={product.ProductID}>
                                 <td>{product.ProductID}</td>
                                 <td>{product.ProductName}</td>
-                                <td>${product.Price}</td>
+                                <td>{product.ProductType}</td>
+                                <td>฿{product.Price}</td>
+                                <td>{product.Amount}</td>
+                                <td>{product.soldCount}</td>
                                 <td>
                                     <div>
-                                        <Tooltip title="Edit Product" arrow>
-                                            <IconButton aria-label="edit" color="success" onClick={() => { /* Edit product logic here */ }}>
-                                                <EditIcon fontSize="inherit" />
-                                            </IconButton>
+                                        <Tooltip title="View Details" arrow>
+                                            <Link href={`/admin-dashboard/products-management/${product.ProductID}`}>
+                                                <IconButton aria-label="view" color="primary">
+                                                    <EditIcon fontSize="inherit" />
+                                                </IconButton>
+                                            </Link>
                                         </Tooltip>
-                                        <Tooltip title="Delete Product" arrow>
-                                            <IconButton aria-label="delete" color="error" onClick={() => handleDelete(product.ProductID)}>
+                                        <Tooltip title="Delete User" arrow>
+                                            <IconButton aria-label="delete" color="error" onClick={() => handleDelete(user.id)}>
                                                 <DeleteIcon fontSize="inherit" />
                                             </IconButton>
                                         </Tooltip>

@@ -19,6 +19,7 @@ export async function GET(req) {
         Price: true,
         images: true,
         DateCreated: true, // Assuming you have a created date field
+        soldCount: true,
         farmer: {
           select: {
             farmerName: true,
