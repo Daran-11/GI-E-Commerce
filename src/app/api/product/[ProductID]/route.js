@@ -2,8 +2,7 @@
 import { NextResponse } from 'next/server';
 import prisma from '../../../../../lib/prisma';
 
-
-export async function GET(request,{ params }) {
+export async function GET(request, { params }) {
   const { ProductID } = params;
 
   if (!ProductID) {
@@ -17,11 +16,15 @@ export async function GET(request,{ params }) {
       },
       include: {
         images: true,
-      }
+        farmer: { // Include the farmer relationship
+          select: {
+            farmerName: true,
+            location: true,
+            contactLine: true,
+          },
+        },
+      },
     });
-
-
-
 
     if (!product) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });

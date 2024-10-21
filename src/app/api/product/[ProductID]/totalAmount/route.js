@@ -1,4 +1,3 @@
-// pages/api/product/[productId]/totalAmount.js
 
 import prisma from '../../../../../../lib/prisma'; // Adjust the import based on your project structure
 
@@ -17,6 +16,7 @@ export async function GET(request, { params }) {
   }
 
   try {
+    // Fetch total amount sold from OrderItem
     const totalAmount = await prisma.orderItem.aggregate({
       _sum: {
         quantity: true, // Assuming the field for quantity in OrderItem is named 'quantity'
@@ -26,8 +26,19 @@ export async function GET(request, { params }) {
       },
     });
 
+    // Get the sum of sold quantities
+    const soldAmount = totalAmount._sum.quantity || 0;
+
+    // Update the soldCount in the Product table
+    await prisma.product.update({
+      where: { ProductID: productId },
+      data: {
+        soldCount: soldAmount, // Update the soldCount to the latest total sold amount
+      },
+    });
+
     return new Response(
-      JSON.stringify({ totalAmount: totalAmount._sum.quantity || 0 }),
+      JSON.stringify({ totalAmount: soldAmount }), // Returning the sold amount
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     );
   } catch (error) {

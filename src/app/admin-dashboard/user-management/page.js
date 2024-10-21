@@ -1,5 +1,6 @@
 "use client";
 
+import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import { useRouter } from "next/navigation";
@@ -25,31 +26,30 @@ const Users = () => {
   const [totalItems, setTotalItems] = useState(0);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
-  const pageSize = 10; // Number of items per page
-  const [dialogOpen, setDialogOpen] = useState(false); // For add/edit user dialog
-  const [newUser, setNewUser] = useState({ name: '', email: '' }); // New user state
+  const pageSize = 10;
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [newUser, setNewUser] = useState({ name: '', email: '' });
 
   // Fetch users data
   const fetchUsers = async (page = 1) => {
     setLoading(false);
     try {
-      const response = await fetch(`/api/users`);
-      if (!response.ok) {
-        throw new Error("Failed to fetch users");
-      }
+      const response = await fetch(`/api/users?page=${page}&pageSize=${pageSize}`);
       const data = await response.json();
-      setUsers(data || []); // Adjust to match your API response
+      console.log('API Response:', data); // Check the structure of the response
+      setUsers(data || []);
       setTotalItems(data.length);
     } catch (error) {
-      console.error("Failed to fetch users:", error);
+      console.error('Failed to fetch users:', error);
     }
   };
+
 
   // Handle user deletion
   const handleDelete = async (userId) => {
     if (window.confirm("Are you sure you want to delete this user?")) {
       try {
-        const response = await fetch(`/api/users/${userId}/delete`, {
+        const response = await fetch(`/api/users/${userId}`, {
           method: "DELETE",
           headers: {
             "Content-Type": "application/json",
@@ -80,10 +80,24 @@ const Users = () => {
 
   // Handle adding a new user
   const handleSaveUser = async () => {
-    // Your API call logic to save a new user goes here
-    // After successful save, close the dialog and fetch users again
-    setDialogOpen(false);
-    await fetchUsers(); // Refresh user list
+    try {
+      const response = await fetch('/api/users', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newUser),
+      });
+
+      if (response.ok) {
+        await fetchUsers(); // Refresh the user list
+        handleCloseDialog(); // Close the dialog
+      } else {
+        alert("Failed to add user");
+      }
+    } catch (error) {
+      console.error("Failed to add user:", error);
+    }
   };
 
   // Use effect for fetching users on session change
@@ -93,9 +107,9 @@ const Users = () => {
     }
 
     if (status === "authenticated" && session?.user?.id) {
-      fetchUsers(); // Fetch users when authenticated
+      fetchUsers(page); // Fetch users when authenticated
     }
-  }, [status, session, router]);
+  }, [status, session, router, page]); // Added `page` to dependencies
 
   if (loading) {
     return (
@@ -104,7 +118,6 @@ const Users = () => {
       </div>
     );
   }
-
 
   return (
     <div className={styles.container}>
@@ -122,6 +135,7 @@ const Users = () => {
             <td>ID</td>
             <td>Name</td>
             <td>Email</td>
+            <td>Role</td>
             <td>Actions</td>
           </tr>
         </thead>
@@ -132,12 +146,15 @@ const Users = () => {
                 <td>{user.id}</td>
                 <td>{user.name}</td>
                 <td>{user.email}</td>
+                <td>{user.role}</td>
                 <td>
                   <div>
-                    <Tooltip title="Edit User" arrow>
-                      <IconButton aria-label="edit" color="success" onClick={() => { /* Edit user logic here */ }}>
-                        <EditIcon fontSize="inherit" />
-                      </IconButton>
+                    <Tooltip title="View Details" arrow>
+                      <Link href={`/admin-dashboard/user-management/${user.id}`}>
+                        <IconButton aria-label="view" color="primary">
+                          <EditIcon fontSize="inherit" />
+                        </IconButton>
+                      </Link>
                     </Tooltip>
                     <Tooltip title="Delete User" arrow>
                       <IconButton aria-label="delete" color="error" onClick={() => handleDelete(user.id)}>
@@ -150,7 +167,7 @@ const Users = () => {
             ))
           ) : (
             <tr>
-              <td colSpan={4}>No users found</td>
+              <td colSpan={5}>No users found</td>
             </tr>
           )}
         </tbody>
@@ -160,10 +177,12 @@ const Users = () => {
         currentPage={page}
         totalItems={totalItems}
         itemsPerPage={pageSize}
-        onPageChange={(newPage) => setPage(newPage)} // Handle page changes
+        onPageChange={(newPage) => {
+          setPage(newPage);
+          fetchUsers(newPage); // Fetch users for the new page
+        }} // Handle page changes
       />
 
-      {/* Add/Edit User Dialog */}
       <Dialog open={dialogOpen} onClose={handleCloseDialog}>
         <DialogTitle>Add User</DialogTitle>
         <DialogContent>
