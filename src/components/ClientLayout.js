@@ -1,16 +1,15 @@
 
 "use client";
 
-import { useEffect, useState } from 'react';
 import { CartProvider } from '@/context/cartContext';
-import NavbarWrapper from './NavbarWrapper';
-import Footer from './Footer';
 import { usePathname } from 'next/navigation';
+import Footer from './Footer';
+import NavbarWrapper from './NavbarWrapper';
 
 export default function ClientLayout({ session, children }) {
     const pathname = usePathname();
     // Specify a path prefix or pattern where the Footer should be hidden
-    const shouldHideFooter = pathname.startsWith('/admin-dashboard') || pathname.startsWith('/dashboard');
+    const shouldHideFooter = pathname.startsWith('/admin-dashboard') || pathname.startsWith('/dashboard') || pathname.startsWith('/cart');
 
     return (
         <CartProvider>

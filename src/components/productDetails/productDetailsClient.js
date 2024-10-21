@@ -4,7 +4,7 @@ import { useCart } from "@/context/cartContext";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Rating } from "react-simple-star-rating";
 import { formatDateToThaiBuddhist } from "../../../utils/formatDate";
 import Breadcrumb from "../BreadCrumb";
@@ -230,11 +230,13 @@ export default function ProductDetailsClient({ product, totalReviewsCount, Produ
         {reviews.length > 0 ? (
           reviews.map((review) => (
             <div key={review.id} className="bg-white p-4 rounded-lg shadow mb-4">
+              
               <div className="flex items-center">
                 <Rating readonly initialValue={review.rating} size={20} iconsCount={5} />
                 <p className="ml-2 text-sm text-gray-500">{formatDateToThaiBuddhist(review.createdAt)}</p>
               </div>
-              <p className="mt-2">{review.comment}</p>
+              <p className='text-[#2b2b2b]'>{review.user.name}</p>
+              <p className="mt-2">{review.review}</p>
             </div>
           ))
         ) : (
