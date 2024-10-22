@@ -1,5 +1,6 @@
 "use client";
 
+import Search from '@/app/ui/dashboard/search/search';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import VisibilityRoundedIcon from '@mui/icons-material/VisibilityRounded';
@@ -81,6 +82,7 @@ export default function IncomingOrders() {
   const [selectedOrderStatus, setSelectedOrderStatus] = useState(''); // State for selected order status
   const [selectedPaymentStatus, setSelectedPaymentStatus] = useState(''); // State for selected payment status
   const [selectedDeliveryStatus, setSelectedDeliveryStatus] = useState(''); // State for selected delivery status
+  
   const query = searchParams.get("query") || ""; // Get the search query
 
   const router = useRouter();
@@ -177,7 +179,7 @@ export default function IncomingOrders() {
 
   const handleAllFilter = () => {
     setSelectedPaymentStatus(null); // Reset payment status
-    setSelectedDeliveryStatus(null); // Reset delivery status
+    setSelectedDeliveryStatus(''); // Reset delivery status
   };
   
 
@@ -213,23 +215,33 @@ export default function IncomingOrders() {
 
       <div className='w-full h-fit  bg-white px-6 pt-6 pb-2 rounded-xl'> 
       <h1 className='page-header '>จัดการคำสั่งซื้อ</h1>          
-        {/* Toggle Buttons for Status Filtering */}
+        {/*  Buttons for Status Filtering */}
         <div className="flex space-x-2 mb-4">
-        <button onClick={handleAllFilter} className="btn">
-          ทั้งหมด
-        </button>
+        <button
+            onClick={handleAllFilter}
+            className={`btn p-2 hover:outline outline-2 outline-[#4eac14] rounded-xl ${
+              selectedDeliveryStatus === '' ? 'bg-[#4eac14] text-white' : 'bg-[#f1f1f1]'
+            }`}
+          >
+            ทั้งหมด
+          </button>
 
         {Object.keys(statusOptions).map((status) => (
-            <Button
+            <button
+            
               key={status}
-              variant="contained"
               color="primary"
+              className={`btn p-1 md:p-2 hover:outline outline-2 outline-[#4eac14] rounded-xl ${selectedDeliveryStatus === status ? 'bg-[#4eac14] text-white' : 'bg-[#f1f1f1]'}`}
               onClick={() => setSelectedDeliveryStatus(status)}
             >
               {statusOptions[status]}
-            </Button>
+            </button>
           ))}
       </div>
+
+      <div className=''>
+        <Search placeholder="ค้นหาจากรหัสคำสั่งซื้อ..."/>
+        </div>
 
       {/* Dropdown for filtering orders by status */}   
       </div>

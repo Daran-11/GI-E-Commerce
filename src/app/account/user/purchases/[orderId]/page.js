@@ -83,8 +83,12 @@ const currentStepIndex = deliveryStatuses.includes(orderDetails.deliveryStatus)
         <p><strong>สถานะ:</strong> {deliveryStatusTranslations[orderDetails.deliveryStatus]}</p>
         <p><strong>รวมทั้งสิ้น</strong> {orderDetails.totalPrice} บาท</p>
         <p><strong>ที่อยู่จัดส่ง:</strong> {orderDetails.addressText}</p>
-        <p><strong>บริษัทขนส่ง:</strong> </p>
-        <p><strong>รหัสพัสดุ:</strong> </p>
+        <p><strong>บริการขนส่ง:</strong> {orderDetails.delivery?.deliveryService?.name || (
+              <span className="text-gray-300">ไม่พบข้อมูลในตอนนี้</span>
+            )} </p>
+        <p><strong>รหัสพัสดุ:</strong> {orderDetails.delivery?.trackingNum || (
+              <span className="text-gray-300">ไม่พบข้อมูลในตอนนี้</span>
+            )} </p>
 
         {/* Progress bar */}
         <div className="progress-bar-container my-4   ">
@@ -93,7 +97,7 @@ const currentStepIndex = deliveryStatuses.includes(orderDetails.deliveryStatus)
             <div className="absolute top-3 left-1/2 transform -translate-x-1/2  w-[75%]   h-2  bg-gray-300 rounded-full"></div>
 
             <div
-              className={` absolute top-3 left-0  h-2 rounded-full pulse`}
+              className={` absolute top-3 left-0  h-2 rounded-full progress-pulse`}
               style={{
                 width: `${((currentStepIndex + 1) / deliveryStatuses.length) * 100 }%`,
                 maxWidth: `87%` ,

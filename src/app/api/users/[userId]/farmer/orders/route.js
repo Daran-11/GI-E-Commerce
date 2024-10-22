@@ -2,8 +2,8 @@
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
-import prisma from "../../../../../../../lib/prisma"; // Ensure this path is correct
 import { checkOrderStatus } from "../../../../../../../lib/middleware/orderStatusMiddleware";
+import prisma from "../../../../../../../lib/prisma"; // Ensure this path is correct
 
 // Helper function to check session and permissions
 async function checkPermissions(session, userId) {
@@ -53,6 +53,11 @@ export async function GET(req, { params }) {
         },
         include: {
           farmer: true,
+          delivery: {
+            include: {
+              deliveryService: true,
+            },
+          },
           user: {
             select: {
               name: true,
