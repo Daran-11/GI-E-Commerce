@@ -4,7 +4,6 @@ import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import Layout from '../../layout'; // Adjust the import path
 
 const deliveryStatusTranslations = {
   Preparing: 'กำลังเตรียมสินค้า',
@@ -168,6 +167,17 @@ export default function OrderDetails({ params }) {
           <h3><strong>ที่อยู่สำหรับจัดส่ง</strong></h3>
           <p>{order.addressText}</p>
         </div>
+      </div>
+
+      <div className="bg-white w-full h-fit p-4 md:p-6 rounded-xl">
+        <p className="text-2xl border-b-2 pb-2 mb-3">บริการขนส่ง</p>
+        <p><strong>ชือบริษัท:</strong> {order.delivery?.deliveryService?.name || (
+              <span className="text-gray-300">ไม่พบข้อมูลในตอนนี้</span>
+            )} </p>
+        <p><strong>รหัสพัสดุ:</strong> {order.delivery?.trackingNum || (
+              <span className="text-gray-300">ไม่พบข้อมูลในตอนนี้</span>
+            )} </p>
+
       </div>
 
       <div className='bg-white w-full h-fit p-3 md:p-5 rounded-xl'>

@@ -25,6 +25,11 @@ export async function GET(request, { params }) {
       },
       include: {
         farmer:true, 
+        delivery: {
+          include: {
+            deliveryService: true,
+          },
+        }, 
         orderItems: {
           include: {
             product: true,
