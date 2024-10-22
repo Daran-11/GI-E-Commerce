@@ -1,5 +1,4 @@
 "use client";
-import QuantityHandler from "@/components/quantityhandler";
 import { useCart } from "@/context/cartContext";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -21,9 +20,7 @@ export default function ProductDetailsClient({ product, totalReviewsCount, Produ
   const [avgRating, setAvgRating] = useState(0);
   const [totalOrderAmount, setTotalOrderAmount] = useState(0);
 
-  const handleQuantityChange = (productId, newQuantity) => {
-    setQuantity(newQuantity);
-  };
+
 
   const addToCart = async () => {
     try {
@@ -120,6 +117,46 @@ export default function ProductDetailsClient({ product, totalReviewsCount, Produ
     setReviewsToShow((prev) => prev + 5);
   };
 
+  const handleQuantityChange = (newQuantity) => {
+    if (newQuantity > 0 && newQuantity <= product.Amount)
+    console.log('newQuantity',newQuantity);
+    setQuantity(newQuantity);
+  };
+
+  const handleInputChange = (e) => {
+    const value = e.target.value;
+    if (value === '') {
+      setQuantity('');
+    } else {
+      let newQuantity = parseInt(value, 10);
+      if (isNaN(newQuantity) || newQuantity < 1) {
+        newQuantity = 1;
+      } else if (newQuantity > product.Amount) {
+        newQuantity = product.Amount;
+      }
+      handleQuantityChange(newQuantity);
+    }
+  };
+
+  const handleBlur = () => {
+    if (quantity === '' || quantity < 1) {
+      setQuantity(1);
+    }
+  };
+
+  const increment = () => {
+    if (quantity < product.Amount) {
+      console.log("+ triggered")
+      handleQuantityChange(quantity + 1);
+    }
+  };
+
+  const decrement = () => {
+    if (quantity > 1) {
+      handleQuantityChange(quantity - 1);
+    }
+  };
+
   return (
     <div className="flex flex-col w-[95%] sm:w-[85%] lg:w-[60%] ml-auto mr-auto mt-[120px]">
       <div className="w-full h-[45px] bg-white rounded-2xl mb-[20px] pl-2 flex items-center">
@@ -170,12 +207,30 @@ export default function ProductDetailsClient({ product, totalReviewsCount, Produ
               <div className="w-fit">
                 <div className="w-fit">จำนวน(กิโล)</div>
                 <div className="w-fit flex items-center">
-                  <QuantityHandler
-                    initialQuantity={quantity}
-                    productAmount={product.Amount}
-                    productId={product.ProductID}
-                    onQuantityChange={handleQuantityChange}
-                  />
+
+
+              <div className='flex items-center w-fit '>
+                <button className='btn w-10 h-10 text-3xl md:text-2xl md:border-2  rounded-full  text-center' onClick={decrement}>
+                  -
+                </button>
+                <div className='items-center justify-center'>
+                <input
+                  type="number"
+                  className="w-4 h-5 lg:w-8 lg:h-10 lg:mx-1 text-center appearance-none"
+                  value={quantity}
+                  onChange={handleInputChange}
+                  onBlur={handleBlur}
+                  min="1"
+                  max={product.Amount}
+                />
+                </div>
+                <button className='btn w-10 h-10 text-3xl md:text-2xl md:border-2 rounded-full' onClick={increment}>
+                  +
+                </button>
+              </div>
+
+                  
+                  
                   <p className="ml-3 text-[#535353]">มีสินค้า {product.Amount} กิโลกรัม</p>
                 </div>
               </div>
