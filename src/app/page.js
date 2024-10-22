@@ -1,10 +1,10 @@
 "use client";
 
+import debounce from "lodash.debounce"; // Import lodash debounce
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import ProductCard from "../components/productcard";
 import Skeleton from "../components/Skeleton"; // Import your Skeleton component
-import debounce from "lodash.debounce"; // Import lodash debounce
 
 async function fetchProducts(sortBy = '') {
   console.log('Fetching products...');
@@ -144,7 +144,10 @@ export default function Home() {
         </div>
         <div>
           {loading ? ( // Conditional rendering based on loading state
-            <Skeleton />
+          <div className='p-4'>             
+          <Skeleton />
+          </div>
+
           ) : error ? (
             <div className="alert alert-error justify-center flex items-center text-gray-500">
               <p>{error}</p>

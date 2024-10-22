@@ -8,6 +8,7 @@ import AddToCartButton from './addToCartButton';
 const ProductCard = ({products}) => {
   const [starSize, setStarSize] = useState(15); // Default star size
 
+
   useEffect(() => {
     // Function to update star size based on screen width
     const updateStarSize = () => {
@@ -52,7 +53,7 @@ const ProductCard = ({products}) => {
                       height={100}
                       sizes="50vw"
                       loading="lazy"
-                      className="object-cover object-center rounded-t-2xl"
+                      className="h-full min-w-full object-cover object-center rounded-t-2xl"
 
                     />
                   ) : (
@@ -66,12 +67,12 @@ const ProductCard = ({products}) => {
       
 
                   <div className="px-[12px] md:px-[18px] h-fit pb-2 -space-y-1 md:space-y-0">
-                      <div className="text-lg md:mt-2 sm:text-xl xl:text-2xl text-[#535353] lg:mt-3  ">
-                          <p>{product.ProductName}{product.ProductType} </p>
+                      <div className="text-lg md:mt-2 sm:text-xl xl:text-2xl text-[#535353]  ">
+                          <p className=''>{product.ProductName}{product.ProductType} </p>
                       </div>
                       
                       <div className="md:mt-[2px] text-[#767676] text-base xl:text-lg ">
-                          <p>ผู้ขาย {product.farmer.farmerName} </p> 
+                          <p className='leading-tight '>ผู้ขาย {product.farmer.farmerName} </p> 
                           {/* Star Rating Component */}
                       </div>
                       <div className='flex items-center'>
@@ -92,7 +93,7 @@ const ProductCard = ({products}) => {
                   
                   </Link> 
 
-                  <div className= 'flex md:grid  grid-cols-2 xl:grid-cols-2  px-[12px] md:px-[18px] lg:pt-[5px] text-[#4eac14] justify-between items-center border-t-[1px]'>
+                  <div className= 'flex md:grid  grid-cols-2 xl:grid-cols-2  px-[12px] md:px-[18px] pt-1  text-[#4eac14] justify-between items-center border-t-[1px]'>
                       <p className=' text-[18px]  sm:text-[19px]  md:text-[25px]  lg:text-[23px] xl:text-[25px]'> ฿{Number(product.Price).toLocaleString()}</p>     
                       <p className=' text-end'>/กิโลกรัม</p>      
 
