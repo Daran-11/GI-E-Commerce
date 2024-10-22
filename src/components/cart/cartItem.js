@@ -111,8 +111,8 @@ export default function CartItem({ initialItems }) {
                     <Image
                       src={item.imageUrl}
                       alt={item.productName}
-                      width={0} // Adjust width as needed
-                      height={0} // Adjust height as needed
+                      width={25} // Adjust width as needed
+                      height={25} // Adjust height as needed
                       sizes="100vw" 
                       className='w-[75px] h-[75px] object-cover rounded-2xl'
                     />
