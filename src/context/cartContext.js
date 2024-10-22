@@ -35,7 +35,7 @@ export const CartProvider = ({ children }) => {
     };
 
     fetchCartItems();
-  }, [session , session ]);
+  }, [ session ]);
 
   useEffect(() => {
     if (session) {
@@ -114,6 +114,9 @@ export const CartProvider = ({ children }) => {
           setCartItemCount(Math.min(uniqueItems, 99));
           return updatedItems;
         });
+      }
+      if (session) {
+        syncCartWithServer(session);
       }
     } else {
       const localCart = JSON.parse(localStorage.getItem('cart')) || [];
