@@ -2,12 +2,12 @@
 import QuantityHandler from "@/components/quantityhandler";
 import { useCart } from "@/context/cartContext";
 import { useSession } from "next-auth/react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { Rating } from "react-simple-star-rating";
 import { formatDateToThaiBuddhist } from "../../../utils/formatDate";
 import Breadcrumb from "../BreadCrumb";
+import EmblaCarousel from "../emblaCarousel";
 
 export default function ProductDetailsClient({ product, totalReviewsCount, ProductID }) {
   const router = useRouter();
@@ -38,8 +38,9 @@ export default function ProductDetailsClient({ product, totalReviewsCount, Produ
         productPrice: productData.Price,
         productAmount: productData.Amount,
         farmerId: productData.farmerId,
+        farmerName: productData.farmer.farmerName,
         Description: productData.Description,
-        imageUrl: productData.images?.[0]?.imageUrl || "/defaultImage.jpg",
+        imageUrl: productData.images?.[0]?.imageUrl,
       };
 
       await addItemToCart(item);
@@ -120,44 +121,23 @@ export default function ProductDetailsClient({ product, totalReviewsCount, Produ
   };
 
   return (
-    <div className="flex flex-col w-[95%] md:w-[60%] ml-auto mr-auto mt-[120px]">
+    <div className="flex flex-col w-[95%] sm:w-[85%] lg:w-[60%] ml-auto mr-auto mt-[120px]">
       <div className="w-full h-[45px] bg-white rounded-2xl mb-[20px] pl-2 flex items-center">
         <Breadcrumb />
       </div>
 
       <div className="detail flex justify-center md:justify-start">
-        <div className="hidden md:flex w-full h-[500px] bg-white rounded-2xl items-center justify-center text-center">
-          {product.images?.[0]?.imageUrl ? (
-            <Image
-              src={product.images[0].imageUrl}
-              alt={product.ProductName}
-              width={0}
-              height={0}
-              loading="lazy"
-              sizes="100vw"
-              className="w-full h-full object-cover rounded-2xl"
-            />
-          ) : (
-            <img className="w-full h-full object-cover rounded-2xl" src="/phulae.jpg" alt="Card Image" />
-          )}
+        <div className="hidden lg:flex">
+        <EmblaCarousel images={product.images || []} />        
         </div>
 
-        <div className="w-full h-fit lg:h-[500px] bg-white lg:ml-[25px] rounded-2xl p-6">
+          {/*replace with Embla carousel here*/}
+
+
+        <div className="w-full h-fit lg:h-[500px] bg-white lg:ml-[15px] rounded-2xl p-6">
           <div className="text-[#535353]">
             <div className="lg:hidden flex justify-center">
-              {product.images?.[0]?.imageUrl ? (
-                <Image
-                  src={product.images[0].imageUrl}
-                  alt={product.ProductName}
-                  width={0}
-                  height={0}
-                  loading="lazy"
-                  sizes="100vw"
-                  className="w-full h-[30vh] object-center rounded-2xl"
-                />
-              ) : (
-                <img className="w-full h-full object-cover rounded-2xl" src="/phulae.jpg" alt="Card Image" />
-              )}
+            <EmblaCarousel images={product.images || []} />
             </div>
             <div className="flex justify-start">
               <p className="mt-3 text-4xl lg:text-5xl">{product.ProductName} {product.ProductType}</p>
@@ -178,8 +158,8 @@ export default function ProductDetailsClient({ product, totalReviewsCount, Produ
             <p className="text-[#4eac14] text-[35px] lg:mb-4 lg:mt-2">
               {Number(product.Price).toLocaleString()} บาท/กิโล
             </p>
-            <div className="space-y-2 md:space-y-4 w-fit lg:w-[600px] text-[#767676] text-[20px] mb-5">
-              <div className="w-fit">
+            <div className="space-y-2 md:space-y-4 w-full  text-[#767676] text-[20px] mb-5">
+              <div className="lg:w-fit">
                 <div className="w-[250px]">คำอธิบาย</div>
                 <div className="w-full text-[#535353]">{product.Description}</div>
               </div>

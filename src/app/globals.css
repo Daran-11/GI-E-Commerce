@@ -12,10 +12,25 @@
   }
 }
 
-.pulse {
+@keyframes load-pulse {
+  0%, 100% {
+      transform: scale(1);
+  }
+  50% {
+      transform: scale(1.05); /* Adjust the scale value here */
+  }
+}
+
+  .animate-load-pulse {
+    animation: pulse-scale 1.5s ease-in-out infinite;
+  }
+
+
+.progress-pulse {
   animation: pulse 2s infinite;
   transform-origin: left; /* Ensure the pulsing occurs from the right */
 }
+
 
 
 .container {
