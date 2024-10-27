@@ -1,5 +1,6 @@
 'use client';
 
+import ConfirmDeliveryButton from '@/components/ConfirmDeliveryButton';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -170,9 +171,7 @@ const currentStepIndex = deliveryStatuses.includes(orderDetails.deliveryStatus)
         {/* Conditionally render the button based on deliveryStatus */}
         {orderDetails.deliveryStatus === 'OutForDelivery' && (
           <div className='w-full h-fit flex justify-end mt-5'>
-            <button className='w-fit px-4 py-2 text-white bg-[#4eac14] hover:bg-[#316b0c] rounded-xl'>
-              ยืนยันการได้รับสินค้า
-            </button>
+            <ConfirmDeliveryButton orderId={orderDetails.id} userId={session.user.id} />
           </div>
         )}
 

@@ -317,6 +317,8 @@ const BankAccountsPage = () => {
             <div>ธนาคาร  {account.isDefault && <span className='text-[#4eac14]'>(บัญชีหลัก)</span>}</div>
             <p>{account.accountName}</p>
             <p>{account.accountNumber}</p>
+            <p>Verified: {account.recipientVerified ? 'Yes' : 'No'}</p>
+            <p>Active: {account.recipientActive ? 'Yes' : 'No'}</p>
           </div>
         </td>
         <td className=' md:px-1 md:py-2 text-right'>
