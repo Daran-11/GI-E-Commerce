@@ -4,8 +4,8 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-export default function AddressManagement() {
-  const { data: session , status} = useSession();
+export default function AddressManagement({ onSave }) {
+  const { data: session, status } = useSession();
   const router = useRouter();
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [addresses, setAddresses] = useState([]);
@@ -107,27 +107,21 @@ export default function AddressManagement() {
     }
   };
 
-  const handleSave = async () => {
-
-    
-
+  const handleSave = async (onSuccess) => {
     const method = addressForm.id ? "PUT" : "POST";
-    const url = addressForm.id
-      ? `/api/users/${session.user.id}/addresses`
-      : `/api/users/${session.user.id}/addresses`;
-  
+    const url = `/api/users/${session.user.id}/addresses`;
+
     const res = await fetch(url, {
       method,
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         ...addressForm,
-        // Include userId in the request body
         userId: session.user.id,
       }),
     });
-  
+
     if (res.ok) {
-      fetchAddresses();
+      await fetchAddresses(); // Refetch addresses after save
       setAddressForm({
         id: "",
         addressLine: "",
@@ -138,39 +132,44 @@ export default function AddressManagement() {
         isDefault: false,
       });
       setIsFormVisible(false); // Hide form after saving
+
+      // Call the callback function if provided
+      if (onSuccess) {
+        onSuccess(); // Trigger the checkout page refetch
+      }
     } else {
       console.error("Failed to save address");
     }
   };
-  
+
 
   const handleSetDefault = async (addressId) => {
     if (session?.user?.id) {
       const userId = session.user.id;
-  
+
       // Find the address details
       const address = addresses.find((addr) => addr.id === addressId);
       if (!address) {
         console.error('Address not found');
         return;
       }
-  
+
       // Determine if the current address is already the default
       const isCurrentlyDefault = address.isDefault;
-  
+
       // Validate address fields before sending
       const { addressLine, provinceId, amphoeId, tambonId, postalCode } = address;
       if (!addressLine || !provinceId || !amphoeId || !tambonId || !postalCode) {
         console.error('Invalid address data');
         return;
       }
-  
+
       // If the address is already the default, simply return (do nothing)
       if (isCurrentlyDefault) {
         console.log('Address is already the default');
         return;
       }
-  
+
       const response = await fetch(`/api/users/${userId}/addresses`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -184,7 +183,7 @@ export default function AddressManagement() {
           isDefault: true, // Set to true or false based on the logic
         }),
       });
-  
+
       if (response.ok) {
         fetchAddresses(); // Refresh the list of addresses
       } else {
@@ -192,9 +191,9 @@ export default function AddressManagement() {
       }
     }
   };
-  
-  
-  
+
+
+
   const handleEdit = (address) => {
     setAddressForm({
       id: address.id,
@@ -212,13 +211,13 @@ export default function AddressManagement() {
 
   const handleDelete = async (addressId) => {
     const confirmDelete = window.confirm('Are you sure you want to delete this address?');
-  
+
     if (confirmDelete && session?.user?.id) {
       const userId = session.user.id;
-  
+
       // Ensure that there are at least 2 addresses before allowing deletion
 
-  
+
       try {
         const response = await fetch(`/api/users/${userId}/addresses/${addressId}`, {
           method: 'DELETE',
@@ -226,7 +225,7 @@ export default function AddressManagement() {
             'Content-Type': 'application/json',
           },
         });
-  
+
         if (response.ok) {
           // Remove the deleted address from the state to refresh the UI
           setAddresses((prevAddresses) => prevAddresses.filter((addr) => addr.id !== addressId));
@@ -250,58 +249,58 @@ export default function AddressManagement() {
         <form>
 
           <div className="md:flex  gap-x-2">
-          
-          <div className="">
-            <select
-              name="provinceId"
-              value={addressForm.provinceId}
-              onChange={handleProvinceChange}
-              className="input-address p-2 w-full md:w-[200px] h-15"
-            >
-              <option value="" >เลือกจังหวัด</option>
-              {provinces.map((province) => (
-                <option key={province.id} value={province.id}>
-                  {province.name_th}
-                </option>
-              ))}
-            </select>
+
+            <div className="">
+              <select
+                name="provinceId"
+                value={addressForm.provinceId}
+                onChange={handleProvinceChange}
+                className="input-address p-2 w-full md:w-[200px] h-15"
+              >
+                <option value="" >เลือกจังหวัด</option>
+                {provinces.map((province) => (
+                  <option key={province.id} value={province.id}>
+                    {province.name_th}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+
+            <div>
+              <select
+                name="amphoeId"
+                value={addressForm.amphoeId}
+                onChange={handleAmphoeChange}
+                className="input-address p-2 w-full md:w-[200px] h-15"
+              >
+                <option value="">เลือกอำเภอ</option>
+                {amphoes.map((amphoe) => (
+                  <option key={amphoe.id} value={amphoe.id}>
+                    {amphoe.name_th}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="hidden md:flex">
+              <select
+                name="tambonId"
+                value={addressForm.tambonId}
+                onChange={handleAddressChange}
+                className="input-address p-2 w-full md:w-[150px] h-15"
+              >
+                <option value="" className="">เลือกตำบล</option>
+                {tambons.map((tambon) => (
+                  <option key={tambon.id} value={tambon.id}>
+                    {tambon.name_th}
+                  </option>
+                ))}
+              </select>
+            </div>
+
           </div>
 
 
-          <div>
-            <select
-              name="amphoeId"
-              value={addressForm.amphoeId}
-              onChange={handleAmphoeChange}
-              className="input-address p-2 w-full md:w-[200px] h-15"              
-            >
-              <option value="">เลือกอำเภอ</option>
-              {amphoes.map((amphoe) => (
-                <option key={amphoe.id} value={amphoe.id}>
-                  {amphoe.name_th}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="hidden md:flex">
-            <select
-              name="tambonId"
-              value={addressForm.tambonId}
-              onChange={handleAddressChange}
-              className="input-address p-2 w-full md:w-[150px] h-15"
-            >
-              <option value="" className="">เลือกตำบล</option>
-              {tambons.map((tambon) => (
-                <option key={tambon.id} value={tambon.id}>
-                  {tambon.name_th}
-                </option>
-              ))}
-            </select>
-          </div>  
-                 
-          </div>
-
- 
 
           <div className="md:hidden">
             <select
@@ -317,10 +316,10 @@ export default function AddressManagement() {
                 </option>
               ))}
             </select>
-          </div>   
+          </div>
 
           <div className="">
-            <textarea 
+            <textarea
               type="text"
               name="addressLine"
               className="input-address p-2 w-full  md:w-[500px]"
@@ -342,43 +341,48 @@ export default function AddressManagement() {
           </div>
 
           <div className="">
-            
-              <input
-                type="checkbox"
-                className=""
-                name="default"
-                checked={addressForm.isDefault}
-                onChange={(e) => setAddressForm({ ...addressForm, isDefault: e.target.checked })}
-              />
-             <label className="ml-1"> เลือกเป็นที่อยู่ตั้งต้น
+
+            <input
+              type="checkbox"
+              className=""
+              name="default"
+              checked={addressForm.isDefault}
+              onChange={(e) => setAddressForm({ ...addressForm, isDefault: e.target.checked })}
+            />
+            <label className="ml-1"> เลือกเป็นที่อยู่ตั้งต้น
             </label>
           </div>
 
-        <div className="border-b-2 pb-3 mb-3">
-          {isFormVisible ?        
-            <button
-            className="text-gray-400 w-fit rounded-lg bg-gray-200 hover:bg-gray-300 h-fit  mt-4 mr-5 p-2"
-            onClick={() => {
-              setIsFormVisible(false);
-              setAddressForm({
-                id: "",
-                addressLine: "",
-                provinceId: "",
-                amphoeId: "",
-                tambonId: "",
-                postalCode: "",
-                isDefault: false,
-              });
-            }}
-          >
-              ยกเลิก
-            </button> : ""
-          }
+          <div className="border-b-2 pb-3 mb-3">
+            {isFormVisible ?
+              <button
+                className="text-gray-400 w-fit rounded-lg bg-gray-200 hover:bg-gray-300 h-fit  mt-4 mr-5 p-2"
+                onClick={() => {
+                  setIsFormVisible(false);
+                  setAddressForm({
+                    id: "",
+                    addressLine: "",
+                    provinceId: "",
+                    amphoeId: "",
+                    tambonId: "",
+                    postalCode: "",
+                    isDefault: false,
+                  });
+                }}
+              >
+                ยกเลิก
+              </button> : ""
+            }
 
-            <button className="w-fit h-fit p-2 text-blue-500 border-2 border-blue-400 rounded-lg hover:bg-blue-500 hover:text-white" type="button" onClick={handleSave}>
+            <button
+              className="w-fit h-fit p-2 text-blue-500 border-2 border-blue-400 rounded-lg hover:bg-blue-500 hover:text-white"
+              type="button"
+              onClick={() => handleSave(onSave)} // Pass onSave to handleSave
+            >
               {addressForm.id ? "อัปเดตที่อยู่" : "บันทึกที่อยู่"}
-            </button>          
-        </div>
+            </button>
+
+          </div>
 
         </form>
       )}
@@ -386,36 +390,36 @@ export default function AddressManagement() {
 
       <ul>
         <div className="">
-        {addresses.length > 0 && addresses.map((address) => (
-          <li className="flex justify-between bg-slate-100 rounded-xl px-2 py-2 my-2" key={address.id}>
+          {addresses.length > 0 && addresses.map((address) => (
+            <li className="flex justify-between bg-slate-100 rounded-xl px-2 py-2 my-2" key={address.id}>
 
-            <div className="text-sm md:text-base flex justify-start space-x-3">
-            <div>
-            {address.addressLine}, {address.province.name_th}, {address.amphoe.name_th}, {address.tambon.name_th}, {address.postalCode}, {address.isDefault}              
-            </div>
-            {address.isDefault && (<div className="px-2 bg-[#4eac14] text-white rounded-xl"> Default </div>)}              
+              <div className="text-sm md:text-base flex justify-start space-x-3">
+                <div>
+                  {address.addressLine}, {address.province.name_th}, {address.amphoe.name_th}, {address.tambon.name_th}, {address.postalCode}, {address.isDefault}
+                </div>
+                {address.isDefault && (<div className="px-2 bg-[#4eac14] text-white rounded-xl"> Default </div>)}
               </div>
 
-            <div className="flex justify-end items-center gap-x-4 md:gap-x-8 text-sm md:text-base">
-            <button disabled={address.isDefault}  className={`text-[#4eac14]  ${address.isDefault ? 'text-gray-500' : 'text-[#4eac14] hover:text-[#7ddb43]'}`} onClick={() => handleSetDefault(address.id)}>
-                {address.isDefault ? "ที่อยู่จัดส่งหลัก" : "เลือกเป็นที่อยู่จัดส่งหลัก"}
-              </button>     
-              <button className="hidden sm:flex w-15 text-blue-500" onClick={() => handleEdit(address)}>แก้ไข</button>
-              <button className="hidden sm:flex w-15 text-red-700"  onClick={() => handleDelete(address.id)}>ลบ</button>
-         
-            </div>
+              <div className="flex justify-end items-center gap-x-4 md:gap-x-8 text-sm md:text-base">
+                <button disabled={address.isDefault} className={`text-[#4eac14]  ${address.isDefault ? 'text-gray-500' : 'text-[#4eac14] hover:text-[#7ddb43]'}`} onClick={() => handleSetDefault(address.id)}>
+                  {address.isDefault ? "ที่อยู่จัดส่งหลัก" : "เลือกเป็นที่อยู่จัดส่งหลัก"}
+                </button>
+                <button className="hidden sm:flex w-15 text-blue-500" onClick={() => handleEdit(address)}>แก้ไข</button>
+                <button className="hidden sm:flex w-15 text-red-700" onClick={() => handleDelete(address.id)}>ลบ</button>
 
-          </li>
-        ))}          
+              </div>
+
+            </li>
+          ))}
         </div>
 
         <li>
-        {isFormVisible ? "":       
-      <button
-      className={isFormVisible? "text-gray-400" : "text-blue-500"}
-      onClick={() => setIsFormVisible(!isFormVisible)}>
-        เพิ่ม
-      </button>}
+          {isFormVisible ? "" :
+            <button
+              className={isFormVisible ? "text-gray-400" : "text-blue-500"}
+              onClick={() => setIsFormVisible(!isFormVisible)}>
+              เพิ่ม
+            </button>}
         </li>
       </ul>
     </div>

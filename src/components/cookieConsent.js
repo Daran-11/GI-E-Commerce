@@ -1,10 +1,14 @@
 'use client';
 import CookieConsent from 'react-cookie-consent';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 const CookieConsentBanner = () => {
+    const [consentGiven, setConsentGiven] = useState(null);
+
     useEffect(() => {
         const cookieConsent = localStorage.getItem('cookieConsent');
+        setConsentGiven(cookieConsent);
+
         if (cookieConsent) {
             console.log('User has already made a choice regarding cookies:', cookieConsent);
             // Disable tracking if rejected
@@ -18,6 +22,8 @@ const CookieConsentBanner = () => {
         localStorage.setItem('cookieConsent', 'rejected');
         console.log('User rejected cookies');
 
+        // Optionally disable tracking or features here
+        // disableTracking();
     };
 
     const handleAccept = () => {
@@ -30,29 +36,32 @@ const CookieConsentBanner = () => {
         } else {
             console.log('Tracking event not sent to Plausible: Running on localhost');
         }
-
-
     };
 
     return (
-        <CookieConsent
-            location="bottom"
-            buttonText="ยอมรับ"
-            declineButtonText="ปฎิเสธ"
-            enableDeclineButton
-            cookieName="cookieConsent"
-            style={{ background: "#2B373B", color: "#FFFFFF" }}
-            buttonStyle={{ color: "#2B373B", fontSize: "13px", fontWeight: "bold" }}
-            declineButtonStyle={{ color: "#2B373B", fontSize: "13px", fontWeight: "bold", marginLeft: '10px' }}
-            expires={150}
-            onAccept={handleAccept}
-            onDecline={handleReject}
-        >
-            This website uses cookies to enhance the user experience.{" "}
-            <span style={{ fontSize: "12px" }}>
-                You can read more about our cookie policy <a href="/cookie-policy" className="underline">here</a>.
-            </span>
-        </CookieConsent>
+        <>
+
+            <CookieConsent
+                location="bottom"
+                buttonText="ยอมรับ"
+                declineButtonText="ปฎิเสธ"
+                enableDeclineButton
+                cookieName="cookieConsent"
+                style={{ background: "#2B373B", color: "#FFFFFF" }}
+                buttonStyle={{ color: "#2B373B", fontSize: "13px", fontWeight: "bold" }}
+                declineButtonStyle={{ color: "#2B373B", fontSize: "13px", fontWeight: "bold", marginLeft: '10px' }}
+                expires={150}
+                onAccept={handleAccept}
+                onDecline={handleReject}
+            >
+                This website uses cookies to enhance the user experience.{" "}
+                <span style={{ fontSize: "12px" }}>
+                    You can read more about our cookie policy <a href="/cookie-policy" className="underline">here</a>.
+                </span>
+            </CookieConsent>
+
+
+        </>
     );
 };
 

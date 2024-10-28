@@ -88,11 +88,11 @@ export default function IncomingOrders() {
   const userId = session.user.id;
 
   useEffect(() => {
-    if (status === 'authenticated' && userId ) {
+    if (status === 'authenticated' && userId) {
       fetchOrders(userId);
-      fetchDeliveryServices(); 
+      fetchDeliveryServices();
     }
-  }, [session, status,query]);
+  }, [session, status, query]);
 
   const fetchOrders = async (userId) => {
     try {
@@ -179,25 +179,25 @@ export default function IncomingOrders() {
     setSelectedPaymentStatus(null); // Reset payment status
     setSelectedDeliveryStatus(null); // Reset delivery status
   };
-  
+
 
   const filteredOrders = orders.filter(order => {
-    const matchesPaymentStatus = selectedPaymentStatus 
-      ? order.paymentStatus === selectedPaymentStatus 
+    const matchesPaymentStatus = selectedPaymentStatus
+      ? order.paymentStatus === selectedPaymentStatus
       : true;
-  
+
     const matchesDeliveryStatus = selectedDeliveryStatus === "Pending"
       ? order.paymentStatus === "Pending" // Check paymentStatus if deliveryStatus is "Pending"
       : selectedDeliveryStatus === "Completed"
-      ? order.paymentStatus === "Completed" && order.deliveryStatus === "Preparing" // Check both paymentStatus and deliveryStatus if deliveryStatus is "Completed"
-      : selectedDeliveryStatus 
-      ? order.deliveryStatus === selectedDeliveryStatus 
-      : true;
-  
+        ? order.paymentStatus === "Completed" && order.deliveryStatus === "Preparing" // Check both paymentStatus and deliveryStatus if deliveryStatus is "Completed"
+        : selectedDeliveryStatus
+          ? order.deliveryStatus === selectedDeliveryStatus
+          : true;
+
     return matchesDeliveryStatus && matchesPaymentStatus;
   });
-  
-  
+
+
 
   if (status === 'loading' || loading) {
     return <div>Loading...</div>;
@@ -211,15 +211,15 @@ export default function IncomingOrders() {
   return (
     <div className=" h-fit space-y-5 ">
 
-      <div className='w-full h-fit  bg-white px-6 pt-6 pb-2 rounded-xl'> 
-      <h1 className='page-header '>จัดการคำสั่งซื้อ</h1>          
+      <div className='w-full h-fit  bg-white px-6 pt-6 pb-2 rounded-xl'>
+        <h1 className='page-header '>จัดการคำสั่งซื้อ</h1>
         {/* Toggle Buttons for Status Filtering */}
         <div className="flex space-x-2 mb-4">
-        <button onClick={handleAllFilter} className="btn">
-          ทั้งหมด
-        </button>
+          <button onClick={handleAllFilter} className="btn">
+            ทั้งหมด
+          </button>
 
-        {Object.keys(statusOptions).map((status) => (
+          {Object.keys(statusOptions).map((status) => (
             <Button
               key={status}
               variant="contained"
@@ -229,111 +229,111 @@ export default function IncomingOrders() {
               {statusOptions[status]}
             </Button>
           ))}
+        </div>
+
+        {/* Dropdown for filtering orders by status */}
       </div>
 
-      {/* Dropdown for filtering orders by status */}   
-      </div>
-           
-      
+
 
 
 
       <div className='relative overflow-x-auto rounded-xl'>
-  <table className=" min-w-full h-fit border-separate border-spacing-0 bg-white p-6 ">
-    <div></div>
-  <thead>
-    <tr className='text-xs 2xl:text-base  bg-gray-100'>
-      <th scope="col" className="w-[50px] px-2 pt-5 pb-3 border-b border-r text-start font-normal rounded-tl-lg">รหัส</th>
-      <th scope="col" className="w-[150px] px-2 pt-5 pb-3 border-b border-r text-start font-normal">สถานะคำสั่งซื้อ</th>
-      <th scope="col" className="w-[120px] border-b px-2 pt-5 pb-3 border-r text-start font-normal">วันที่สั่งซื้อ</th>
-      <th scope="col" className="w-[100px] border-b px-2 pt-5 pb-3 border-r text-start font-normal">รวม</th>
-      <th scope="col" className="w-[200px] border-b px-2 pt-5 pb-3 border-r text-start font-normal">ทีอยู่จัดส่ง</th>
-      <th scope="col" className="w-[200px] border-b px-2 pt-5 pb-3 border-r text-start font-normal">ผู้ซื้อ</th>
-      <th scope="col" className="w-[150px] border-b px-2 pt-5 pb-3 border-r text-start font-normal">บริการขนส่ง</th>
-      <th scope="col" className="w-[100px] border-b px-2 pt-5 pb-3 border-r text-start font-normal">เลขพัสดุ</th>
-      <th scope="col" className="w-[180px] border-b px-2 pt-5 pb-3 border-r text-start font-normal">สถานะการชำระเงิน</th>
-      <th scope="col" className="w-[180px] border-b px-2 pt-5 pb-3 border-r text-start font-normal">สถานะการจัดส่ง</th>
-      <th scope="col" className="w-[320px] border-b px-2 pt-5 pb-3 border-r text-start font-normal  rounded-tr-lg">แอ็คชั่น</th>
-    </tr>
-  </thead>
-  {filteredOrders.length === 0 ? (
-                    <tfoot>
-                    <tr className="bg-gray-100 text-right">
-                      <td colSpan="11" className="border  md:px-4 md:py-2 font-normal text-gray-400 text-left ">
-                        ไม่พบคำสั่งซือในตอนนี้
-                      </td>
-                    </tr>
-                  </tfoot>
-  ) : (
-    <tbody>
-      {filteredOrders.map((order) => (
-        <tr key={order.id} className="hover:bg-gray-100 text-sm">
-          <td className=" border-b border-r px-2  md:py-2">{order.id}</td>
-          <td className="border-b border-r  px-2 md:py-2">{orderStatusTranslations[order.status]}</td>
-          <td className="border-b border-r px-2  md:py-2">{new Date(order.createdAt).toLocaleDateString('th-TH')}</td>
-          <td className="border-b border-r px-2 ">{order.totalPrice} บาท</td>
-          <td className="border-b border-r px-2  md:py-2">{order.addressText}</td>
-          <td className='border-b border-r px-2  md:py-2'>  
-            <div className='flex flex-col'>
-              <div className='mb-1'>{order.user?.name || 'User not found'} </div>
-              <div>{order.user?.phone || 'phone not found'}</div>
-            </div>
-          </td>
-          <td className="border-b border-r px-2  md:py-2">
-            {order.delivery?.deliveryService?.name || (
-              <span className="text-gray-300">โปรดใส่บริการขนส่ง</span>
-            )}
-          </td>
-          <td className="border-b border-r px-2  md:py-2">
-            {order.delivery?.trackingNum || (
-              <span className="text-gray-300">โปรดใส่เลขพัสดุ</span>
-            )}
-          </td>
-          <td className="border-b border-r px-2   md:py-2">
-            <div className={`${paymentStatusColors[order.paymentStatus]}   text-center border-2 border-transparent py-1  rounded-3xl`}>
-              {paymentStatusTranslations[order.paymentStatus]}
-            </div>
-            
-          </td>
-          <td className="border-b border-r px-2  md:py-2">
-            <div className={`${statusColors[order.deliveryStatus]} text-center border-2 border-transparent py-1  rounded-3xl `}>
-            {deliveryStatusTranslations[order.deliveryStatus]}
-            </div>
+        <table className=" min-w-full h-fit border-separate border-spacing-0 bg-white p-6 ">
+          <div></div>
+          <thead>
+            <tr className='text-xs 2xl:text-base  bg-gray-100'>
+              <th scope="col" className="w-[50px] px-2 pt-5 pb-3 border-b border-r text-start font-normal rounded-tl-lg">รหัส</th>
+              <th scope="col" className="w-[150px] px-2 pt-5 pb-3 border-b border-r text-start font-normal">สถานะคำสั่งซื้อ</th>
+              <th scope="col" className="w-[120px] border-b px-2 pt-5 pb-3 border-r text-start font-normal">วันที่สั่งซื้อ</th>
+              <th scope="col" className="w-[100px] border-b px-2 pt-5 pb-3 border-r text-start font-normal">รวม</th>
+              <th scope="col" className="w-[200px] border-b px-2 pt-5 pb-3 border-r text-start font-normal">ทีอยู่จัดส่ง</th>
+              <th scope="col" className="w-[200px] border-b px-2 pt-5 pb-3 border-r text-start font-normal">ผู้ซื้อ</th>
+              <th scope="col" className="w-[150px] border-b px-2 pt-5 pb-3 border-r text-start font-normal">บริการขนส่ง</th>
+              <th scope="col" className="w-[100px] border-b px-2 pt-5 pb-3 border-r text-start font-normal">เลขพัสดุ</th>
+              <th scope="col" className="w-[180px] border-b px-2 pt-5 pb-3 border-r text-start font-normal">สถานะการชำระเงิน</th>
+              <th scope="col" className="w-[180px] border-b px-2 pt-5 pb-3 border-r text-start font-normal">สถานะการจัดส่ง</th>
+              <th scope="col" className="w-[320px] border-b px-2 pt-5 pb-3 border-r text-start font-normal  rounded-tr-lg">แอ็คชั่น</th>
+            </tr>
+          </thead>
+          {filteredOrders.length === 0 ? (
+            <tfoot>
+              <tr className="bg-gray-100 text-right">
+                <td colSpan="11" className="border  md:px-4 md:py-2 font-normal text-gray-400 text-left ">
+                  ไม่พบคำสั่งซือในตอนนี้
+                </td>
+              </tr>
+            </tfoot>
+          ) : (
+            <tbody>
+              {filteredOrders.map((order) => (
+                <tr key={order.id} className="hover:bg-gray-100 text-sm">
+                  <td className=" border-b border-r px-2  md:py-2">{order.id}</td>
+                  <td className="border-b border-r  px-2 md:py-2">{orderStatusTranslations[order.status]}</td>
+                  <td className="border-b border-r px-2  md:py-2">{new Date(order.createdAt).toLocaleDateString('th-TH')}</td>
+                  <td className="border-b border-r px-2 ">{order.totalPrice} บาท</td>
+                  <td className="border-b border-r px-2  md:py-2">{order.addressText}</td>
+                  <td className='border-b border-r px-2  md:py-2'>
+                    <div className='flex flex-col'>
+                      <div className='mb-1'>{order.user?.name || 'User not found'} </div>
+                      <div>{order.user?.phone || 'phone not found'}</div>
+                    </div>
+                  </td>
+                  <td className="border-b border-r px-2  md:py-2">
+                    {order.delivery?.deliveryService?.name || (
+                      <span className="text-gray-300">โปรดใส่บริการขนส่ง</span>
+                    )}
+                  </td>
+                  <td className="border-b border-r px-2  md:py-2">
+                    {order.delivery?.trackingNum || (
+                      <span className="text-gray-300">โปรดใส่เลขพัสดุ</span>
+                    )}
+                  </td>
+                  <td className="border-b border-r px-2   md:py-2">
+                    <div className={`${paymentStatusColors[order.paymentStatus]}   text-center border-2 border-transparent py-1  rounded-3xl`}>
+                      {paymentStatusTranslations[order.paymentStatus]}
+                    </div>
 
-          </td>
-          <td className="border-b border-r px-2  md:py-2">
-            <Tooltip title="ดูรายละเอียด" arrow>
-              <IconButton
-                aria-label="view"
-                color="primary"
-                onClick={() => router.push(`/dashboard/orders/${order.id}`)}
-              >
-                <div className="border-2 text-sm md:px-2 py-1 rounded-xl">
-                  <VisibilityRoundedIcon /> ดูเพิ่มเติม
-                </div>
-              </IconButton>
-            </Tooltip>
-            
-            {order.deliveryStatus !== "Shipped" && order.deliveryStatus !== "Delivered"  && (
-            <Tooltip title="เพิ่มเลขพัสดุ" arrow>
-              <IconButton
-                aria-label="add-tracking"
-                color="primary"
-                onClick={() => handleOpen(order)}
-              >
-                <div className="border-2 text-sm md:px-2 py-1 rounded-xl">
-                  <LocalShippingIcon /> จัดส่ง
-                </div>
-              </IconButton>
-            </Tooltip>
+                  </td>
+                  <td className="border-b border-r px-2  md:py-2">
+                    <div className={`${statusColors[order.deliveryStatus]} text-center border-2 border-transparent py-1  rounded-3xl `}>
+                      {deliveryStatusTranslations[order.deliveryStatus]}
+                    </div>
+
+                  </td>
+                  <td className="border-b border-r px-2  md:py-2">
+                    <Tooltip title="ดูรายละเอียด" arrow>
+                      <IconButton
+                        aria-label="view"
+                        color="primary"
+                        onClick={() => router.push(`/dashboard/orders/${order.id}`)}
+                      >
+                        <div className="border-2 text-sm md:px-2 py-1 rounded-xl">
+                          <VisibilityRoundedIcon /> ดูเพิ่มเติม
+                        </div>
+                      </IconButton>
+                    </Tooltip>
+
+                    {order.deliveryStatus !== "Shipped" && order.deliveryStatus !== "Delivered" && (
+                      <Tooltip title="เพิ่มเลขพัสดุ" arrow>
+                        <IconButton
+                          aria-label="add-tracking"
+                          color="primary"
+                          onClick={() => handleOpen(order)}
+                        >
+                          <div className="border-2 text-sm md:px-2 py-1 rounded-xl">
+                            <LocalShippingIcon /> จัดส่ง
+                          </div>
+                        </IconButton>
+                      </Tooltip>
+                    )}
+
+                  </td>
+                </tr>
+              ))}
+            </tbody>
           )}
-
-          </td>
-        </tr>
-      ))}
-    </tbody>
-  )}
-</table>        
+        </table>
       </div>
 
 
@@ -345,7 +345,7 @@ export default function IncomingOrders() {
         aria-labelledby="delivery-modal-title"
         aria-describedby="delivery-modal-description"
       >
-        
+
         <Box
           sx={{
             position: 'absolute',
@@ -360,10 +360,10 @@ export default function IncomingOrders() {
           }}
         >
           <div className='flex justify-between items-center mb-4'>
-          <h2 className='text-xl r' id="delivery-modal-title">กรอกข้อมูลขนส่ง</h2>
-          <IconButton onClick={handleClose} sx={{ color: 'gray' }}>
-            <CloseRoundedIcon />
-          </IconButton>
+            <h2 className='text-xl r' id="delivery-modal-title">กรอกข้อมูลขนส่ง</h2>
+            <IconButton onClick={handleClose} sx={{ color: 'gray' }}>
+              <CloseRoundedIcon />
+            </IconButton>
           </div>
           <FormControl fullWidth sx={{ mb: 2 }}>
             <InputLabel id="delivery-service-label">ผู้ให้บริการขนส่ง</InputLabel>
