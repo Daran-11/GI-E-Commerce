@@ -19,6 +19,7 @@ export default async function RootLayout({ children }) {
     <html lang="th">
       <head>
         <script src="https://cdn.omise.co/omise.js" defer></script>
+        <script async src="https://plausible.io/js/plausible.js"></script>
       </head>
       <body className={`${prompt.className} bg-[#f1f1f1] m-0 p-0`}>
         <SessionProvider session={session}>
