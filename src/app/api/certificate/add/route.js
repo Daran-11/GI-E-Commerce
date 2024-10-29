@@ -9,9 +9,9 @@ export async function POST(request) {
   try {
     const formData = await request.formData();
 
-    const farmerId = formData.get('farmerId');
-    if (!farmerId) {
-      throw new Error("Farmer ID is not provided in the form data.");
+    const UsersId = formData.get('UsersId');
+    if (!UsersId) {
+      throw new Error("Users ID is not provided in the form data.");
     }
 
     const latitude = parseFloat(formData.get('latitude'));
@@ -43,8 +43,8 @@ export async function POST(request) {
       status: 'รอตรวจสอบใบรับรอง',
       registrationDate: new Date(),
       expiryDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)), // Set expiry to 1 year from now
-      farmer: {
-        connect: { id: parseInt(farmerId, 10) },
+      Users: {
+        connect: { id: parseInt(UsersId, 10) },
       },
     };
 
@@ -122,7 +122,7 @@ export async function DELETE(request) {
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
-  const farmerId = searchParams.get('farmerId');
+  const UsersId = searchParams.get('UsersId');
   const id = searchParams.get('id');
 
   try {
@@ -130,7 +130,7 @@ export async function GET(request) {
       const certificate = await prisma.certificate.findUnique({
         where: { id: parseInt(id, 10) },
         include: {
-          farmer: {
+          Users: {
             select: {
               name: true
             }
@@ -138,13 +138,13 @@ export async function GET(request) {
         }
       });
       return NextResponse.json(certificate);
-    } else if (farmerId) {
+    } else if (UsersId) {
       const certificates = await prisma.certificate.findMany({
         where: {
-          farmerId: parseInt(farmerId, 10)
+          UsersId: parseInt(UsersId, 10)
         },
         include: {
-          farmer: {
+          Users: {
             select: {
               name: true
             }
@@ -153,7 +153,7 @@ export async function GET(request) {
       });
       return NextResponse.json(certificates);
     } else {
-      return NextResponse.json({ error: "Either id or farmerId is required" }, { status: 400 });
+      return NextResponse.json({ error: "Either id or UsersId is required" }, { status: 400 });
     }
   } catch (error) {
     console.error("Error fetching certificates:", error);

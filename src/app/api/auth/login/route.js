@@ -18,25 +18,25 @@ export async function POST(req) {
     }
 
     console.log('Login:', login); // Debugging statement
-    const farmer = await prisma.farmer.findFirst({
+    const Users = await prisma.Users.findFirst({
       where: { phone: login }
     });
 
-    console.log('Farmer found:', farmer); // Debugging statement
+    console.log('Users found:', Users); // Debugging statement
 
-    if (farmer && await bcrypt.compare(password, farmer.password)) {
+    if (Users && await bcrypt.compare(password, Users.password)) {
       const token = jwt.sign(
-        { id: farmer.id, name: farmer.name, lastname: farmer.lastname, role: farmer.role },
+        { id: Users.id, name: Users.name, lastname: Users.lastname, role: Users.role },
         JWT_SECRET,
         { expiresIn: '1h' }
       );
 
       return new Response(JSON.stringify({
         token,
-        name: farmer.name,
-        lastname: farmer.lastname,
-        role: farmer.role,
-        id: farmer.id
+        name: Users.name,
+        lastname: Users.lastname,
+        role: Users.role,
+        id: Users.id
       }), { status: 200 });
     } else {
       return new Response(JSON.stringify({ message: 'Invalid credentials' }), { status: 401 });

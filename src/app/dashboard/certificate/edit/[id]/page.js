@@ -1,9 +1,23 @@
 "use client";
-import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import "@/app/dashboard/certificate/add/add.css"; // Assuming you're using the same CSS as the first form
+import { useState, useEffect } from "react";
+import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import L from "leaflet";
+import Image from "next/image";
+import "@/app/dashboard/certificate/add/add.css";
 
+// Fix for the missing marker icon in Leaflet
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
+  iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
+});
+
+// Edit page component
 const EditCertificatePage = ({ params }) => {
+  // Initialize form state
   const [formData, setFormData] = useState({
     type: "",
     variety: "",
@@ -11,25 +25,49 @@ const EditCertificatePage = ({ params }) => {
     latitude: "",
     longitude: "",
     productionQuantity: "",
-    hasCertificate: "",
-    imageUrl: null,
-    farmerId: "",
-    registrationDate: "",
-    expiryDate: "",
+    standards: [],
+    UsersId: "",
     status: "",
   });
 
-  const [imagePreview, setImagePreview] = useState(null);
+  const [standards, setStandards] = useState([]);
   const [errors, setErrors] = useState({});
   const router = useRouter();
   const { id } = params;
 
+  // Fetch data on component mount
   useEffect(() => {
+    const fetchStandards = async () => {
+      try {
+        const response = await fetch("/api/standards");
+        if (response.ok) {
+          const data = await response.json();
+          setStandards(data);
+        } else {
+          throw new Error("Failed to fetch standards");
+        }
+      } catch (error) {
+        console.error("Error fetching standards:", error);
+      }
+    };
+
     const fetchCertificate = async () => {
       try {
         const response = await fetch(`/api/certificate/add?id=${id}`);
         if (response.ok) {
           const data = await response.json();
+          
+          // Transform the standards data to include certificate details
+          const certificateStandards = Array.isArray(data.standards) 
+            ? data.standards.map(standard => ({
+                id: standard.id,
+                name: standard.name,
+                logo: standard.logoUrl,
+                certNumber: standard.certNumber || "",
+                certDate: standard.certDate ? new Date(standard.certDate).toISOString().split('T')[0] : "",
+              }))
+            : [];
+
           setFormData({
             type: data.type || "",
             variety: data.variety || "",
@@ -37,16 +75,10 @@ const EditCertificatePage = ({ params }) => {
             latitude: data.latitude || "",
             longitude: data.longitude || "",
             productionQuantity: data.productionQuantity || "",
-            hasCertificate: data.hasCertificate || "",
-            imageUrl: data.imageUrl || null,
-            farmerId: data.farmer?.id || "",
-            registrationDate: new Date(data.registrationDate).toISOString().split("T")[0],
-            expiryDate: new Date(data.expiryDate).toISOString().split("T")[0],
+            standards: certificateStandards,
+            UsersId: data.Users?.id || "",
             status: data.status || "",
           });
-          if (data.imageUrl) {
-            setImagePreview(data.imageUrl);
-          }
         } else {
           alert("Failed to fetch certificate");
         }
@@ -55,24 +87,86 @@ const EditCertificatePage = ({ params }) => {
       }
     };
 
+    fetchStandards();
     fetchCertificate();
   }, [id]);
 
+  // Form field change handler
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setFormData((prev) => ({ ...prev, imageUrl: file }));
-      setImagePreview(URL.createObjectURL(file));
-      setErrors((prev) => ({ ...prev, imageUrl: "" }));
+  // Standards change handler
+  const handleStandardChange = (standard, checked) => {
+    setFormData((prev) => {
+      const currentStandards = Array.isArray(prev.standards) ? prev.standards : [];
+      const updatedStandards = checked
+        ? [...currentStandards, {
+            id: standard.id,
+            name: standard.name,
+            logo: standard.logoUrl,
+            certNumber: "",
+            certDate: ""
+          }]
+        : currentStandards.filter((s) => s.id !== standard.id);
+      return { ...prev, standards: updatedStandards };
+    });
+  };
+
+  // Standard details change handler
+  const handleStandardDetailChange = (standardId, field, value) => {
+    setFormData((prev) => {
+      const currentStandards = Array.isArray(prev.standards) ? prev.standards : [];
+      const updatedStandards = currentStandards.map((s) =>
+        s.id === standardId ? { ...s, [field]: value } : s
+      );
+      return { ...prev, standards: updatedStandards };
+    });
+  };
+
+  // Map marker component
+  const LocationMarker = () => {
+    useMapEvents({
+      click(e) {
+        const { lat, lng } = e.latlng;
+        setFormData((prev) => ({
+          ...prev,
+          latitude: lat,
+          longitude: lng,
+        }));
+      },
+    });
+
+    return formData.latitude && formData.longitude ? (
+      <Marker position={[formData.latitude, formData.longitude]}></Marker>
+    ) : null;
+  };
+
+  // Get current location handler
+  const getCurrentLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setFormData((prev) => ({
+            ...prev,
+            latitude,
+            longitude,
+          }));
+        },
+        (error) => {
+          console.error("Error getting location:", error);
+          alert("ไม่สามารถดึงตำแหน่งปัจจุบันได้");
+        }
+      );
+    } else {
+      alert("Geolocation is not supported by this browser.");
     }
   };
 
+  // Form submission handler
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -80,15 +174,11 @@ const EditCertificatePage = ({ params }) => {
     if (!formData.type) newErrors.type = "กรุณากรอกชนิด";
     if (!formData.variety) newErrors.variety = "กรุณากรอกสายพันธุ์";
     if (!formData.plotCode) newErrors.plotCode = "กรุณากรอกรหัสแปลงปลูก";
-    if (!formData.latitude) newErrors.latitude = "กรุณากรอกพิกัดแกน X (ละติจูด)";
-    if (!formData.longitude) newErrors.longitude = "กรุณากรอกพิกัดแกน Y (ลองจิจูด)";
+    if (!formData.latitude || !formData.longitude) newErrors.location = "กรุณาเลือกพิกัด";
     if (!formData.productionQuantity) newErrors.productionQuantity = "กรุณากรอกจำนวนผลผลิต";
-    if (!formData.hasCertificate) newErrors.hasCertificate = "กรุณาเลือกว่ามีใบรับรองหรือไม่";
-    if (formData.hasCertificate === "มี" && !formData.imageUrl) newErrors.imageUrl = "กรุณาอัปโหลดรูปใบรับรอง";
-    if (!formData.farmerId) newErrors.farmerId = "กรุณากรอกรหัสเกษตร";
-    if (!formData.registrationDate) newErrors.registrationDate = "กรุณากรอกวันจดทะเบียน";
-    if (!formData.expiryDate) newErrors.expiryDate = "กรุณากรอกวันหมดอายุ";
-    if (!formData.status) newErrors.status = "กรุณากรอกสถานะ";
+    if (!Array.isArray(formData.standards) || formData.standards.length === 0) {
+      newErrors.standards = "กรุณาเลือกมาตรฐาน";
+    }
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -103,14 +193,18 @@ const EditCertificatePage = ({ params }) => {
     formDataToSend.append("latitude", formData.latitude);
     formDataToSend.append("longitude", formData.longitude);
     formDataToSend.append("productionQuantity", formData.productionQuantity);
-    formDataToSend.append("hasCertificate", formData.hasCertificate);
-    formDataToSend.append("farmerId", formData.farmerId);
-    formDataToSend.append("registrationDate", formData.registrationDate);
-    formDataToSend.append("expiryDate", formData.expiryDate);
+    formDataToSend.append("UsersId", formData.UsersId);
     formDataToSend.append("status", formData.status);
-    if (formData.imageUrl instanceof File) {
-      formDataToSend.append("imageUrl", formData.imageUrl);
-    }
+
+    // Append standards data
+    const standardsArray = Array.isArray(formData.standards) ? formData.standards : [];
+    standardsArray.forEach((standard, index) => {
+      formDataToSend.append(`standards[${index}][id]`, standard.id);
+      formDataToSend.append(`standards[${index}][name]`, standard.name);
+      formDataToSend.append(`standards[${index}][logo]`, standard.logo);
+      formDataToSend.append(`standards[${index}][certNumber]`, standard.certNumber);
+      formDataToSend.append(`standards[${index}][certDate]`, standard.certDate);
+    });
 
     try {
       const response = await fetch("/api/certificate/add", {
@@ -123,7 +217,7 @@ const EditCertificatePage = ({ params }) => {
         throw new Error(errorData.message || "Failed to update certificate");
       }
 
-      alert("Certificate updated successfully");
+      alert("แก้ไขใบรับรองสำเร็จ");
       router.push("/dashboard/certificate");
     } catch (error) {
       console.error("Error:", error);
@@ -131,10 +225,11 @@ const EditCertificatePage = ({ params }) => {
     }
   };
 
+  // Component render
   return (
     <div className="container">
       <main className="mainContent">
-        <h1 className="title-name">เเก้ไขใบรับรอง</h1>
+        <h1 className="title-name">ขอใบรับรอง</h1>
         <p className="subtitle-name">ข้อมูลผลิต</p>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="form-container">
@@ -165,46 +260,32 @@ const EditCertificatePage = ({ params }) => {
             />
             {errors.variety && <p className="error">{errors.variety}</p>}
 
-            <p className="section-name">รหัสแปลงปลูก</p>
-            <input
-              name="plotCode"
-              type="text"
-              placeholder="รหัสแปลงปลูก"
-              value={formData.plotCode}
-              onChange={handleChange}
-              className="form-input"
-              required
-            />
-            {errors.plotCode && <p className="error">{errors.plotCode}</p>}
+            <p className="section-name">พิกัด</p>
+            <MapContainer
+              center={[20.046061226911785, 99.890654]} // Default location
+              zoom={15}
+              style={{ height: "400px", width: "100%" }}
+            >
+              <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+              <LocationMarker />
+            </MapContainer>
+            <p>
+              พิกัดที่เลือก: ละติจูด {formData.latitude}, ลองจิจูด{" "}
+              {formData.longitude}
+            </p>
 
-            <p className="section-name">พิกัดแกน X (ละติจูด)</p>
-            <input
-              name="latitude"
-              type="text"
-              placeholder="พิกัดแกน X (ละติจูด)"
-              value={formData.latitude}
-              onChange={handleChange}
-              className="form-input"
-              required
-            />
-            {errors.latitude && <p className="error">{errors.latitude}</p>}
-
-            <p className="section-name">พิกัดแกน Y (ลองจิจูด)</p>
-            <input
-              name="longitude"
-              type="text"
-              placeholder="พิกัดแกน Y (ลองจิจูด)"
-              value={formData.longitude}
-              onChange={handleChange}
-              className="form-input"
-              required
-            />
-            {errors.longitude && <p className="error">{errors.longitude}</p>}
+            <button
+              type="button"
+              className="button-location"
+              onClick={getCurrentLocation}
+            >
+              ตำแหน่งปัจจุบัน
+            </button>
 
             <p className="section-name">จำนวนผลผลิต (กิโลกรัม)</p>
             <input
               name="productionQuantity"
-              type="text"
+              type="number"
               placeholder="จำนวนผลผลิต (กิโลกรัม)"
               value={formData.productionQuantity}
               onChange={handleChange}
@@ -215,61 +296,70 @@ const EditCertificatePage = ({ params }) => {
               <p className="error">{errors.productionQuantity}</p>
             )}
 
-            <p className="section-name">ใบรับรอง</p>
-            <select
-              name="hasCertificate"
-              value={formData.hasCertificate}
-              onChange={handleChange}
-              className="formInput"
-              required
-            >
-              <option value="" disabled hidden>
-                -
-              </option>
-              
-              <option value="มี">มี</option>
-              <option value="ไม่มี">ไม่มี</option>
-            </select>
-            {errors.hasCertificate && (
-              <p className="error">{errors.hasCertificate}</p>
-            )}
-
-            {formData.hasCertificate === "มี" && (
-              <div>
-                <input
-                  name="imageUrl"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  className="form-input"
-                  required
-                />
-                {imagePreview && (
-                  <img
-                    src={imagePreview}
-                    alt="Uploaded Preview"
-                    className="image-preview"
-                  />
-                )}
-                {errors.imageUrl && <p className="error">{errors.imageUrl}</p>}
-              </div>
-            )}
-
+            <p className="section-name">มาตรฐาน</p>
+            <div className="standards-container">
+  {standards.map((standard) => {
+    const currentStandard = formData.standards.find((s) => s.id === standard.id);
+    return (
+      <div
+        key={standard.id}
+        className={`standard-item-container ${
+          currentStandard ? "selected" : ""
+        }`}
+      >
+        <div className={'standard-item-container1'}>
+          <label>
             <input
-              name="farmerId"
-              type="number"
-              placeholder="รหัสเกษตร"
-              value={formData.farmerId}
-              onChange={handleChange}
-              className="form-input"
-              required
+              type="checkbox"
+              checked={!!currentStandard} // เช็คว่า selected หรือไม่
+              onChange={(e) => handleStandardChange(standard, e.target.checked)}
             />
-            {errors.farmerId && <p className="error">{errors.farmerId}</p>}
+            <span className="standard-logo">
+              <Image
+                src={standard.logoUrl}
+                alt={standard.name}
+                width={80}
+                height={80}
+              />
+            </span>
+          </label>
+        </div>
+        <span className="standard-name">{standard.name}</span>
+
+        <div className="standard-details">
+          <input
+            type="text"
+            className="form-input1"
+            placeholder="เลขที่ใบรับรอง"
+            value={currentStandard ? currentStandard.certNumber : ""} // แสดงค่าเลขที่ใบรับรอง
+            required={!!currentStandard} // ถ้ามีการเลือกต้องกรอก
+            onChange={(e) =>
+              handleStandardDetailChange(standard.id, "certNumber", e.target.value)
+            }
+          />
+          <br />
+          <input
+            type="date"
+            className="form-input1"
+            placeholder="วันที่ใบรับรอง"
+            value={currentStandard ? currentStandard.certDate : ""} // แสดงค่าวันที่ใบรับรอง
+            required={!!currentStandard} // ถ้ามีการเลือกต้องกรอก
+            onChange={(e) =>
+              handleStandardDetailChange(standard.id, "certDate", e.target.value)
+            }
+          />
+        </div>
+      </div>
+    );
+  })}
+</div>
+
+
           </div>
 
-          <div className="button-group">
+        <div className="button-group">
             <button type="submit" className="button-submit">
-              เเก้ไขใบรับรอง
+              แก้ไขใบรับรอง
             </button>
           </div>
         </form>
@@ -278,4 +368,4 @@ const EditCertificatePage = ({ params }) => {
   );
 };
 
-export default EditCertificatePage;
+export default EditCertificatePage;   

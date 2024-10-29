@@ -10,7 +10,7 @@ export default async function handler(req, res) {
       const certificate = await prisma.certificate.findUnique({
         where: { id: parseInt(id) },
         include: {
-          farmer: true,
+          Users: true,
         },
       });
 

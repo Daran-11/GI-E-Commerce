@@ -4,7 +4,7 @@ export async function DELETE(request) {
   const { id } = await request.json();
   
   try {
-    await prisma.farmer.delete({
+    await prisma.Users.delete({
       where: { id },
     });
     return new Response('User deleted', { status: 200 });

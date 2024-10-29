@@ -18,38 +18,6 @@ import MenuLink from './menuLink/menuLink';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 
-// Define the menu items
-const menuItems = [
-  {
-    list: [
-      { title: 'หน้าหลัก', path: '/dashboard', icon: <MdDashboard /> },    
-    ],
-  },
-  {
-    title: 'ใบรับรอง',
-    list: [
-      { title: 'ลงทะเบียนใบรับรอง', path: '/dashboard/certificate', icon: <MdSupervisedUserCircle /> },
-    ],
-  },
-  {
-    title: 'สินค้า',
-    list: [
-      { title: 'จัดการสินค้า', path: '/dashboard/products', icon: <MdShoppingBag /> },
-      { title: 'จัดการคำสั่งซื้อ', path: '/dashboard/orders', icon: <MdPeople /> },
-      { title: 'ประวัติการขาย', path: '/dashboard/transactions', icon: <MdAttachMoney /> },
-      { title: 'ช่องทางชำระเงิน', path: '/dashboard/chennel', icon: <MdMoney /> },
-    ],
-  },
-  {
-    title: 'วิเคราะห์',
-    list: [
-      { title: 'ตรวจสอบย้อนกลับ', path: '/dashboard/traceability', icon: <MdAnalytics /> },
-      { title: 'การตั้งค่า', path: '/dashboard/settings', icon: <MdOutlineSettings /> },
-      { title: 'ช่วยเหลือ', path: '/dashboard/help', icon: <MdHelpCenter /> },
-    ],
-  },
-];
-
 // Define the Sidebar component
 const Sidebar = () => {
   const pathname = usePathname();
@@ -107,5 +75,40 @@ const Sidebar = () => {
     </div>
   );
 };
+
+
+// Define the menu items
+const menuItems = [
+  {
+    list: [
+      { title: 'หน้าหลัก', path: '/dashboard', icon: <MdDashboard /> },    
+    ],
+  },
+  {
+    title: 'ใบรับรอง',
+    list: [
+      { title: 'ลงทะเบียนใบรับรอง', path: '/dashboard/certificate', icon: <MdSupervisedUserCircle /> },
+    ],
+  },
+  {
+    title: 'สินค้า',
+    list: [
+      { title: 'จัดการสินค้า', path: '/dashboard/products', icon: <MdShoppingBag /> },
+      { title: 'จัดการคำสั่งซื้อ', path: '/dashboard/orders', icon: <MdPeople /> },
+      { title: 'ประวัติการขาย', path: '/dashboard/transactions', icon: <MdAttachMoney /> },
+      { title: 'ช่องทางชำระเงิน', path: '/dashboard/chennel', icon: <MdMoney /> },
+    ],
+  },
+  {
+    title: 'วิเคราะห์',
+    list: [
+      { title: 'ตรวจสอบย้อนกลับ', path: '/dashboard/traceability', icon: <MdAnalytics /> },
+      { title: 'การตั้งค่า', path: '/dashboard/settings', icon: <MdOutlineSettings /> },
+      { title: 'ช่วยเหลือ', path: '/dashboard/help', icon: <MdHelpCenter /> },
+    ],
+  },
+];
+
+
 
 export default Sidebar;

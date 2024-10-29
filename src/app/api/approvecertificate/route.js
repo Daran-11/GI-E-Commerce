@@ -15,7 +15,7 @@ export async function GET(request) {
         where: { 
           id: parseInt(id, 10),
         },
-        include: { farmer: true },
+        include: { Users: true },
       });
       
       console.log("Found certificate:", certificate);
@@ -48,7 +48,7 @@ export async function GET(request) {
         where: {
           status: "รอตรวจสอบใบรับรอง"
         },
-        include: { farmer: true },
+        include: { Users: true },
       });
       return NextResponse.json(certificates);
     } catch (error) {
@@ -77,8 +77,8 @@ export async function POST(request) {
       registrationDate: new Date(data.registrationDate),
       expiryDate: new Date(data.expiryDate),
       status: "รอตรวจสอบใบรับรอง",
-      farmer: {
-        connect: { id: parseInt(data.farmerId, 10) },
+      Users: {
+        connect: { id: parseInt(data.UsersId, 10) },
       },
     };
 

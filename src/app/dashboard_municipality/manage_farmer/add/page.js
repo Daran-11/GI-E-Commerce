@@ -1,13 +1,13 @@
 "use client";
 import { useState, useEffect } from "react";
-import styles from "@/app/ui/dashboard/certificate/certificate.module.css";
+import styles from "@/app/ui/dashboard/manage_farmer/manage_farmer.module.css";
 import { useRouter } from "next/navigation";
 import { MdAdd, MdDelete } from 'react-icons/md';
 
-const AddFarmer = ({ farmerId }) => {
+const AddUsers = ({ UsersId }) => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [certificates, setCertificates] = useState([{ standardName: "", certificateNumber: "", approvalDate: "" }]);
+  const [certificates, setCertificates] = useState([{ type: "", variety:"", standardName: "", certificateNumber: "", approvalDate: "" }]);
   const [standards, setStandards] = useState([]);
   const router = useRouter();
 
@@ -22,38 +22,40 @@ const AddFarmer = ({ farmerId }) => {
       }
     };
 
-    const fetchFarmerData = async () => {
-      if (farmerId) {
+    const fetchUsersData = async () => {
+      if (UsersId) {
         try {
-          const response = await fetch(`/api/manage_farmer?id=${farmerId}`);
+          const response = await fetch(`/api/manage_farmer?id=${UsersId}`);
           const data = await response.json();
           setFirstName(data.firstName);
           setLastName(data.lastName);
-          setCertificates(data.certificates.length > 0 ? data.certificates : [{ standardName: "", certificateNumber: "", approvalDate: "" }]);
+          setCertificates(data.certificates.length > 0 ? data.certificates : [{ type: "", variety:"", standardName: "", certificateNumber: "", approvalDate: "" }]);
         } catch (error) {
-          console.error("Failed to fetch farmer data:", error);
+          console.error("Failed to fetch Users data:", error);
         }
       }
     };
 
     fetchStandards();
-    fetchFarmerData();
-  }, [farmerId]);
+    fetchUsersData();
+  }, [UsersId]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
     try {
       const res = await fetch("/api/manage_farmer", {
-        method: farmerId ? "PUT" : "POST",
+        method: UsersId ? "PUT" : "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          id: farmerId,
+          id: UsersId,
           firstName,
           lastName,
           certificates: certificates.map(cert => ({
+            type: cert.type, 
+            variety: cert.variety,
             standardName: cert.standardName,
             certificateNumber: cert.certificateNumber,
             approvalDate: new Date(cert.approvalDate).toISOString(),
@@ -64,7 +66,7 @@ const AddFarmer = ({ farmerId }) => {
       if (res.ok) {
         router.push("/dashboard_municipality/manage_farmer");
       } else {
-        throw new Error(farmerId ? "Failed to update farmer" : "Failed to create farmer");
+        throw new Error(UsersId ? "Failed to update Users" : "Failed to create Users");
       }
     } catch (error) {
       console.error(error);
@@ -73,7 +75,7 @@ const AddFarmer = ({ farmerId }) => {
   };
 
   const handleDelete = async () => {
-    if (!farmerId) return;
+    if (!UsersId) return;
 
     try {
       const res = await fetch("/api/manage_farmer", {
@@ -81,13 +83,13 @@ const AddFarmer = ({ farmerId }) => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ id: farmerId }),
+        body: JSON.stringify({ id: UsersId }),
       });
 
       if (res.ok) {
         router.push("/dashboard_municipality/manage_farmer");
       } else {
-        throw new Error("Failed to delete farmer");
+        throw new Error("Failed to delete Users");
       }
     } catch (error) {
       console.error(error);
@@ -96,7 +98,7 @@ const AddFarmer = ({ farmerId }) => {
   };
 
   const handleAddCertificate = () => {
-    setCertificates([...certificates, { standardName: "", certificateNumber: "", approvalDate: "" }]);
+    setCertificates([...certificates, { type: "", variety:"", standardName: "", certificateNumber: "", approvalDate: "" }]);
   };
 
   const handleRemoveCertificate = (index) => {
@@ -130,8 +132,26 @@ const AddFarmer = ({ farmerId }) => {
         />
         {certificates.map((cert, index) => (
           <div key={index} className={styles.certificateGroup}>
+          <input
+              type="text"
+              placeholder="ชนิด"
+              className={styles.selectcertificates}
+              value={cert.type}
+              onChange={(e) => handleCertificateChange(index, 'type', e.target.value)}
+              required
+            />
+            <input
+              type="text"
+              placeholder="พันธุ์"
+              className={styles.selectcertificates}
+              value={cert.variety}
+              onChange={(e) => handleCertificateChange(index, 'variety', e.target.value)}
+              required
+            />
+            <br/>
             <select
               value={cert.standardName}
+              className={styles.selectcertificates}
               onChange={(e) => handleCertificateChange(index, 'standardName', e.target.value)}
               required
             >
@@ -143,31 +163,50 @@ const AddFarmer = ({ farmerId }) => {
             <input
               type="text"
               placeholder="เลขที่ใบรับรอง"
+              className={styles.selectcertificates}
               value={cert.certificateNumber}
-              onChange={(e) => handleCertificateChange(index, 'certificateNumber', e.target.value)}
+              onChange={(e) =>
+                handleCertificateChange(
+                  index,
+                  "certificateNumber",
+                  e.target.value
+                )
+              }
               required
             />
-            <input
+           <input
               type="date"
+              className={styles.selectcertificates}
               value={cert.approvalDate}
-              onChange={(e) => handleCertificateChange(index, 'approvalDate', e.target.value)}
+              onChange={(e) =>
+                handleCertificateChange(index, "approvalDate", e.target.value)
+              }
               required
             />
-            <button type="button" onClick={() => handleRemoveCertificate(index)}>
+            <button
+              className={styles.delete}
+              type="button"
+              onClick={() => handleRemoveCertificate(index)}
+            >
               <MdDelete />
             </button>
           </div>
         ))}
-        <button type="button" onClick={handleAddCertificate} className={styles.addButton}>
-          <MdAdd /> เพิ่มใบรับรอง
+         <button
+          className={styles.addButton}
+          type="button"
+          onClick={handleAddCertificate}
+        >
+          <MdAdd />
         </button>
-        <button type="submit" className={styles.button}>{farmerId ? 'อัปเดตเกษตรกร' : 'เพิ่มรายชื่อเกษตรกร'}</button>
-        {farmerId && (
-          <button type="button" onClick={handleDelete} className={styles.deleteButton}>ลบเกษตรกร</button>
-        )}
+        <div className={styles.buttonContainer}>
+          <button type="submit" className={styles.Submitbutton}>
+            {UsersId ? "อัปเดตเกษตรกร" : "เพิ่มรายชื่อเกษตรกร"}
+          </button>
+        </div>
       </form>
     </div>
   );
 };
 
-export default AddFarmer;
+export default AddUsers;

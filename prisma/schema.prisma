@@ -8,7 +8,7 @@ generator client {
   provider = "prisma-client-js"
 }
 
-model Farmer {
+model Users {
   id                 Int          @id @default(autoincrement())
   title              String
   name               String
@@ -22,7 +22,7 @@ model Farmer {
   password           String
   role               String
   certificates       Certificate[]  // Keep this if you have other certificates
-  manageFarmers      manage_farmer[] // Adding reverse relation
+  
 }
 
 model manage_farmer {
@@ -32,8 +32,6 @@ model manage_farmer {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   certificates Certificate_farmer[]
-  farmerId   Int?     // Add farmerId field for the relation
-  farmer     Farmer?  @relation(fields: [farmerId], references: [id]) // Adding the relation
 }
 
 model Certificate {
@@ -46,8 +44,8 @@ model Certificate {
   registrationDate   DateTime
   expiryDate         DateTime
   status             String    @default("รอตรวจสอบใบรับรอง")
-  farmerId           Int
-  farmer             Farmer    @relation(fields: [farmerId], references: [id])
+  UsersId           Int
+  Users             Users    @relation(fields: [UsersId], references: [id])
   municipalComment   String?
   standards          Json      // เก็บข้อมูลมาตรฐานเป็น JSON
   createdAt          DateTime  @default(now())
@@ -65,11 +63,13 @@ model Standard {
 
 model Certificate_farmer {
   id                Int      @id @default(autoincrement())
+  type              String
+  variety           String
   standardName      String
   certificateNumber String
   approvalDate      DateTime
-  farmer           manage_farmer @relation(fields: [farmerId], references: [id], onDelete: Cascade)
-  farmerId          Int
+  Users           manage_farmer @relation(fields: [UsersId], references: [id], onDelete: Cascade)
+  UsersId          Int
 }
 
 model Product {

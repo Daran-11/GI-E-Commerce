@@ -11,9 +11,9 @@ export default NextAuth({
       },
       authorize: async (credentials) => {
       
-        const farmer = { id: 1, name: 'farmer' }; 
-        if (farmer) {
-          return farmer;
+        const Users = { id: 1, name: 'Users' }; 
+        if (Users) {
+          return Users;
         } else {
           return null;
         }

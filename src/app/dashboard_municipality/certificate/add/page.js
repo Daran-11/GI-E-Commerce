@@ -13,7 +13,7 @@ const Register = () => {
     productionQuantity: "",
     hasCertificate: "",
     imageUrl: null,
-    farmerId: "",
+    UsersId: "",
   });
 
   const [imagePreview, setImagePreview] = useState(null);
@@ -49,7 +49,7 @@ const Register = () => {
     if (!formData.hasCertificate) newErrors.hasCertificate = "กรุณาเลือกว่ามีใบรับรองหรือไม่";
     if (formData.hasCertificate === "มี" && !formData.imageUrl) newErrors.imageUrl = "กรุณาอัปโหลดรูปใบรับรอง";
    
-    if (!formData.farmerId) newErrors.farmerId = "กรุณากรอกรหัสเกษตร";
+    if (!formData.UsersId) newErrors.UsersId = "กรุณากรอกรหัสเกษตร";
 
     // If there are errors, update state and stop submission
     if (Object.keys(newErrors).length > 0) {
@@ -68,7 +68,7 @@ const Register = () => {
     if (formData.imageUrl) {
       formDataToSend.append("imageUrl", formData.imageUrl);
     }
-    formDataToSend.append("farmerId", formData.farmerId);
+    formDataToSend.append("UsersId", formData.UsersId);
     
     if (formData.hasCertificate === "มี" && formData.imageUrl) {
       formDataToSend.append("imageUrl", formData.imageUrl);
@@ -200,15 +200,15 @@ const Register = () => {
             )}
 
             <input
-              name="farmerId"
+              name="UsersId"
               type="number"
               placeholder="รหัสเกษตร"
-              value={formData.farmerId}
+              value={formData.UsersId}
               onChange={handleChange}
               className="form-input"
               required
             />
-            {errors.farmerId && <p className="error">{errors.farmerId}</p>}
+            {errors.UsersId && <p className="error">{errors.UsersId}</p>}
           </div>
 
           <div className="button-group">

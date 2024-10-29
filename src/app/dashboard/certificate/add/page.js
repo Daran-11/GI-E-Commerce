@@ -28,15 +28,15 @@ const Register = () => {
 
   const [standards, setStandards] = useState([]);
   const [errors, setErrors] = useState({});
-  const [farmerId, setFarmerId] = useState(null);
+  const [UsersId, setUsersId] = useState(null);
   const router = useRouter();
 
   useEffect(() => {
-    const storedFarmerId = localStorage.getItem("farmerId");
-    if (storedFarmerId) {
-      setFarmerId(storedFarmerId);
+    const storedUsersId = localStorage.getItem("UsersId");
+    if (storedUsersId) {
+      setUsersId(storedUsersId);
     } else {
-      console.error("Farmer ID not found in localStorage");
+      console.error("Users ID not found in localStorage");
     }
 
     // Fetch standards
@@ -120,10 +120,10 @@ const Register = () => {
       formDataToSend.append(`standards[${index}][certDate]`, standard.certDate);
     });
 
-    if (farmerId) {
-      formDataToSend.append("farmerId", farmerId);
+    if (UsersId) {
+      formDataToSend.append("UsersId", UsersId);
     } else {
-      alert("Farmer ID not found. Please log in again.");
+      alert("Users ID not found. Please log in again.");
       return;
     }
 
@@ -138,7 +138,7 @@ const Register = () => {
         throw new Error(errorData.message || "Failed to add certificate");
       }
 
-      alert("Certificate added successfully");
+      alert("เพิ่มใบรับรองเรีบยร้อย");
       router.push("/dashboard/certificate");
     } catch (error) {
       console.error("Error:", error);
@@ -265,59 +265,56 @@ const Register = () => {
                       : ""
                   }`}
                 >
-                  <label>
+                  <div className={"standard-item-container1"}>
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={formData.standards.some(
+                          (s) => s.id === standard.id
+                        )}
+                        onChange={(e) =>
+                          handleStandardChange(standard, e.target.checked)
+                        }
+                      />
+                      <span className="standard-logo">
+                        <Image
+                          src={standard.logoUrl}
+                          alt={standard.name}
+                          width={80}
+                          height={80}
+                        />
+                      </span>
+                    </label>
+                  </div>
+                  <span className="standard-name">{standard.name}</span>
+
+                  <div className="standard-details">
                     <input
-                      type="checkbox"
-                      checked={formData.standards.some(
-                        (s) => s.id === standard.id
-                      )}
+                      type="text"
+                      className="form-input1"
+                      placeholder="เลขที่ใบรับรอง"
                       onChange={(e) =>
-                        handleStandardChange(standard, e.target.checked)
+                        handleStandardDetailChange(
+                          standard.id,
+                          "certNumber",
+                          e.target.value
+                        )
                       }
                     />
-                    <span className="standard-logo">
-                      <Image
-                        src={standard.logoUrl}
-                        alt={standard.name}
-                        width={80}
-                        height={80}
-                      />
-                    </span>
-                    
-                    
-                  </label>
-                  <span className="standard-name">{standard.name}</span>
-                  {formData.standards.some((s) => s.id === standard.id) && (
-                    <div className="standard-details">
-                      <input
-                        type="text"
-                        className="form-input1"
-                        placeholder="เลขที่ใบรับรอง"
-                        onChange={(e) =>
-                          handleStandardDetailChange(
-                            standard.id,
-                            "certNumber",
-                            e.target.value
-                          )
-                        }
-                        required
-                      />
-                      <br />
-                      <input
-                        type="date"
-                        className="form-input1"
-                        placeholder="วันที่ใบรับรอง"
-                        onChange={(e) =>
-                          handleStandardDetailChange(
-                            standard.id,
-                            "certDate",
-                            e.target.value
-                          )
-                        }
-                        required
-                      />
-                    </div>
-                  )}
+                    <br />
+                    <input
+                      type="date"
+                      className="form-input1"
+                      placeholder="วันที่ใบรับรอง"
+                      onChange={(e) =>
+                        handleStandardDetailChange(
+                          standard.id,
+                          "certDate",
+                          e.target.value
+                        )
+                      }
+                    />
+                  </div>
                 </div>
               ))}
             </div>
@@ -325,7 +322,7 @@ const Register = () => {
 
           <div className="button-group">
             <button type="submit" className="button-submit">
-            ขอใบรับรอง
+              ขอใบรับรอง
             </button>
           </div>
         </form>

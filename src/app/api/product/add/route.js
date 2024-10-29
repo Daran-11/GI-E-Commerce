@@ -11,7 +11,7 @@ export async function GET(request) {
     try {
       const product = await prisma.product.findUnique({
         where: { id: parseInt(id, 10) },
-        // No need to include 'farmer' here as it's not in the Product model
+        // No need to include 'Users' here as it's not in the Product model
       });
       if (product) {
         return NextResponse.json(product);

@@ -6,15 +6,15 @@ export async function GET(req, { params }) {
   const { name } = params; // Use name instead of id
 
   try {
-    // Fetch the manage_farmer and related Farmer data by Farmer's name
-    const farmerData = await prisma.manage_farmer.findFirst({
+    // Fetch the manage_farmer and related Users data by Users's name
+    const UsersData = await prisma.manage_farmer.findFirst({
       where: {
-        farmer: {
-          name: name, // Check the farmer's name
+        Users: {
+          name: name, // Check the Users's name
         },
       },
       include: {
-        farmer: {
+        Users: {
           select: {
             name: true,
             lastname: true,
@@ -30,8 +30,8 @@ export async function GET(req, { params }) {
       },
     });
 
-    if (farmerData) {
-      return new Response(JSON.stringify(farmerData), {
+    if (UsersData) {
+      return new Response(JSON.stringify(UsersData), {
         status: 200,
         headers: { "Content-Type": "application/json" },
       });
@@ -39,7 +39,7 @@ export async function GET(req, { params }) {
       return new Response(JSON.stringify({ message: "ไม่พบเกษตร" }), { status: 404 });
     }
   } catch (error) {
-    console.error("Error fetching farmer data:", error);
+    console.error("Error fetching Users data:", error);
     return new Response(JSON.stringify({ message: "เกิดข้อผิดพลาดในการดึงข้อมูล" }), { status: 500 });
   }
 }

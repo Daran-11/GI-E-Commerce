@@ -3,7 +3,7 @@ import Link from 'next/link';
 import styles from '../../../ui/dashboard/users/account/account.module.css';
 
 const fetchUsersByRole = async () => {
-  return await prisma.farmer.findMany({
+  return await prisma.Users.findMany({
     where: {
       role: {
         in: ['เกษตรกร'],
@@ -49,7 +49,7 @@ export default async function UsersByRolePage() {
     ))
   ) : (
     <tr>
-      <td colSpan={12}>No users found</td>
+      <td colSpan={12}>ไม่พบข้อมูล</td>
     </tr>
   )}
 </tbody>

@@ -6,21 +6,21 @@ import Pagination from "@/app/ui/dashboard/pagination/pagination";
 import Search from "@/app/ui/dashboard/search/search";
 import { MdEdit, MdDelete } from 'react-icons/md';
 
-const ManageFarmers = () => {
-  const [manage_farmers, setManage_farmers] = useState([]);
+const ManageUsers = () => {
+  const [manage_Users, setManage_Users] = useState([]);
 
   useEffect(() => {
-    const fetchFarmers = async () => {
+    const fetchUsers = async () => {
       try {
         const response = await fetch("/api/manage_farmer");
         const data = await response.json();
-        setManage_farmers(data);
+        setManage_Users(data);
       } catch (error) {
-        console.error("Failed to fetch farmers:", error);
+        console.error("Failed to fetch Users:", error);
       }
     };
 
-    fetchFarmers();
+    fetchUsers();
   }, []);
 
   const handleDelete = async (id) => {
@@ -31,12 +31,12 @@ const ManageFarmers = () => {
         });
         if (response.ok) {
           alert("ลบเกษตรกรเรียบร้อยแล้ว");
-          setManage_farmers(manage_farmers.filter((manage_farmer) => manage_farmer.id !== id));
+          setManage_Users(manage_Users.filter((manage_Users) => manage_Users.id !== id));
         } else {
           alert("ไม่สามารถลบเกษตรกรได้");
         }
       } catch (error) {
-        console.error("Failed to delete farmer:", error);
+        console.error("Failed to delete Users:", error);
       }
     }
   };
@@ -52,9 +52,11 @@ const ManageFarmers = () => {
       <table className={styles.table}>
         <thead>
           <tr>
-            <td>ลำดับ</td>
+            <td>#</td>
             <td>ชื่อ</td>
             <td>นามสกุล</td>
+            <td>ชนิด</td>
+            <td>พันธุ์</td>
             <td>ชื่อมาตรฐาน</td>
             <td>หมายเลขใบรับรอง</td>
             <td>วันที่อนุมัติ</td>
@@ -62,58 +64,64 @@ const ManageFarmers = () => {
           </tr>
         </thead>
         <tbody>
-          {manage_farmers.length > 0 ? (
-            manage_farmers.map((manage_farmer, index) => (
-              <React.Fragment key={manage_farmer.id}>
+          {manage_Users.length > 0 ? (
+            manage_Users.map((manage_Users, index) => (
+              <React.Fragment key={manage_Users.id}>
                 {/* แสดงข้อมูลเกษตรกรพร้อมใบรับรองใบแรก */}
                 <tr>
                   <td>{index + 1}</td>
-                  <td>{manage_farmer.firstName}</td>
-                  <td>{manage_farmer.lastName}</td>
-                  {manage_farmer.certificates.length > 0 ? (
+                  <td>{manage_Users.firstName}</td>
+                  <td>{manage_Users.lastName}</td>
+                  {manage_Users.certificates.length > 0 ? (
                     <>
-                      <td>{manage_farmer.certificates[0].standardName}</td>
-                      <td>{manage_farmer.certificates[0].certificateNumber}</td>
-                      <td>{new Date(manage_farmer.certificates[0].approvalDate).toLocaleDateString()}</td>
+                      <td>{manage_Users.certificates[0].type}</td>
+                      <td>{manage_Users.certificates[0].variety}</td>
+                      <td>{manage_Users.certificates[0].standardName}</td>
+                      <td>{manage_Users.certificates[0].certificateNumber}</td>
+                      <td>{new Date(manage_Users.certificates[0].approvalDate).toLocaleDateString()}</td>
                     </>
                   ) : (
                     <td colSpan={3}>ไม่มีใบรับรอง</td>
                   )}
                   <td>
+                  <div className={styles.standardsContainer}>
                     <div className={styles.buttons}>
-                      <Link href={`/dashboard_municipality/manage_farmer/edit/${manage_farmer.id}`}>
+                      <Link href={`/dashboard_municipality/manage_farmer/edit/${manage_Users.id}`}>
                         <button className={`${styles.iconButton} ${styles.edit}`} title="แก้ไข">
                           <MdEdit />
                         </button>
                       </Link>
                       <button
                         className={`${styles.iconButton} ${styles.delete}`}
-                        onClick={() => handleDelete(manage_farmer.id)}
+                        onClick={() => handleDelete(manage_Users.id)}
                         title="ลบ"
                       >
                         <MdDelete />
                       </button>
                     </div>
+                    </div>
                   </td>
                 </tr>
 
-                {/* แสดงใบรับรองที่เหลือในบรรทัดถัดไป */}
-                {manage_farmer.certificates.slice(1).map((certificate, certIndex) => (
+           
+                {manage_Users.certificates.slice(1).map((certificate, certIndex) => (
                   <tr key={certIndex}>
-                    <td></td> {/* ช่องว่างสำหรับลำดับ */}
-                    <td></td> {/* ช่องว่างสำหรับชื่อ */}
-                    <td></td> {/* ช่องว่างสำหรับนามสกุล */}
+                    <td></td> 
+                    <td></td> 
+                    <td></td> 
+                    <td>{certificate.type}</td>
+                    <td>{certificate.variety}</td>
                     <td>{certificate.standardName}</td>
                     <td>{certificate.certificateNumber}</td>
                     <td>{new Date(certificate.approvalDate).toLocaleDateString()}</td>
-                    <td></td> {/* ช่องว่างสำหรับการดำเนินการ */}
+                    <td></td> 
                   </tr>
                 ))}
               </React.Fragment>
             ))
           ) : (
             <tr>
-              <td colSpan={7}>ไม่พบข้อมูลเกษตรกร</td>
+              <td colSpan={7}>ไม่พบข้อมูล</td>
             </tr>
           )}
         </tbody>
@@ -123,4 +131,4 @@ const ManageFarmers = () => {
   );
 };
 
-export default ManageFarmers;
+export default ManageUsers;
