@@ -53,7 +53,7 @@ const Standards = () => {
       <table className={styles.table}>
         <thead>
           <tr>
-            <td>ลำดับ</td>
+            <td>#</td>
             <td>โลโก้</td>
             <td>ชื่อมาตรฐาน</td>
             <td>คำอธิบาย</td>
@@ -65,7 +65,9 @@ const Standards = () => {
             standards.map((standard, index) => (
               <tr key={standard.id}>
                 <td>{index + 1}</td>
+                
                 <td>
+                <div className={styles.standardsContainer}>
                   <Image
                     src={standard.logoUrl}
                     alt={standard.name}
@@ -73,10 +75,13 @@ const Standards = () => {
                     height={50}
                     className={styles.standardLogo}
                   />
+                    </div>
                 </td>
+              
                 <td>{standard.name}</td>
                 <td>{standard.description}</td>
                 <td>
+                <div className={styles.standardsContainer}>
                   <div className={styles.buttons}>
                     <Link href={`/dashboard_municipality/manage_standards/edit/${standard.id}`}>
                       <button className={`${styles.iconButton} ${styles.edit}`} title="แก้ไข">
@@ -91,12 +96,13 @@ const Standards = () => {
                       <MdDelete  />
                     </button>
                   </div>
+                  </div>
                 </td>
               </tr>
             ))
           ) : (
             <tr>
-              <td colSpan={5}>ไม่พบข้อมูลมาตรฐาน</td>
+              <td colSpan={5}>ไม่พบข้อมูล</td>
             </tr>
           )}
         </tbody>

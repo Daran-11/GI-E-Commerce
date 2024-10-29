@@ -1,17 +1,19 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/app/lib/prisma';
 
-// Create a new farmer
+// Create a new Users
 export async function POST(request) {
   const { firstName, lastName, certificates } = await request.json();
 
   try {
-    const newFarmer = await prisma.manage_farmer.create({
+    const newUsers = await prisma.manage_farmer.create({
       data: {
         firstName,
         lastName,
         certificates: {
           create: certificates.map(cert => ({
+            type: cert.type,
+            variety: cert.variety,
             standardName: cert.standardName,
             certificateNumber: cert.certificateNumber,
             approvalDate: new Date(cert.approvalDate),
@@ -22,19 +24,19 @@ export async function POST(request) {
         certificates: true,
       },
     });
-    return NextResponse.json(newFarmer, { status: 201 });
+    return NextResponse.json(newUsers, { status: 201 });
   } catch (error) {
-    console.error('Failed to create farmer:', error);
-    return NextResponse.json({ error: 'Failed to create farmer', details: error.message }, { status: 500 });
+    console.error('Failed to create Users:', error);
+    return NextResponse.json({ error: 'Failed to create Users', details: error.message }, { status: 500 });
   }
 }
 
-// Update an existing farmer
+// Update an existing Users
 export async function PUT(request) {
   const { id, firstName, lastName, certificates } = await request.json();
 
   try {
-    const updatedFarmer = await prisma.manage_farmer.update({
+    const updatedUsers = await prisma.manage_farmer.update({
       where: { id: parseInt(id) },
       data: {
         firstName,
@@ -42,6 +44,8 @@ export async function PUT(request) {
         certificates: {
           deleteMany: {}, // Remove all existing certificates
           create: certificates.map(cert => ({
+            type: cert.type,
+            variety: cert.variety,
             standardName: cert.standardName,
             certificateNumber: cert.certificateNumber,
             approvalDate: new Date(cert.approvalDate),
@@ -52,63 +56,63 @@ export async function PUT(request) {
         certificates: true,
       },
     });
-    return NextResponse.json(updatedFarmer);
+    return NextResponse.json(updatedUsers);
   } catch (error) {
-    console.error('Failed to update farmer:', error);
-    return NextResponse.json({ error: 'Failed to update farmer', details: error.message }, { status: 500 });
+    console.error('Failed to update Users:', error);
+    return NextResponse.json({ error: 'Failed to update Users', details: error.message }, { status: 500 });
   }
 }
 
-// Fetch farmer(s) data
+// Fetch Users(s) data
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const id = searchParams.get('id');
 
   try {
     if (id) {
-      const farmer = await prisma.manage_farmer.findUnique({
+      const Users = await prisma.manage_farmer.findUnique({
         where: { id: parseInt(id) },
         include: { certificates: true },
       });
-      if (!farmer) {
+      if (!Users) {
         return NextResponse.json({ error: 'ไม่พบข้อมูลเกษตรกร' }, { status: 404 });
       }
-      return NextResponse.json(farmer);
+      return NextResponse.json(Users);
     } else {
-      const farmers = await prisma.manage_farmer.findMany({
+      const Users = await prisma.manage_farmer.findMany({
         include: { certificates: true },
       });
-      return NextResponse.json(farmers);
+      return NextResponse.json(Users);
     }
   } catch (error) {
-    console.error('Failed to fetch farmers:', error);
-    return NextResponse.json({ error: 'Failed to fetch farmers', details: error.message }, { status: 500 });
+    console.error('Failed to fetch Users:', error);
+    return NextResponse.json({ error: 'Failed to fetch Users', details: error.message }, { status: 500 });
   }
 }
 
-// Delete a farmer
+// Delete a Users
 export async function DELETE(request) {
   const { searchParams } = new URL(request.url);
   const id = searchParams.get('id');
 
   if (!id) {
-    return NextResponse.json({ error: 'Missing farmer ID' }, { status: 400 });
+    return NextResponse.json({ error: 'Missing Users ID' }, { status: 400 });
   }
 
   try {
-    // Delete all certificates associated with the farmer
+    // Delete all certificates associated with the Users
     await prisma.certificate.deleteMany({
-      where: { farmerId: parseInt(id) },
+      where: { UsersId: parseInt(id) },
     });
 
-    // Delete the farmer
+    // Delete the Users
     await prisma.manage_farmer.delete({
       where: { id: parseInt(id) },
     });
 
-    return NextResponse.json({ message: 'Farmer and certificates deleted successfully' });
+    return NextResponse.json({ message: 'Users and certificates deleted successfully' });
   } catch (error) {
-    console.error('Failed to delete farmer:', error);
-    return NextResponse.json({ error: 'Failed to delete farmer', details: error.message }, { status: 500 });
+    console.error('Failed to delete Users:', error);
+    return NextResponse.json({ error: 'Failed to delete Users', details: error.message }, { status: 500 });
   }
 }

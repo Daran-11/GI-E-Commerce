@@ -2,7 +2,7 @@ import prisma from '../../../lib/prisma';
 import UserDetails from '../UserDetails';
 
 const fetchUser = async (id) => {
-  return await prisma.farmer.findUnique({
+  return await prisma.Users.findUnique({
     where: { id: Number(id) },
   });
 };

@@ -7,7 +7,7 @@ export default function UserDetails({ user }) {
   const router = useRouter();
 
   const handleApproval = async () => {
-    if (confirm('Are you sure you want to approve this user?')) {
+    if (confirm('คุณต้องการต้องบัญชีผู้ใช้นี้ ?')) {
       await fetch(`/api/users/${user.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },

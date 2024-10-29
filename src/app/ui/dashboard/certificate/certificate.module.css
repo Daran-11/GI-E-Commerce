@@ -32,6 +32,8 @@
 .table td {
     padding: 15px;
     border-bottom: 1px solid #ddd; /* Adds a subtle border between rows */
+    text-align: center; /* Center the text horizontally */
+    vertical-align: middle; /* Center the text vertically */
 }
 
 /* Button styles */
@@ -51,7 +53,6 @@
 /* Button variations */
 .view {
     background-color: rgba(156, 204, 235, 0.75);
-
 }
 
 /* Status indicator styles */
@@ -60,6 +61,18 @@
     padding: 5px;
     font-size: 14px;
     color: black;
+}
+
+/* Flex container for standards */
+.standardsContainer {
+    display: flex;
+    justify-content: center; /* Center the images horizontally */
+    align-items: center; /* Center the images vertically */
+}
+
+.standardsContainer img {
+    margin: 0 5px; /* Add some space between images */
+    max-width: 40px; /* Ensure the images don't exceed a certain width */
 }
 
 /* Status colors */
@@ -84,9 +97,8 @@
     border: none;
     cursor: pointer;
     color: rgba(247, 115, 115, 0.75); /* Red color for delete action */
-  }
-  
-  .delete:hover {
+}
+
+.delete:hover {
     color: #ff7875; /* Lighter red on hover */
-  }
-  
+}

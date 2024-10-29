@@ -44,7 +44,7 @@ const ApproveCertificatePage = ({ params }) => {
             longitude: data.longitude || "",
             productionQuantity: data.productionQuantity || "",
             standards: JSON.parse(data.standards) || [],
-            farmerId: data.farmer?.id || "",
+            UsersId: data.Users?.id || "",
             registrationDate: new Date(data.registrationDate).toISOString().split("T")[0],
             expiryDate: new Date(data.expiryDate).toISOString().split("T")[0],
             status: data.status || "",

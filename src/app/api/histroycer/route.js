@@ -16,7 +16,7 @@ export async function GET(request) {
           id: parseInt(id, 10),
           status: { in: VALID_STATUSES }
         },
-        include: { farmer: true },
+        include: { Users: true },
       });
       if (certificate) {
         return NextResponse.json(certificate);
@@ -40,7 +40,7 @@ export async function GET(request) {
         where: {
           status: { in: VALID_STATUSES }
         },
-        include: { farmer: true },
+        include: { Users: true },
       });
       return NextResponse.json(certificates);
     } catch (error) {
@@ -65,8 +65,8 @@ export async function POST(request) {
         expiryDate: new Date(data.expiryDate),
         status: data.status,
         municipalComment: data.municipalComment || null, // Add municipalComment field
-        farmer: {
-          connect: { id: parseInt(data.farmerId, 10) }, // Convert farmerId to integer
+        Users: {
+          connect: { id: parseInt(data.UsersId, 10) }, // Convert farmerId to integer
         },
       },
     });

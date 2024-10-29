@@ -1,0 +1,80 @@
+
+.container {
+    background-color: var(--bgSoft);
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 20px;
+}
+
+.title{
+    font-size: 32px;
+}
+.input,.selectcertificates{
+    padding: 0.75rem;
+    border: 1.5px solid #ddd;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    width: 100%;
+    margin-bottom: 15px;
+    margin-top: 5px;
+}
+.subtitle{
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+
+.certificateGroup {
+    display: flex; 
+    align-items: center; 
+    gap: 10px;
+  }
+  
+  .certificateGroup input,
+  .certificateGroup select {
+    flex: 1; 
+  }
+  
+  .certificateGroup .delete {
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+  
+  .certificateGroup .delete:hover {
+    background-color: #ff1a1a; 
+  }
+  
+  .addButton{
+    font-size: 20px;
+    padding: 0.3rem;
+    border: 1.5px solid #ddd;
+    border-radius: 10px;
+  }
+
+  .buttonContainer {
+    display: flex;        /* Use Flexbox */
+    justify-content: flex-end; /* Align items to the right */
+    margin-top: 20px;     /* Optional margin for spacing above the button */
+  }
+
+  .Submitbutton {
+    background-color: #4CAF50; /* Example background color */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .Submitbutton:hover {
+    background-color: #45a049; /* Darker color on hover */
+  }
+
+
+
+
+

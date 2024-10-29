@@ -53,7 +53,7 @@ const Certificate = () => {
       <table className={styles.table}>
         <thead>
           <tr>
-          <td>#</td>
+            <td>#</td>
             <td>ชนิด</td>
             <td>สายพันธุ์</td>
             <td>มาตรฐาน</td>
@@ -63,59 +63,63 @@ const Certificate = () => {
           </tr>
         </thead>
         <tbody>
-  {certificates.length > 0 ? (
-    certificates.map((certificate, index) => {
-      const standards = JSON.parse(certificate.standards); // Parse standards if needed
-      return (
-        <tr key={certificate.id}>
-          <td>{index + 1}</td>
-          <td>{certificate.type}</td>
-          <td>{certificate.variety}</td>
-          <td>
-            {standards.length > 0 ? (
-              standards.map((standard) => (
-                <div key={standard.id}>
-                  <Image 
-                    src={standard.logo} 
-                    alt={standard.name} 
-                    width={40} 
-                    height={40} 
-                  />
-                </div>
-              ))
-            ) : (
-              "ไม่มี"
-            )}
-          </td>
-          <td>{certificate.productionQuantity}</td>
-          <td>
-            <span
-              className={`${styles.status} ${styles[certificate.status]}`}
-            >
-              {certificate.status}
-            </span>
-          </td>
-          <td>
-            <div className={styles.buttons}>
-              <Link
-                href={`/dashboard_municipality/certificate/approve/${certificate.id}`}
-              >
-                <button className={`${styles.button} ${styles.view}`}>
-                  ตรวจสอบใบรับรอง
-                </button>
-              </Link>
-            </div>
-          </td>
-        </tr>
-      );
-    })
-  ) : (
-    <tr>
-      <td colSpan={10}>ไม่พบใบรับรอง</td> {/* Adjust colSpan if necessary */}
-    </tr>
-  )}
-</tbody>
+          {certificates.length > 0 ? (
+            certificates.map((certificate, index) => {
+              const standards = JSON.parse(certificate.standards); // Parse standards if needed
+              return (
+                <tr key={certificate.id}>
+                  <td>{index + 1}</td>
+                  <td>{certificate.type}</td>
+                  <td>{certificate.variety}</td>
+                  <td>
+                    <div className={styles.standardsContainer}>
+                      {standards.length > 0
+                        ? standards.map((standard) => (
+                            <Image
+                              key={standard.id}
+                              src={standard.logo}
+                              alt={standard.name}
+                              width={40}
+                              height={40}
+                            />
+                          ))
+                        : "ไม่มี"}
+                    </div>
+                  </td>
 
+                  <td>{certificate.productionQuantity}</td>
+                  <td>
+                    <span
+                      className={`${styles.status} ${
+                        styles[certificate.status]
+                      }`}
+                    >
+                      {certificate.status}
+                    </span>
+                  </td>
+                  <td>
+                  <div className={styles.standardsContainer}>
+                    <div className={styles.buttons}>
+                      <Link
+                        href={`/dashboard_municipality/certificate/approve/${certificate.id}`}
+                      >
+                        <button className={`${styles.button} ${styles.view}`}>
+                          ตรวจสอบใบรับรอง
+                        </button>
+                      </Link>
+                    </div>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })
+          ) : (
+            <tr>
+              <td colSpan={10}>ไม่พบข้อมูล</td>{" "}
+            
+            </tr>
+          )}
+        </tbody>
       </table>
       <Pagination />
     </div>

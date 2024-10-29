@@ -9,25 +9,25 @@ import { useRouter } from "next/navigation";
 
 const Certificate = () => {
   const [certificates, setCertificates] = useState([]);
-  const [farmerId, setFarmerId] = useState(null);
+  const [UsersId, setUsersId] = useState(null);
   const router = useRouter();
 
   useEffect(() => {
-    const storedFarmerId = localStorage.getItem('farmerId');
-    if (storedFarmerId) {
-      setFarmerId(storedFarmerId);
+    const storedUsersId = localStorage.getItem("UsersId");
+    if (storedUsersId) {
+      setUsersId(storedUsersId);
     } else {
-      console.error("Farmer ID not found in localStorage");
-      router.push('/login');
+      console.error("Users ID not found in localStorage");
+      router.push("/login");
     }
   }, [router]);
 
   useEffect(() => {
     const fetchCertificates = async () => {
-      if (!farmerId) return;
+      if (!UsersId) return;
 
       try {
-        const response = await fetch(`/api/certificate/add?farmerId=${farmerId}`);
+        const response = await fetch(`/api/certificate/add?UsersId=${UsersId}`);
         const data = await response.json();
         setCertificates(data);
       } catch (error) {
@@ -36,7 +36,7 @@ const Certificate = () => {
     };
 
     fetchCertificates();
-  }, [farmerId]);
+  }, [UsersId]);
 
   const handleDelete = async (id) => {
     if (confirm("Are you sure you want to delete this certificate?")) {
@@ -74,6 +74,7 @@ const Certificate = () => {
             <td>มาตรฐาน</td>
             <td>จำนวนผลผลิต</td>
             <td>สถานะ</td>
+            <td>รายงาน</td>
             <td></td>
           </tr>
         </thead>
@@ -87,47 +88,60 @@ const Certificate = () => {
                   <td>{certificate.type}</td>
                   <td>{certificate.variety}</td>
                   <td>
-                    {standards.length > 0 ? (
-                      standards.map((standard) => (
-                        <div key={standard.id}>
-                          <Image 
-                            src={standard.logo} 
-                            alt={standard.name} 
-                            width={40} 
-                            height={40} 
-                          />
-                        </div>
-                      ))
-                    ) : (
-                      "ไม่มี"
-                    )}
+                    <div className={styles.standardsContainer}>
+                      {standards.length > 0
+                        ? standards.map((standard) => (
+                            <Image
+                              key={standard.id}
+                              src={standard.logo}
+                              alt={standard.name}
+                              width={40}
+                              height={40}
+                            />
+                          ))
+                        : "ไม่มี"}
+                    </div>
                   </td>
+
                   <td>{certificate.productionQuantity}</td>
                   <td>
                     <span
-                      className={`${styles.status} ${styles[certificate.status]}`}
+                      className={`${styles.status} ${
+                        styles[certificate.status]
+                      }`}
                     >
                       {certificate.status}
-                      <br/>
-                      {certificate.municipalComment}
                     </span>
                   </td>
                   <td>
-                    <div className={styles.buttons}>
-                      <button
-                        className={`${styles.button} ${styles.delete}`}
-                        onClick={() => handleDelete(certificate.id)}
-                      >
-                        ลบใบรับรอง
-                      </button>
+                    {certificate.municipalComment
+                      ? certificate.municipalComment
+                      : "-"}
+                  </td>
+
+                  <td>
+                  <div className={styles.standardsContainer}>
+                    {certificate.status === "ไม่อนุมัติ" ? (
+                      <div className={styles.buttons}>
+                        <button
+                          className={`${styles.button} ${styles.view}`}
+                          onClick={() => handleDelete(certificate.id)}
+                        >
+                          ลบใบรับรอง
+                        </button>
+                      </div>
+                    ) : (
+                      <span></span>
+                    )}
                     </div>
+                    <div className={styles.buttons}></div>
                   </td>
                 </tr>
               );
             })
           ) : (
             <tr>
-              <td colSpan={7}>ไม่มีใบรับรอง</td>
+              <td colSpan={7}>ไม่พบข้อมูล</td>
             </tr>
           )}
         </tbody>

@@ -5,7 +5,7 @@ export async function PATCH(req, { params }) {
   const { action } = await req.json();
 
   if (action === 'approve') {
-    await prisma.farmer.update({
+    await prisma.Users.update({
       where: { id: Number(id) },
       data: { role: 'เกษตรกร' },
     });

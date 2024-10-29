@@ -29,8 +29,8 @@ export async function POST(request) {
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create a new farmer in the database
-    const farmer = await prisma.farmer.create({
+    // Create a new Users in the database
+    const Users = await prisma.Users.create({
       data: {
         title, // Ensure that title is included here
         name,
@@ -47,7 +47,7 @@ export async function POST(request) {
     });
 
     // Respond with success message
-    return NextResponse.json({ message: 'User created successfully', farmer: { id: farmer.id, name: farmer.name } }, { status: 201 });
+    return NextResponse.json({ message: 'User created successfully', Users: { id: Users.id, name: Users.name } }, { status: 201 });
   } catch (error) {
     console.error('Error creating user:', error); // Log error for debugging
     return NextResponse.json({ message: 'Error creating user', error: error.message }, { status: 400 });

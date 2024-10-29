@@ -93,6 +93,7 @@ const Historycer = () => {
             </span>
           </td>
           <td>
+          <div className={styles.standardsContainer}>
             <div className={styles.buttons}>
               <Link
                 href={`/dashboard_municipality/certificate/edit/${certificate.id}`}
@@ -102,13 +103,14 @@ const Historycer = () => {
                 </button>
               </Link>
             </div>
+            </div>
           </td>
         </tr>
       );
     })
   ) : (
     <tr>
-      <td colSpan={10}>ไม่พบใบรับรอง</td> {/* Adjust colSpan if necessary */}
+      <td colSpan={10}>ไม่พบข้อมูล</td> {/* Adjust colSpan if necessary */}
     </tr>
   )}
 </tbody>

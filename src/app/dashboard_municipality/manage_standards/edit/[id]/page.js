@@ -81,7 +81,7 @@ export default function EditStandard({ params }) {
     <div className={styles.container}>
       <div className={styles.mainContent}>
         <h1 className={styles.title}>แก้ไขมาตรฐาน</h1>
-        <h3 className={styles.subtitle}>แก้ไขข้อมูลมาตรฐาน</h3>
+        <h3 className={styles.subtitle}>ข้อมูลมาตรฐานการรับรองสินค้า</h3>
         {error && <p className={styles.errorMessage}>{error}</p>}
         <form onSubmit={handleSubmit}>
           <div className={styles.formContainer}>
