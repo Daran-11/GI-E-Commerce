@@ -1,6 +1,5 @@
-import { Box, Button, Modal, TextField, Typography } from '@mui/material';
+import { Box, Button, Modal, Typography } from '@mui/material';
 import { useState } from 'react';
-import { Rating } from "react-simple-star-rating";
 
 function ConfirmDeliveryButton({ orderId, userId, productId }) {
   const [open, setOpen] = useState(false);
@@ -81,8 +80,7 @@ function ConfirmDeliveryButton({ orderId, userId, productId }) {
             p: 4,
             borderRadius: 2,
           }}
-        >
-          {!showRating ? (
+        >     
             <>
               <Typography variant="h6" component="h2">
                 Confirm Delivery
@@ -99,42 +97,6 @@ function ConfirmDeliveryButton({ orderId, userId, productId }) {
                 </Button>
               </Box>
             </>
-          ) : (
-            <>
-              <Typography variant="h6" component="h2">
-                Rate Your Product
-              </Typography>
-              <Box sx={{ mt: 2 }}>
-                <Rating
-                  onClick={setRating}
-                  ratingValue={rating}
-                  size={25}
-                  label
-                  transition
-                  fillColor="orange"
-                  emptyColor="gray"
-                  allowHover={true}
-                />
-                <TextField
-                  fullWidth
-                  multiline
-                  rows={3}
-                  label="Review (optional)"
-                  value={review}
-                  onChange={(e) => setReview(e.target.value)}
-                  sx={{ mt: 2 }}
-                />
-                <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-                  <Button variant="contained" color="primary" onClick={handleRatingSubmit}>
-                    Submit Review
-                  </Button>
-                  <Button variant="outlined" color="secondary" onClick={handleClose}>
-                    Close
-                  </Button>
-                </Box>
-              </Box>
-            </>
-          )}
         </Box>
       </Modal>
     </>
