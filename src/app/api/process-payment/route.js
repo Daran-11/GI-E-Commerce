@@ -17,11 +17,14 @@ export async function POST(request) {
       return NextResponse.json({ success: false, message: 'Invalid order ID' }, { status: 400 });
     }
 
+    const description = `Order ID: ${orderId}, Product ID: ${productId}, Quantity: ${quantity}`;
+
     // Create a charge with Omise
     const charge = await omise.charges.create({
       amount: totalAmount * 100, // in satang for THB
       currency: 'thb',
       card: token,
+      description: description,
     });
 
     if (charge.status === 'successful') {

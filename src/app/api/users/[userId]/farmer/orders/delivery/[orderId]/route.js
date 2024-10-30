@@ -48,11 +48,11 @@ export async function POST(request, { params }) {
       },
       update: {
         trackingNum: trackingNum, // Update the tracking number
-        deliveryId: service.id, // Update the delivery service
+        serviceId: service.id, // Update the delivery service
       },
       create: {
         trackingNum: trackingNum, // Create with the new tracking number
-        deliveryId: service.id, // Create with the delivery service ID
+        serviceId: service.id, // Create with the delivery service ID
         orderId: parseInt(orderId), // Associate with the correct order
       },
     });
@@ -61,6 +61,7 @@ export async function POST(request, { params }) {
     await prisma.order.update({
       where: { id: parseInt(orderId) }, // Ensure that the orderId is an integer
       data: {
+        deliveryId: updatedDeliveryDetail.id,
         deliveryStatus: DeliveryStatus.Shipped, // Use the enum value for "shipped"
       },
     });

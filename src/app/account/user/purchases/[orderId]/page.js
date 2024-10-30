@@ -1,14 +1,16 @@
 'use client';
 
 import ConfirmDeliveryButton from '@/components/ConfirmDeliveryButton';
+import { Box, Button, Modal, TextField } from '@mui/material';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { Rating } from 'react-simple-star-rating';
 
 const deliveryStatusTranslations = {
-  Preparing: 'กำลังเตรียมสินค้า',
-  Shipped: 'บริษัทขนส่งรับสินค้าแล้ว',
-  OutForDelivery: 'กำลังจัดส่ง',
+  Preparing: 'เตรียมสินค้า',
+  Shipped: 'การจัดส่ง',
+  //OutForDelivery: 'นำส่งพัสดุ',
   Delivered: 'สำเร็จ',
   Canceled: 'ยกเลิก',
   Returned: 'ส่งคืน',
@@ -16,33 +18,44 @@ const deliveryStatusTranslations = {
   RefundProcessed: 'คืนเงินเสร็จสิ้น',
 };
 
-const deliveryStatuses = ['Preparing', 'Shipped', 'OutForDelivery', 'Delivered'];
+const deliveryStatuses = ['Preparing', 'Shipped', 'Delivered'];
 
 function OrderDetails({ params }) {
   const { orderId } = params;
   const { data: session, status } = useSession();
   const router = useRouter();
-
+  const [isReviewModalOpen, setReviewModalOpen] = useState(false);
+  const [selectedProductId, setSelectedProductId] = useState(null);
+  const [rating, setRating] = useState(0);
+  const [review, setReview] = useState('');
   const [orderDetails, setOrderDetails] = useState(null);
+  const [userReviews, setUserReviews] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Redirect to login if not authenticated
     if (status === 'unauthenticated') {
       router.push('/login');
     }
-
-    // Fetch order details if authenticated
+  
     if (status === 'authenticated' && session?.user?.id && orderId) {
       const fetchOrderDetails = async () => {
         try {
-          const response = await fetch(
-            `/api/users/${session.user.id}/purchases/${orderId}`
-          );
+          const response = await fetch(`/api/users/${session.user.id}/purchases/${orderId}`);
           if (response.ok) {
             const data = await response.json();
             setOrderDetails(data.order);
+      
+            // Fetch user reviews for each product in the order
+            const reviewResponse = await fetch(`/api/users/${session.user.id}/reviews-rating/${orderId}`);
+            if (reviewResponse.ok) {
+              const reviewData = await reviewResponse.json();
+              
+              // Set reviewed product IDs
+              setUserReviews(reviewData.reviewedProductIds || []);
+            } else {
+              console.error('Failed to fetch user reviews');
+            }
           } else {
             setError('Failed to fetch order details');
           }
@@ -53,10 +66,57 @@ function OrderDetails({ params }) {
           setLoading(false);
         }
       };
-
+      
       fetchOrderDetails();
     }
   }, [status, session, router, orderId]);
+  
+
+  
+  const submitReview = async () => {
+    try {
+      const response = await fetch('/api/rating-reviews', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: session.user.id,
+          productId: selectedProductId,
+          orderId,
+          rating,
+          review,  // Optional review text field
+        }),
+      });
+      
+      const data = await response.json();
+      if (data.success) {
+        alert('Review submitted successfully!');
+      } else {
+        alert('Error submitting review: ' + data.error);
+      }
+    } catch (error) {
+      console.error('Error submitting review:', error);
+      alert('Could not submit the review');
+    } finally {
+      closeReviewModal();
+
+    }
+  };
+
+  const handleRating = (rate) => {
+    setRating(rate);
+  };
+
+  const openReviewModal = (productId) => {
+    setSelectedProductId(productId);
+    setReviewModalOpen(true);
+  };
+
+  const closeReviewModal = () => {
+    setReviewModalOpen(false);
+    setRating(0);
+  };
 
   if (loading) {
     return <div>Loading order details...</div>;
@@ -95,13 +155,13 @@ const currentStepIndex = deliveryStatuses.includes(orderDetails.deliveryStatus)
         <div className="progress-bar-container my-4   ">
           <div className='relative '>
             {/* Progress Bar Line */}
-            <div className="absolute top-3 left-1/2 transform -translate-x-1/2  w-[75%]   h-2  bg-gray-300 rounded-full"></div>
+            <div className="absolute top-3 left-1/2 transform -translate-x-1/2  w-[69%]   h-2  bg-gray-300 rounded-full"></div>
 
             <div
               className={` absolute top-3 left-0  h-2 rounded-full progress-pulse`}
               style={{
                 width: `${((currentStepIndex + 1) / deliveryStatuses.length) * 100 }%`,
-                maxWidth: `87%` ,
+                maxWidth: `83%` ,
                 backgroundColor: '#4eac14',
               }}
             ></div>            
@@ -139,8 +199,19 @@ const currentStepIndex = deliveryStatuses.includes(orderDetails.deliveryStatus)
           <tbody>
             {orderDetails.orderItems.map((item) => (
               <tr key={item.id} className="text-center">
-                <td className="border border-gray-300 px-2 py-2">
+                <td className="border border-gray-300 px-2 py-2 text-start">
                   {item.product.ProductName}
+                  {item.product.ProductType}
+                   {orderDetails.farmer.farmerName}
+                  {orderDetails.deliveryStatus === 'Delivered' && !userReviews.includes(item.product.ProductID) && (
+                    <div>
+                      <button onClick={() => openReviewModal(item.product.ProductID)} className="text-blue-600 underline">
+                        เขียนรีวิว
+                      </button>                      
+                    </div>
+
+                  )}
+
                 </td>
                 <td className="border border-gray-300 px-2 py-2">
                   {item.product.ProductType}
@@ -169,13 +240,31 @@ const currentStepIndex = deliveryStatuses.includes(orderDetails.deliveryStatus)
           </tfoot>
         </table>
         {/* Conditionally render the button based on deliveryStatus */}
-        {orderDetails.deliveryStatus === 'OutForDelivery' && (
+        {orderDetails.deliveryStatus === 'Shipped' && (
           <div className='w-full h-fit flex justify-end mt-5'>
             <ConfirmDeliveryButton orderId={orderDetails.id} userId={session.user.id} />
           </div>
         )}
 
-
+      {/* Review Modal */}
+      <Modal open={isReviewModalOpen} onClose={closeReviewModal}>
+        <Box className="p-6 bg-white rounded-lg shadow-lg mx-auto mt-20 max-w-md">
+          <h2 className="text-lg font-semibold mb-4">Rate the Product</h2>
+          <Rating onClick={handleRating} ratingValue={rating} allowHover={true} size={30} />
+          <TextField
+                  fullWidth
+                  multiline
+                  rows={3}
+                  label="Review (optional)"
+                  value={review}
+                  onChange={(e) => setReview(e.target.value)}
+                  sx={{ mt: 2 }}
+                />
+          <div className="mt-4">
+            <Button variant="contained" color="primary" onClick={submitReview}>Submit Review</Button>
+          </div>
+        </Box>
+      </Modal>
       </div>
     </div>
   );
