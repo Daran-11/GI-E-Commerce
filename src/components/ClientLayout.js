@@ -1,10 +1,10 @@
-
 "use client";
 
 import { CartProvider } from '@/context/cartContext';
 import { usePathname } from 'next/navigation';
 import Footer from './Footer';
 import NavbarWrapper from './NavbarWrapper';
+
 
 export default function ClientLayout({ session, children }) {
     const pathname = usePathname();

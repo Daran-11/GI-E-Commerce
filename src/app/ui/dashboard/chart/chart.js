@@ -11,8 +11,9 @@ import {
   Legend,
 } from "recharts";
 
-const siteId = "gipineapple"; // Replace with your actual site ID
-const apiKey = "voNKNzpDiJsvE00ym9bspzvITg2J_XrOKBrX5TPQsWA7YJdyjanQTnwd8lar2aeg"; // Optional, if your Plausible API is private
+const siteId = process.env.NEXT_PUBLIC_PLAUSIBLE_SITE_ID;
+const apiKey = process.env.NEXT_PUBLIC_PLAUSIBLE_API_KEY;
+
 
 const Chart = () => {
   const [data, setData] = useState([]);
@@ -35,7 +36,7 @@ const Chart = () => {
         throw new Error("Failed to fetch data from Plausible.");
       }
       const visitorsResult = await visitorsResponse.json();
-      console.log("Visitors Result:", visitorsResult);
+
 
       const transformedVisitorsData = visitorsResult.results.map((item) => ({
         date: item.date,
@@ -56,7 +57,6 @@ const Chart = () => {
         throw new Error("Failed to fetch page views data.");
       }
       const pageViewsResult = await pageViewsResponse.json();
-      console.log("Page Views Result:", pageViewsResult);
 
       // Transform page views data to match visitors data structure
       const transformedPageViewsData = pageViewsResult.results.map((item) => ({
@@ -64,7 +64,6 @@ const Chart = () => {
         pageviews: item.pageviews || 0,
       }));
 
-      console.log("Transformed Page Views Data:", transformedPageViewsData);
 
       // Merge visitors and page views data
       const mergedData = transformedVisitorsData.map((visitorData) => {
@@ -77,7 +76,6 @@ const Chart = () => {
         };
       });
 
-      console.log("Merged Data:", mergedData);
 
       setData(mergedData);
     } catch (error) {
