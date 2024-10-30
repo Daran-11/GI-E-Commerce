@@ -5,14 +5,13 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 // Map of deliveryStatus to Thai translations
 const deliveryStatusTranslations = {
-  Preparing: 'กำลังเตรียมสินค้า',
-  Shipped: 'ส่งให้บริษัทขนส่งแล้ว',
+  Preparing: 'กำลังเตรียมพัสดุ',
+  Shipped: 'ระหว่างการจัดส่ง',
   OutForDelivery: 'กำลังจัดส่ง',
-  Delivered: 'สำเร็จ',
+  Delivered: 'จัดส่งสำเร็จ',
   Canceled: 'ยกเลิก',
   Returned: 'ส่งคืน',
   FailedDelivery: 'การจัดส่งล้มเหลว',
-  //AwaitingPickup: 'รอการรับ',
   RefundProcessed: 'คืนเงินเสร็จสิ้น',
 };
 

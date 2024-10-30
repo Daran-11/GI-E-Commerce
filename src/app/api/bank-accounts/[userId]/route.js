@@ -54,12 +54,17 @@ export async function POST(request, { params }) {
     });
   }
 
+  const farmer = await prisma.farmer.findUnique({
+    where: { userId: parseInt(params.userId) }
+  });
+
   const newBankAccount = await prisma.bankAccount.create({
     data: {
       accountNumber,
       accountName,
       bankId: parseInt(bankId, 10),
       userId: parseInt(params.userId),
+      farmerId: farmer.id,
       isDefault,
     },
   });

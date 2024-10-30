@@ -10,8 +10,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from 'react';
 
 const deliveryStatusTranslations = {
-  Preparing: 'เตรียมพัสดุ',
-  Shipped: 'ระหว่างขนส่ง',
+  Preparing: 'กำลังเตรียมพัสดุ',
+  Shipped: 'ระหว่างการจัดส่ง',
   Delivered: 'จัดส่งสำเร็จ',
   Canceled: 'ยกเลิก',
   Returned: 'ส่งคืน',

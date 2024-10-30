@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
 
 const deliveryStatusTranslations = {
   Preparing: 'กำลังเตรียมสินค้า',
-  Shipped: 'ส่งให้บริษัทขนส่งแล้ว',
+  Shipped: 'ระหว่างการจัดส่ง',
   OutForDelivery: 'กำลังจัดส่ง',
   Delivered: 'จัดส่งสำเร็จ',
   Canceled: 'ยกเลิก',
