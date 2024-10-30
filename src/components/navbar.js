@@ -8,38 +8,30 @@ import { useEffect, useRef, useState } from 'react';
 import SearchBar from "./searchbar";
 
 export const Navbar = () => {
-    const { data: session, status } = useSession()
+    const { data: session, status } = useSession();
     const currentPath = usePathname();
-    const pathname = usePathname()
-    const { cartItemCount } = useCart(); // Use cart context
-    //const [cartItemCount, setCartItemCount] = useState(0); //จำนวนสินค้าในตะกร้าตอนนี้
+    const { cartItemCount } = useCart();
     const activePaths = ['/account/user/profile', '/account/user/settings', '/account/user/orders', '/account/user/addresses'];
 
-    const [isMenuOpen, setIsMenuOpen] = useState(false); // State to handle the menu toggle
-    const [isDropdownOpen, setIsDropdownOpen] = useState(false); // State for dropdown menu
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const dropdownRef = useRef(null);
-    const toggleButtonRef = useRef(null); // Ref for the hamburger icon
+    const toggleButtonRef = useRef(null);
     const [menuAnimation, setMenuAnimation] = useState(false);
 
-    // Function to toggle the menu
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
-
-    // Function to toggle the dropdown menu
     const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
 
-    // Close dropdown menu when clicking outside of it
     useEffect(() => {
         const handleClickOutside = (event) => {
-            // Check if the click is outside the menu AND not on the toggle button
             if (
                 dropdownRef.current && !dropdownRef.current.contains(event.target) &&
                 toggleButtonRef.current && !toggleButtonRef.current.contains(event.target)
             ) {
-                toggleMenu(); // Close the menu
+                toggleMenu();
             }
         };
 
-        // Add both 'mousedown' and 'touchstart' events to handle desktop and mobile
         document.addEventListener('mousedown', handleClickOutside);
         document.addEventListener('touchstart', handleClickOutside);
 
@@ -49,17 +41,6 @@ export const Navbar = () => {
         };
     }, [dropdownRef, toggleMenu]);
 
-
-
-    // Function to handle dropdown toggle and close the mobile menu
-    const handleDropdownToggle = () => {
-        setIsDropdownOpen(!isDropdownOpen);
-        if (isMenuOpen) {
-            setIsMenuOpen(false);
-        }
-    };
-
-    // Trigger animation when the menu opens/closes
     useEffect(() => {
         if (isMenuOpen) {
             setMenuAnimation(true);
@@ -67,6 +48,11 @@ export const Navbar = () => {
             setMenuAnimation(false);
         }
     }, [isMenuOpen]);
+
+    // Do not return null; instead, conditionally render the navbar content
+    if (currentPath.startsWith('/dashboard') || currentPath.startsWith('/admin-dashboard')) {
+        return null; // Render nothing if the path starts with these values
+    }
 
     return (
         <div className="fixed top-0 left-0 w-full bg-white shadow-lg z-50">

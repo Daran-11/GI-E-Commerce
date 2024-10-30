@@ -51,7 +51,6 @@ const DashboardAdmin = () => {
           <Card />
           <Card />
           <Card />
-          <Notification />
         </div>
         <div>
           <Transactions />

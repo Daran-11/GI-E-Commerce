@@ -3,8 +3,9 @@ import React, { useEffect, useState } from "react";
 import { MdSupervisedUserCircle } from "react-icons/md";
 import styles from "./card.module.css";
 
-const siteId = "gipineapple"; // Replace with your actual site ID
-const apiKey = "voNKNzpDiJsvE00ym9bspzvITg2J_XrOKBrX5TPQsWA7YJdyjanQTnwd8lar2aeg"; // Optional, if your Plausible API is private
+const siteId = process.env.NEXT_PUBLIC_PLAUSIBLE_SITE_ID;
+const apiKey = process.env.NEXT_PUBLIC_PLAUSIBLE_API_KEY;
+
 
 const Card = () => {
   const [pageViews, setPageViews] = useState(0);
@@ -30,7 +31,6 @@ const Card = () => {
       }
 
       const result = await response.json();
-      console.log("Page Views API Response:", result);
 
       // Attempt to extract the pageviews count
       // If the API response contains nested objects, adapt this as necessary
