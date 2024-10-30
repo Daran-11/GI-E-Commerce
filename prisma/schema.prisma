@@ -63,12 +63,16 @@ model ProductImage {
 model RatingReview {
   id          Int      @id @default(autoincrement())
   userId      Int
+  orderId   Int
   productId   Int
   rating      Int      @db.TinyInt  // Rating out of 5 (for example)
   review      String?  @db.VarChar(1000) // Optional review text
   createdAt   DateTime @default(now())
+
+   @@unique([userId, orderId])  // Define composite unique constraint here
   
   // Relationships
+  order     Order    @relation(fields: [orderId], references: [id])
   product     Product  @relation(fields: [productId], references: [ProductID])
   user        User     @relation(fields: [userId], references: [id])
 }
@@ -121,6 +125,7 @@ model Order {
 
   farmer           Farmer           @relation(fields: [farmerId], references: [id])
   user             User             @relation(fields: [userId], references: [id])
+  reviews          RatingReview[]   // Relation to RatingReview table
   delivery         Delivery_Detail?
   orderItems       OrderItem[]      // Relation to OrderItem table (1-to-many)
 
@@ -180,12 +185,12 @@ model Delivery_Service {
 
 model Delivery_Detail {
   id              Int              @id @default(autoincrement())
-  deliveryId      Int
+  serviceId       Int
   orderId         Int              @unique  // Associate with a specific order and must be unique
   trackingNum     String           // Tracking number for this specific order
 
   order           Order            @relation(fields: [orderId], references: [id]) // One-to-one relation with Order
-  deliveryService Delivery_Service @relation(fields: [deliveryId], references: [id]) // Relation with Delivery_Service
+  deliveryService Delivery_Service @relation(fields: [serviceId], references: [id]) // Relation with Delivery_Service
 }
 
 model Address {
