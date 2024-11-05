@@ -5,14 +5,29 @@ import Link from "next/link";
 import Image from "next/image";
 import Pagination from "@/app/ui/dashboard/pagination/pagination";
 import Search from "@/app/ui/dashboard/search/search";
+import { useRouter } from "next/navigation";
 
 const Certificate = () => {
   const [certificates, setCertificates] = useState([]);
+  const [UsersId, setUsersId] = useState(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    const storedUsersId = localStorage.getItem("UsersId");
+    if (storedUsersId) {
+      setUsersId(storedUsersId);
+    } else {
+      console.error("Users ID not found in localStorage");
+      router.push("/login");
+    }
+  }, [router]);
 
   useEffect(() => {
     const fetchCertificates = async () => {
+      if (!UsersId) return;
+
       try {
-        const response = await fetch("/api/certificate/add");
+        const response = await fetch(`/api/certificate/add?UsersId=${UsersId}`);
         const data = await response.json();
         setCertificates(data);
       } catch (error) {
@@ -21,7 +36,7 @@ const Certificate = () => {
     };
 
     fetchCertificates();
-  }, []);
+  }, [UsersId]);
 
   const handleDelete = async (id) => {
     if (confirm("Are you sure you want to delete this certificate?")) {
@@ -55,60 +70,77 @@ const Certificate = () => {
           <tr>
             <td>#</td>
             <td>สายพันธุ์</td>
-            <td>รหัสแปลงปลูก</td>
-            <td>วันจดทะเบียน</td>
-            <td>วันหมดอายุ</td>
+            <td>มาตรฐาน</td>
+            <td>จำนวนผลผลิต</td>
             <td>สถานะ</td>
-            <td>ข้อมูลเกษตรกร</td>
-            <td>Actions</td>
+            <td>รายงาน</td>
+            <td></td>
           </tr>
         </thead>
         <tbody>
           {certificates.length > 0 ? (
-            certificates.map((certificate) => (
-              <tr key={certificate.id}>
-                <td>{certificate.id}</td>
-                <td>{certificate.variety}</td>
-                <td>{certificate.plotCode}</td>
-                <td>
-                  {new Date(certificate.registrationDate).toLocaleDateString()}
-                </td>
-                <td>{new Date(certificate.expiryDate).toLocaleDateString()}</td>
-                <td>
-                  <span
-                    className={`${styles.status} ${styles[certificate.status]}`}
-                  >
-                    {certificate.status}
-                  </span>
-                </td>
+            certificates.map((certificate, index) => {
+              const standards = JSON.parse(certificate.standards); // Parse standards if needed
+              return (
+                <tr key={certificate.id}>
+                  <td>{index + 1}</td>
+                  <td>{certificate.type}</td>
+                  <td>{certificate.variety}</td>
+                  <td>
+                    <div className={styles.standardsContainer}>
+                      {standards.length > 0
+                        ? standards.map((standard) => (
+                            <Image
+                              key={standard.id}
+                              src={standard.logo}
+                              alt={standard.name}
+                              width={40}
+                              height={40}
+                            />
+                          ))
+                        : "ไม่มี"}
+                    </div>
+                  </td>
 
-                <td>
-                  {certificate.farmer?.name || "N/A"}
-                  <br />
-                  {certificate.farmer?.location || "N/A"}
-                </td>
-                <td>
-                  <div className={styles.buttons}>
-                    <Link
-                      href={`/dashboard/certificate/edit/${certificate.id}`}
+                  <td>{certificate.productionQuantity}</td>
+                  <td>
+                    <span
+                      className={`${styles.status} ${
+                        styles[certificate.status]
+                      }`}
                     >
-                      <button className={`${styles.button} ${styles.view}`}>
-                        Edit
-                      </button>
-                    </Link>
-                    <button
-                      className={`${styles.button} ${styles.cancelled}`}
-                      onClick={() => handleDelete(certificate.id)}
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))
+                      {certificate.status}
+                    </span>
+                  </td>
+                  <td>
+                    {certificate.municipalComment
+                      ? certificate.municipalComment
+                      : "-"}
+                  </td>
+
+                  <td>
+                  <div className={styles.standardsContainer}>
+                    {certificate.status === "ไม่อนุมัติ" ? (
+                      <div className={styles.buttons}>
+                        <button
+                          className={`${styles.button} ${styles.view}`}
+                          onClick={() => handleDelete(certificate.id)}
+                        >
+                          ลบใบรับรอง
+                        </button>
+                      </div>
+                    ) : (
+                      <span></span>
+                    )}
+                    </div>
+                    <div className={styles.buttons}></div>
+                  </td>
+                </tr>
+              );
+            })
           ) : (
             <tr>
-              <td colSpan={9}>No certificates available</td>
+              <td colSpan={7}>ไม่พบข้อมูล</td>
             </tr>
           )}
         </tbody>

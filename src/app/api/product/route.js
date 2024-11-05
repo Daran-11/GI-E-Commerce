@@ -23,7 +23,7 @@ export async function GET(req) {
         farmer: {
           select: {
             farmerName: true,
-            location: true,
+
           },
         },
         reviews: {
