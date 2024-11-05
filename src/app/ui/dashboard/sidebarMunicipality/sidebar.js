@@ -1,0 +1,183 @@
+"use client";
+
+import React, { useEffect, useState } from "react";
+import styles from "./sidebar.module.css";
+import {
+  MdDashboard,
+  MdSupervisedUserCircle,
+  MdShoppingBag,
+  MdAttachMoney,
+  MdAnalytics,
+  MdPeople,
+  MdOutlineSettings,
+  MdHelpCenter,
+  MdLogout,
+  MdMoney,
+  MdAssignment,
+  MdGavel,
+} from "react-icons/md";
+import MenuLink from "./menuLink/menuLink";
+import Image from "next/image";
+import { usePathname, useRouter } from "next/navigation";
+
+const Sidebar = () => {
+  const pathname = usePathname();
+  const router = useRouter();
+  const [user, setUser] = useState({
+    name: "Loading...",
+    lastname: "Loading...",
+    role: "Loading...",
+  });
+
+  useEffect(() => {
+    const name = localStorage.getItem("name");
+    const lastname = localStorage.getItem("lastname");
+    const role = localStorage.getItem("role");
+
+    if (name && lastname && role) {
+      setUser({ name, lastname, role });
+
+   
+      if (role === "เทศบาล" || role === "admin") {
+        router.push("/dashboard_municipality");
+      } else if (role !== "เกษตรกร") {
+        router.push("/login"); 
+      }
+    } else {
+      
+      router.push("/login");
+    }
+  }, [router]);
+
+  const handleLogout = () => {
+    localStorage.clear();
+    router.push("/login"); 
+  };
+
+  return (
+    <div className={styles.container}>
+      <div className={styles.user}>
+        <Image
+          className={styles.userImage}
+          src="/dinosaur.png"
+          alt=""
+          width="50"
+          height="50"
+        />
+        <div className={styles.userDetail}>
+          <span className={styles.username}>
+            {user.name} {user.lastname}
+          </span>
+          <span className={styles.userTitle}>{user.role}</span>
+        </div>
+      </div>
+      <ul className={`${styles.list}`}>
+        {menuItems.map((cat) => (
+          <li key={cat.title}>
+            <span className={styles.cat}>{cat.title}</span>
+            {cat.list.map((item) => (
+              <MenuLink
+                item={item}
+                key={item.title}
+                isActive={pathname === item.path}
+              />
+            ))}
+          </li>
+        ))}
+      </ul>
+      <button className={styles.logout} onClick={handleLogout}>
+        <MdLogout />
+        ลงชื่อออก
+      </button>
+    </div>
+  );
+};
+
+
+// Define the menu items
+const menuItems = [
+  {
+    list: [
+      {
+        title: "หน้าหลัก",
+        path: "/dashboard_municipality",
+        icon: <MdDashboard />,
+      },
+    ],
+  },
+  {
+    title: "ใบรับรอง",
+    list: [
+      {
+        title: "จัดการผู้ใช้",
+        path: "/dashboard_municipality/users",
+        icon: <MdSupervisedUserCircle />,
+      },
+      {
+        title: "ตรวจสอบใบรับรอง",
+        path: "/dashboard_municipality/certificate",
+        icon: <MdAssignment />,
+      },
+      {
+        title: "จัดการมาตราฐาน",
+        path: "/dashboard_municipality/manage_standards",
+        icon: <MdGavel />,
+      },
+      {
+        title: "จัดการเกษตกร",
+        path: "/dashboard_municipality/manage_farmer",
+        icon: <MdGavel />,
+      },
+    ],
+  },
+  {
+    title: "สินค้า",
+    list: [
+      {
+        title: "จัดการสินค้า",
+        path: "/dashboard_municipality/products",
+        icon: <MdShoppingBag />,
+      },
+      {
+        title: "จัดการคำสั่งซื้อ",
+        path: "/dashboard_municipality/orders",
+        icon: <MdPeople />,
+      },
+      {
+        title: "ประวัติการขาย",
+        path: "/dashboard_municipality/transactions",
+        icon: <MdAttachMoney />,
+      },
+      {
+        title: "ช่องทางชำระเงิน",
+        path: "/dashboard_municipality/chennel",
+        icon: <MdMoney />,
+      },
+    ],
+  },
+  {
+    title: "วิเคราะห์",
+    list: [
+      {
+        title: "ตรวจสอบย้อนกลับ",
+        path: "/dashboard_municipality/traceability",
+        icon: <MdAnalytics />,
+      },
+      {
+        title: "การตั้งค่า",
+        path: "/dashboard_municipality/settings",
+        icon: <MdOutlineSettings />,
+      },
+      {
+        title: "ช่วยเหลือ",
+        path: "/dashboard_municipality/help",
+        icon: <MdHelpCenter />,
+      },
+    ],
+  },
+];
+
+
+
+
+export default Sidebar;

@@ -1,0 +1,135 @@
+/* Global container styles */
+.container {
+    background-color: var(--bgSoft);
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 20px;
+}
+
+/* Flexbox container for top section */
+.top {
+    display: flex;
+    justify-content: flex-end; /* Aligns children to the right */
+    margin-bottom: 10px;
+}
+
+/* Add new button styles */
+.addButton {
+    padding: 10px;
+    background-color: #98de6d;
+    color: var(--text);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease; /* Smooth transition */
+}
+
+.addButton:hover {
+    background-color: #7fc05b; /* Darker shade on hover */
+}
+
+/* Table styles */
+.table {
+    width: 100%;
+    border-collapse: collapse; /* Ensures borders between cells are merged */
+}
+
+.table thead {
+    background-color: #ffffff;
+}
+
+.table th, .table td {
+    padding: 15px;
+    border-bottom: 1px solid #ddd; /* Adds a subtle border between rows */
+    text-align: center; /* Center the text horizontally */
+    vertical-align: middle; /* Center the text vertically */
+}
+
+
+
+/* Button styles */
+.buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.button {
+    padding: 5px 10px;
+    border-radius: 5px;
+    color: var(--text); /* Default text color */
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease; /* Smooth transition */
+}
+
+.button:hover {
+    opacity: 0.9; /* Slightly transparent on hover */
+}
+
+/* Specific styles for the "ตรวจสอบ" button */
+.checkButton {
+    color: blue; /* Blue text color */
+    text-decoration: underline; /* Underlined text */
+    background: none; /* No background */
+    border: none; /* No border */
+    padding: 5px 10px; /* Adjust padding as needed */
+    cursor: pointer; /* Pointer cursor */
+}
+
+.checkButton:hover {
+    opacity: 0.8; /* Slightly transparent on hover */
+}
+
+/* Status indicator styles */
+.status {
+    border-radius: 5px;
+    padding: 5px;
+    font-size: 14px;
+    color: black;
+}
+
+/* Status colors */
+.รอตรวจสอบใบรับรอง {
+    color: rgb(247, 167, 47);
+}
+
+.อนุมัติ {
+    color: rgb(55, 187, 3);
+}
+
+.ไม่อนุมัติ {
+    color: rgba(247, 115, 115, 0.75);
+}
+
+.หมดอายุ {
+    background-color: #afafaf;
+}
+
+.delete {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: rgba(247, 115, 115, 0.75); /* Red color for delete action */
+    transition: color 0.3s ease; /* Smooth transition */
+}
+
+.delete:hover {
+    color: #ff7875; /* Lighter red on hover */
+}
+
+/* Accessibility: Focus styles for buttons */
+.button:focus, .delete:focus, .addButton:focus, .checkButton:focus {
+    outline: 2px solid #4a90e2; /* Outline to indicate focus */
+    outline-offset: 2px; /* Space between outline and button */
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .table {
+        font-size: 14px; /* Slightly smaller font on mobile */
+    }
+
+    .addButton {
+        padding: 8px; /* Adjust button padding */
+    }
+}

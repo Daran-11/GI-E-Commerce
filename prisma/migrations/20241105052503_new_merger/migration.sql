@@ -55,11 +55,13 @@ CREATE TABLE `ProductImage` (
 CREATE TABLE `RatingReview` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `userId` INTEGER NOT NULL,
+    `orderId` INTEGER NOT NULL,
     `productId` INTEGER NOT NULL,
     `rating` TINYINT NOT NULL,
     `review` VARCHAR(1000) NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
+    UNIQUE INDEX `RatingReview_userId_orderId_key`(`userId`, `orderId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -131,7 +133,7 @@ CREATE TABLE `Delivery_Service` (
 -- CreateTable
 CREATE TABLE `Delivery_Detail` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `deliveryId` INTEGER NOT NULL,
+    `serviceId` INTEGER NOT NULL,
     `orderId` INTEGER NOT NULL,
     `trackingNum` VARCHAR(191) NOT NULL,
 
@@ -199,8 +201,17 @@ CREATE TABLE `Tambon` (
 CREATE TABLE `Farmer` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `userId` INTEGER NOT NULL,
-    `location` VARCHAR(191) NOT NULL,
-    `farmerName` VARCHAR(100) NOT NULL,
+    `title` VARCHAR(191) NOT NULL,
+    `name` VARCHAR(191) NOT NULL,
+    `lastname` VARCHAR(191) NOT NULL,
+    `address` VARCHAR(191) NOT NULL,
+    `sub_district` VARCHAR(191) NOT NULL,
+    `district` VARCHAR(191) NOT NULL,
+    `province` VARCHAR(191) NOT NULL,
+    `zip_code` VARCHAR(191) NOT NULL,
+    `phone` VARCHAR(191) NOT NULL,
+    `password` VARCHAR(191) NOT NULL,
+    `role` VARCHAR(191) NOT NULL,
     `contactLine` VARCHAR(15) NOT NULL,
 
     UNIQUE INDEX `Farmer_userId_key`(`userId`),
@@ -208,15 +219,45 @@ CREATE TABLE `Farmer` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
+CREATE TABLE `manage_farmer` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `firstName` VARCHAR(191) NOT NULL,
+    `lastName` VARCHAR(191) NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `Certificate_farmer` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `type` VARCHAR(191) NOT NULL,
+    `variety` VARCHAR(191) NOT NULL,
+    `standardName` VARCHAR(191) NOT NULL,
+    `certificateNumber` VARCHAR(191) NOT NULL,
+    `approvalDate` DATETIME(3) NOT NULL,
+    `UsersId` INTEGER NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
 CREATE TABLE `Certificate` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `type` VARCHAR(191) NOT NULL,
     `variety` VARCHAR(191) NOT NULL,
     `plotCode` VARCHAR(191) NOT NULL,
+    `latitude` DOUBLE NOT NULL,
+    `longitude` DOUBLE NOT NULL,
+    `productionQuantity` INTEGER NOT NULL,
+    `hasGAP` BOOLEAN NOT NULL,
+    `hasGI` BOOLEAN NOT NULL,
     `registrationDate` DATETIME(3) NOT NULL,
     `expiryDate` DATETIME(3) NOT NULL,
-    `status` VARCHAR(191) NOT NULL,
-    `imageUrl` VARCHAR(191) NOT NULL,
+    `status` VARCHAR(191) NOT NULL DEFAULT 'รอตรวจสอบใบรับรอง',
     `farmerId` INTEGER NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -253,6 +294,9 @@ ALTER TABLE `Product` ADD CONSTRAINT `Product_farmerId_fkey` FOREIGN KEY (`farme
 ALTER TABLE `ProductImage` ADD CONSTRAINT `ProductImage_productId_fkey` FOREIGN KEY (`productId`) REFERENCES `Product`(`ProductID`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE `RatingReview` ADD CONSTRAINT `RatingReview_orderId_fkey` FOREIGN KEY (`orderId`) REFERENCES `Order`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE `RatingReview` ADD CONSTRAINT `RatingReview_productId_fkey` FOREIGN KEY (`productId`) REFERENCES `Product`(`ProductID`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -283,7 +327,7 @@ ALTER TABLE `OrderItem` ADD CONSTRAINT `OrderItem_farmerId_fkey` FOREIGN KEY (`f
 ALTER TABLE `Delivery_Detail` ADD CONSTRAINT `Delivery_Detail_orderId_fkey` FOREIGN KEY (`orderId`) REFERENCES `Order`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Delivery_Detail` ADD CONSTRAINT `Delivery_Detail_deliveryId_fkey` FOREIGN KEY (`deliveryId`) REFERENCES `Delivery_Service`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `Delivery_Detail` ADD CONSTRAINT `Delivery_Detail_serviceId_fkey` FOREIGN KEY (`serviceId`) REFERENCES `Delivery_Service`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `Address` ADD CONSTRAINT `Address_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -305,6 +349,9 @@ ALTER TABLE `Tambon` ADD CONSTRAINT `Tambon_amphoeId_fkey` FOREIGN KEY (`amphoeI
 
 -- AddForeignKey
 ALTER TABLE `Farmer` ADD CONSTRAINT `Farmer_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Certificate_farmer` ADD CONSTRAINT `Certificate_farmer_UsersId_fkey` FOREIGN KEY (`UsersId`) REFERENCES `manage_farmer`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `Certificate` ADD CONSTRAINT `Certificate_farmerId_fkey` FOREIGN KEY (`farmerId`) REFERENCES `Farmer`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;

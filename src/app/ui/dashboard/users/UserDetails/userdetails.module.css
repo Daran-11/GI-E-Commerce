@@ -1,0 +1,97 @@
+/* Container for the whole page */
+.container {
+  margin: 20px auto;
+  padding: 20px 80px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #ccc;
+}
+
+/* Main content styling */
+.mainContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Title styling */
+.title-name {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 16px;
+  text-align: center;
+  margin-top: 20px;
+}
+
+/* Section for user details */
+.user-details-section {
+  width: 100%;
+  padding: 20px;
+  background-color: #fff;
+  margin-bottom: 20px;
+}
+
+/* Bordered box for individual data points */
+.data-box {
+  padding: 0.75rem;
+  background-color: #f1f1f1;
+  border-radius: 10px;
+  border: 1.5px solid #ddd;
+  margin-bottom: 0.5rem;
+  margin-top: 0.3rem;
+  font-size: 1.1rem;
+  line-height: 1.4;
+}
+.title {
+  font-size: 24px; /* Font size set to 18px */
+  font-weight: bold;
+  margin-bottom: 5px;
+  margin-top: 10px;
+}
+/* Button group container */
+.button-group {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end; /* Align buttons to the right */
+  gap: 10px; /* Space between the buttons */
+  margin-top: 20px;
+}
+
+.button-submitt {
+  background-color: #4CAF50; /* Green background for approval */
+  color: white; /* White text color */
+  padding: 10px 20px; /* Padding inside the button */
+  border: none; /* Remove border */
+  border-radius: 10px; /* Rounded corners */
+  cursor: pointer; /* Pointer cursor on hover */
+  font-size: 16px; /* Font size */
+  transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth transition effects */
+}
+
+.button-submitt:hover {
+  background-color: #45a049; /* Darker green on hover */
+  transform: scale(1.05); /* Slightly enlarge button on hover */
+}
+
+.button-submittt {
+  background-color: #f44336; /* Red background for rejection */
+  color: white; /* White text color */
+  padding: 10px 20px; /* Padding inside the button */
+  border: none; /* Remove border */
+  border-radius: 10px; /* Rounded corners */
+  cursor: pointer; /* Pointer cursor on hover */
+  font-size: 16px; /* Font size */
+  transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth transition effects */
+}
+
+.button-submittt:hover {
+  background-color: #d32f2f; /* Darker red on hover */
+  transform: scale(1.05); /* Slightly enlarge button on hover */
+}
+
+/* Hover effects */
+.button-submitt:hover,
+.button-submittt:hover {
+  opacity: 0.9;
+}

@@ -34,6 +34,11 @@ export async function middleware(req) {
     return NextResponse.redirect(new URL('/', req.url));
   }
 
+    // Restrict farmers from accessing the admin dashboard
+    if (url.startsWith('/dashboard') && role === 'customer') {
+      return NextResponse.redirect(new URL('/', req.url));
+    }
+
   // General case: user is authorized, allowing access
   return NextResponse.next();
 }

@@ -4,51 +4,51 @@ import { NextResponse } from "next/server";
 
 const prisma = new PrismaClient();
 
-export async function GET(request) {
-  const { searchParams } = new URL(request.url);
-  const id = searchParams.get("id");
 
-  if (id) {
-    try {
-      const certificate = await prisma.certificate.findUnique({
-        where: { id: parseInt(id, 10) },
-        include: { farmer: true },
-      });
-      if (certificate) {
-        return NextResponse.json(certificate);
-      } else {
-        return NextResponse.json(
-          { error: "Certificate not found" },
-          { status: 404 }
-        );
-      }
-    } catch (error) {
-      console.error("Error fetching certificate:", error);
-      return NextResponse.json(
-        { error: "Error fetching certificate" },
-        { status: 500 }
-      );
-    }
-  } else {
-    // Existing GET method for fetching all certificates
-    try {
-      const certificates = await prisma.certificate.findMany({
-        include: { farmer: true },
-      });
-      return NextResponse.json(certificates);
-    } catch (error) {
-      console.error("Error fetching certificates:", error);
-      return NextResponse.json(
-        { error: "Error fetching certificates" },
-        { status: 500 }
-      );
-    }
-  }
-}
 
 export async function POST(request) {
   try {
-    const data = await request.json();
+    const formData = await request.formData();
+
+    const UsersId = formData.get('UsersId');
+    if (!UsersId) {
+      throw new Error("Users ID is not provided in the form data.");
+    }
+
+    const latitude = parseFloat(formData.get('latitude'));
+    const longitude = parseFloat(formData.get('longitude'));
+    
+    if (!latitude || !longitude) {
+      throw new Error("Invalid latitude or longitude values.");
+    }
+
+    const standards = [];
+    for (let i = 0; formData.get(`standards[${i}][id]`); i++) {
+      const standard = {
+        id: parseInt(formData.get(`standards[${i}][id]`), 10),
+        name: formData.get(`standards[${i}][name]`),
+        logo: formData.get(`standards[${i}][logo]`),
+        certNumber: formData.get(`standards[${i}][certNumber]`),
+        certDate: formData.get(`standards[${i}][certDate]`),
+      };
+      standards.push(standard);
+    }
+
+    const certificateData = {
+      type: formData.get('type'),
+      variety: formData.get('variety'),
+      latitude,
+      longitude,
+      productionQuantity: parseInt(formData.get('productionQuantity'), 10),
+      standards: JSON.stringify(standards),
+      status: 'รอตรวจสอบใบรับรอง',
+      registrationDate: new Date(),
+      expiryDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)), // Set expiry to 1 year from now
+      Users: {
+        connect: { id: parseInt(UsersId, 10) },
+      },
+    };
+
     const certificate = await prisma.certificate.create({
       data: {
         variety: data.variety,
@@ -74,19 +74,31 @@ export async function POST(request) {
 
 export async function PUT(request) {
   try {
-    const data = await request.json();
+    const formData = await request.formData();
+    const id = parseInt(formData.get('id'), 10);
+
+    const standards = [];
+    for (let i = 0; formData.get(`standards[${i}][id]`); i++) {
+      const standard = {
+        id: parseInt(formData.get(`standards[${i}][id]`), 10),
+        name: formData.get(`standards[${i}][name]`),
+        logo: formData.get(`standards[${i}][logo]`),
+        certNumber: formData.get(`standards[${i}][certNumber]`),
+        certDate: formData.get(`standards[${i}][certDate]`),
+      };
+      standards.push(standard);
+    }
+
     const updatedCertificate = await prisma.certificate.update({
-      where: { id: parseInt(data.id, 10) },
+      where: { id },
       data: {
-        variety: data.variety,
-        plotCode: data.plotCode,
-        registrationDate: new Date(data.registrationDate),
-        expiryDate: new Date(data.expiryDate),
-        status: data.status,
-        imageUrl: data.imageUrl,
-        farmer: {
-          connect: { id: parseInt(data.farmerId, 10) }, // Convert farmerId to integer
-        },
+        type: formData.get('type'),
+        variety: formData.get('variety'),
+        latitude: parseFloat(formData.get('latitude')),
+        longitude: parseFloat(formData.get('longitude')),
+        productionQuantity: parseInt(formData.get('productionQuantity'), 10),
+        standards: JSON.stringify(standards),
+        status: formData.get('status'),
       },
     });
     return NextResponse.json(updatedCertificate, { status: 200 });
@@ -101,13 +113,10 @@ export async function PUT(request) {
 
 export async function DELETE(request) {
   try {
-    const { searchParams, href } = new URL(request.url);
-
-    console.log("Request URL:", href); // Log the entire URL
+    const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
 
     if (!id) {
-      console.warn("No 'id' provided in the URL query string:", href);
       return NextResponse.json({ error: "No id provided" }, { status: 400 });
     }
 
@@ -121,5 +130,46 @@ export async function DELETE(request) {
       { error: "Failed to delete certificate" },
       { status: 500 }
     );
+  }
+}
+
+export async function GET(request) {
+  const { searchParams } = new URL(request.url);
+  const UsersId = searchParams.get('UsersId');
+  const id = searchParams.get('id');
+
+  try {
+    if (id) {
+      const certificate = await prisma.certificate.findUnique({
+        where: { id: parseInt(id, 10) },
+        include: {
+          Users: {
+            select: {
+              name: true
+            }
+          }
+        }
+      });
+      return NextResponse.json(certificate);
+    } else if (UsersId) {
+      const certificates = await prisma.certificate.findMany({
+        where: {
+          UsersId: parseInt(UsersId, 10)
+        },
+        include: {
+          Users: {
+            select: {
+              name: true
+            }
+          }
+        }
+      });
+      return NextResponse.json(certificates);
+    } else {
+      return NextResponse.json({ error: "Either id or UsersId is required" }, { status: 400 });
+    }
+  } catch (error) {
+    console.error("Error fetching certificates:", error);
+    return NextResponse.json({ error: "Error fetching certificates" }, { status: 500 });
   }
 }
