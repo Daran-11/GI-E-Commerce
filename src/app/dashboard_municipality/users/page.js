@@ -1,7 +1,7 @@
-import prisma from "../../lib/prisma";
-import Link from "next/link";
-import styles from "../../ui/dashboard/users/users.module.css";
 import Pagination from "@/app/ui/dashboard/pagination/pagination";
+import Link from "next/link";
+import prisma from "../../../../lib/prisma";
+import styles from "../../ui/dashboard/users/users.module.css";
 
 const fetchUsers = async () => {
   return await prisma.Users.findMany();

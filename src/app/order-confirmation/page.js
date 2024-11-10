@@ -9,13 +9,7 @@ export default function OrderConfirmation() {
   const { data: session, status } = useSession();
   const router = useRouter();
 
-  useEffect(() => {
-    const orderId = sessionStorage.getItem('orderId');
-    if (!orderId) {
-      // Redirect to another page if orderId is not found in session storage
-      router.push('/');
-    }
-  }, [router]);
+
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -29,20 +23,27 @@ export default function OrderConfirmation() {
       if (orderId && orderId.length > 0) {
         const fetchOrder = async () => {
           try {
-            const response = await fetch(`/api/orders?id=${orderId.join(',')}`);
+            const response = await fetch(`/api/orders/${orderId.join(',')}`);
+            console.log('Response:', response); // Check response status and headers
             if (response.ok) {
               const data = await response.json();
-              console.log('data is:',data); // Add this to inspect the API response
-              setOrders(data.orders);
-
-              sessionStorage.removeItem('orderId');
+              console.log('API response:', data); // Log the response to check structure
+              
+              // Make sure the structure matches what you're expecting
+              if (data.orders) {
+                setOrders(data.orders); // Update the state with the orders
+              } else {
+                setError("No orders found in the response");
+              }
             } else {
               setError("Order not found");
             }
           } catch (error) {
+            console.error('Fetch error:', error); // Detailed error logging
             setError("Failed to fetch order details");
           }
         };
+        
         fetchOrder();
       } else {
         setError("No order ID provided");

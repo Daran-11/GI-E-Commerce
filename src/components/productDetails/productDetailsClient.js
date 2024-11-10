@@ -1,6 +1,7 @@
 "use client";
 import { useCart } from "@/context/cartContext";
 import { useSession } from "next-auth/react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { Rating } from "react-simple-star-rating";
@@ -171,7 +172,7 @@ export default function ProductDetailsClient({ product, totalReviewsCount, Produ
           {/*replace with Embla carousel here*/}
 
 
-        <div className="w-full h-fit lg:h-[500px] bg-white lg:ml-[15px] rounded-2xl p-6">
+        <div className="w-full h-fit  bg-white lg:ml-[15px] rounded-2xl p-6">
           <div className="text-[#535353]">
             <div className="lg:hidden flex justify-center">
             <EmblaCarousel images={product.images || []} />
@@ -180,6 +181,38 @@ export default function ProductDetailsClient({ product, totalReviewsCount, Produ
               <p className="mt-3 text-4xl lg:text-5xl">{product.ProductName} {product.ProductType}</p>
             </div>
             <div className="flex w-full text-[#767676] text-xl">
+              <div>
+              {product.certificates.length > 0 ? (
+                product.certificates.map((certificate) => {
+
+                
+                  const standards = JSON.parse(certificate.standards); 
+                  return (
+                  <div key={certificate.id}>
+                    {/* Ensure certificate.standards is an array before mapping */}
+                    {Array.isArray(standards) && standards.length > 0 ? (
+                      standards.map((standard, index) => (
+                        <div key={index}>
+                      <Image
+                        key={index}
+                        src={standard.logo}
+                        alt={standard.name}
+                        width={50}
+                        height={50}
+                      />
+                        </div>
+                      ))
+                    ) : (
+                      <p>No standards information available</p>
+                    )}
+                  </div>
+                  );
+
+})
+              ) : (
+                <p>No certificates available</p>
+              )}
+              </div>
               <div className="mr-5 flex justify-start items-center">
                 <Rating
                   readonly
@@ -192,13 +225,41 @@ export default function ProductDetailsClient({ product, totalReviewsCount, Produ
               </div>
               <p className="hidden md:flex"> ขายแล้ว {totalOrderAmount} กิโลกรัม</p>
             </div>
-            <p className="text-[#4eac14] text-[35px] lg:mb-4 lg:mt-2">
+            <p className="text-[#4eac14] text-[35px] lg:mb-2 lg:mt-2">
               {Number(product.Price).toLocaleString()} บาท/กิโล
             </p>
             <div className="space-y-2 md:space-y-4 w-full  text-[#767676] text-[20px] mb-5">
               <div className="lg:w-fit">
+                <div>
+                {product.certificates.length > 0 ? (
+                product.certificates.map((certificate) => {
+
+                
+                  const standards = JSON.parse(certificate.standards); 
+                  return (
+                  <div key={certificate.id}>
+                    {/* Ensure certificate.standards is an array before mapping */}
+                    {Array.isArray(standards) && standards.length > 0 ? (
+                      standards.map((standard, index) => (
+                        <div className=" " key={index}>
+                          
+                          <p>ทะเบียนเลขที่: {standard.certNumber}</p>
+                          <p>วันที่รับรอง {standard.certDate}</p>
+                        </div>
+                      ))
+                    ) : (
+                      <p>No standards information available</p>
+                    )}
+                  </div>
+                  );
+                  })
+              ) : (
+                <p>No certificates available</p>
+              )}
+                </div>
                 <div className="w-[250px]">คำอธิบาย</div>
                 <div className="w-full text-[#535353]">{product.Description}</div>
+                
               </div>
               <div className="w-fit">
                 <div className="w-[250px]">ช่องทางติดต่อ</div>
@@ -255,7 +316,7 @@ export default function ProductDetailsClient({ product, totalReviewsCount, Produ
 
       <div className='text-[#535353] bg-white rounded-2xl mt-5 p-4'>
         <p className='text-2xl'>รายละเอียด</p>
-        <p className='mt-2'>{product.Description}</p>
+        <p className='mt-2'>{product.Details}</p>
       </div>
 
       <div className="w-full h-fit bg-white mt-6 p-6 rounded-2xl">

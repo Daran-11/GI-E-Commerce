@@ -28,12 +28,14 @@ export default async function ProductDetails({ params }) {
       Amount: true,
       Price: true,
       Description:true,
+      Details:true,
       images: true,
+      certificates: true, // Include related certificates
       farmer: {
         select: {
           id:true,
           farmerName: true,  // Select specific fields from the Farmer model
-          location: true,
+          province: true,
           contactLine: true,  // You can include more fields as needed
         },
       },

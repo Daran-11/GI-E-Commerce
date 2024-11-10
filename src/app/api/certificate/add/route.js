@@ -1,8 +1,6 @@
 // app/api/certificate/add/route.js
-import { PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
-
-const prisma = new PrismaClient();
+import prisma from "../../../../../lib/prisma";
 
 
 
@@ -10,8 +8,8 @@ export async function POST(request) {
   try {
     const formData = await request.formData();
 
-    const UsersId = formData.get('UsersId');
-    if (!UsersId) {
+    const userId = formData.get('userId');
+    if (!userId) {
       throw new Error("Users ID is not provided in the form data.");
     }
 
@@ -21,6 +19,7 @@ export async function POST(request) {
     if (!latitude || !longitude) {
       throw new Error("Invalid latitude or longitude values.");
     }
+
 
     const standards = [];
     for (let i = 0; formData.get(`standards[${i}][id]`); i++) {
@@ -34,6 +33,18 @@ export async function POST(request) {
       standards.push(standard);
     }
 
+    const farmer = await prisma.farmer.findUnique({
+      where: {
+        userId: parseInt(userId)
+      }
+    });
+    
+    
+  
+    if (!farmer) {
+      return NextResponse.json({ error: 'Farmer profile not found for this user' }, { status: 404 });
+    }
+
     const certificateData = {
       type: formData.get('type'),
       variety: formData.get('variety'),
@@ -45,23 +56,17 @@ export async function POST(request) {
       registrationDate: new Date(),
       expiryDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)), // Set expiry to 1 year from now
       Users: {
-        connect: { id: parseInt(UsersId, 10) },
+        connect: { id: parseInt(farmer.id, 10) },
       },
+      
     };
 
+
+
     const certificate = await prisma.certificate.create({
-      data: {
-        variety: data.variety,
-        plotCode: data.plotCode,
-        registrationDate: new Date(data.registrationDate),
-        expiryDate: new Date(data.expiryDate),
-        status: data.status,
-        imageUrl: data.imageUrl,
-        farmer: {
-          connect: { id: parseInt(data.farmerId, 10) }, // Convert farmerId to integer
-        },
-      },
+      data: certificateData,
     });
+
     return NextResponse.json(certificate, { status: 201 });
   } catch (error) {
     console.error("Failed to add certificate:", error);
@@ -138,6 +143,22 @@ export async function GET(request) {
   const UsersId = searchParams.get('UsersId');
   const id = searchParams.get('id');
 
+  if(!UsersId) {
+    console.log("no UsersId");
+  }
+
+  const farmer = await prisma.farmer.findUnique({
+    where: {
+      userId: parseInt(UsersId)
+    }
+  });
+  
+  
+
+  if (!farmer) {
+    return NextResponse.json({ error: 'Farmer profile not found for this user' }, { status: 404 });
+  }
+
   try {
     if (id) {
       const certificate = await prisma.certificate.findUnique({
@@ -154,7 +175,7 @@ export async function GET(request) {
     } else if (UsersId) {
       const certificates = await prisma.certificate.findMany({
         where: {
-          UsersId: parseInt(UsersId, 10)
+          farmerId: parseInt(farmer.id, 10)
         },
         include: {
           Users: {
@@ -166,7 +187,7 @@ export async function GET(request) {
       });
       return NextResponse.json(certificates);
     } else {
-      return NextResponse.json({ error: "Either id or UsersId is required" }, { status: 400 });
+      console.error("Error fetching certificates:", error);
     }
   } catch (error) {
     console.error("Error fetching certificates:", error);

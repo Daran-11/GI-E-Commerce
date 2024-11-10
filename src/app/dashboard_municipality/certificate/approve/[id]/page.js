@@ -1,11 +1,11 @@
 "use client";
-import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
-import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
-import "leaflet/dist/leaflet.css";
-import L from "leaflet";
-import Image from "next/image";
 import "@/app/dashboard/certificate/add/add.css";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { MapContainer, Marker, TileLayer, useMapEvents } from "react-leaflet";
 
 // Fix for the missing marker icon in Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -349,6 +349,7 @@ const ApproveCertificatePage = ({ params }) => {
                   center={[20.046061226911785, 99.890654]}
                   zoom={15}
                   style={{ height: "100%", width: "100%" }}
+                   className="map-container "
                 >
                   <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                   <LocationMarker />
@@ -422,7 +423,7 @@ const ApproveCertificatePage = ({ params }) => {
 
             {/* Display comment field conditionally */}
             {showCommentField && (
-              <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+              <div className="fixed inset-0 z-40  flex items-center justify-center bg-black bg-opacity-50">
                 <div className="bg-white rounded-lg p-6 w-1/3">
                   <label className="block text-sm font-medium mb-2">
                     ความคิดเห็น (เหตุผลที่ไม่อนุมัติ)

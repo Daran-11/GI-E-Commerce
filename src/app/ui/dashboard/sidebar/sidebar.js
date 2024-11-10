@@ -1,22 +1,22 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import styles from './sidebar.module.css';
+import Image from 'next/image';
+import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import {
-  MdDashboard,
-  MdSupervisedUserCircle,
-  MdShoppingBag,
-  MdAttachMoney,
   MdAnalytics,
-  MdPeople,
-  MdOutlineSettings,
+  MdAttachMoney,
+  MdDashboard,
   MdHelpCenter,
   MdLogout,
   MdMoney,
+  MdOutlineSettings,
+  MdPeople,
+  MdShoppingBag,
+  MdSupervisedUserCircle,
 } from 'react-icons/md';
-import MenuLink from './menuLink/menuLink'; 
-import Image from 'next/image';
-import { usePathname, useRouter } from 'next/navigation';
+import MenuLink from './menuLink/menuLink';
+import styles from './sidebar.module.css';
 
 // Define the Sidebar component
 const Sidebar = () => {

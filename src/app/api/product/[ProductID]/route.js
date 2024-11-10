@@ -16,10 +16,11 @@ export async function GET(request, { params }) {
       },
       include: {
         images: true,
+        certificates: true, // Include related certificates
         farmer: { // Include the farmer relationship
           select: {
             farmerName: true,
-            location: true,
+            province: true,
             contactLine: true,
           },
         },

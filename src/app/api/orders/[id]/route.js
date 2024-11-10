@@ -4,37 +4,36 @@ import prisma from '../../../../../lib/prisma';
 export async function GET(request, { params }) {
   const { id } = params;
 
-  // Convert id to an integer
-  const orderId = parseInt(id, 10);
+  // Split and convert `id` to an array of integers
+  const orderIds = id.split(',').map((orderId) => parseInt(orderId, 10));
 
-  // Check if orderId is a valid number
-  if (isNaN(orderId)) {
-    return NextResponse.json({ error: 'Invalid order ID' }, { status: 400 });
+  // Validate that all elements are valid numbers
+  if (orderIds.some(isNaN)) {
+    console.error('Invalid order IDs:', orderIds); // Add this for debugging
+    return NextResponse.json({ error: 'Invalid order IDs' }, { status: 400 });
   }
 
   try {
-    const order = await prisma.order.findUnique({
-      where: { id: orderId },
+    const orders = await prisma.order.findMany({
+      where: { id: { in: orderIds } },
       include: {
         farmer: true,
         orderItems: {
           include: {
             product: true,
             farmer: true,
-          }
-
-        }
+          },
+        },
       },
     });
 
-    if (!order) {
-      return NextResponse.json({ error: 'Order not found' }, { status: 404 });
+    if (orders.length === 0) {
+      return NextResponse.json({ error: 'Orders not found' }, { status: 404 });
     }
 
-    return NextResponse.json(order);
+    return NextResponse.json({ orders });
   } catch (error) {
     console.error('Error fetching order details:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
-
