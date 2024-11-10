@@ -1,8 +1,8 @@
 // components/Layout.js
 "use client";
 import { useSession } from "next-auth/react";
-import Sidebar from "../ui/dashboard/sidebarMunicipality/sidebar";
 import Navbar from "../ui/dashboard/navbar/navbar";
+import Sidebar from "../ui/dashboard/sidebar/sidebarMunicipality/sidebar";
 
 const Layout = ({ children }) => {
   const { data: session } = useSession();

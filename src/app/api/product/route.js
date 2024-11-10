@@ -22,6 +22,7 @@ export async function GET(req) {
         soldCount: true,
         farmer: {
           select: {
+            id: true,
             farmerName: true,
 
           },

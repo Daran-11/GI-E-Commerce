@@ -1,76 +1,42 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import styles from "./sidebar.module.css";
+import { useSession } from "next-auth/react";
+import { usePathname, useRouter } from "next/navigation";
+import { useState } from "react";
 import {
-  MdDashboard,
-  MdSupervisedUserCircle,
-  MdShoppingBag,
-  MdAttachMoney,
   MdAnalytics,
-  MdPeople,
-  MdOutlineSettings,
+  MdAssignment,
+  MdAttachMoney,
+  MdDashboard,
+  MdGavel,
   MdHelpCenter,
   MdLogout,
   MdMoney,
-  MdAssignment,
-  MdGavel,
+  MdOutlineSettings,
+  MdPeople,
+  MdSupervisedUserCircle
 } from "react-icons/md";
 import MenuLink from "./menuLink/menuLink";
-import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
+import styles from "./sidebar.module.css";
+
 
 const Sidebar = () => {
+  const { data: session, status } = useSession();
   const pathname = usePathname();
   const router = useRouter();
+
   const [user, setUser] = useState({
     name: "Loading...",
-    lastname: "Loading...",
     role: "Loading...",
   });
 
-  useEffect(() => {
-    const name = localStorage.getItem("name");
-    const lastname = localStorage.getItem("lastname");
-    const role = localStorage.getItem("role");
-
-    if (name && lastname && role) {
-      setUser({ name, lastname, role });
-
-   
-      if (role === "เทศบาล" || role === "admin") {
-        router.push("/dashboard_municipality");
-      } else if (role !== "เกษตรกร") {
-        router.push("/login"); 
-      }
-    } else {
-      
-      router.push("/login");
-    }
-  }, [router]);
 
   const handleLogout = () => {
-    localStorage.clear();
     router.push("/login"); 
   };
 
   return (
     <div className={styles.container}>
-      <div className={styles.user}>
-        <Image
-          className={styles.userImage}
-          src="/dinosaur.png"
-          alt=""
-          width="50"
-          height="50"
-        />
-        <div className={styles.userDetail}>
-          <span className={styles.username}>
-            {user.name} {user.lastname}
-          </span>
-          <span className={styles.userTitle}>{user.role}</span>
-        </div>
-      </div>
       <ul className={`${styles.list}`}>
         {menuItems.map((cat) => (
           <li key={cat.title}>
@@ -133,11 +99,6 @@ const menuItems = [
   {
     title: "สินค้า",
     list: [
-      {
-        title: "จัดการสินค้า",
-        path: "/dashboard_municipality/products",
-        icon: <MdShoppingBag />,
-      },
       {
         title: "จัดการคำสั่งซื้อ",
         path: "/dashboard_municipality/orders",

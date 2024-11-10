@@ -1,10 +1,11 @@
 "use client";
-import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
-import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
-import "leaflet/dist/leaflet.css";
 import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+import { useSession } from "next-auth/react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { MapContainer, Marker, TileLayer, useMapEvents } from "react-leaflet";
 import "./add.css";
 
 // Fix for the missing marker icon in Leaflet
@@ -17,6 +18,7 @@ L.Icon.Default.mergeOptions({
 });
 
 const Register = () => {
+  const { data: session, status } = useSession();
   const [formData, setFormData] = useState({
     type: "",
     variety: "",
@@ -28,33 +30,30 @@ const Register = () => {
 
   const [standards, setStandards] = useState([]);
   const [errors, setErrors] = useState({});
-  const [UsersId, setUsersId] = useState(null);
+  const userId = session.user.id;
   const router = useRouter();
 
   useEffect(() => {
-    const storedUsersId = localStorage.getItem("UsersId");
-    if (storedUsersId) {
-      setUsersId(storedUsersId);
-    } else {
-      console.error("Users ID not found in localStorage");
+
+    if (status === 'authenticated' && userId && session.user.role === 'farmer') {
+      // Fetch standards
+      const fetchStandards = async () => {
+        try {
+          const response = await fetch("/api/standards");
+          if (response.ok) {
+            const data = await response.json();
+            setStandards(data);
+          } else {
+            throw new Error("Failed to fetch standards");
+          }
+        } catch (error) {
+          console.error("Error fetching standards:", error);
+        }
+      };
+
+      fetchStandards();      
     }
 
-    // Fetch standards
-    const fetchStandards = async () => {
-      try {
-        const response = await fetch("/api/standards");
-        if (response.ok) {
-          const data = await response.json();
-          setStandards(data);
-        } else {
-          throw new Error("Failed to fetch standards");
-        }
-      } catch (error) {
-        console.error("Error fetching standards:", error);
-      }
-    };
-
-    fetchStandards();
   }, []);
 
   const handleChange = (e) => {
@@ -120,8 +119,8 @@ const Register = () => {
       formDataToSend.append(`standards[${index}][certDate]`, standard.certDate);
     });
 
-    if (UsersId) {
-      formDataToSend.append("UsersId", UsersId);
+    if (userId) {
+      formDataToSend.append("userId", userId);
     } else {
       alert("Users ID not found. Please log in again.");
       return;
@@ -223,6 +222,7 @@ const Register = () => {
               center={[20.046061226911785, 99.890654]} // Default location
               zoom={15}
               style={{ height: "400px", width: "100%" }}
+              className="map-container "
             >
               <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
               <LocationMarker />

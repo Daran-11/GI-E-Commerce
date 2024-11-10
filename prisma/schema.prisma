@@ -34,10 +34,10 @@ model BankAccount {
 model Product {
   ProductID   Int            @id @unique(map: "ProductID") @default(autoincrement())
   farmerId    Int
-  plotCode    String
   ProductName String          @db.VarChar(11)
   ProductType String          @db.VarChar(11)
   Description String?         @db.VarChar(200)
+  Details     String?
   Price       Int             @db.SmallInt // ราคาขาย
   Cost        Int             @db.SmallInt // ราคาต้นทุน
   Amount      Int             @db.MediumInt
@@ -49,7 +49,9 @@ model Product {
   cartItems   CartItem[]
   OrderItems  OrderItem[]
   reviews     RatingReview[]
+  certificates Certificate[] 
   farmer      Farmer          @relation(fields: [farmerId], references: [id])
+
 }
 
 model ProductImage {
@@ -260,7 +262,7 @@ enum Role {
 
 model Farmer {
   id                 Int          @id @default(autoincrement())
-  userId         Int           @unique
+  userId             Int           @unique
   farmerName         String?
   title              String
   name               String
@@ -304,23 +306,38 @@ model Certificate_farmer {
   UsersId          Int
 }
 
+model Standard {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  logoUrl     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+
+
 model Certificate {
   id                 Int       @id @default(autoincrement())
   type               String
   variety            String
-  plotCode           String
   latitude           Float
   longitude          Float
   productionQuantity Int
-  hasGAP             Boolean
-  hasGI              Boolean
   registrationDate   DateTime
   expiryDate         DateTime
   status             String    @default("รอตรวจสอบใบรับรอง")
   farmerId           Int
-  farmer             Farmer    @relation(fields: [farmerId], references: [id])
+  municipalComment   String?
+  standards          Json      // เก็บข้อมูลมาตรฐานเป็น JSON
   createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  productId          Int?      
+  Users              Farmer    @relation(fields: [farmerId], references: [id])
+  Product            Product?   @relation(fields: [productId], references: [ProductID])
 }
+
+
 
 model History {
   id             Int      @id @default(autoincrement())
