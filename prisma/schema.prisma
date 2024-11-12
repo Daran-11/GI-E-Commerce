@@ -263,7 +263,6 @@ enum Role {
 model Farmer {
   id                 Int          @id @default(autoincrement())
   userId             Int           @unique
-  farmerName         String?
   title              String
   name               String
   lastname           String
@@ -273,7 +272,9 @@ model Farmer {
   province           String
   zip_code           String
   phone              String
-  contactLine    String        @db.VarChar(15) 
+  password           String
+  role               String
+  contactLine        String        @db.VarChar(15) 
   certificates   Certificate[]
   products       Product[]
   OrderItems     OrderItem[]

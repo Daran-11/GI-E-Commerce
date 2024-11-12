@@ -164,9 +164,9 @@ export const Navbar = () => {
 
                                         <DropdownItem
                                             key="farmer register "
-                                            className={`dropdown-item ${currentPath === '/about' ? 'text-[#4EAC14]' : 'text-[#595959]'} text-left `}
+                                            className={`dropdown-item ${currentPath === '/register_farmer' ? 'text-[#4EAC14]' : 'text-[#595959]'} text-left `}
                                             textValue="ลงทะเบียนเกษตรกร"
-                                            href='/about'
+                                            href='/register_farmer'
                                         >
                                             ลงทะเบียนเกษตรกร
                                         </DropdownItem>
@@ -182,7 +182,7 @@ export const Navbar = () => {
                             </div>
                         ) : (
                             <li>
-                                <Link href='/login' className={currentPath === "/login" ? "text-[#4EAC14]" : "text-[#595959]"}>
+                                <Link href='/Login' className={currentPath === "/Login" ? "text-[#4EAC14]" : "text-[#595959]"}>
                                     เข้าสู่ระบบ
                                 </Link>
                             </li>
@@ -250,9 +250,9 @@ export const Navbar = () => {
                                             >บัญชีผู้ใช้</Link>
                                         </li>
                                         <li>
-                                            <Link href='/about'
+                                            <Link href='/register_farmer'
                                                 onClick={toggleMenu}
-                                                className={currentPath === "/about" ? "text-[#4EAC14] block px-4 py-2 " : "block  px-4 py-2  text-gray-700 hover:bg-gray-100"}
+                                                className={currentPath === "/register_farmer" ? "text-[#4EAC14] block px-4 py-2 " : "block  px-4 py-2  text-gray-700 hover:bg-gray-100"}
                                             >
                                                 ลงทะเบียนเกษตรกร</Link>
                                         </li>
@@ -269,8 +269,8 @@ export const Navbar = () => {
                                     </>
                                 ) : (
                                     <li>
-                                        <Link href='/login'
-                                            className={currentPath === "/login" ? "text-[#4EAC14] block px-4 py-2 " : "block  px-4 py-2  text-gray-700 hover:bg-gray-100"}
+                                        <Link href='/Login'
+                                            className={currentPath === "/Login" ? "text-[#4EAC14] block px-4 py-2 " : "block  px-4 py-2  text-gray-700 hover:bg-gray-100"}
                                             onClick={toggleMenu}>
                                             เข้าสู่ระบบ
                                         </Link>
