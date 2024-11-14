@@ -263,17 +263,13 @@ enum Role {
 model Farmer {
   id                 Int          @id @default(autoincrement())
   userId             Int           @unique
-  title              String
-  name               String
-  lastname           String
+  farmerName         String?
   address            String
   sub_district       String
   district           String
   province           String
   zip_code           String
   phone              String
-  password           String
-  role               String
   contactLine        String        @db.VarChar(15) 
   certificates   Certificate[]
   products       Product[]
@@ -286,6 +282,7 @@ model Farmer {
 
   History History[]
 }
+
 
 model manage_farmer {
   id        Int      @id @default(autoincrement())
