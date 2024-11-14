@@ -19,6 +19,7 @@ L.Icon.Default.mergeOptions({
 const EditCertificatePage = ({ params }) => {
   // Initialize form state
   const [formData, setFormData] = useState({
+    type: "",
     variety: "",
     plotCode: "",
     latitude: "",
@@ -27,8 +28,6 @@ const EditCertificatePage = ({ params }) => {
     standards: [],
     UsersId: "",
     status: "",
-    imageUrl: "",
-    farmerId: "",
   });
 
   const [standards, setStandards] = useState([]);
@@ -220,8 +219,9 @@ const EditCertificatePage = ({ params }) => {
 
       alert("แก้ไขใบรับรองสำเร็จ");
       router.push("/dashboard/certificate");
-    } else {
-      alert("Failed to update certificate");
+    } catch (error) {
+      console.error("Error:", error);
+      alert(error.message || "Failed to update certificate");
     }
   };
 

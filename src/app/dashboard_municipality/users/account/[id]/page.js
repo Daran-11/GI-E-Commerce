@@ -1,5 +1,5 @@
-import prisma from '../../../../../lib/prisma';
-import UserDetails from '../UserDetails';
+import prisma from '../../../../../../lib/prisma';
+import UserDetails from '../../UserDetails';
 
 const fetchUser = async (id) => {
   try {
