@@ -34,9 +34,10 @@ export async function middleware(req) {
   if (url.startsWith('/dashboard_municipality') && role !== 'municipal') {
     return NextResponse.redirect(new URL('/', req.url));
   }
-  if (url.startsWith('/dashboard') && !['admin', 'municipal'].includes(role)) {
+  if (url.startsWith('/dashboard') && !['admin', 'municipal','farmer'].includes(role)) {
     return NextResponse.redirect(new URL('/', req.url));
   }
+
 
   // If none of the restricted conditions apply, allow access
   return NextResponse.next();

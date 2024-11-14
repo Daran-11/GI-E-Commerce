@@ -1,76 +1,115 @@
-import Pagination from "@/app/ui/dashboard/pagination/pagination";
+"use client";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import prisma from "../../../../lib/prisma";
 import styles from "../../ui/dashboard/users/users.module.css";
 
-const fetchUsers = async () => {
-  return await prisma.Users.findMany();
-};
+export default function UsersPage() {
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-export default async function UsersPage() {
-  const users = await fetchUsers();
+  useEffect(() => {
+    async function fetchUsers() {
+      try {
+        const response = await fetch('/api/approve_farmer');
+        if (!response.ok) {
+          throw new Error('Failed to fetch users');
+        }
+        const data = await response.json();
+        setUsers(data); // ไม่ต้อง filter แล้วเพราะทำที่ API แล้ว
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
 
-  // Filter out users with roles 'เกษตรกร', 'เทศบาล', or 'admin'
-  const filteredUsers = users.filter(
-    (user) => !["เกษตรกร", "เทศบาล", "admin"].includes(user.role)
-  );
+    fetchUsers();
+  }, []);
+
+  if (loading) {
+    return <div className="text-center p-4">กำลังโหลด...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center text-red-500 p-4">Error: {error}</div>;
+  }
 
   return (
     <div className={styles.container}>
       <div className={styles.top}>
         <Link href="/dashboard_municipality/users/account">
-          <button className={styles.addButton}>บัญชีผู้ใช้ ทั้งหมด</button>
+          <span className={styles.addButton}>บัญชีผู้ใช้ ทั้งหมด</span>
         </Link>
       </div>
+
       <table className={styles.table}>
         <thead>
-          <tr>
+        <tr>
             <td>#</td>
+            <td>อีเมล</td>
             <td>ชื่อ-นามสกุล</td>
-            <td>ที่อยู่</td>
-            <td>ตำบล</td>
-            <td>อำเภอ</td>
-            <td>จังหวัด</td>
-            <td>รหัสไปรษณีย์</td>
             <td>เบอร์โทรศัพท์</td>
-            <td></td>
+            <td>ชื่อเกษตรกร</td>
+            <td>สถานะ</td>
+            <td>การจัดการ</td>
           </tr>
         </thead>
         <tbody>
-          {filteredUsers.length > 0 ? (
-            filteredUsers.map((user, index) => (
+        {users.length > 0 ? (
+            users.map((user, index) => (
               <tr key={user.id}>
                 <td>{index + 1}</td>
+                <td>{user.email || '-'}</td>
+                <td>{user.name || '-'}</td>
+                <td>{user.phone || '-'}</td>
+                <td>{user.Farmer?.farmerName || '-'}</td>
                 <td>
-                  {user.title}
-                  {user.name} &nbsp;{user.lastname}
+                  <span 
+                    className={`inline-block px-2 py-1 rounded-full text-xs font-semibold
+                      ${user.role === 'farmer' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}
+                  >
+                    {user.role === 'farmer' ? 'เกษตรกร' : user.role}
+                  </span>
                 </td>
-                <td>{user.address}</td>
-                <td>{user.sub_district}</td>
-                <td>{user.district}</td>
-                <td>{user.province}</td>
-                <td>{user.zip_code}</td>
-                <td>{user.phone}</td>
-
                 <td>
                   <Link href={`/dashboard_municipality/users/${user.id}`}>
-                    <button
-                      className={`${styles.button} ${styles.checkButton}`}
-                    >
+                    <span className={`${styles.button} ${styles.checkButton}`}>
                       ตรวจสอบ
-                    </button>
+                    </span>
                   </Link>
                 </td>
               </tr>
             ))
           ) : (
             <tr>
-              <td colSpan={12}>ไม่พบข้อมูล</td>
+              <td colSpan={12} className="text-center">ไม่พบข้อมูลที่รอการอนุมัติ</td>
             </tr>
           )}
         </tbody>
       </table>
-      <Pagination />
+
+      <div className="mt-4">
+        <nav className="flex justify-center">
+          <ul className="flex space-x-2">
+            <li>
+              <button className="px-3 py-1 bg-gray-200 rounded">
+                Previous
+              </button>
+            </li>
+            <li>
+              <button className="px-3 py-1 bg-blue-500 text-white rounded">
+                1
+              </button>
+            </li>
+            <li>
+              <button className="px-3 py-1 bg-gray-200 rounded">
+                Next
+              </button>
+            </li>
+          </ul>
+        </nav>
+      </div>
     </div>
   );
 }

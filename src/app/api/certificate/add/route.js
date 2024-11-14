@@ -10,7 +10,7 @@ export async function POST(request) {
 
     const userId = formData.get('userId');
     if (!userId) {
-      throw new Error("Users ID is not provided in the form data.");
+      throw new Error("User ID is not provided in the form data.");
     }
 
     const latitude = parseFloat(formData.get('latitude'));
@@ -33,7 +33,8 @@ export async function POST(request) {
       standards.push(standard);
     }
 
-    const farmer = await prisma.farmer.findUnique({
+    const farmer = await 
+    ({
       where: {
         userId: parseInt(userId)
       }
@@ -55,7 +56,7 @@ export async function POST(request) {
       status: 'รอตรวจสอบใบรับรอง',
       registrationDate: new Date(),
       expiryDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)), // Set expiry to 1 year from now
-      Users: {
+      user: {
         connect: { id: parseInt(farmer.id, 10) },
       },
       
@@ -139,58 +140,111 @@ export async function DELETE(request) {
 }
 
 export async function GET(request) {
-  const { searchParams } = new URL(request.url);
-  const UsersId = searchParams.get('UsersId');
-  const id = searchParams.get('id');
-
-  if(!UsersId) {
-    console.log("no UsersId");
-  }
-
-  const farmer = await prisma.farmer.findUnique({
-    where: {
-      userId: parseInt(UsersId)
-    }
-  });
-  
-  
-
-  if (!farmer) {
-    return NextResponse.json({ error: 'Farmer profile not found for this user' }, { status: 404 });
-  }
-
   try {
+    const { searchParams } = new URL(request.url);
+    const userId = searchParams.get('UsersId'); // แก้ตรงนี้ให้รับ UsersId แทน userId
+    const id = searchParams.get('id');
+
+    console.log('Received UsersId:', userId); // เพิ่ม log เพื่อดูค่าที่รับมา
+
+    if (!userId) {
+      return NextResponse.json(
+        { error: 'User ID is required' }, 
+        { status: 400 }
+      );
+    }
+
+    // ค้นหา farmer โดยใช้ UserId
+    const farmer = await prisma.farmer.findFirst({ // เปลี่ยนเป็น findFirst
+      where: {
+        userId: parseInt(userId)
+      }
+    });
+
+    console.log('Found farmer:', farmer); // เพิ่ม log เพื่อดูผลการค้นหา farmer
+
+    if (!farmer) {
+      return NextResponse.json(
+        { error: 'Farmer profile not found' }, 
+        { status: 404 }
+      );
+    }
+
+    // ถ้ามี id ให้ดึงใบรับรองเดียว
     if (id) {
       const certificate = await prisma.certificate.findUnique({
-        where: { id: parseInt(id, 10) },
-        include: {
-          Users: {
-            select: {
-              name: true
-            }
-          }
-        }
-      });
-      return NextResponse.json(certificate);
-    } else if (UsersId) {
-      const certificates = await prisma.certificate.findMany({
-        where: {
-          farmerId: parseInt(farmer.id, 10)
+        where: { 
+          id: parseInt(id)
         },
         include: {
-          Users: {
-            select: {
-              name: true
-            }
-          }
+          Users: true // เปลี่ยนการ include ให้เรียบง่ายขึ้น
         }
       });
-      return NextResponse.json(certificates);
-    } else {
-      console.error("Error fetching certificates:", error);
+
+      if (!certificate) {
+        return NextResponse.json(
+          { error: 'Certificate not found' }, 
+          { status: 404 }
+        );
+      }
+
+      return NextResponse.json(certificate);
     }
+
+    // ดึงใบรับรองทั้งหมดของเกษตรกร
+    const certificates = await prisma.certificate.findMany({
+      where: {
+        farmerId: farmer.id
+      },
+      include: {
+        Users: true
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+
+    console.log('Found certificates:', certificates); // เพิ่ม log เพื่อดูผลลัพธ์
+
+    return NextResponse.json(certificates);
+
   } catch (error) {
-    console.error("Error fetching certificates:", error);
-    return NextResponse.json({ error: "Error fetching certificates" }, { status: 500 });
+    console.error("Error in GET certificate:", error);
+    return NextResponse.json(
+      { 
+        error: 'Failed to fetch certificates', 
+        details: error.message,
+        stack: error.stack // เพิ่ม stack trace เพื่อดูรายละเอียดข้อผิดพลาด
+      }, 
+      { status: 500 }
+    );
   }
 }
+// สำหรับการสร้างใบรับรองใหม่
+const createCertificate = async (formData, farmerId) => {
+  const standards = [];
+  for (let i = 0; formData.get(`standards[${i}][id]`); i++) {
+    standards.push({
+      id: parseInt(formData.get(`standards[${i}][id]`)),
+      name: formData.get(`standards[${i}][name]`),
+      logo: formData.get(`standards[${i}][logo]`),
+      certNumber: formData.get(`standards[${i}][certNumber]`),
+      certDate: formData.get(`standards[${i}][certDate]`)
+    });
+  }
+
+  return await prisma.certificate.create({
+    data: {
+      type: formData.get('type'),
+      variety: formData.get('variety'),
+      latitude: parseFloat(formData.get('latitude')),
+      longitude: parseFloat(formData.get('longitude')),
+      productionQuantity: parseInt(formData.get('productionQuantity')),
+      registrationDate: new Date(),
+      expiryDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
+      status: 'รอตรวจสอบใบรับรอง',
+      standards: JSON.stringify(standards),
+      farmerId: farmerId
+    }
+  });
+};

@@ -79,16 +79,6 @@ export async function POST(request) {
       },
     });
 
-    // Update user role to farmer
-    await prisma.user.update({
-      where: {
-        id: userId,
-      },
-      data: {
-        role: 'farmer',
-      },
-    });
-
     return new Response(JSON.stringify(farmer), {
       status: 201,
       headers: { 'Content-Type': 'application/json' },
