@@ -276,14 +276,15 @@ const Product = () => {
         <thead>
           <tr>
             <td>รหัส</td>
-            <td>รหัสแปลงปลูก</td>
             <td>ชื่อสินค้า</td>
             <td>สายพันธุ์</td>
             <td>ราคา</td>
             <td>จำนวน</td>
             <td>สถานะ</td>
+
             <td>รูปภาพ</td>
-            <td>Actions</td>
+            <td className={styles.truncateText}>คำอธิบาย</td>
+            <td className="">แอ็คชั่น</td>
           </tr>
         </thead>
         <tbody>
@@ -291,7 +292,6 @@ const Product = () => {
             filteredProducts.map((product) => (
               <tr key={product.ProductID}>
                 <td>{product.ProductID}</td>
-                <td>{product.plotCode}</td>
                 <td>{product.ProductName}</td>
                 <td>{product.ProductType}</td>
                 <td>{product.Price}</td>
@@ -309,18 +309,18 @@ const Product = () => {
                     <Image
                       src={product.imageUrl}
                       alt={product.ProductName}
-                      width={100} // Adjust width as needed
-                      height={100} // Adjust height as needed
-                      style={{
-                        objectFit: "cover",
-                        marginTop: "10px",
-                      }}
+                      width={25} // Adjust width as needed
+                      height={25} // Adjust height as needed
+                      className="object-cover "
                     />
                   ) : (
                     "No image"
                   )}
                 </td>
-                <td>
+                <td className={styles.truncateText}>
+                  {product.Description}
+                </td>
+                <td className="">
                   <div className={styles.buttons}>
                     <Tooltip title="แก้ไขสินค้า"
                       arrow>

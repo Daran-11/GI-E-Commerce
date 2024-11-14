@@ -39,14 +39,41 @@ export async function GET(request, { params }) {
                         userId,
                     },
                 },
-                include: { images: true }, // Include related images
+                include: {
+                    images: true,
+                    certificates: {
+                      include: {
+                        certificate: {
+                          select: {
+                            id: true,
+                            standards: true, // Include the standards field which contains certNumber
+                          },
+                        },
+                      },
+                    },
+                  },
             });
 
             if (product) {
-                return NextResponse.json(product); 
-            } else {
+                // Process certificates to extract certNumber
+                if (product.certificates && product.certificates.length > 0) {
+                  product.certificates = product.certificates.map(cert => {
+                    const standards = JSON.parse(cert.certificate.standards); // Parse standards JSON string
+              
+                    // Add certNumber to the certificate data
+                    cert.certificate.standards = standards.map(standard => ({
+                      ...standard,
+                      certNumber: standard.certNumber, // Add certNumber for frontend access
+                    }));
+              
+                    return cert;
+                  });
+                }
+              
+                return NextResponse.json(product); // Return the product data with parsed certificates
+              } else {
                 return NextResponse.json({ error: "Product not found" }, { status: 404 });
-            }
+              }
         } else {
             // Fetching products with search, sorting, and pagination
             const query = searchParams.get("query") || ""; // Search query

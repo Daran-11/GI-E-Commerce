@@ -1,4 +1,3 @@
-//completed
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { writeFile } from "fs/promises";
 import { getServerSession } from "next-auth";
@@ -74,7 +73,6 @@ export async function POST(request, { params }) {
     const formData = await request.formData();
 
     // Extract fields from formData
-    const plotCode = formData.get("plotCode");
     const ProductName = formData.get("ProductName");
     const ProductType = formData.get("ProductType");
     const Price = formData.get("Price");
@@ -82,6 +80,24 @@ export async function POST(request, { params }) {
     const Amount = formData.get("Amount");
     const status = formData.get("status");
     const Description = formData.get("Description");
+    const Details = formData.get("Details");
+    const Certificates = formData.getAll("Certificates");
+
+    // Ensure Certificates is an array of integers
+    let certificateIds = [];
+    if (Certificates.length === 1 && typeof Certificates[0] === "string") {
+      // If it's a single string, split it by comma
+      certificateIds = Certificates[0].split(',').map((id) => parseInt(id.trim()));
+    } else {
+      // Otherwise, map the array directly to integers
+      certificateIds = Certificates.map((id) => parseInt(id.trim()));
+    }
+
+    // Filter out any NaN values (in case of invalid parsing)
+    certificateIds = certificateIds.filter((id) => !isNaN(id));
+
+    // Log the parsed certificate IDs for debugging
+    console.log("Parsed certificate IDs:", certificateIds);
 
     // Handle multiple image files
     const imageFiles = formData.getAll("images"); // Adjusted for multiple images
@@ -98,7 +114,6 @@ export async function POST(request, { params }) {
     // Create the new product in the database
     const product = await prisma.product.create({
       data: {
-        plotCode,
         ProductName,
         ProductType,
         Description: Description,
@@ -107,7 +122,7 @@ export async function POST(request, { params }) {
         Cost: parseInt(Cost, 10),
         status,
         farmerId: farmer.id, // Link the product to the farmer
-        // Initially, no image URLs here since they are stored in a different model
+        Details,
       },
     });
 
@@ -122,6 +137,19 @@ export async function POST(request, { params }) {
         })
       );
       await Promise.all(imagePromises);
+    }
+
+    // Link the product to certificates
+    if (certificateIds.length > 0) {
+      const productCertificatePromises = certificateIds.map((certificateId) =>
+        prisma.productCertificate.create({
+          data: {
+            productId: product.ProductID,
+            certificateId: certificateId,
+          },
+        })
+      );
+      await Promise.all(productCertificatePromises);
     }
 
     console.log("Product added successfully:", product); // Debug successful addition

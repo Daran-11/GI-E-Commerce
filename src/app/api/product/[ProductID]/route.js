@@ -16,8 +16,19 @@ export async function GET(request, { params }) {
       },
       include: {
         images: true,
-        certificates: true, // Include related certificates
-        farmer: { // Include the farmer relationship
+        certificates: {
+          include: {
+            certificate: {
+              select: {
+                id: true,
+                standards: true, // Include standards JSON field
+                createdAt: true,
+                updatedAt: true,
+              },
+            },
+          },
+        },
+        farmer: {
           select: {
             farmerName: true,
             province: true,
@@ -30,6 +41,9 @@ export async function GET(request, { params }) {
     if (!product) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
+
+    // Ensure that certificate data is properly fetched and returned
+
 
     return NextResponse.json(product, { status: 200 });
   } catch (error) {

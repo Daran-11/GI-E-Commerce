@@ -1,25 +1,27 @@
 // ตัวform/model ไว้เพิ่มข้อมูลในหน้productของfarmer completed
 "use client";
-import { useState, useCallback } from "react";
-import { useForm, Controller } from "react-hook-form";
 import {
+  Button,
+  Checkbox,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  Button,
-  TextField,
-  Grid,
   FormControl,
+  Grid,
   InputLabel,
-  Select,
+  ListItemText,
   MenuItem,
-  styled,
   Paper,
+  Select,
+  styled,
+  TextField
 } from "@mui/material";
 import { useSession } from 'next-auth/react';
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+
 
 
 // Custom styled Paper component
@@ -45,17 +47,24 @@ const DropZone = styled("div")(({ theme }) => ({
 }));
 
 const AddProductDialog = ({ open, onClose, onAddProduct }) => {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession()
+  const [certificates, setCertificates] = useState([]);
+
+  const userId = session.user.id;
+
+
   const { control, handleSubmit, reset, formState: { errors } } = useForm({
     defaultValues: {
       plotCode: "",
       ProductName: "",
       ProductType: "",
+      Certificates: [],
       Price: "",
       Cost: "",
       Amount: "",
       status: "",
       Description: "",
+      Details: "",
     },
     mode: "onChange"
   });
@@ -101,9 +110,12 @@ const AddProductDialog = ({ open, onClose, onAddProduct }) => {
       Price: parseFloat(data.Price.replace(/,/g, "")).toFixed(2),
     };
 
+      // Log the formattedData.Certificates to check its structure
+  console.log("Formatted Certificates:", formattedData.Certificates);
+
     // Prepare form data for submission
     const formDataToSend = new FormData();
-    formDataToSend.append("plotCode", formattedData.plotCode);
+    //formDataToSend.append("plotCode", formattedData.plotCode);
     formDataToSend.append("ProductName", formattedData.ProductName);
     formDataToSend.append("ProductType", formattedData.ProductType);
     formDataToSend.append("Price", parseFloat(formattedData.Price.replace(/,/g, "")).toFixed(2));
@@ -111,6 +123,8 @@ const AddProductDialog = ({ open, onClose, onAddProduct }) => {
     formDataToSend.append("Amount", formattedData.Amount);
     formDataToSend.append("status", formattedData.status);
     formDataToSend.append("Description", formattedData.Description);
+    formDataToSend.append("Details", formattedData.Details);
+    formDataToSend.append("Certificates", formattedData.Certificates);
 
     // Append image files
     imageFiles.forEach((file) => {
@@ -143,6 +157,23 @@ const AddProductDialog = ({ open, onClose, onAddProduct }) => {
     setImageFiles([]); // Clear image files
     onClose(); // Close the dialog
   }, [reset, onClose]);
+
+  useEffect(() => {
+    // Fetch the available certificates for the farmer
+    if (status === 'authenticated' && userId) {
+      console.log("user id is",userId);
+      async function fetchCertificates() {
+        const response = await fetch(`/api/users/${userId}/certificates`);
+        const data = await response.json();
+        console.log("cert data is",data);
+        setCertificates(data);
+      }
+
+      fetchCertificates();      
+    }
+
+  }, [status]);
+  
 
   return (
     <Dialog open={open} onClose={handleClose} PaperComponent={CustomPaper} maxWidth="lg">
@@ -213,23 +244,6 @@ const AddProductDialog = ({ open, onClose, onAddProduct }) => {
               <Grid container spacing={2} paddingTop={2}>
                 <Grid item xs={12}>
                   <Controller
-                    name="plotCode"
-                    control={control}
-                    rules={{ required: "รหัสแปลงปลูก is required" }}
-                    render={({ field }) => (
-                      <TextField
-                        {...field}
-                        label="รหัสแปลงปลูก"
-                        variant="outlined"
-                        fullWidth
-                        error={!!errors.plotCode}
-                        helperText={errors.plotCode?.message}
-                      />
-                    )}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <Controller
                     name="ProductName"
                     control={control}
                     rules={{ required: "ชื่อสินค้า is required" }}
@@ -260,6 +274,77 @@ const AddProductDialog = ({ open, onClose, onAddProduct }) => {
                     />
                   </FormControl>
                 </Grid>
+                <Grid item xs={12}>
+                <FormControl fullWidth>
+                  <InputLabel>การรับรอง</InputLabel>
+                  <Controller
+                    name="Certificates"
+                    control={control}
+                    render={({ field }) => (
+                      <Select
+                        {...field}
+                        label="การรับรอง"
+                        multiple
+                        renderValue={(selected) => {
+                          if (selected.length === 0) {
+                            return "Please select certificates"; // Optional placeholder when nothing is selected
+                          }
+
+                          return selected
+                            .map((selectedId) => {
+                              // Find the certificate that matches the selected ID
+                              const selectedCertificate = certificates.find(
+                                (certificate) => certificate.id === selectedId
+                              );
+
+                              // If a certificate is found, look into its parsed standards for the name
+                              if (selectedCertificate) {
+                                const standards = JSON.parse(selectedCertificate.standards);
+                                return Array.isArray(standards) && standards.length > 0
+                                  ? standards.map((cert) => cert.certNumber).join(", ") // Join multiple names if needed
+                                  : "Unnamed certificate";
+                              }
+                              return "";
+                            })
+                            .join(", ");
+                        }}
+                      >
+                        {certificates.length > 0 ? (
+                          certificates.map((certificate) => {
+                            const standards = JSON.parse(certificate.standards); // Parse the standards JSON
+                            return (
+                              Array.isArray(standards) && standards.length > 0 ? (
+                                standards.map((cert, index) => (
+                                  <MenuItem key={`${certificate.id}-${index}`} value={certificate.id}>
+                                    {/* Ensure the value is certificate.id for selection */}
+                                    <Checkbox
+                                      checked={field.value.includes(certificate.id)} // Check if certificate.id is selected
+                                    />
+                                    <ListItemText
+                                      primary={cert.name}
+                                      secondary={`Cert No: ${cert.certNumber}, Date: ${cert.certDate}`}
+                                    />
+                                  </MenuItem>
+                                ))
+                              ) : (
+                                <MenuItem key={certificate.id} disabled>
+                                  No standards information available
+                                </MenuItem>
+                              )
+                            );
+                          })
+                        ) : (
+                          <MenuItem disabled>No certificates available</MenuItem>
+                        )}
+                      </Select>
+                    )}
+                  />
+                </FormControl>
+              </Grid>
+
+
+
+
                 <Grid item xs={12} sm={6}>
                   <Controller
                     name="Cost"
@@ -353,6 +438,22 @@ const AddProductDialog = ({ open, onClose, onAddProduct }) => {
                         variant="outlined"
                         fullWidth
                         multiline
+                        rows={4}
+                      />
+                    )}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <Controller
+                    name="Details"
+                    control={control}
+                    render={({ field }) => (
+                      <textarea
+                        {...field}
+                        label="รายละเอียดเพิ่มเติม"
+                        className="input-address p-2 w-full outline outline-1 outline-gray-400 "
+                        variant="outlined"
+                        placeholder="รายละเอียดเพิ่มเติม(ไม่บังคับ)"
                         rows={4}
                       />
                     )}
