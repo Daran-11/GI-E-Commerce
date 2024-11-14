@@ -30,7 +30,18 @@ export default async function ProductDetails({ params }) {
       Description:true,
       Details:true,
       images: true,
-      certificates: true, // Include related certificates
+      certificates: {
+        include: {
+          certificate: {
+            select: {
+              id: true,
+              standards: true, // Include standards JSON field
+              createdAt: true,
+              updatedAt: true,
+            },
+          },
+        },
+      },
       farmer: {
         select: {
           id:true,

@@ -1,23 +1,23 @@
 "use client";
-import { useState, useCallback, useEffect } from "react";
-import { useForm, Controller } from "react-hook-form";
 import {
+  Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  Button,
-  TextField,
-  Grid,
   FormControl,
+  Grid,
   InputLabel,
-  Select,
   MenuItem,
-  styled,
   Paper,
+  Select,
+  styled,
+  TextField
 } from "@mui/material";
-import Image from "next/image";
 import { useSession } from "next-auth/react";
+import Image from "next/image";
+import { useCallback, useEffect, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
 
 const CustomPaper = styled(Paper)(({ theme }) => ({
   borderRadius: "16px",
@@ -45,20 +45,26 @@ const EditProductDialog = ({ open, onClose, ProductID, onSuccess }) => {
       plotCode: "",
       ProductName: "",
       ProductType: "",
+      Certificates: [],
       Price: "",
       Cost: "",
       Amount: "",
       status: "",
       Description: "",
+      Details: "",
     },
   });
 
+
+  const [certificates, setCertificates] = useState([]);
+  const [certNumbers, setCertNumbers] = useState([]);
+  const [selectedCertificate, setSelectedCertificate] = useState('');
   const [imagePreviews, setImagePreviews] = useState([]);
   const [imagesToDelete, setImagesToDelete] = useState([]);
   const [initialImages, setInitialImages] = useState([]);
   const { data: session, status } = useSession();
   const [hasFetched, setHasFetched] = useState(false);
-
+  const userId = session.user.id;
   
 useEffect(() => {
   const fetchProduct = async () => {
@@ -73,8 +79,18 @@ useEffect(() => {
       }
 
       const data = await response.json();
+      console.log("data cer",data.certificates)
+
+      // Process certificates to extract certNumber
+      const certNumbers = Array.isArray(data.certificates)
+        ? data.certificates.flatMap(cert =>
+            cert.certificate?.standards?.map(standard => standard.certNumber) || []
+          )
+        : [];
+
+      console.log("certNumbers", certNumbers); // Log certNumbers for debugging      
+      
       reset({
-        plotCode: data.plotCode || "",
         ProductName: data.ProductName || "",
         ProductType: data.ProductType || "",
         Price: data.Price ? parseFloat(data.Price).toFixed(2) : "",
@@ -82,12 +98,15 @@ useEffect(() => {
         Amount: data.Amount || "",
         status: data.status || "",
         Description: data.Description || "",
+        Details: data.Details || "",
+        Certificates: data.certificates || [] // Set existing certificates
       });
+
 
       const imageUrls = Array.isArray(data.images) ? data.images.map(img => img.imageUrl) : [];
       setInitialImages(imageUrls);
       setImagePreviews(imageUrls);
-
+      setCertNumbers(certNumbers);
       // Set `hasFetched` to true after successfully fetching and setting data
       setHasFetched(true);
     } catch (error) {
@@ -101,6 +120,23 @@ useEffect(() => {
     fetchProduct();
   }
 }, [ProductID, reset, session, hasFetched]);
+
+useEffect(() => {
+  // Fetch the available certificates for the farmer
+  if (status === 'authenticated' && userId) {
+    console.log("user id is",userId);
+    async function fetchCertificates() {
+      const response = await fetch(`/api/users/${userId}/certificates`);
+      const data = await response.json();
+      console.log("cert data is",data);
+      setCertificates(data);
+    }
+
+    fetchCertificates();      
+  }
+
+}, [status]);
+
 
   const handleFileChange = (files) => {
     const fileArray = Array.from(files);
@@ -150,7 +186,6 @@ useEffect(() => {
 
     const formDataToSend = new FormData();
     formDataToSend.append("ProductID", ProductID);
-    formDataToSend.append("plotCode", formattedData.plotCode);
     formDataToSend.append("ProductName", formattedData.ProductName);
     formDataToSend.append("ProductType", formattedData.ProductType);
     formDataToSend.append("Price", formattedData.Price);
@@ -158,6 +193,8 @@ useEffect(() => {
     formDataToSend.append("Amount", formattedData.Amount);
     formDataToSend.append("status", formattedData.status);
     formDataToSend.append("Description", formattedData.Description);
+    formDataToSend.append("Details", formattedData.Details);
+    formDataToSend.append("Certificates", formattedData.Certificates);
 
     imagePreviews.forEach((file) => {
       if (file instanceof File) {
@@ -204,6 +241,10 @@ useEffect(() => {
     onClose();
   }, [reset, onClose]);
 
+  const selectedCertNumber = certificates
+  .find(cert => cert.id === selectedCertificate)?.certificate?.[0]?.standards?.[0]?.certNumber || '';
+
+
   return (
     <Dialog open={open} onClose={handleClose} PaperComponent={CustomPaper} maxWidth="lg">
       <DialogTitle>แก้ไขสินค้า</DialogTitle>
@@ -231,11 +272,6 @@ useEffect(() => {
             <Grid item xs={12} sm={5}>
               <Grid container spacing={2} paddingTop={2}>
                 <Grid item xs={12}>
-                  <Controller name="plotCode" control={control} rules={{ required: "รหัสแปลงปลูก is required" }} render={({ field }) => (
-                    <TextField {...field} label="รหัสแปลงปลูก" variant="outlined" fullWidth error={!!errors.plotCode} helperText={errors.plotCode?.message} />
-                  )} />
-                </Grid>
-                <Grid item xs={12}>
                   <Controller name="ProductName" control={control} rules={{ required: "ชื่อสินค้า is required" }} render={({ field }) => (
                     <TextField {...field} label="ชื่อสินค้า" variant="outlined" fullWidth error={!!errors.ProductName} helperText={errors.ProductName?.message} />
                   )} />
@@ -252,6 +288,18 @@ useEffect(() => {
                     )} />
                   </FormControl>
                 </Grid>
+                <Grid item xs={12}>
+              <TextField
+                value={certNumbers}
+                label="ใบรับรอง"
+                variant="outlined"
+                fullWidth
+                disabled
+                InputProps={{
+                  readOnly: true, // Make it read-only if the field is just for display
+                }}
+              />
+            </Grid>
                 <Grid item xs={12} sm={6}>
                   <Controller name="Price" control={control} rules={{ required: "ราคาสินค้า is required" }} render={({ field }) => (
                     <TextField {...field} label="ราคาสินค้า (บาท)" variant="outlined" fullWidth error={!!errors.Price} helperText={errors.Price?.message} onChange={(e) => field.onChange(e.target.value.replace(/[^0-9,.]/g, "").replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,"))} />
@@ -282,6 +330,22 @@ useEffect(() => {
                   <Controller name="Description" control={control} render={({ field }) => (
                     <TextField {...field} label="รายละเอียดสินค้า" variant="outlined" fullWidth multiline rows={4} />
                   )} />
+                </Grid>
+                <Grid item xs={12}>
+                  <Controller
+                    name="Details"
+                    control={control}
+                    render={({ field }) => (
+                      <textarea
+                        {...field}
+                        label="รายละเอียดเพิ่มเติม"
+                        className="input-address p-2 w-full outline outline-1 outline-gray-400 "
+                        variant="outlined"
+                        placeholder="รายละเอียดเพิ่มเติม(ไม่บังคับ)"
+                        rows={4}
+                      />
+                    )}
+                  />
                 </Grid>
               </Grid>
             </Grid>

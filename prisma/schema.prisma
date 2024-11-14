@@ -49,7 +49,7 @@ model Product {
   cartItems   CartItem[]
   OrderItems  OrderItem[]
   reviews     RatingReview[]
-  certificates Certificate[] 
+  certificates ProductCertificate[] // The relationship is through the join table
   farmer      Farmer          @relation(fields: [farmerId], references: [id])
 
 }
@@ -334,10 +334,17 @@ model Certificate {
   updatedAt          DateTime  @updatedAt
   productId          Int?      
   Users              Farmer    @relation(fields: [farmerId], references: [id])
-  Product            Product?   @relation(fields: [productId], references: [ProductID])
+  products           ProductCertificate[]
 }
 
+model ProductCertificate {
+  productId    Int
+  certificateId Int
+  product      Product    @relation(fields: [productId], references: [ProductID])
+  certificate  Certificate @relation(fields: [certificateId], references: [id])
 
+  @@id([productId, certificateId])
+}
 
 model History {
   id             Int      @id @default(autoincrement())

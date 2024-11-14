@@ -181,38 +181,7 @@ export default function ProductDetailsClient({ product, totalReviewsCount, Produ
               <p className="mt-3 text-4xl lg:text-5xl">{product.ProductName} {product.ProductType}</p>
             </div>
             <div className="flex w-full text-[#767676] text-xl">
-              <div>
-              {product.certificates.length > 0 ? (
-                product.certificates.map((certificate) => {
 
-                
-                  const standards = JSON.parse(certificate.standards); 
-                  return (
-                  <div key={certificate.id}>
-                    {/* Ensure certificate.standards is an array before mapping */}
-                    {Array.isArray(standards) && standards.length > 0 ? (
-                      standards.map((standard, index) => (
-                        <div key={index}>
-                      <Image
-                        key={index}
-                        src={standard.logo}
-                        alt={standard.name}
-                        width={50}
-                        height={50}
-                      />
-                        </div>
-                      ))
-                    ) : (
-                      <p>No standards information available</p>
-                    )}
-                  </div>
-                  );
-
-})
-              ) : (
-                <p>No certificates available</p>
-              )}
-              </div>
               <div className="mr-5 flex justify-start items-center">
                 <Rating
                   readonly
@@ -230,33 +199,58 @@ export default function ProductDetailsClient({ product, totalReviewsCount, Produ
             </p>
             <div className="space-y-2 md:space-y-4 w-full  text-[#767676] text-[20px] mb-5">
               <div className="lg:w-fit">
-                <div>
-                {product.certificates.length > 0 ? (
-                product.certificates.map((certificate) => {
+              <div>
+        {product.certificates.map((cert) => {
+          // Ensure certificate exists and has the 'certificate' property
+          if (cert.certificate && cert.certificate.standards) {
+            const standards = cert.certificate.standards; // This is the JSON field
 
-                
-                  const standards = JSON.parse(certificate.standards); 
-                  return (
-                  <div key={certificate.id}>
-                    {/* Ensure certificate.standards is an array before mapping */}
-                    {Array.isArray(standards) && standards.length > 0 ? (
-                      standards.map((standard, index) => (
-                        <div className=" " key={index}>
-                          
-                          <p>ทะเบียนเลขที่: {standard.certNumber}</p>
-                          <p>วันที่รับรอง {standard.certDate}</p>
+            try {
+              // Assuming standards is a JSON string, parse it if necessary
+              const standardsObj = JSON.parse(standards);
+              console.log("standardsObj :",standardsObj)
+
+              return (
+                <div key={cert.certificate.id}>
+                  <div>
+                    {standardsObj.map((standard, index) => (
+                      <div className="flex space-x-3 mb-2 justify-start items-center" key={index}>
+                        <div>
+                        <Image
+                        key={index}
+                        src={standard.logo}
+                        alt={standard.name}
+                        width={50}
+                        height={50}
+                      />                          
                         </div>
-                      ))
-                    ) : (
-                      <p>No standards information available</p>
-                    )}
+                      <div>
+                        <p className="text-sm">ทะเบียน: {standard.certNumber}</p>                        
+                      </div>
+                      <div> 
+                        <p className="text-sm">วันที่รับรอง: {standard.certDate}</p>                        
+                      </div>
+
+
+                      </div>
+                    ))}
                   </div>
-                  );
-                  })
-              ) : (
-                <p>No certificates available</p>
-              )}
                 </div>
+              );
+            } catch (error) {
+              console.error('Error parsing standards:', error);
+              return <div>Invalid standards data</div>;
+            }
+          } else {
+            // If no standards found for the certificate
+            return (
+              <div key={cert.certificate ? cert.certificate.id : 'no-id'}>
+                No standards found for this certificate.
+              </div>
+            );
+          }
+        })}
+      </div>
                 <div className="w-[250px]">คำอธิบาย</div>
                 <div className="w-full text-[#535353]">{product.Description}</div>
                 

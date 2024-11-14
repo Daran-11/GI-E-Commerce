@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server"; // Ensure you import NextResponse
 import { PrismaClient } from "@prisma/client";
+import { NextResponse } from "next/server"; // Ensure you import NextResponse
 
 const prisma = new PrismaClient();
 
@@ -48,7 +48,6 @@ export async function POST(request) {
     const data = await request.json();
     const product = await prisma.product.create({
       data: {
-        plotCode: data.plotCode,
         productName: data.productName,
         variety: data.variety,
         price: parseFloat(data.price), // Convert to Float
@@ -72,7 +71,6 @@ export async function PUT(request) {
     const updatedProduct = await prisma.product.update({
       where: { id: parseInt(data.id, 10) },
       data: {
-        plotCode: data.plotCode,
         productName: data.productName,
         variety: data.variety,
         price: data.price,

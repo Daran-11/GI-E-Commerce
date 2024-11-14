@@ -72,10 +72,8 @@ export async function PUT(request, { params }) {
   }
 
   try {
-    const formData = await request.formData();
-    
+    const formData = await request.formData();  
     const id = formData.get("ProductID");
-    const plotCode = formData.get("plotCode");
     const ProductName = formData.get("ProductName");
     const ProductType = formData.get("ProductType");
     const Price = formData.get("Price");
@@ -85,6 +83,7 @@ export async function PUT(request, { params }) {
     const Description = formData.get("Description");
     const newImageFiles = formData.getAll("images");
     const imagesToDelete = formData.getAll("imagesToDelete");
+    const Details = formData.get("Details");
 
     // Handle image deletions
     if (imagesToDelete.length > 0) {
@@ -116,13 +115,13 @@ export async function PUT(request, { params }) {
     const updatedProduct = await prisma.product.update({
       where: { ProductID: parseInt(id, 10) },
       data: {
-        plotCode,
         ProductName,
         ProductType,
         Description,
         Price: parseFloat(Price),
         Cost: parseFloat(Cost),
         Amount: parseFloat(Amount),
+        Details,
         status,
       },
     });
