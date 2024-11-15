@@ -2,8 +2,6 @@
 import { NextResponse } from "next/server";
 import prisma from "../../../../../lib/prisma";
 
-
-
 export async function POST(request) {
   try {
     const formData = await request.formData();
@@ -20,7 +18,6 @@ export async function POST(request) {
       throw new Error("Invalid latitude or longitude values.");
     }
 
-
     const standards = [];
     for (let i = 0; formData.get(`standards[${i}][id]`); i++) {
       const standard = {
@@ -33,14 +30,11 @@ export async function POST(request) {
       standards.push(standard);
     }
 
-    const farmer = await 
-    ({
+    const farmer = await prisma.farmer.findUnique({
       where: {
         userId: parseInt(userId)
       }
     });
-    
-    
   
     if (!farmer) {
       return NextResponse.json({ error: 'Farmer profile not found for this user' }, { status: 404 });
@@ -59,10 +53,7 @@ export async function POST(request) {
       user: {
         connect: { id: parseInt(farmer.id, 10) },
       },
-      
     };
-
-
 
     const certificate = await prisma.certificate.create({
       data: certificateData,
@@ -142,48 +133,47 @@ export async function DELETE(request) {
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('UsersId'); // แก้ตรงนี้ให้รับ UsersId แทน userId
+    const userId = searchParams.get('FarmerId');
     const id = searchParams.get('id');
 
-    console.log('Received UsersId:', userId); // เพิ่ม log เพื่อดูค่าที่รับมา
+    console.log('Received FarmerId:', userId);
 
     if (!userId) {
       return NextResponse.json(
-        { error: 'User ID is required' }, 
+        { error: 'User ID is required' },
         { status: 400 }
       );
     }
 
-    // ค้นหา farmer โดยใช้ UserId
-    const farmer = await prisma.farmer.findFirst({ // เปลี่ยนเป็น findFirst
+    const existingFarmer = await prisma.farmer.findUnique({
       where: {
-        userId: parseInt(userId)
-      }
+        userId: userId,
+      },
     });
 
-    console.log('Found farmer:', farmer); // เพิ่ม log เพื่อดูผลการค้นหา farmer
+    console.log('Found farmer:', existingFarmer);
 
-    if (!farmer) {
+    if (!existingFarmer) {
       return NextResponse.json(
-        { error: 'Farmer profile not found' }, 
+        { error: 'Farmer profile not found' },
         { status: 404 }
       );
     }
 
-    // ถ้ามี id ให้ดึงใบรับรองเดียว
+    // If id is provided, fetch a specific certificate
     if (id) {
       const certificate = await prisma.certificate.findUnique({
-        where: { 
+        where: {
           id: parseInt(id)
         },
         include: {
-          Users: true // เปลี่ยนการ include ให้เรียบง่ายขึ้น
+          Farmer: true
         }
       });
 
       if (!certificate) {
         return NextResponse.json(
-          { error: 'Certificate not found' }, 
+          { error: 'Certificate not found' },
           { status: 404 }
         );
       }
@@ -191,36 +181,37 @@ export async function GET(request) {
       return NextResponse.json(certificate);
     }
 
-    // ดึงใบรับรองทั้งหมดของเกษตรกร
+    // If no id, fetch all certificates of the farmer
     const certificates = await prisma.certificate.findMany({
       where: {
-        farmerId: farmer.id
+        farmerId: existingFarmer.id
       },
       include: {
-        Users: true
+        Farmer: true
       },
       orderBy: {
         createdAt: 'desc'
       }
     });
 
-    console.log('Found certificates:', certificates); // เพิ่ม log เพื่อดูผลลัพธ์
+    console.log('Found certificates:', certificates);
 
     return NextResponse.json(certificates);
 
   } catch (error) {
     console.error("Error in GET certificate:", error);
     return NextResponse.json(
-      { 
-        error: 'Failed to fetch certificates', 
+      {
+        error: 'Failed to fetch certificates',
         details: error.message,
-        stack: error.stack // เพิ่ม stack trace เพื่อดูรายละเอียดข้อผิดพลาด
-      }, 
+        stack: error.stack
+      },
       { status: 500 }
     );
   }
 }
-// สำหรับการสร้างใบรับรองใหม่
+
+// Function to create a certificate, used in POST
 const createCertificate = async (formData, farmerId) => {
   const standards = [];
   for (let i = 0; formData.get(`standards[${i}][id]`); i++) {
