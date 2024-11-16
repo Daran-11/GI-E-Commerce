@@ -2,13 +2,15 @@
 import { NextResponse } from "next/server";
 import prisma from "../../../../../lib/prisma";
 
+
+
 export async function POST(request) {
   try {
     const formData = await request.formData();
 
     const userId = formData.get('userId');
     if (!userId) {
-      throw new Error("User ID is not provided in the form data.");
+      throw new Error("Users ID is not provided in the form data.");
     }
 
     const latitude = parseFloat(formData.get('latitude'));
@@ -17,6 +19,7 @@ export async function POST(request) {
     if (!latitude || !longitude) {
       throw new Error("Invalid latitude or longitude values.");
     }
+
 
     const standards = [];
     for (let i = 0; formData.get(`standards[${i}][id]`); i++) {
@@ -35,6 +38,8 @@ export async function POST(request) {
         userId: parseInt(userId)
       }
     });
+    
+    
   
     if (!farmer) {
       return NextResponse.json({ error: 'Farmer profile not found for this user' }, { status: 404 });
@@ -50,10 +55,13 @@ export async function POST(request) {
       status: 'รอตรวจสอบใบรับรอง',
       registrationDate: new Date(),
       expiryDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)), // Set expiry to 1 year from now
-      user: {
+      Users: {
         connect: { id: parseInt(farmer.id, 10) },
       },
+      
     };
+
+
 
     const certificate = await prisma.certificate.create({
       data: certificateData,
@@ -131,111 +139,58 @@ export async function DELETE(request) {
 }
 
 export async function GET(request) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('FarmerId');
-    const id = searchParams.get('id');
+  const { searchParams } = new URL(request.url);
+  const UsersId = searchParams.get('UsersId');
+  const id = searchParams.get('id');
 
-    console.log('Received FarmerId:', userId);
-
-    if (!userId) {
-      return NextResponse.json(
-        { error: 'User ID is required' },
-        { status: 400 }
-      );
-    }
-
-    const existingFarmer = await prisma.farmer.findUnique({
-      where: {
-        userId: userId,
-      },
-    });
-
-    console.log('Found farmer:', existingFarmer);
-
-    if (!existingFarmer) {
-      return NextResponse.json(
-        { error: 'Farmer profile not found' },
-        { status: 404 }
-      );
-    }
-
-    // If id is provided, fetch a specific certificate
-    if (id) {
-      const certificate = await prisma.certificate.findUnique({
-        where: {
-          id: parseInt(id)
-        },
-        include: {
-          Farmer: true
-        }
-      });
-
-      if (!certificate) {
-        return NextResponse.json(
-          { error: 'Certificate not found' },
-          { status: 404 }
-        );
-      }
-
-      return NextResponse.json(certificate);
-    }
-
-    // If no id, fetch all certificates of the farmer
-    const certificates = await prisma.certificate.findMany({
-      where: {
-        farmerId: existingFarmer.id
-      },
-      include: {
-        Farmer: true
-      },
-      orderBy: {
-        createdAt: 'desc'
-      }
-    });
-
-    console.log('Found certificates:', certificates);
-
-    return NextResponse.json(certificates);
-
-  } catch (error) {
-    console.error("Error in GET certificate:", error);
-    return NextResponse.json(
-      {
-        error: 'Failed to fetch certificates',
-        details: error.message,
-        stack: error.stack
-      },
-      { status: 500 }
-    );
-  }
-}
-
-// Function to create a certificate, used in POST
-const createCertificate = async (formData, farmerId) => {
-  const standards = [];
-  for (let i = 0; formData.get(`standards[${i}][id]`); i++) {
-    standards.push({
-      id: parseInt(formData.get(`standards[${i}][id]`)),
-      name: formData.get(`standards[${i}][name]`),
-      logo: formData.get(`standards[${i}][logo]`),
-      certNumber: formData.get(`standards[${i}][certNumber]`),
-      certDate: formData.get(`standards[${i}][certDate]`)
-    });
+  if(!UsersId) {
+    console.log("no UsersId");
   }
 
-  return await prisma.certificate.create({
-    data: {
-      type: formData.get('type'),
-      variety: formData.get('variety'),
-      latitude: parseFloat(formData.get('latitude')),
-      longitude: parseFloat(formData.get('longitude')),
-      productionQuantity: parseInt(formData.get('productionQuantity')),
-      registrationDate: new Date(),
-      expiryDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
-      status: 'รอตรวจสอบใบรับรอง',
-      standards: JSON.stringify(standards),
-      farmerId: farmerId
+  const farmer = await prisma.farmer.findUnique({
+    where: {
+      userId: parseInt(UsersId)
     }
   });
-};
+  
+  
+
+  if (!farmer) {
+    return NextResponse.json({ error: 'Farmer profile not found for this user' }, { status: 404 });
+  }
+
+  try {
+    if (id) {
+      const certificate = await prisma.certificate.findUnique({
+        where: { id: parseInt(id, 10) },
+        include: {
+          Users: {
+            select: {
+              farmerName: true
+            }
+          }
+        }
+      });
+      return NextResponse.json(certificate);
+    } else if (UsersId) {
+      const certificates = await prisma.certificate.findMany({
+        where: {
+          farmerId: parseInt(farmer.id, 10)
+        },
+        include: {
+          Users: {
+            select: {
+              farmerName: true
+            }
+          }
+        }
+      });
+      return NextResponse.json(certificates);
+    } else {
+      console.error("Error fetching certificates:", error);
+    }
+  } catch (error) {
+    console.error("Error fetching certificates:", error);
+    return NextResponse.json({ error: "Error fetching certificates" }, { status: 500 });
+  }
+}

@@ -7,7 +7,7 @@ import { MdAdd, MdDelete } from 'react-icons/md';
 const EditUsers = ({ params }) => {
   const UsersId = params.id;
   const [formData, setFormData] = useState({
-    farmerName: "",
+    farmerNameApprove: "",
     certificates: [{ type: "", variety: "", standardName: "", certificateNumber: "", approvalDate: "" }],
   });
   const [standards, setStandards] = useState([]);
@@ -32,7 +32,7 @@ const EditUsers = ({ params }) => {
 
           const data = await response.json();
           setFormData({
-            farmerName: data.farmerName || "",
+            farmerNameApprove: data.farmerNameApprove || "",
             certificates: data.certificates?.length > 0 
               ? data.certificates.map(cert => ({
                   type: cert.type || "",
@@ -64,7 +64,7 @@ const EditUsers = ({ params }) => {
         },
         body: JSON.stringify({
           id: UsersId,
-          farmerName: formData.farmerName,
+          farmerNameApprove: formData.farmerNameApprove,
           certificates: formData.certificates.map(cert => ({
             type: cert.type,
             variety: cert.variety,
@@ -114,8 +114,8 @@ const EditUsers = ({ params }) => {
           type="text"
           placeholder="ชื่อ-นามสกุล"
           className={styles.input}
-          value={formData.farmerName}
-          onChange={(e) => setFormData(prevData => ({ ...prevData, farmerName: e.target.value }))}
+          value={formData.farmerNameApprove}
+          onChange={(e) => setFormData(prevData => ({ ...prevData, farmerNameApprove: e.target.value }))}
           required
         />
         {formData.certificates.map((cert, index) => (

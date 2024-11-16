@@ -41,74 +41,85 @@ const ApproveCertificatePage = ({ params }) => {
         const response = await fetch(`/api/approvecertificate/?id=${id}`);
         if (response.ok) {
           const data = await response.json();
-          setFormData({
-            type: data.type || "",
-            variety: data.variety || "",
-            plotCode: data.plotCode || "",
-            latitude: data.latitude || "",
-            longitude: data.longitude || "",
-            productionQuantity: data.productionQuantity || "",
-            standards: JSON.parse(data.standards) || [],
-            UsersId: data.Users?.id || "",
-            registrationDate: new Date(data.registrationDate)
-              .toISOString()
-              .split("T")[0],
-            expiryDate: new Date(data.expiryDate).toISOString().split("T")[0],
-            status: data.status || "",
-            municipalComment: "",
-            UsersTitle: data.Users?.title || "",
-            UsersName: data.Users?.name || "",
-            UsersLastname: data.Users?.lastname || "",
-          });
+          console.log("Certificate data:", data);
+  
+          if (data.Users) {
+            setFormData({
+              type: data.type || "",
+              variety: data.variety || "",
+              latitude: data.latitude || "",
+              longitude: data.longitude || "",
+              productionQuantity: data.productionQuantity || "",
+              standards: JSON.parse(data.standards) || [],
+              registrationDate: data.registrationDate? new Date(data.registrationDate).toLocaleDateString('th-TH'): "",
+              expiryDate: data.expiryDate? new Date(data.expiryDate).toLocaleDateString('th-TH'): "",
+              status: data.status || "",
+              municipalComment: "",
+              farmerName: data.Users.farmerName || "" ,
+              address:data.Users.address || "",
+              phone:data.Users.phone || "",
+              contactLine:data.Users.contactLine || ""
+            });
 
-          // Fetch Users data after getting certificate data
-          await fetchUsersData(data.Users?.name, data.Users?.lastname);
+            // เรียกใช้ fetchUsersData โดยส่งชื่อเกษตรกร
+            await fetchUsersData(data.Users.farmerName);
+          }
         } else {
-          alert("Failed to fetch certificate");
+          throw new Error("Failed to fetch certificate");
         }
       } catch (error) {
         console.error("Failed to fetch certificate:", error);
+        alert("ไม่สามารถดึงข้อมูลใบรับรองได้");
       }
     };
-
+  
     fetchCertificate();
   }, [id]);
-
-  const fetchUsersData = async (name, lastname) => {
+  
+  const fetchUsersData = async (name) => {
     try {
+      // แสดง log เพื่อตรวจสอบค่าที่ได้รับ
+      console.log("Searching for farmer with name:", name);
+  
       const response = await fetch(`/api/manage_farmer`);
-
-      if (response.ok) {
-        const Users = await response.json();
-        const matchedUsers = Users.find(
-          (f) => f.firstName === name && f.lastName === lastname
+      if (!response.ok) {
+        throw new Error('Failed to fetch farmers data');
+      }
+  
+      const farmers = await response.json();
+      console.log("All farmers:", farmers);
+  
+      // ค้นหาเกษตรกรที่มีชื่อตรงกัน
+      const matchedFarmer = farmers.find(
+        (farmer) => farmer.farmerNameApprove.toLowerCase() === name.toLowerCase()
+      );
+  
+      console.log("Matched farmer:", matchedFarmer);
+  
+      if (matchedFarmer) {
+        setUsersData(matchedFarmer);
+        setMatchFound(true);
+  
+        // ดึงข้อมูลใบรับรอง
+        const certsResponse = await fetch(
+          `/api/farmer_certificates/${matchedFarmer.id}`
         );
-
-        if (matchedUsers) {
-          setUsersData(matchedUsers);
-          setMatchFound(true);
-
-          // Fetch certificates for the matched Users
-          const certsResponse = await fetch(
-            `/api/farmer_certificates/${matchedUsers.id}`
-          );
-          if (certsResponse.ok) {
-            const certsData = await certsResponse.json();
-            setUsersCertificates(certsData);
-          } else {
-            console.error(
-              "Failed to fetch certificates:",
-              certsResponse.statusText
-            );
-          }
+        if (certsResponse.ok) {
+          const certsData = await certsResponse.json();
+          setUsersCertificates(certsData);
         } else {
-          setMatchFound(false);
+          console.error("Failed to fetch certificates");
         }
       } else {
-        console.error("Failed to fetch Users:", response.statusText);
+        setMatchFound(false);
+        setUsersData(null);
+        setUsersCertificates([]);
       }
     } catch (error) {
-      console.error("Failed to fetch Users data:", error);
+      console.error("Failed to fetch farmer data:", error);
+      setMatchFound(false);
+      setUsersData(null);
+      setUsersCertificates([]);
     }
   };
 
@@ -182,24 +193,24 @@ const ApproveCertificatePage = ({ params }) => {
   return (
     <div className="flex min-h-screen bg-gray-100">
       {/* Left Side - Original Form */}
-      
-
-
-
-
       <div className="w-1/2 p-6">
         <div className="bg-white rounded-lg shadow p-6">
         <h2 className="mb-6" style={{ fontSize: '1.5rem' }}>ข้อมูลเกษตรกร</h2>
-
-
           {matchFound ? (
             <div>
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <h3 className="text-lg font-medium">
-                    {UsersData?.firstName} {UsersData?.lastName}
+                    {formData.farmerName} {/* ใช้ชื่อจาก formData แทน */}
                   </h3>
-                </div>
+                  {UsersData && (
+                    <div className="text-sm text-gray-600">
+                      <p>ที่อยู่: {formData.address}</p>
+                      <p>เบอร์โทร: {formData.phone}</p>
+                      <p>Line ID: {formData.contactLine}</p>
+                    </div>
+                  )}
+              </div>
                 <button
                   onClick={() => setShowCertificates(!showCertificates)}
                   className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors flex items-center space-x-2"
@@ -294,7 +305,7 @@ const ApproveCertificatePage = ({ params }) => {
                 />
               </svg>
               <p className="text-gray-600 text-lg">
-                ไม่พบรายชื่อเกษตรกรที่ตรงกัน
+              ไม่พบรายชื่อเกษตรกร: {formData.farmerName}
               </p>
               <p className="text-gray-500 text-sm mt-2">
                 กรุณาตรวจสอบข้อมูลเกษตรกรอีกครั้ง
@@ -314,7 +325,7 @@ const ApproveCertificatePage = ({ params }) => {
               </label>
               <input
                 type="text"
-                value={`${formData.UsersName} ${formData.UsersLastname}`}
+                value={`${formData.farmerName}`}
                 className="w-full p-2 border rounded-md bg-gray-50"
                 disabled
               />
@@ -376,30 +387,36 @@ const ApproveCertificatePage = ({ params }) => {
             <div className="form-group">
               <label className="block text-sm font-medium mb-2">มาตรฐาน</label>
               <div className="grid grid-cols-2 gap-4">
-                {formData.standards.map((standard, index) => (
-                  <div key={index} className="border rounded-lg p-4">
-                    <div className="flex flex-col items-center">
-                      <div className="w-20 h-20 mb-2">
-                        <Image
-                          src={standard.logo}
-                          alt={standard.name}
-                          width={80}
-                          height={80}
-                          className="object-contain"
-                        />
+                {formData.standards && formData.standards.length > 0 ? (
+                  formData.standards.map((standard, index) => (
+                    <div key={index} className="border rounded-lg p-4">
+                      <div className="flex flex-col items-center">
+                        <div className="w-20 h-20 mb-2">
+                          <Image
+                            src={standard.logo}
+                            alt={standard.name}
+                            width={80}
+                            height={80}
+                            className="object-contain"
+                          />
+                        </div>
+                        <h3 className="font-medium text-center">
+                          {standard.name}
+                        </h3>
+                        <p className="text-sm text-gray-600">
+                          เลขที่: {standard.certNumber}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          วันที่: {standard.certDate}
+                        </p>
                       </div>
-                      <h3 className="font-medium text-center">
-                        {standard.name}
-                      </h3>
-                      <p className="text-sm text-gray-600">
-                        เลขที่: {standard.certNumber}
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        วันที่: {standard.certDate}
-                      </p>
                     </div>
+                  ))
+                ) : (
+                  <div className="col-span-2 text-center py-4 text-gray-500">
+                    ไม่พบข้อมูลมาตรฐาน
                   </div>
-                ))}
+                )}
               </div>
             </div>
 

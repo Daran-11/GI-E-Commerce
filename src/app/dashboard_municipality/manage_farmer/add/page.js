@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { MdAdd, MdDelete } from 'react-icons/md';
 
 const AddUsers = ({ UsersId }) => {
-  const [farmerName, setFarmerName] = useState("");
+  const [farmerNameApprove, setFarmerNameApprove] = useState("");
   const [certificates, setCertificates] = useState([{ type: "", variety:"", standardName: "", certificateNumber: "", approvalDate: "" }]);
   const [standards, setStandards] = useState([]);
   const router = useRouter();
@@ -26,7 +26,7 @@ const AddUsers = ({ UsersId }) => {
         try {
           const response = await fetch(`/api/manage_farmer?id=${UsersId}`);
           const data = await response.json();
-          setFarmerName(data.farmerName);
+          setFarmerNameApprove(data.farmerNameApprove);
           setCertificates(data.certificates.length > 0 ? data.certificates : [{ type: "", variety:"", standardName: "", certificateNumber: "", approvalDate: "" }]);
         } catch (error) {
           console.error("Failed to fetch Users data:", error);
@@ -49,7 +49,7 @@ const AddUsers = ({ UsersId }) => {
         },
         body: JSON.stringify({
           id: UsersId,
-          farmerName,
+          farmerNameApprove,
           certificates: certificates.map(cert => ({
             type: cert.type, 
             variety: cert.variety,
@@ -115,8 +115,8 @@ const AddUsers = ({ UsersId }) => {
           type="text"
           placeholder="ชื่อ-นามสกุล"
           className={styles.input}
-          value={farmerName}
-          onChange={(e) => setFarmerName(e.target.value)}
+          value={farmerNameApprove}
+          onChange={(e) => setFarmerNameApprove(e.target.value)}
           required
         />
         {certificates.map((cert, index) => (
