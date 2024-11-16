@@ -286,8 +286,7 @@ model Farmer {
 
 model manage_farmer {
   id        Int      @id @default(autoincrement())
-  firstName String
-  lastName  String
+  farmerName         String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   certificates Certificate_farmer[]
