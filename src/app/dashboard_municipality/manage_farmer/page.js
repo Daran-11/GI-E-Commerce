@@ -75,7 +75,7 @@ const ManageFarmer = () => {
                 {/* แสดงข้อมูลเกษตรกรพร้อมใบรับรองใบแรก */}
                 <tr>
                   <td>{index + 1}</td>
-                  <td>{manage_farmer.farmerName}</td>
+                  <td>{manage_farmer.farmerNameApprove}</td>
                   {manage_farmer.certificates.length > 0 ? (
                     <>
                       <td>{manage_farmer.certificates[0].type}</td>
