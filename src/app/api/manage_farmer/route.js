@@ -3,13 +3,12 @@ import prisma from '../../../../lib/prisma';
 
 // Create a new Users
 export async function POST(request) {
-  const { firstName, lastName, certificates } = await request.json();
+  const { farmerNameApprove, certificates } = await request.json();
 
   try {
     const newUsers = await prisma.manage_farmer.create({
       data: {
-        firstName,
-        lastName,
+        farmerNameApprove,
         certificates: {
           create: certificates.map(cert => ({
             type: cert.type,
@@ -33,14 +32,13 @@ export async function POST(request) {
 
 // Update an existing Users
 export async function PUT(request) {
-  const { id, firstName, lastName, certificates } = await request.json();
+  const { id, farmerNameApprove, certificates } = await request.json();
 
   try {
     const updatedUsers = await prisma.manage_farmer.update({
       where: { id: parseInt(id) },
       data: {
-        firstName,
-        lastName,
+        farmerNameApprove,
         certificates: {
           deleteMany: {}, // Remove all existing certificates
           create: certificates.map(cert => ({
@@ -101,7 +99,7 @@ export async function DELETE(request) {
 
   try {
     // Delete all certificates associated with the Users
-    await prisma.certificate.deleteMany({
+    await prisma.certificate_farmer.deleteMany({
       where: { UsersId: parseInt(id) },
     });
 

@@ -76,19 +76,19 @@
 }
 
 /* Status colors */
-.pending {
+.รอตรวจสอบใบรับรอง {
     background-color: rgba(247, 203, 115, 0.75); /* Using rgba for better color transparency */
 }
 
-.done {
+.อนุมัติ {
     background-color: rgba(175, 214, 238, 0.75);
 }
 
-.cancelled {
+.ไม่อนุมัติ	 {
     background-color: rgba(247, 115, 115, 0.75);
 }
 
-.expired {
+.หมดอายุ {
     background-color: #afafaf;
 }
 

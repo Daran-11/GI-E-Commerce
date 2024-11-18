@@ -38,6 +38,7 @@ export async function middleware(req) {
     return NextResponse.redirect(new URL('/', req.url));
   }
 
+
   // If none of the restricted conditions apply, allow access
   return NextResponse.next();
 }

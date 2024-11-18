@@ -166,7 +166,7 @@ export async function GET(request) {
         include: {
           Users: {
             select: {
-              name: true
+              farmerName: true
             }
           }
         }
@@ -180,7 +180,7 @@ export async function GET(request) {
         include: {
           Users: {
             select: {
-              name: true
+              farmerName: true
             }
           }
         }
