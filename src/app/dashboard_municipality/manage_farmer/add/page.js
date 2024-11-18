@@ -5,8 +5,7 @@ import { useRouter } from "next/navigation";
 import { MdAdd, MdDelete } from 'react-icons/md';
 
 const AddUsers = ({ UsersId }) => {
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
+  const [farmerNameApprove, setFarmerNameApprove] = useState("");
   const [certificates, setCertificates] = useState([{ type: "", variety:"", standardName: "", certificateNumber: "", approvalDate: "" }]);
   const [standards, setStandards] = useState([]);
   const router = useRouter();
@@ -27,8 +26,7 @@ const AddUsers = ({ UsersId }) => {
         try {
           const response = await fetch(`/api/manage_farmer?id=${UsersId}`);
           const data = await response.json();
-          setFirstName(data.firstName);
-          setLastName(data.lastName);
+          setFarmerNameApprove(data.farmerNameApprove);
           setCertificates(data.certificates.length > 0 ? data.certificates : [{ type: "", variety:"", standardName: "", certificateNumber: "", approvalDate: "" }]);
         } catch (error) {
           console.error("Failed to fetch Users data:", error);
@@ -51,8 +49,7 @@ const AddUsers = ({ UsersId }) => {
         },
         body: JSON.stringify({
           id: UsersId,
-          firstName,
-          lastName,
+          farmerNameApprove,
           certificates: certificates.map(cert => ({
             type: cert.type, 
             variety: cert.variety,
@@ -116,18 +113,10 @@ const AddUsers = ({ UsersId }) => {
       <form onSubmit={handleSubmit} className={styles.form}>
         <input
           type="text"
-          placeholder="ชื่อ"
+          placeholder="ชื่อ-นามสกุล"
           className={styles.input}
-          value={firstName}
-          onChange={(e) => setFirstName(e.target.value)}
-          required
-        />
-        <input
-          type="text"
-          placeholder="นามสกุล"
-          className={styles.input}
-          value={lastName}
-          onChange={(e) => setLastName(e.target.value)}
+          value={farmerNameApprove}
+          onChange={(e) => setFarmerNameApprove(e.target.value)}
           required
         />
         {certificates.map((cert, index) => (

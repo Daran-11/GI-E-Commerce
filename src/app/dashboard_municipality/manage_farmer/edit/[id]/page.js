@@ -7,8 +7,7 @@ import { MdAdd, MdDelete } from 'react-icons/md';
 const EditUsers = ({ params }) => {
   const UsersId = params.id;
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
+    farmerNameApprove: "",
     certificates: [{ type: "", variety: "", standardName: "", certificateNumber: "", approvalDate: "" }],
   });
   const [standards, setStandards] = useState([]);
@@ -33,8 +32,7 @@ const EditUsers = ({ params }) => {
 
           const data = await response.json();
           setFormData({
-            firstName: data.firstName || "",
-            lastName: data.lastName || "",
+            farmerNameApprove: data.farmerNameApprove || "",
             certificates: data.certificates?.length > 0 
               ? data.certificates.map(cert => ({
                   type: cert.type || "",
@@ -66,8 +64,7 @@ const EditUsers = ({ params }) => {
         },
         body: JSON.stringify({
           id: UsersId,
-          firstName: formData.firstName,
-          lastName: formData.lastName,
+          farmerNameApprove: formData.farmerNameApprove,
           certificates: formData.certificates.map(cert => ({
             type: cert.type,
             variety: cert.variety,
@@ -115,18 +112,10 @@ const EditUsers = ({ params }) => {
       <form onSubmit={handleSubmit} className={styles.form}>
         <input
           type="text"
-          placeholder="ชื่อ"
+          placeholder="ชื่อ-นามสกุล"
           className={styles.input}
-          value={formData.firstName}
-          onChange={(e) => setFormData(prevData => ({ ...prevData, firstName: e.target.value }))}
-          required
-        />
-        <input
-          type="text"
-          placeholder="นามสกุล"
-          className={styles.input}
-          value={formData.lastName}
-          onChange={(e) => setFormData(prevData => ({ ...prevData, lastName: e.target.value }))}
+          value={formData.farmerNameApprove}
+          onChange={(e) => setFormData(prevData => ({ ...prevData, farmerNameApprove: e.target.value }))}
           required
         />
         {formData.certificates.map((cert, index) => (
