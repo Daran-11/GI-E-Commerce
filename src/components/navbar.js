@@ -182,7 +182,7 @@ export const Navbar = () => {
                             </div>
                         ) : (
                             <li>
-                                <Link href='/Login' className={currentPath === "/Login" ? "text-[#4EAC14]" : "text-[#595959]"}>
+                                <Link href='/login' className={currentPath === "/login" ? "text-[#4EAC14]" : "text-[#595959]"}>
                                     เข้าสู่ระบบ
                                 </Link>
                             </li>
