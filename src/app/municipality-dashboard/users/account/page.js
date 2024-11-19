@@ -88,7 +88,7 @@ export default async function UsersByRolePage() {
                 <td>{user.createdAt ? new Date(user.createdAt).toLocaleDateString('th-TH') : '-'}</td>
                 <td>{user.updatedAt ? new Date(user.updatedAt).toLocaleDateString('th-TH') : '-'}</td>
                 <td>
-                  <span 
+                  <span
                     className={`inline-block px-2 py-1 rounded-full text-xs font-semibold
                       ${user.role === 'farmer' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}
                   >
@@ -96,8 +96,8 @@ export default async function UsersByRolePage() {
                   </span>
                 </td>
                 <td>
-                  <Link 
-                    href={`/dashboard_municipality/users/account/${user.id}`}
+                  <Link
+                    href={`/municipality-dashboard/users/account/${user.id}`}
                     className={`${styles.button} ${styles.viewButton}`}
                   >
                     ดูข้อมูล

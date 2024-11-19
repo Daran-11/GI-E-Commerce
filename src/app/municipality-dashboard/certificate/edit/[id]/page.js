@@ -75,12 +75,12 @@ const ApproveCertificatePage = ({ params }) => {
     if (action === "ไม่อนุมัติ" && !formData.municipalComment) {
       newErrors.municipalComment = "กรุณากรอกความคิดเห็นเมื่อไม่อนุมัติใบรับรอง";
     }
-  
+
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
     }
-  
+
     try {
       const response = await fetch("/api/histroycer", {
         method: "PUT",
@@ -93,16 +93,16 @@ const ApproveCertificatePage = ({ params }) => {
           municipalComment: formData.municipalComment
         }),
       });
-  
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || "ไม่สามารถอัพเดตใบรับรอง");
       }
       const result = await response.json();
       console.log("Response from server:", result);
-  
+
       alert(`ใบรับรอง${action === "อนุมัติ" ? "ได้รับการอนุมัติ" : "ถูกปฏิเสธ"}เรียบร้อยแล้ว`);
-      router.push("/dashboard_municipality/certificate");
+      router.push("/municipality-dashboard/certificate");
     } catch (error) {
       console.error("Error:", error);
       alert(error.message || "ไม่สามารถอัพเดตใบรับรอง");
@@ -196,7 +196,7 @@ const ApproveCertificatePage = ({ params }) => {
                 </div>
 
               ))}
-              
+
             </div>
           </div>
 

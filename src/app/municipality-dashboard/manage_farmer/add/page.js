@@ -4,12 +4,9 @@ import styles from "@/app/ui/dashboard/manage_farmer/manage_farmer.module.css";
 import { useRouter } from "next/navigation";
 import { MdAdd, MdDelete } from 'react-icons/md';
 
-const EditUsers = ({ params }) => {
-  const UsersId = params.id;
-  const [formData, setFormData] = useState({
-    farmerNameApprove: "",
-    certificates: [{ type: "", variety: "", standardName: "", certificateNumber: "", approvalDate: "" }],
-  });
+const AddUsers = ({ UsersId }) => {
+  const [farmerNameApprove, setFarmerNameApprove] = useState("");
+  const [certificates, setCertificates] = useState([{ type: "", variety: "", standardName: "", certificateNumber: "", approvalDate: "" }]);
   const [standards, setStandards] = useState([]);
   const router = useRouter();
 
@@ -28,21 +25,9 @@ const EditUsers = ({ params }) => {
       if (UsersId) {
         try {
           const response = await fetch(`/api/manage_farmer?id=${UsersId}`);
-          if (!response.ok) throw new Error("Network response was not ok");
-
           const data = await response.json();
-          setFormData({
-            farmerNameApprove: data.farmerNameApprove || "",
-            certificates: data.certificates?.length > 0 
-              ? data.certificates.map(cert => ({
-                  type: cert.type || "",
-                  variety: cert.variety || "",
-                  standardName: cert.standardName || "",
-                  certificateNumber: cert.certificateNumber || "",
-                  approvalDate: cert.approvalDate ? new Date(cert.approvalDate).toISOString().split('T')[0] : "",
-                }))
-              : [{ type: "", variety: "", standardName: "", certificateNumber: "", approvalDate: "" }],
-          });
+          setFarmerNameApprove(data.farmerNameApprove);
+          setCertificates(data.certificates.length > 0 ? data.certificates : [{ type: "", variety: "", standardName: "", certificateNumber: "", approvalDate: "" }]);
         } catch (error) {
           console.error("Failed to fetch Users data:", error);
         }
@@ -55,17 +40,17 @@ const EditUsers = ({ params }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     try {
       const res = await fetch("/api/manage_farmer", {
-        method: "PUT",
+        method: UsersId ? "PUT" : "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           id: UsersId,
-          farmerNameApprove: formData.farmerNameApprove,
-          certificates: formData.certificates.map(cert => ({
+          farmerNameApprove,
+          certificates: certificates.map(cert => ({
             type: cert.type,
             variety: cert.variety,
             standardName: cert.standardName,
@@ -76,35 +61,51 @@ const EditUsers = ({ params }) => {
       });
 
       if (res.ok) {
-        router.push("/dashboard_municipality/manage_farmer");
+        router.push("/municipality-dashboard/manage_farmer");
       } else {
-        throw new Error("Failed to update Users");
+        throw new Error(UsersId ? "Failed to update Users" : "Failed to create Users");
       }
     } catch (error) {
       console.error(error);
+      // Handle error (e.g., show error message to user)
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!UsersId) return;
+
+    try {
+      const res = await fetch("/api/manage_farmer", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id: UsersId }),
+      });
+
+      if (res.ok) {
+        router.push("/municipality-dashboard/manage_farmer");
+      } else {
+        throw new Error("Failed to delete Users");
+      }
+    } catch (error) {
+      console.error(error);
+      // Handle error (e.g., show error message to user)
     }
   };
 
   const handleAddCertificate = () => {
-    setFormData(prevData => ({
-      ...prevData,
-      certificates: [...prevData.certificates, { type: "", variety: "", standardName: "", certificateNumber: "", approvalDate: "" }],
-    }));
+    setCertificates([...certificates, { type: "", variety: "", standardName: "", certificateNumber: "", approvalDate: "" }]);
   };
 
   const handleRemoveCertificate = (index) => {
-    setFormData(prevData => ({
-      ...prevData,
-      certificates: prevData.certificates.filter((_, i) => i !== index),
-    }));
+    setCertificates(certificates.filter((_, i) => i !== index));
   };
 
   const handleCertificateChange = (index, field, value) => {
-    setFormData(prevData => {
-      const newCertificates = [...prevData.certificates];
-      newCertificates[index][field] = value;
-      return { ...prevData, certificates: newCertificates };
-    });
+    const newCertificates = [...certificates];
+    newCertificates[index][field] = value;
+    setCertificates(newCertificates);
   };
 
   return (
@@ -114,11 +115,11 @@ const EditUsers = ({ params }) => {
           type="text"
           placeholder="ชื่อ-นามสกุล"
           className={styles.input}
-          value={formData.farmerNameApprove}
-          onChange={(e) => setFormData(prevData => ({ ...prevData, farmerNameApprove: e.target.value }))}
+          value={farmerNameApprove}
+          onChange={(e) => setFarmerNameApprove(e.target.value)}
           required
         />
-        {formData.certificates.map((cert, index) => (
+        {certificates.map((cert, index) => (
           <div key={index} className={styles.certificateGroup}>
             <input
               type="text"
@@ -136,6 +137,7 @@ const EditUsers = ({ params }) => {
               onChange={(e) => handleCertificateChange(index, 'variety', e.target.value)}
               required
             />
+            <br />
             <select
               value={cert.standardName}
               className={styles.selectcertificates}
@@ -152,14 +154,22 @@ const EditUsers = ({ params }) => {
               placeholder="เลขที่ใบรับรอง"
               className={styles.selectcertificates}
               value={cert.certificateNumber}
-              onChange={(e) => handleCertificateChange(index, 'certificateNumber', e.target.value)}
+              onChange={(e) =>
+                handleCertificateChange(
+                  index,
+                  "certificateNumber",
+                  e.target.value
+                )
+              }
               required
             />
             <input
               type="date"
               className={styles.selectcertificates}
               value={cert.approvalDate}
-              onChange={(e) => handleCertificateChange(index, 'approvalDate', e.target.value)}
+              onChange={(e) =>
+                handleCertificateChange(index, "approvalDate", e.target.value)
+              }
               required
             />
             <button
@@ -179,11 +189,13 @@ const EditUsers = ({ params }) => {
           <MdAdd />
         </button>
         <div className={styles.buttonContainer}>
-          <button type="submit" className={styles.Submitbutton}>อัปเดตเกษตรกร</button>
+          <button type="submit" className={styles.Submitbutton}>
+            {UsersId ? "อัปเดตเกษตรกร" : "เพิ่มรายชื่อเกษตรกร"}
+          </button>
         </div>
       </form>
     </div>
   );
 };
 
-export default EditUsers;
+export default AddUsers;

@@ -51,7 +51,7 @@ const ManageFarmer = () => {
     <div className={styles.container}>
       <div className={styles.top}>
         <Search placeholder="ค้นหาเกษตรกร..." />
-        <Link href="/dashboard_municipality/manage_farmer/add">
+        <Link href="/municipality-dashboard/manage_farmer/add">
           <button className={styles.addButton}>เพิ่มเกษตรกรใหม่</button>
         </Link>
       </div>
@@ -88,36 +88,36 @@ const ManageFarmer = () => {
                     <td colSpan={3}>ไม่มีใบรับรอง</td>
                   )}
                   <td>
-                  <div className={styles.standardsContainer}>
-                    <div className={styles.buttons}>
-                      <Link href={`/dashboard_municipality/manage_farmer/edit/${manage_farmer.id}`}>
-                        <button className={`${styles.iconButton} ${styles.edit}`} title="แก้ไข">
-                          <MdEdit />
+                    <div className={styles.standardsContainer}>
+                      <div className={styles.buttons}>
+                        <Link href={`/municipality-dashboard/manage_farmer/edit/${manage_farmer.id}`}>
+                          <button className={`${styles.iconButton} ${styles.edit}`} title="แก้ไข">
+                            <MdEdit />
+                          </button>
+                        </Link>
+                        <button
+                          className={`${styles.iconButton} ${styles.delete}`}
+                          onClick={() => handleDelete(manage_farmer.id)}
+                          title="ลบ"
+                        >
+                          <MdDelete />
                         </button>
-                      </Link>
-                      <button
-                        className={`${styles.iconButton} ${styles.delete}`}
-                        onClick={() => handleDelete(manage_farmer.id)}
-                        title="ลบ"
-                      >
-                        <MdDelete />
-                      </button>
-                    </div>
+                      </div>
                     </div>
                   </td>
                 </tr>
 
-           
+
                 {manage_farmer.certificates.slice(1).map((certificate, certIndex) => (
                   <tr key={certIndex}>
-                    <td></td> 
-                    <td></td> 
+                    <td></td>
+                    <td></td>
                     <td>{certificate.type}</td>
                     <td>{certificate.variety}</td>
                     <td>{certificate.standardName}</td>
                     <td>{certificate.certificateNumber}</td>
                     <td>{new Date(certificate.approvalDate).toLocaleDateString()}</td>
-                    <td></td> 
+                    <td></td>
                   </tr>
                 ))}
               </React.Fragment>
