@@ -1,11 +1,10 @@
 "use client";
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import styles from '@/app/dashboard_municipality/manage_standards/add/standards.module.css';
+import styles from '@/app/municipality-dashboard/manage_standards/add/standards.module.css';
 
-
-export default function EditStandard({ params }) {
+export default function AddStandard() {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [logo, setLogo] = useState(null);
@@ -13,28 +12,6 @@ export default function EditStandard({ params }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
-  const { id } = params;
-
-  useEffect(() => {
-    const fetchStandard = async () => {
-      try {
-        const response = await fetch(`/api/standards?id=${id}`);
-        if (response.ok) {
-          const data = await response.json();
-          setName(data.name);
-          setDescription(data.description);
-          setPreviewUrl(data.logoUrl);
-        } else {
-          throw new Error('Failed to fetch standard');
-        }
-      } catch (error) {
-        console.error('Error fetching standard:', error);
-        setError('Failed to load standard data');
-      }
-    };
-
-    fetchStandard();
-  }, [id]);
 
   const handleLogoChange = (e) => {
     const file = e.target.files[0];
@@ -57,21 +34,21 @@ export default function EditStandard({ params }) {
     }
 
     try {
-      const response = await fetch(`/api/standards?id=${id}`, {
-        method: 'PUT',
+      const response = await fetch('/api/standards', {
+        method: 'POST',
         body: formData,
       });
 
       if (response.ok) {
-        router.push('/dashboard_municipality/manage_standards');
+        router.push('/municipality-dashboard/manage_standards');
         router.refresh();
       } else {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to update standard');
+        throw new Error(errorData.error || 'Failed to add standard');
       }
     } catch (error) {
-      console.error('Error updating standard:', error);
-      setError(error.message || 'เกิดข้อผิดพลาดในการอัปเดตมาตรฐาน');
+      console.error('Error adding standard:', error);
+      setError(error.message || 'เกิดข้อผิดพลาดในการเพิ่มมาตรฐาน');
     } finally {
       setIsSubmitting(false);
     }
@@ -80,7 +57,7 @@ export default function EditStandard({ params }) {
   return (
     <div className={styles.container}>
       <div className={styles.mainContent}>
-        <h1 className={styles.title}>แก้ไขมาตรฐาน</h1>
+        <h1 className={styles.title}>เพิ่มมาตรฐาน</h1>
         <h3 className={styles.subtitle}>ข้อมูลมาตรฐานการรับรองสินค้า</h3>
         {error && <p className={styles.errorMessage}>{error}</p>}
         <form onSubmit={handleSubmit}>
@@ -131,7 +108,7 @@ export default function EditStandard({ params }) {
               ยกเลิก
             </button>
             <button type="submit" disabled={isSubmitting} className={styles.buttonSubmit}>
-              {isSubmitting ? 'กำลังอัปเดต...' : 'อัปเดตมาตรฐาน'}
+              {isSubmitting ? 'กำลังเพิ่ม...' : 'เพิ่มมาตรฐาน'}
             </button>
           </div>
         </form>

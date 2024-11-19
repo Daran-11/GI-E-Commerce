@@ -49,11 +49,6 @@ const Navbar = () => {
             <span className="text-gray-700 font-medium">Guest</span>
           )}
         </div>
-        <div className={styles.icons}>
-          <MdOutlineChat size={20} />
-          <MdNotifications size={20} />
-          <MdPublic size={20} />
-        </div>
       </div>
     </nav>
   );
