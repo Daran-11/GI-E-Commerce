@@ -28,13 +28,13 @@ const Sidebar = () => {
     const name = localStorage.getItem('name');
     const lastname = localStorage.getItem('lastname');
     const role = localStorage.getItem('role');
-  
+
     if (name && lastname && role) {
       setUser({ name, lastname, role });
 
-      // Redirect to dashboard_municipality if role is เทศบาล or admin
+      // Redirect to municipality-dashboard if role is เทศบาล or admin
       if (role === 'เทศบาล' || role === 'admin') {
-        router.push('/dashboard_municipality');
+        router.push('/municipality-dashboard');
       } else if (role !== 'เกษตรกร') {
         router.push('/login'); // Redirect to login if role is not เกษตรกร, เทศบาล, or admin
       }
@@ -81,7 +81,7 @@ const Sidebar = () => {
 const menuItems = [
   {
     list: [
-      { title: 'หน้าหลัก', path: '/dashboard', icon: <MdDashboard /> },    
+      { title: 'หน้าหลัก', path: '/dashboard', icon: <MdDashboard /> },
     ],
   },
   {

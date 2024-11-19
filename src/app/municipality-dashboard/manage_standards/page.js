@@ -46,7 +46,7 @@ const Standards = () => {
     <div className={styles.container}>
       <div className={styles.top}>
         <Search placeholder="ค้นหามาตรฐาน..." />
-        <Link href="/dashboard_municipality/manage_standards/add">
+        <Link href="/municipality-dashboard/manage_standards/add">
           <button className={styles.addButton}>เพิ่มมาตรฐานใหม่</button>
         </Link>
       </div>
@@ -65,37 +65,37 @@ const Standards = () => {
             standards.map((standard, index) => (
               <tr key={standard.id}>
                 <td>{index + 1}</td>
-                
+
                 <td>
-                <div className={styles.standardsContainer}>
-                  <Image
-                    src={standard.logoUrl}
-                    alt={standard.name}
-                    width={50}
-                    height={50}
-                    className={styles.standardLogo}
-                  />
-                    </div>
+                  <div className={styles.standardsContainer}>
+                    <Image
+                      src={standard.logoUrl}
+                      alt={standard.name}
+                      width={50}
+                      height={50}
+                      className={styles.standardLogo}
+                    />
+                  </div>
                 </td>
-              
+
                 <td>{standard.name}</td>
                 <td>{standard.description}</td>
                 <td>
-                <div className={styles.standardsContainer}>
-                  <div className={styles.buttons}>
-                    <Link href={`/dashboard_municipality/manage_standards/edit/${standard.id}`}>
-                      <button className={`${styles.iconButton} ${styles.edit}`} title="แก้ไข">
-                        <MdEdit   />
+                  <div className={styles.standardsContainer}>
+                    <div className={styles.buttons}>
+                      <Link href={`/municipality-dashboard/manage_standards/edit/${standard.id}`}>
+                        <button className={`${styles.iconButton} ${styles.edit}`} title="แก้ไข">
+                          <MdEdit />
+                        </button>
+                      </Link>
+                      <button
+                        className={`${styles.iconButton} ${styles.delete}`}
+                        onClick={() => handleDelete(standard.id)}
+                        title="ลบ"
+                      >
+                        <MdDelete />
                       </button>
-                    </Link>
-                    <button
-                      className={`${styles.iconButton} ${styles.delete}`}
-                      onClick={() => handleDelete(standard.id)}
-                      title="ลบ"
-                    >
-                      <MdDelete  />
-                    </button>
-                  </div>
+                    </div>
                   </div>
                 </td>
               </tr>

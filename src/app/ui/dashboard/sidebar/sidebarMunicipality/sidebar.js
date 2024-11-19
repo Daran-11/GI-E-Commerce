@@ -1,5 +1,5 @@
 "use client";
-
+import Image from 'next/image';
 import { useSession } from "next-auth/react";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
@@ -18,55 +18,31 @@ import {
 } from "react-icons/md";
 import MenuLink from "./menuLink/menuLink";
 import styles from "./sidebar.module.css";
+import { FaBackspace } from "react-icons/fa";
 
 
-const Sidebar = () => {
-  const { data: session, status } = useSession();
-  const pathname = usePathname();
-  const router = useRouter();
 
-  const [user, setUser] = useState({
-    name: "Loading...",
-    role: "Loading...",
-  });
-
-
-  const handleLogout = () => {
-    router.push("/login"); 
-  };
-
-  return (
-    <div className={styles.container}>
-      <ul className={`${styles.list}`}>
-        {menuItems.map((cat) => (
-          <li key={cat.title}>
-            <span className={styles.cat}>{cat.title}</span>
-            {cat.list.map((item) => (
-              <MenuLink
-                item={item}
-                key={item.title}
-                isActive={pathname === item.path}
-              />
-            ))}
-          </li>
-        ))}
-      </ul>
-      <button className={styles.logout} onClick={handleLogout}>
-        <MdLogout />
-        ลงชื่อออก
-      </button>
-    </div>
-  );
-};
 
 
 // Define the menu items
 const menuItems = [
   {
+    title: "",
+    list: [
+      {
+        title: "กลับไปยังหน้าซื้อ",
+        path: "/",
+        icon: <FaBackspace />,
+
+      },
+    ],
+  },
+  {
+    title: "หน้า",
     list: [
       {
         title: "หน้าหลัก",
-        path: "/dashboard_municipality",
+        path: "/municipality-dashboard",
         icon: <MdDashboard />,
       },
     ],
@@ -76,43 +52,23 @@ const menuItems = [
     list: [
       {
         title: "จัดการผู้ใช้",
-        path: "/dashboard_municipality/users",
+        path: "/municipality-dashboard/users",
         icon: <MdSupervisedUserCircle />,
       },
       {
         title: "ตรวจสอบใบรับรอง",
-        path: "/dashboard_municipality/certificate",
+        path: "/municipality-dashboard/certificate",
         icon: <MdAssignment />,
       },
       {
         title: "จัดการมาตราฐาน",
-        path: "/dashboard_municipality/manage_standards",
+        path: "/municipality-dashboard/manage_standards",
         icon: <MdGavel />,
       },
       {
         title: "จัดการเกษตกร",
-        path: "/dashboard_municipality/manage_farmer",
+        path: "/municipality-dashboard/manage_farmer",
         icon: <MdGavel />,
-      },
-    ],
-  },
-  {
-    title: "สินค้า",
-    list: [
-      {
-        title: "จัดการคำสั่งซื้อ",
-        path: "/dashboard_municipality/orders",
-        icon: <MdPeople />,
-      },
-      {
-        title: "ประวัติการขาย",
-        path: "/dashboard_municipality/transactions",
-        icon: <MdAttachMoney />,
-      },
-      {
-        title: "ช่องทางชำระเงิน",
-        path: "/dashboard_municipality/chennel",
-        icon: <MdMoney />,
       },
     ],
   },
@@ -120,25 +76,51 @@ const menuItems = [
     title: "วิเคราะห์",
     list: [
       {
-        title: "ตรวจสอบย้อนกลับ",
-        path: "/dashboard_municipality/traceability",
-        icon: <MdAnalytics />,
-      },
-      {
         title: "การตั้งค่า",
-        path: "/dashboard_municipality/settings",
+        path: "/municipality-dashboard/settings",
         icon: <MdOutlineSettings />,
       },
       {
         title: "ช่วยเหลือ",
-        path: "/dashboard_municipality/help",
+        path: "/municipality-dashboard/help",
         icon: <MdHelpCenter />,
       },
     ],
   },
 ];
 
+// Define the Sidebar component
+const Sidebar = () => {
+  const pathname = usePathname();
 
+  return (
+    <aside className="hidden xl:block fixed top-0 w-[330px] h-screen bg-[var(--bgSoft)] shadow-md z-50">
+      {/* Logo at the top of the sidebar */}
+      <div className="flex items-center justify-center bg-white py-4 ">
+        <Image src="/logo/logo.png" alt="Logo" width={250} height={250} />
+      </div>
 
+      <div className="containerlist w-[315px] h-[calc(100vh-160px)] overflow-hidden mt-2 px-2">
+        <ul className="list-none text-[#878d84] h-full w-full overflow-y-auto">
+          {menuItems.map((cat) => (
+            <li key={cat.title}>
+              <span className="text-[var(--textSoft)] font-bold text-[13px] my-2.5">
+                {cat.title}
+              </span>
+              {cat.list.map((item) => (
+                <MenuLink item={item} key={item.title} isActive={pathname === item.path} />
+              ))}
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <button className="  flex items-center gap-2 cursor-pointer rounded-lg bg-transparent border-0 text-[#878d84] w-full hover:bg-white hover:shadow-md">
+        <MdLogout />
+        ลงชื่อออก
+      </button>
+    </aside>
+  );
+}
 
 export default Sidebar;

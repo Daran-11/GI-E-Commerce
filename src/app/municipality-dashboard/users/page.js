@@ -38,14 +38,14 @@ export default function UsersPage() {
   return (
     <div className={styles.container}>
       <div className={styles.top}>
-        <Link href="/dashboard_municipality/users/account">
+        <Link href="/municipality-dashboard/users/account">
           <span className={styles.addButton}>บัญชีผู้ใช้ ทั้งหมด</span>
         </Link>
       </div>
 
       <table className={styles.table}>
         <thead>
-        <tr>
+          <tr>
             <td>#</td>
             <td>อีเมล</td>
             <td>ชื่อ-นามสกุล</td>
@@ -56,7 +56,7 @@ export default function UsersPage() {
           </tr>
         </thead>
         <tbody>
-        {users.length > 0 ? (
+          {users.length > 0 ? (
             users.map((user, index) => (
               <tr key={user.id}>
                 <td>{index + 1}</td>
@@ -65,7 +65,7 @@ export default function UsersPage() {
                 <td>{user.phone || '-'}</td>
                 <td>{user.Farmer?.farmerName || '-'}</td>
                 <td>
-                  <span 
+                  <span
                     className={`inline-block px-2 py-1 rounded-full text-xs font-semibold
                       ${user.role === 'farmer' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}
                   >
@@ -73,7 +73,7 @@ export default function UsersPage() {
                   </span>
                 </td>
                 <td>
-                  <Link href={`/dashboard_municipality/users/${user.id}`}>
+                  <Link href={`/municipality-dashboard/users/${user.id}`}>
                     <span className={`${styles.button} ${styles.checkButton}`}>
                       ตรวจสอบ
                     </span>
