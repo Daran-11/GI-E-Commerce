@@ -31,7 +31,7 @@ export async function middleware(req) {
   if (url.startsWith('/admin-dashboard') && role !== 'admin') {
     return NextResponse.redirect(new URL('/', req.url));
   }
-  if (url.startsWith('/dashboard_municipality') && role !== 'municipal') {
+  if (url.startsWith('/municipality-dashboard') && role !== 'municipal') {
     return NextResponse.redirect(new URL('/', req.url));
   }
   if (url.startsWith('/dashboard') && !['admin', 'farmer'].includes(role)) {
@@ -50,6 +50,6 @@ export const config = {
     '/dashboard/:path*',               // Match all subpaths of /dashboard
     '/account/user/:path*',            // Match all subpaths of /account/user
     '/api/users/:path*',               // Match all API routes under /api/users
-    '/dashboard_municipality/:path*',  // Match all subpaths of /dashboard_municipality
+    '/municipality-dashboard/:path*',  // Match all subpaths of /dashboard_municipality
   ],
 };

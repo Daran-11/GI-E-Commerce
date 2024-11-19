@@ -1,11 +1,11 @@
 "use client";
 import { useCart } from "@/context/cartContext";
 import {
-    Button,
-    Dropdown,
-    DropdownItem,
-    DropdownMenu,
-    PopoverTrigger,
+  Button,
+  Dropdown,
+  DropdownItem,
+  DropdownMenu,
+  PopoverTrigger,
 } from "@nextui-org/react";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
@@ -65,7 +65,8 @@ export const Navbar = () => {
   // Do not return null; instead, conditionally render the navbar content
   if (
     currentPath.startsWith("/dashboard") ||
-    currentPath.startsWith("/admin-dashboard")
+    currentPath.startsWith("/admin-dashboard") ||
+    currentPath.startsWith("/municipality-dashboard")
   ) {
     return null; // Render nothing if the path starts with these values
   }
@@ -163,9 +164,8 @@ export const Navbar = () => {
                   ตะกร้า
                 </Link>
                 <span
-                  className={`text-white text-base rounded-full ml-1 px-2 ${
-                    cartItemCount >= 1 ? "bg-[#4EAC14]" : "bg-[#a8a8a8]"
-                  }`}
+                  className={`text-white text-base rounded-full ml-1 px-2 ${cartItemCount >= 1 ? "bg-[#4EAC14]" : "bg-[#a8a8a8]"
+                    }`}
                 >
                   {cartItemCount}
                 </span>
@@ -188,9 +188,9 @@ export const Navbar = () => {
               {session?.user?.role === "municipal" && (
                 <li>
                   <Link
-                    href="/dashboard_municipality"
+                    href="/municipality-dashboard"
                     className={
-                      currentPath === "/dashboard_municipality"
+                      currentPath === "/municipality-dashboard"
                         ? "text-[#4EAC14]"
                         : "text-[#595959]"
                     }
@@ -211,11 +211,10 @@ export const Navbar = () => {
                       backdrop="blur"
                     >
                       <svg
-                        className={`fill-current hover:text-[#4EAC14] ${
-                          activePaths.includes(currentPath)
-                            ? "text-[#4EAC14]"
-                            : "text-[#595959]"
-                        }`}
+                        className={`fill-current hover:text-[#4EAC14] ${activePaths.includes(currentPath)
+                          ? "text-[#4EAC14]"
+                          : "text-[#595959]"
+                          }`}
                         xmlns="http://www.w3.org/2000/svg"
                         height="30px"
                         viewBox="0 -960 960 960"
@@ -232,11 +231,10 @@ export const Navbar = () => {
                     className="pl-[30px]  pb-[10px]  pt-[30px] w-[250px] h-fit bg-white border shadow-lg rounded-lg  "
                   >
                     <DropdownItem
-                      className={`dropdown-item ${
-                        currentPath === "/account/user/profile"
-                          ? "text-[#4EAC14]"
-                          : "text-[#595959]"
-                      } text-left `}
+                      className={`dropdown-item ${currentPath === "/account/user/profile"
+                        ? "text-[#4EAC14]"
+                        : "text-[#595959]"
+                        } text-left `}
                       textValue="โปรไฟล์"
                       href="/account/user/profile"
                     >
@@ -245,45 +243,43 @@ export const Navbar = () => {
 
                     <DropdownItem
                       key="farmer register "
-                      className={`dropdown-item ${
-                        currentPath === "/register_farmer"
-                          ? "text-[#4EAC14]"
-                          : "text-[#595959]"
-                      } text-left `}
+                      className={`dropdown-item ${currentPath === "/register_farmer"
+                        ? "text-[#4EAC14]"
+                        : "text-[#595959]"
+                        } text-left `}
                       textValue="ลงทะเบียนเกษตรกร"
                       href="/register_farmer"
                     >
                       ลงทะเบียนเกษตรกร
                     </DropdownItem>
 
-                                        <DropdownItem key="signout" className='dropdown-item text-red-500 hover:text-red-500 text-left' textValue="ออกจากระบบ">
-                                            <button onClick={() => signOut({ callbackUrl: '/' })}>
-                                                ออกจากระบบ
-                                            </button>
-                                        </DropdownItem>
+                    <DropdownItem key="signout" className='dropdown-item text-red-500 hover:text-red-500 text-left' textValue="ออกจากระบบ">
+                      <button onClick={() => signOut({ callbackUrl: '/' })}>
+                        ออกจากระบบ
+                      </button>
+                    </DropdownItem>
 
-                                    </DropdownMenu>
-                                </Dropdown>
-                            </div>
-                        ) : (
-                            <li>
-                                <Link href='/login' className={currentPath === "/login" ? "text-[#4EAC14]" : "text-[#595959]"}>
-                                    เข้าสู่ระบบ
-                                </Link>
-                            </li>
-                        )}
-                    </ul>
-                </div>
+                  </DropdownMenu>
+                </Dropdown>
+              </div>
+            ) : (
+              <li>
+                <Link href='/login' className={currentPath === "/login" ? "text-[#4EAC14]" : "text-[#595959]"}>
+                  เข้าสู่ระบบ
+                </Link>
+              </li>
+            )}
+          </ul>
+        </div>
 
         {/* Mobile Menu (shown when the hamburger icon is clicked) */}
         {isMenuOpen && (
           <div
             ref={dropdownRef}
-            className={`dropdown-button lg:hidden absolute top-[90px] right-0 w-full bg-white shadow-lg transition-all duration-300 ease-in-out transform ${
-              menuAnimation
-                ? "translate-y-0 opacity-100"
-                : "-translate-y-full opacity-0"
-            }`}
+            className={`dropdown-button lg:hidden absolute top-[90px] right-0 w-full bg-white shadow-lg transition-all duration-300 ease-in-out transform ${menuAnimation
+              ? "translate-y-0 opacity-100"
+              : "-translate-y-full opacity-0"
+              }`}
           >
             <ul className="flex flex-col items-start p-4 ">
               <div className="w-full text-lg">
@@ -340,9 +336,8 @@ export const Navbar = () => {
                   >
                     ตะกร้า
                     <span
-                      className={`text-white text-base rounded-full ml-1 px-2 ${
-                        cartItemCount >= 1 ? "bg-[#4EAC14]" : "bg-[#a8a8a8]"
-                      }`}
+                      className={`text-white text-base rounded-full ml-1 px-2 ${cartItemCount >= 1 ? "bg-[#4EAC14]" : "bg-[#a8a8a8]"
+                        }`}
                     >
                       {cartItemCount}
                     </span>
@@ -367,9 +362,9 @@ export const Navbar = () => {
                 {session?.user?.role === "municipal" && (
                   <li>
                     <Link
-                      href="/dashboard_municipality"
+                      href="/municipality-dashboard"
                       className={
-                        currentPath === "/dashboard_municipality"
+                        currentPath === "/municipality-dashboard"
                           ? "text-[#4EAC14] block px-4 py-2 "
                           : "block  px-4 py-2  text-gray-700 hover:bg-gray-100"
                       }
