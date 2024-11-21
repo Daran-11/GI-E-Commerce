@@ -7,19 +7,13 @@ export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
 
-  console.log("Received GET request with id:", id);
-
   if (id) {
     try {
       const certificate = await prisma.certificate.findUnique({
-        where: { 
-          id: parseInt(id, 10),
-        },
+        where: { id: parseInt(id, 10) },
         include: { Users: true },
       });
       
-      console.log("Found certificate:", certificate);
-
       if (certificate) {
         if (certificate.status === "รอตรวจสอบใบรับรอง") {
           return NextResponse.json(certificate);
@@ -99,70 +93,85 @@ export async function POST(request) {
 export async function PUT(request) {
   try {
     const formData = await request.formData();
-    console.log("Received formData:", Object.fromEntries(formData));
-
     const id = formData.get('id');
     const action = formData.get('action');
     const municipalComment = formData.get('municipalComment');
 
     if (!id || !action) {
-      console.log("Missing required fields:", { id, action });
-      return NextResponse.json({ error: "Missing required fields", received: { id, action } }, { status: 400 });
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    let status;
-
-    if (action === "อนุมัติ") {
-      status = "อนุมัติ";
-    } else if (action === "ไม่อนุมัติ") {
-      status = "ไม่อนุมัติ";
-      if (!municipalComment) {
-        console.log("Missing comment for rejection");
-        return NextResponse.json({ error: "Comment is required for rejection" }, { status: 400 });
-      }
-    } else {
-      console.log("Invalid action:", action);
-      return NextResponse.json({ error: "Invalid action", received: action }, { status: 400 });
+    const status = action === "อนุมัติ" ? "อนุมัติ" : "ไม่อนุมัติ";
+    
+    if (status === "ไม่อนุมัติ" && !municipalComment) {
+      return NextResponse.json({ error: "Comment is required for rejection" }, { status: 400 });
     }
 
-    console.log("Before database update:", { id, status, municipalComment });
-
+    // Update certificate
     const updatedCertificate = await prisma.certificate.update({
       where: { id: parseInt(id, 10) },
-      data: {
-        status,
-        municipalComment,
-      },
+      data: { status, municipalComment },
+      include: { Users: true }
     });
 
-    console.log("After database update:", updatedCertificate);
-    return NextResponse.json(updatedCertificate, { status: 200 });
-  } catch (error) {
-    console.error("Failed to update certificate:", error);
-    return NextResponse.json(
-      { error: "Failed to update certificate", details: error.message },
-      { status: 500 }
-    );
-  }
-}
+    if (action === "อนุมัติ") {
+      // Get farmer details with all required fields
+      const farmer = await prisma.farmer.findUnique({
+        where: { id: updatedCertificate.farmerId },
+        select: {
+          id: true,
+          farmerName: true,
+          address: true,
+          sub_district: true,
+          district: true,
+          province: true,
+          zip_code: true,
+          phone: true
+        }
+      });
 
-export async function DELETE(request) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get("id");
+      if (!farmer) {
+        return NextResponse.json({ error: "Farmer not found" }, { status: 404 });
+      }
 
-    if (!id) {
-      return NextResponse.json({ error: "No id provided" }, { status: 400 });
+      // Generate Product_ID components
+      const farmerIdPadded = farmer.id.toString().padStart(3, '0');
+      const typePrefix = updatedCertificate.type === 'สับปะรด' ? 'P' : '';
+      const varietyCode = updatedCertificate.variety === 'นางแล' ? 'N' : 
+                         updatedCertificate.variety === 'ภูแล' ? 'P' : '';
+      const certificateIdPadded = updatedCertificate.id.toString().padStart(4, '0');
+      
+      // Create final Product_ID
+      const productId = `${farmerIdPadded}${typePrefix}${varietyCode}${certificateIdPadded}`;
+
+      // Create full address string
+      const fullAddress = `${farmer.address} ${farmer.sub_district} ${farmer.district} ${farmer.province} ${farmer.zip_code}`;
+
+      // Create QR Code record
+      await prisma.qR_Code.create({
+        data: {
+          Product_ID: productId,
+          Type: updatedCertificate.type,
+          Variety: updatedCertificate.variety,
+          ProductionQuantity: updatedCertificate.productionQuantity,
+          Standard: JSON.stringify(updatedCertificate.standards),
+          Address: fullAddress,
+          Phone: farmer.phone,
+          farmerName: farmer.farmerName,
+          farmerId: farmer.id,
+          Latitude: updatedCertificate.latitude,
+          Longitude: updatedCertificate.longitude,
+          createdAt: new Date(),
+          updatedAt: updatedCertificate.updatedAt
+        }
+      });
     }
 
-    await prisma.certificate.delete({
-      where: { id: parseInt(id, 10) },
-    });
-    return NextResponse.json({ status: 200 });
+    return NextResponse.json(updatedCertificate);
   } catch (error) {
-    console.error("Failed to delete certificate:", error);
+    console.error("Error:", error);
     return NextResponse.json(
-      { error: "Failed to delete certificate" },
+      { error: "Failed to process request", details: error.message },
       { status: 500 }
     );
   }
