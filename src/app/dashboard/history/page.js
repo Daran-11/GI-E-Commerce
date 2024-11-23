@@ -14,27 +14,39 @@ export default function History() {
   const router = useRouter();
 
   useEffect(() => {
-    if (status === 'authenticated') {
-      // Fetch orders only when the session is available and the user is authenticated
+    if (status === 'authenticated' && session?.user?.id) {
       fetchOrders(session.user.id);
     }
   }, [session, status]);
 
+
+  const [error, setError] = useState(null);
+
   const fetchOrders = async (userId) => {
+    if (!userId) {
+      setError("User ID is missing");
+      setLoading(false);
+      return;
+    }
+
     try {
       const res = await fetch(`/api/users/${userId}/farmer/history`);
       if (!res.ok) {
         throw new Error('Failed to fetch orders');
       }
       const data = await res.json();
+
       setOrders(data);
-      console.log("This is the data from history", data)
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      console.error(err);
+
     } finally {
       setLoading(false);
     }
   };
+
+
+
 
   const getStatusColor = (status) => {
     switch (status) {
