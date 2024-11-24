@@ -3,7 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { Rating } from 'react-simple-star-rating';
-import AddToCartButton from './addToCartButton';
+import AddToCartButton from './AddToCartButton';
 
 const ProductCard = ({products}) => {
   const [starSize, setStarSize] = useState(15); // Default star size

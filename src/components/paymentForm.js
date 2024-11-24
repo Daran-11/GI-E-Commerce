@@ -17,29 +17,38 @@ export default function PaymentForm({ totalAmount, orderId, onPaymentSuccess, se
 
 
   useEffect(() => {
+    console.log("Environment Public Key:", process.env.NEXT_PUBLIC_OMISE_PUBLIC_KEY);
+  
     const loadOmiseScript = () => {
       return new Promise((resolve, reject) => {
-        const script = document.createElement('script');
+        const script = document.createElement("script");
         script.src = "https://cdn.omise.co/omise.js";
         script.defer = true;
         script.onload = () => {
           if (window.Omise) {
-            window.Omise.setPublicKey(process.env.NEXT_PUBLIC_OMISE_PUBLIC_KEY);
-            console.log('Omise.js loaded:', window.Omise);
-            resolve(window.Omise);
+            const publicKey = 'pkey_test_60uf39ytmwkbsecb4rs';
+            console.log("Loaded Omise.js with Public Key:", publicKey);
+  
+            if (publicKey) {
+              window.Omise.setPublicKey(publicKey);
+              resolve(window.Omise);
+            } else {
+              reject(new Error("Public Key is undefined"));
+            }
           } else {
-            reject(new Error('Failed to load Omise.js'));
+            reject(new Error("Failed to load Omise.js"));
           }
         };
-        script.onerror = () => reject(new Error('Failed to load Omise.js'));
+        script.onerror = () => reject(new Error("Failed to load Omise.js"));
         document.body.appendChild(script);
       });
     };
-
-    loadOmiseScript().catch(error => {
-      console.error('Omise.js initialization error:', error);
+  
+    loadOmiseScript().catch((error) => {
+      console.error("Omise.js initialization error:", error);
     });
   }, []);
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();

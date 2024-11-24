@@ -1,14 +1,8 @@
-import { NextResponse } from "next/server";
-import prisma from "../../../../../../lib/prisma";
 import { writeFile } from "fs/promises";
+import { NextResponse } from "next/server";
 import path from "path";
+import prisma from "../../../../../../lib/prisma";
 
-// Config to disable body parsing since we handle it manually
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
 
 // Helper function to handle file uploads
 async function handleFileUpload(file) {

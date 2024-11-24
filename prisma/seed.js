@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 
 async function main() {
   // Define the path to your SQL file
-  const sqlFilePath = path.join(__dirname, 'sql', 'seed_data.sql');
+  const sqlFilePath = path.join(__dirname, 'sql', 'server_seed.sql');
   
   // Read the SQL file
   const sql = fs.readFileSync(sqlFilePath, 'utf-8');

@@ -15,7 +15,7 @@ export default function ClientLayout({ session, children }) {
         <CartProvider>
             <NavbarWrapper>
                 <main className="m-0">{children}</main>
-                {!shouldHideFooter && <Footer />}
+                {!shouldHideFooter && <Footer/>}
             </NavbarWrapper>
         </CartProvider>
     );

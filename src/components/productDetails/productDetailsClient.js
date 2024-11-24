@@ -7,7 +7,8 @@ import { useCallback, useEffect, useState } from "react";
 import { Rating } from "react-simple-star-rating";
 import { formatDateToThaiBuddhist } from "../../../utils/formatDate";
 import Breadcrumb from "../BreadCrumb";
-import EmblaCarousel from "../emblaCarousel";
+import EmblaCarousel from "../EmblaCarousel";
+
 
 export default function ProductDetailsClient({ product, totalReviewsCount, ProductID }) {
   const router = useRouter();

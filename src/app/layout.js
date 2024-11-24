@@ -1,11 +1,11 @@
 // src/app/layout.js
+import CookieConsentBanner from '@/components/cookieConsent';
 import { getServerSession } from 'next-auth';
+import PlausibleProvider from 'next-plausible';
 import { Prompt } from 'next/font/google';
+import ClientLayout from '../components/ClientLayout';
 import SessionProvider from '../components/SessionProvider';
 import './globals.css';
-import PlausibleProvider from 'next-plausible';
-import ClientLayout from '../components/ClientLayout';
-import CookieConsentBanner from '@/components/CookieConsent';
 
 const prompt = Prompt({
   subsets: ['thai'],

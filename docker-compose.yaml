@@ -1,0 +1,23 @@
+
+services:
+  app:
+    build:
+      context: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_DEBUG=true 
+      - NODE_ENV=production
+    depends_on:
+      - db
+    env_file:
+      - .env  # Load environment variables from the .env file
+  db:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: gipineapple
+      MYSQL_USER: teem
+      MYSQL_PASSWORD: Test123
+    ports:
+      - "3306:3306"

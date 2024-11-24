@@ -4,6 +4,7 @@ import prisma from '../../../../lib/prisma';
 
 const omise = Omise({
   secretKey: process.env.OMISE_SECRET_KEY,
+  publicKey: process.env.NEXT_PUBLIC_OMISE_PUBLIC_KEY,
 });
 
 export async function POST(request) {
@@ -11,7 +12,7 @@ export async function POST(request) {
     const body = await request.json();
     console.log('Request Body:', body); // Log the request body for debugging
     const { token, orderId, totalAmount, quantity, productId } = body;
-
+    console.log("OMISE_SECRET_KEY:", process.env.OMISE_SECRET_KEY);
     // Validate the order ID(s)
     if (!orderId || !orderId.length) {
       return NextResponse.json({ success: false, message: 'Invalid order ID' }, { status: 400 });
@@ -25,6 +26,13 @@ export async function POST(request) {
     // Create a charge with Omise
     const charge = await omise.charges.create({
       amount: totalAmount * 100, // in satang for THB
+      currency: 'thb',
+      card: token,
+      description: description,
+    });
+
+    console.log("Charge Request:", {
+      amount: totalAmount * 100,
       currency: 'thb',
       card: token,
       description: description,
