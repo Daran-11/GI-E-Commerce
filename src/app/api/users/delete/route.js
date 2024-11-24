@@ -1,4 +1,4 @@
-import prisma from '../../../../lib/prisma';
+import prisma from "../../../../../lib/prisma";
 
 export async function DELETE(request) {
   const { id } = await request.json();

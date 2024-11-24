@@ -3,7 +3,7 @@ import AddressManagement from '@/components/AddressManagement';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-export default function page() {
+export default function Addresses() {
 
     const { data: session, status } = useSession()
     const router = useRouter()

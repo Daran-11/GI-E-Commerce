@@ -305,7 +305,7 @@ const BankAccountsPage = () => {
       <table className="min-w-full table-auto border-collapse mt-4">
 
     {bankAccounts.length > 0 && bankAccounts.map((account) => (
-        <tbody className=''>
+        <tbody className='' key={account.id}>
       <tr key={account.id} className='border-b-2'>
         <td className="w-[95px] md:py-4 py-2">
           <div className='w-[75px] h-[75px] border-2 text-center '>

@@ -1,3 +1,31 @@
+
+
+
+INSERT INTO `User` (`id`, `email`, `name`, `role`, `password`, `createdAt`, `phone`, `updatedAt`) VALUES
+(1, 'teamtv56@gmail.com', 'Daranphop Samutkao', 'admin', '$2b$10$KcRMu495IBtBPfAozkGXOuk8BvN/8LP2u9c/v3Q2Sz0/lUoqT6dq6', '2024-07-09 18:56:11.523', '0620721555', '2024-07-09 18:56:11.523'),
+(2, 'te@gmail.com', 'Daran', 'farmer', '$2b$10$If4NjEwB2h0skzDLeVbd..Pn5dND8S4kkThTU2OqwGZePzqwDUcg2', '2024-10-29 11:54:11.389', '0628423156', '2024-10-29 11:54:11.389'),
+(3, 'customer@gmail.com', 'อานัส', 'customer', '$2b$10$kf6GvqxpUv3av8jpXKYrZuzd80uj2Zs1JVBHRIZwB0KUCZeJ5Brj.', '2024-10-29 12:23:06.999', '0888465562', '2024-10-29 12:23:06.999');
+
+
+INSERT INTO `Farmer` (`id`, `userId`, `province`, `farmerName`, `contactLine`) VALUES
+(1, 2, 'Chiang Rai ', 'ลุงเทพ', 'Line teem');
+
+
+INSERT INTO `Delivery_service` (`id`, `name`, `isAvailable`) VALUES
+(1, 'Flash', 1),
+(2, 'ThailandPost', 1),
+(3, 'kerry', 1);
+
+
+INSERT INTO `Bank` (`id`, `brand`, `imageUrl`, `isAvailable`) VALUES
+(1, 'scb', '', 1),
+(2, 'kbank', '', 1),
+(3, 'ktb', '', 1),
+(4, 'bbl', '', 1),
+(5, 'bay', '', 1);
+
+
+
 INSERT INTO `Province` (`id`, `name_en`, `name_th`, `deleted_at`, `geography_id`, `updated_at`, `created_at`) VALUES
 (1, 'Bangkok', 'กรุงเทพมหานคร', NULL, 2, '2022-05-16 06:31:03.000', '2019-08-09 03:33:09.000'),
 (2, 'Samut Prakan', 'สมุทรปราการ', NULL, 2, '2022-05-16 06:31:03.000', '2019-08-09 03:33:09.000'),
