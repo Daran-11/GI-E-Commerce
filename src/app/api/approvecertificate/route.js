@@ -7,38 +7,51 @@ export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
 
-  console.log("Received GET request with id:", id);
-
   if (id) {
     try {
       const certificate = await prisma.certificate.findUnique({
-        where: { 
-          id: parseInt(id, 10),
+        where: { id: parseInt(id, 10) },
+        include: {
+          Users: {
+            select: {
+              id: true,
+              farmerName: true,
+              address: true,
+              sub_district: true,
+              district: true,
+              province: true,
+              zip_code: true,
+              phone: true,
+              contactLine: true,
+            },
+          },
         },
-        include: { Users: true },
       });
-      
-      console.log("Found certificate:", certificate);
 
-      if (certificate) {
-        if (certificate.status === "รอตรวจสอบใบรับรอง") {
-          return NextResponse.json(certificate);
-        } else {
-          return NextResponse.json(
-            { error: `Certificate found but status is ${certificate.status}` },
-            { status: 400 }
-          );
-        }
-      } else {
+      if (!certificate) {
         return NextResponse.json(
-          { error: "Certificate not found" },
+          { error: "ไม่พบข้อมูลใบรับรอง" },
           { status: 404 }
         );
       }
+
+      if (certificate.status !== "รอตรวจสอบใบรับรอง") {
+        return NextResponse.json(
+          {
+            error: `ใบรับรองนี้มีสถานะเป็น ${certificate.status} ไม่สามารถดำเนินการต่อได้`,
+          },
+          { status: 400 }
+        );
+      }
+
+      return NextResponse.json(certificate);
     } catch (error) {
       console.error("Error fetching certificate:", error);
       return NextResponse.json(
-        { error: "Error fetching certificate", details: error.message },
+        {
+          error: "เกิดข้อผิดพลาดในการดึงข้อมูลใบรับรอง",
+          details: error.message,
+        },
         { status: 500 }
       );
     }
@@ -46,15 +59,26 @@ export async function GET(request) {
     try {
       const certificates = await prisma.certificate.findMany({
         where: {
-          status: "รอตรวจสอบใบรับรอง"
+          status: "รอตรวจสอบใบรับรอง",
         },
-        include: { Users: true },
+        include: {
+          Users: {
+            select: {
+              id: true,
+              farmerName: true,
+              phone: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
       });
       return NextResponse.json(certificates);
     } catch (error) {
       console.error("Error fetching certificates:", error);
       return NextResponse.json(
-        { error: "Error fetching certificates" },
+        { error: "เกิดข้อผิดพลาดในการดึงข้อมูลรายการใบรับรอง" },
         { status: 500 }
       );
     }
@@ -66,31 +90,50 @@ export async function POST(request) {
     const formData = await request.formData();
     const data = Object.fromEntries(formData);
 
+    // Validate required fields
+    const requiredFields = [
+      "type",
+      "variety",
+      "productionQuantity",
+      "registrationDate",
+      "expiryDate",
+      "UsersId",
+    ];
+    for (const field of requiredFields) {
+      if (!data[field]) {
+        return NextResponse.json(
+          { error: `กรุณาระบุข้อมูล ${field}` },
+          { status: 400 }
+        );
+      }
+    }
+
     const certificateData = {
       type: data.type,
       variety: data.variety,
       plotCode: data.plotCode,
-      latitude: parseFloat(data.latitude),
-      longitude: parseFloat(data.longitude),
+      latitude: data.latitude ? parseFloat(data.latitude) : null,
+      longitude: data.longitude ? parseFloat(data.longitude) : null,
       productionQuantity: parseInt(data.productionQuantity, 10),
       standards: data.standards ? JSON.parse(data.standards) : [],
       registrationDate: new Date(data.registrationDate),
       expiryDate: new Date(data.expiryDate),
       status: "รอตรวจสอบใบรับรอง",
-      Users: {
-        connect: { id: parseInt(data.UsersId, 10) },
-      },
+      farmerId: parseInt(data.UsersId, 10),
     };
 
     const certificate = await prisma.certificate.create({
       data: certificateData,
+      include: {
+        Users: true,
+      },
     });
 
     return NextResponse.json(certificate, { status: 201 });
   } catch (error) {
     console.error("Failed to add certificate:", error);
     return NextResponse.json(
-      { error: "Failed to add certificate", details: error.message },
+      { error: "เกิดข้อผิดพลาดในการเพิ่มใบรับรอง", details: error.message },
       { status: 500 }
     );
   }
@@ -99,70 +142,128 @@ export async function POST(request) {
 export async function PUT(request) {
   try {
     const formData = await request.formData();
-    console.log("Received formData:", Object.fromEntries(formData));
-
-    const id = formData.get('id');
-    const action = formData.get('action');
-    const municipalComment = formData.get('municipalComment');
+    const id = formData.get("id");
+    const action = formData.get("action");
+    const municipalComment = formData.get("municipalComment");
 
     if (!id || !action) {
-      console.log("Missing required fields:", { id, action });
-      return NextResponse.json({ error: "Missing required fields", received: { id, action } }, { status: 400 });
+      return NextResponse.json(
+        { error: "กรุณาระบุข้อมูลให้ครบถ้วน" },
+        { status: 400 }
+      );
     }
 
-    let status;
+    const status =
+      action === "อนุมัติ" ? "ได้รับการรับรอง" : "ไม่ผ่านการรับรอง";
 
-    if (action === "อนุมัติ") {
-      status = "อนุมัติ";
-    } else if (action === "ไม่อนุมัติ") {
-      status = "ไม่อนุมัติ";
-      if (!municipalComment) {
-        console.log("Missing comment for rejection");
-        return NextResponse.json({ error: "Comment is required for rejection" }, { status: 400 });
-      }
-    } else {
-      console.log("Invalid action:", action);
-      return NextResponse.json({ error: "Invalid action", received: action }, { status: 400 });
+    if (status === "ไม่ผ่านการรับรอง" && !municipalComment) {
+      return NextResponse.json(
+        { error: "กรุณาระบุเหตุผลในการไม่อนุมัติ" },
+        { status: 400 }
+      );
     }
 
-    console.log("Before database update:", { id, status, municipalComment });
+    // ดึงข้อมูลใบรับรองเดิม
+    const existingCertificate = await prisma.certificate.findUnique({
+      where: { id: parseInt(id, 10) },
+      include: { Users: true },
+    });
 
+    if (!existingCertificate) {
+      return NextResponse.json(
+        { error: "ไม่พบข้อมูลใบรับรอง" },
+        { status: 404 }
+      );
+    }
+
+    if (existingCertificate.status !== "รอตรวจสอบใบรับรอง") {
+      return NextResponse.json(
+        { error: "ไม่สามารถอัปเดตใบรับรองที่ดำเนินการไปแล้ว" },
+        { status: 400 }
+      );
+    }
+
+    // อัพเดทใบรับรอง
     const updatedCertificate = await prisma.certificate.update({
       where: { id: parseInt(id, 10) },
       data: {
         status,
         municipalComment,
+        updatedAt: new Date(),
       },
+      include: { Users: true },
     });
 
-    console.log("After database update:", updatedCertificate);
-    return NextResponse.json(updatedCertificate, { status: 200 });
-  } catch (error) {
-    console.error("Failed to update certificate:", error);
-    return NextResponse.json(
-      { error: "Failed to update certificate", details: error.message },
-      { status: 500 }
-    );
-  }
-}
+    if (action === "อนุมัติ") {
+      // Get farmer details
+      const farmer = await prisma.farmer.findUnique({
+        where: { id: updatedCertificate.farmerId },
+        select: {
+          id: true,
+          farmerName: true,
+          address: true,
+          sub_district: true,
+          district: true,
+          province: true,
+          zip_code: true,
+          phone: true,
+        },
+      });
 
-export async function DELETE(request) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get("id");
+      if (!farmer) {
+        return NextResponse.json(
+          { error: "ไม่พบข้อมูลเกษตรกร" },
+          { status: 404 }
+        );
+      }
 
-    if (!id) {
-      return NextResponse.json({ error: "No id provided" }, { status: 400 });
+      // สร้าง Product_ID
+      const farmerIdPadded = farmer.id.toString().padStart(3, "0");
+      const typePrefix = updatedCertificate.type === "สับปะรด" ? "P" : "";
+      const varietyCode =
+        updatedCertificate.variety === "นางแล"
+          ? "N"
+          : updatedCertificate.variety === "ภูแล"
+          ? "P"
+          : "";
+      const certificateIdPadded = updatedCertificate.id
+        .toString()
+        .padStart(4, "0");
+      const productId = `${farmerIdPadded}${typePrefix}${varietyCode}${certificateIdPadded}`;
+
+      // สร้างที่อยู่เต็ม
+      const fullAddress = `${farmer.address} ${farmer.sub_district} ${farmer.district} ${farmer.province} ${farmer.zip_code}`;
+
+      // สร้าง QR Code โดยใช้ standards โดยตรงจาก Certificate
+      await prisma.qR_Code.create({
+        data: {
+          Product_ID: productId,
+          Type: updatedCertificate.type,
+          Variety: updatedCertificate.variety,
+          ProductionQuantity: updatedCertificate.productionQuantity,
+          Standard: updatedCertificate.standards, // ใช้ค่าโดยตรง ไม่ต้อง stringify ซ้ำ
+          Address: fullAddress,
+          Phone: farmer.phone,
+          farmerName: farmer.farmerName,
+          farmerId: farmer.id,
+          Latitude: updatedCertificate.latitude,
+          Longitude: updatedCertificate.longitude,
+        },
+      });
     }
 
-    await prisma.certificate.delete({
-      where: { id: parseInt(id, 10) },
+    return NextResponse.json({
+      success: true,
+      message:
+        action === "อนุมัติ"
+          ? "อนุมัติใบรับรองเรียบร้อยแล้ว"
+          : "ปฏิเสธใบรับรองเรียบร้อยแล้ว",
+      certificate: updatedCertificate,
     });
-    return NextResponse.json({ status: 200 });
   } catch (error) {
-    console.error("Failed to delete certificate:", error);
+    console.error("Error:", error);
     return NextResponse.json(
-      { error: "Failed to delete certificate" },
+      { error: "เกิดข้อผิดพลาดในการดำเนินการ", details: error.message },
       { status: 500 }
     );
   }

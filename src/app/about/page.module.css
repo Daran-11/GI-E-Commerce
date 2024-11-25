@@ -1,0 +1,8 @@
+
+
+
+
+.devcard {
+   @apply bg-white rounded-xl p-6 shadow-[0_3px_10px_rgb(0,0,0,0.2)] transition duration-500 ease-in-out transform hover:scale-105 
+
+}
