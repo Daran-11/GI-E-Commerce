@@ -42,7 +42,7 @@ const ApproveCertificatePage = ({ params }) => {
         if (response.ok) {
           const data = await response.json();
           console.log("Certificate data:", data);
-
+  
           if (data.Users) {
             setFormData({
               type: data.type || "",
@@ -51,14 +51,14 @@ const ApproveCertificatePage = ({ params }) => {
               longitude: data.longitude || "",
               productionQuantity: data.productionQuantity || "",
               standards: JSON.parse(data.standards) || [],
-              registrationDate: data.registrationDate ? new Date(data.registrationDate).toLocaleDateString('th-TH') : "",
-              expiryDate: data.expiryDate ? new Date(data.expiryDate).toLocaleDateString('th-TH') : "",
+              registrationDate: data.registrationDate? new Date(data.registrationDate).toLocaleDateString('th-TH'): "",
+              expiryDate: data.expiryDate? new Date(data.expiryDate).toLocaleDateString('th-TH'): "",
               status: data.status || "",
               municipalComment: "",
-              farmerName: data.Users.farmerName || "",
-              address: data.Users.address || "",
-              phone: data.Users.phone || "",
-              contactLine: data.Users.contactLine || ""
+              farmerName: data.Users.farmerName || "" ,
+              address:data.Users.address || "",
+              phone:data.Users.phone || "",
+              contactLine:data.Users.contactLine || ""
             });
 
             // เรียกใช้ fetchUsersData โดยส่งชื่อเกษตรกร
@@ -72,34 +72,34 @@ const ApproveCertificatePage = ({ params }) => {
         alert("ไม่สามารถดึงข้อมูลใบรับรองได้");
       }
     };
-
+  
     fetchCertificate();
   }, [id]);
-
+  
   const fetchUsersData = async (name) => {
     try {
       // แสดง log เพื่อตรวจสอบค่าที่ได้รับ
       console.log("Searching for farmer with name:", name);
-
+  
       const response = await fetch(`/api/manage_farmer`);
       if (!response.ok) {
         throw new Error('Failed to fetch farmers data');
       }
-
+  
       const farmers = await response.json();
       console.log("All farmers:", farmers);
-
+  
       // ค้นหาเกษตรกรที่มีชื่อตรงกัน
       const matchedFarmer = farmers.find(
         (farmer) => farmer.farmerNameApprove.toLowerCase() === name.toLowerCase()
       );
-
+  
       console.log("Matched farmer:", matchedFarmer);
-
+  
       if (matchedFarmer) {
         setUsersData(matchedFarmer);
         setMatchFound(true);
-
+  
         // ดึงข้อมูลใบรับรอง
         const certsResponse = await fetch(
           `/api/farmer_certificates/${matchedFarmer.id}`
@@ -163,7 +163,8 @@ const ApproveCertificatePage = ({ params }) => {
       console.log("Response from server:", result);
 
       alert(
-        `ใบรับรอง${action === "อนุมัติ" ? "ได้รับการอนุมัติ" : "ถูกปฏิเสธ"
+        `ใบรับรอง${
+          action === "อนุมัติ" ? "ได้รับการอนุมัติ" : "ถูกปฏิเสธ"
         }เรียบร้อยแล้ว`
       );
       router.push("/municipality-dashboard/certificate");
@@ -194,7 +195,7 @@ const ApproveCertificatePage = ({ params }) => {
       {/* Left Side - Original Form */}
       <div className="w-1/2 p-6">
         <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="mb-6" style={{ fontSize: '1.5rem' }}>ข้อมูลเกษตรกร</h2>
+        <h2 className="mb-6" style={{ fontSize: '1.5rem' }}>ข้อมูลเกษตรกร</h2>
           {matchFound ? (
             <div>
               <div className="flex items-center justify-between mb-6">
@@ -209,15 +210,16 @@ const ApproveCertificatePage = ({ params }) => {
                       <p>Line ID: {formData.contactLine}</p>
                     </div>
                   )}
-                </div>
+              </div>
                 <button
                   onClick={() => setShowCertificates(!showCertificates)}
                   className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors flex items-center space-x-2"
                 >
                   <span>{showCertificates ? "ซ่อนข้อมูล" : "ดูเพิ่มเติม"}</span>
                   <svg
-                    className={`w-4 h-4 transform transition-transform ${showCertificates ? "rotate-180" : ""
-                      }`}
+                    className={`w-4 h-4 transform transition-transform ${
+                      showCertificates ? "rotate-180" : ""
+                    }`}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -303,7 +305,7 @@ const ApproveCertificatePage = ({ params }) => {
                 />
               </svg>
               <p className="text-gray-600 text-lg">
-                ไม่พบรายชื่อเกษตรกร: {formData.farmerName}
+              ไม่พบรายชื่อเกษตรกร: {formData.farmerName}
               </p>
               <p className="text-gray-500 text-sm mt-2">
                 กรุณาตรวจสอบข้อมูลเกษตรกรอีกครั้ง
@@ -358,7 +360,7 @@ const ApproveCertificatePage = ({ params }) => {
                   center={[20.046061226911785, 99.890654]}
                   zoom={15}
                   style={{ height: "100%", width: "100%" }}
-                  className="map-container "
+                   className="map-container "
                 >
                   <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                   <LocationMarker />
@@ -433,7 +435,7 @@ const ApproveCertificatePage = ({ params }) => {
               >
                 อนุมัติใบรับรอง
               </button>
-
+              
             </div>
 
             {/* Display comment field conditionally */}
@@ -471,7 +473,7 @@ const ApproveCertificatePage = ({ params }) => {
                     >
                       ยืนยันการไม่อนุมัติ
                     </button>
-
+                    
                   </div>
                 </div>
               </div>
