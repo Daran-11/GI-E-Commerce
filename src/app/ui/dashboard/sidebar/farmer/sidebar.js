@@ -59,7 +59,7 @@ const Sidebar = () => {
   const pathname = usePathname();
 
   return (
-    <aside className="hidden xl:block fixed top-0 w-[330px] h-screen bg-[var(--bgSoft)] shadow-md z-50">
+    <aside className="hidden xl:block fixed top-13 w-[330px] h-screen bg-[var(--bgSoft)] shadow-md z-50">
       {/* Logo at the top of the sidebar */}
       <div className="flex items-center justify-center bg-white py-4 ">
         <Image src="/logo/logo.png" alt="Logo" width={250} height={250} />

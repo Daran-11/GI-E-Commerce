@@ -202,7 +202,10 @@ export default function IncomingOrders() {
 
 
   if (status === 'loading' || loading) {
-    return <div>Loading...</div>;
+    return <div className="flex flex-col items-center justify-center min-h-screen">
+    <div className="w-12 h-12 border-4 border-t-green-500 border-r-green-500 border-b-green-200 border-l-green-200 rounded-full animate-spin"></div>
+    <p className="mt-4 text-gray-600">กำลังโหลดข้อมูล...</p>
+  </div>;
   }
 
   if (status === 'unauthenticated') {

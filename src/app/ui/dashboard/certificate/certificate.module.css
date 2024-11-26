@@ -80,7 +80,7 @@
     background-color: rgba(247, 203, 115, 0.75); /* Using rgba for better color transparency */
 }
 
-.อนุมัติ {
+.ได้รับการรับรอง {
     background-color: rgba(175, 214, 238, 0.75);
 }
 
@@ -102,3 +102,29 @@
 .delete:hover {
     color: #ff7875; /* Lighter red on hover */
 }
+
+/* certificate.module.css */
+.standardsContainer {
+    display: flex;
+    flex-direction: column; /* ทำให้แสดงในแนวตั้ง */
+    gap: 8px; /* ระยะห่างระหว่างแต่ละมาตรฐาน */
+  }
+  
+ 
+  
+  .standardContent {
+    display: flex;
+    align-items: center;
+  }
+  
+  .standardName {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text);
+  }
+  
+  .noData {
+    text-align: center;
+    color: var(--textSoft);
+    font-style: italic;
+  }
