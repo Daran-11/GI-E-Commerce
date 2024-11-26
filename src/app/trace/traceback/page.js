@@ -49,7 +49,7 @@ const StandardCard = ({ standard }) => (
 
 // Farmer Info Component - ปรับให้ responsive
 const FarmerInfo = ({ data }) => (
-  <div className="rounded-3xl bg-white p-4 sm:p-6 border border-gray-100">
+  <div className="rounded-3xl bg-white p-4 sm:p-6 border border-gray-100 ">
     <div className="flex flex-col items-center">
       <div className="mb-4 h-[100px] w-[100px] sm:h-[120px] sm:w-[120px] overflow-hidden rounded-full">
         <Image
@@ -165,8 +165,8 @@ export default function Traceback() {
     <div className="min-h-screen bg-gradient-to-b from-green-50 to-white">
       <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-6">
         {/* Header */}
-        <header className="mb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="relative h-[70px] sm:h-[90px] w-[200px] sm:w-[250px]">
+        <header className="mt-10 mb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className=" relative h-[70px] sm:h-[90px] w-[200px] sm:w-[250px]">
             <Image
               src="/logo/logo.png"
               alt="GI PLATFORM"
@@ -183,19 +183,7 @@ export default function Traceback() {
           </button>
         </header>
   
-        <div className="rounded-2xl border border-gray-300 bg-white p-4 sm:p-6 shadow-lg">
-          {/* Product Type Badge */}
-          <div className="mb-4 flex justify-center sm:justify-start">
-            <span className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium
-              ${productType === 'PP' ? 'bg-blue-100 text-blue-800' :
-                productType === 'PN' ? 'bg-purple-100 text-purple-800' :
-                'bg-gray-100 text-gray-800'}`}
-            >
-              {productType === 'PP' ? 'สินค้าแปรรูป' :
-               productType === 'PN' ? 'สินค้าธรรมชาติ' :
-               'สินค้าทั่วไป'}
-            </span>
-          </div>
+        
   
           {/* Main Content Area */}
           <div className="flex flex-col md:flex-row md:gap-6">
@@ -252,26 +240,6 @@ export default function Traceback() {
         </div>
       </div>
   
-      {/* Floating Action Buttons */}
-      <div className="fixed bottom-4 right-4 flex flex-col gap-2 md:hidden z-50">
-        <button
-          onClick={() => router.push('/trace')}
-          className="rounded-full bg-green-600 p-3 text-white shadow-lg hover:bg-green-700 transition-colors"
-          aria-label="ค้นหาใหม่"
-        >
-          <ArrowLeft className="h-6 w-6" />
-        </button>
-        
-        {showScrollTop && (
-          <button
-            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className="rounded-full bg-gray-600 p-3 text-white shadow-lg hover:bg-gray-700 transition-colors"
-            aria-label="เลื่อนขึ้นบน"
-          >
-            <ArrowUp className="h-6 w-6" />
-          </button>
-        )}
-      </div>
-    </div>
+      
   );
 }
