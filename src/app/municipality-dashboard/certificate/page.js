@@ -75,14 +75,14 @@ const Certificate = () => {
                     <div className={styles.standardsContainer}>
                       {standards.length > 0
                         ? standards.map((standard) => (
-                          <Image
-                            key={standard.id}
-                            src={standard.logo}
-                            alt={standard.name}
-                            width={40}
-                            height={40}
-                          />
-                        ))
+                            <Image
+                              key={standard.id}
+                              src={standard.logo}
+                              alt={standard.name}
+                              width={40}
+                              height={40}
+                            />
+                          ))
                         : "ไม่มี"}
                     </div>
                   </td>
@@ -90,23 +90,24 @@ const Certificate = () => {
                   <td>{certificate.productionQuantity}</td>
                   <td>
                     <span
-                      className={`${styles.status} ${styles[certificate.status]
-                        }`}
+                      className={`${styles.status} ${
+                        styles[certificate.status]
+                      }`}
                     >
                       {certificate.status}
                     </span>
                   </td>
                   <td>
-                    <div className={styles.standardsContainer}>
-                      <div className={styles.buttons}>
-                        <Link
-                          href={`/municipality-dashboard/certificate/approve/${certificate.id}`}
-                        >
-                          <button className={`${styles.button} ${styles.view}`}>
-                            ตรวจสอบใบรับรอง
-                          </button>
-                        </Link>
-                      </div>
+                  <div className={styles.standardsContainer}>
+                    <div className={styles.buttons}>
+                      <Link
+                        href={`/municipality-dashboard/certificate/approve/${certificate.id}`}
+                      >
+                        <button className={`${styles.button} ${styles.view}`}>
+                          ตรวจสอบใบรับรอง
+                        </button>
+                      </Link>
+                    </div>
                     </div>
                   </td>
                 </tr>
@@ -115,7 +116,7 @@ const Certificate = () => {
           ) : (
             <tr>
               <td colSpan={10}>ไม่พบข้อมูล</td>{" "}
-
+            
             </tr>
           )}
         </tbody>

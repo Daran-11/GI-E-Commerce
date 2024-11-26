@@ -111,83 +111,108 @@ const AddUsers = ({ UsersId }) => {
   return (
     <div className={styles.container}>
       <form onSubmit={handleSubmit} className={styles.form}>
-        <input
-          type="text"
-          placeholder="ชื่อ-นามสกุล"
-          className={styles.input}
-          value={farmerNameApprove}
-          onChange={(e) => setFarmerNameApprove(e.target.value)}
-          required
-        />
+        <div className={styles.certificateField}>
+          <label className={styles.formLabel} htmlFor="farmerNameApprove">ชื่อ-นามสกุล</label>
+          <input
+            id="farmerNameApprove"
+            type="text"
+            placeholder="ชื่อ-นามสกุล"
+            className={styles.input}
+            value={farmerNameApprove}
+            onChange={(e) => setFarmerNameApprove(e.target.value)}
+            required
+          />
+        </div>
+
         {certificates.map((cert, index) => (
           <div key={index} className={styles.certificateGroup}>
-            <input
-              type="text"
-              placeholder="ชนิด"
-              className={styles.selectcertificates}
-              value={cert.type}
-              onChange={(e) => handleCertificateChange(index, 'type', e.target.value)}
-              required
-            />
-            <input
-              type="text"
-              placeholder="พันธุ์"
-              className={styles.selectcertificates}
-              value={cert.variety}
-              onChange={(e) => handleCertificateChange(index, 'variety', e.target.value)}
-              required
-            />
-            <br />
-            <select
-              value={cert.standardName}
-              className={styles.selectcertificates}
-              onChange={(e) => handleCertificateChange(index, 'standardName', e.target.value)}
-              required
-            >
-              <option value="">เลือกมาตรฐาน</option>
-              {standards.map(std => (
-                <option key={std.id} value={std.name}>{std.name}</option>
-              ))}
-            </select>
-            <input
-              type="text"
-              placeholder="เลขที่ใบรับรอง"
-              className={styles.selectcertificates}
-              value={cert.certificateNumber}
-              onChange={(e) =>
-                handleCertificateChange(
-                  index,
-                  "certificateNumber",
-                  e.target.value
-                )
-              }
-              required
-            />
-            <input
-              type="date"
-              className={styles.selectcertificates}
-              value={cert.approvalDate}
-              onChange={(e) =>
-                handleCertificateChange(index, "approvalDate", e.target.value)
-              }
-              required
-            />
-            <button
+            <div className={styles.certificateField}>
+              <label className={styles.formLabel} htmlFor={`type-${index}`}>ชนิด</label>
+              <input
+                id={`type-${index}`}
+                type="text"
+                placeholder="ชนิด"
+                className={styles.selectcertificates}
+                value={cert.type}
+                onChange={(e) => handleCertificateChange(index, 'type', e.target.value)}
+                required
+              />
+            </div>
+
+            <div className={styles.certificateField}>
+              <label className={styles.formLabel} htmlFor={`variety-${index}`}>สายพันธุ์</label>
+              <input
+                id={`variety-${index}`}
+                type="text"
+                placeholder="พันธุ์"
+                className={styles.selectcertificates}
+                value={cert.variety}
+                onChange={(e) => handleCertificateChange(index, 'variety', e.target.value)}
+                required
+              />
+            </div>
+
+            <div className={styles.certificateField}>
+              <label className={styles.formLabel} htmlFor={`standardName-${index}`}>ประเภทใบรับรอง</label>
+              <select
+                id={`standardName-${index}`}
+                value={cert.standardName}
+                className={styles.selectcertificates}
+                onChange={(e) => handleCertificateChange(index, 'standardName', e.target.value)}
+                required
+              >
+                <option value="">เลือกมาตรฐาน</option>
+                {standards.map(std => (
+                  <option key={std.id} value={std.name}>{std.name}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className={styles.certificateField}>
+              <label className={styles.formLabel} htmlFor={`certificateNumber-${index}`}>เลขที่ใบรับรอง</label>
+              <input
+                id={`certificateNumber-${index}`}
+                type="text"
+                placeholder="เลขที่ใบรับรอง"
+                className={styles.selectcertificates}
+                value={cert.certificateNumber}
+                onChange={(e) => handleCertificateChange(index, "certificateNumber", e.target.value)}
+                required
+              />
+            </div>
+
+            <div className={styles.certificateField}>
+              <label className={styles.formLabel} htmlFor={`approvalDate-${index}`}>วันที่อนุมัติ</label>
+              <input
+                id={`approvalDate-${index}`}
+                type="date"
+                className={styles.selectcertificates}
+                value={cert.approvalDate}
+                onChange={(e) => handleCertificateChange(index, "approvalDate", e.target.value)}
+                required
+              />
+            </div>
+
+            <button           
               className={styles.delete}
               type="button"
               onClick={() => handleRemoveCertificate(index)}
+              aria-label="ลบรายการ"
             >
               <MdDelete />
             </button>
           </div>
         ))}
+
         <button
           className={styles.addButton}
           type="button"
           onClick={handleAddCertificate}
+          aria-label="เพิ่มรายการใหม่"
         >
           <MdAdd />
         </button>
+
         <div className={styles.buttonContainer}>
           <button type="submit" className={styles.Submitbutton}>
             {UsersId ? "อัปเดตเกษตรกร" : "เพิ่มรายชื่อเกษตรกร"}
