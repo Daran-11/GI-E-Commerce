@@ -281,8 +281,27 @@ model Farmer {
 
 
   History History[]
+  QR_Code QR_Code[]
 }
 
+model QR_Code {
+  id                 Int      @id @default(autoincrement())
+  Product_ID         String   @unique
+  Type               String
+  Variety            String
+  ProductionQuantity Int
+  Standard           Json // เก็บข้อมูลมาตรฐานเป็น JSON
+  Address            String
+  Phone              String
+  farmerName         String
+  farmerId           Int
+  Latitude           Float?   // Marked as optional
+  Longitude          Float?   // Marked as optional
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  farmer             Farmer   @relation(fields: [farmerId], references: [id])
+}
 
 model manage_farmer {
   id        Int      @id @default(autoincrement())
