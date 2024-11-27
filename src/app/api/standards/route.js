@@ -1,7 +1,24 @@
 import { NextResponse } from 'next/server';
 import prisma from '../../../../lib/prisma';
-import { writeFile } from 'fs/promises';
-import path from 'path';
+import { Storage } from '@google-cloud/storage';
+
+const storage = new Storage();
+const bucketName = 'gipineapple';
+
+async function uploadToGCS(file) {
+  const buffer = Buffer.from(await file.arrayBuffer());
+  const filename = Date.now() + '-' + file.name;
+  const blob = storage.bucket(bucketName).file(filename);
+  const blobStream = blob.createWriteStream();
+  
+  await new Promise((resolve, reject) => {
+    blobStream.on('finish', resolve);
+    blobStream.on('error', reject);
+    blobStream.end(buffer);
+  });
+
+  return `https://storage.googleapis.com/${bucketName}/${filename}`;
+}
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
@@ -39,14 +56,7 @@ export async function POST(request) {
 
     let logoUrl = '';
     if (logo) {
-      const bytes = await logo.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-
-      const filename = Date.now() + '-' + logo.name;
-      const uploadDir = path.join(process.cwd(), 'public', 'uploads');
-      await writeFile(path.join(uploadDir, filename), buffer);
-
-      logoUrl = `/uploads/${filename}`;
+      logoUrl = await uploadToGCS(logo);
     }
 
     const newStandard = await prisma.standard.create({
@@ -82,20 +92,13 @@ export async function PUT(request) {
       return NextResponse.json({ error: 'Name is required' }, { status: 400 });
     }
 
-    let updatedData = { 
+    let updatedData = {
       name,
       description: description || '',
     };
 
     if (logo) {
-      const bytes = await logo.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-
-      const filename = Date.now() + '-' + logo.name;
-      const uploadDir = path.join(process.cwd(), 'public', 'uploads');
-      await writeFile(path.join(uploadDir, filename), buffer);
-
-      updatedData.logoUrl = `/uploads/${filename}`;
+      updatedData.logoUrl = await uploadToGCS(logo);
     }
 
     const updatedStandard = await prisma.standard.update({
