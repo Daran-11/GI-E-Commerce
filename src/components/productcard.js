@@ -57,7 +57,7 @@ const ProductCard = ({products}) => {
 
                     />
                   ) : (
-                    <img
+                    <Image
                       className="w-full h-full object-cover object-center rounded-t-2xl"
                       src="/phulae.jpg"
                       alt="Card Image"
