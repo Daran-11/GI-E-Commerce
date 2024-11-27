@@ -4,7 +4,6 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import styles from '@/app/municipality-dashboard/manage_standards/add/standards.module.css';
 
-
 export default function EditStandard({ params }) {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -23,6 +22,7 @@ export default function EditStandard({ params }) {
           const data = await response.json();
           setName(data.name);
           setDescription(data.description);
+          // ใช้ URL จาก Google Cloud Storage โดยตรง
           setPreviewUrl(data.logoUrl);
         } else {
           throw new Error('Failed to fetch standard');
@@ -39,6 +39,10 @@ export default function EditStandard({ params }) {
   const handleLogoChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        setError('ไฟล์ต้องมีขนาดไม่เกิน 5MB');
+        return;
+      }
       setLogo(file);
       setPreviewUrl(URL.createObjectURL(file));
     }
@@ -119,7 +123,13 @@ export default function EditStandard({ params }) {
                 />
                 {previewUrl && (
                   <div className={styles.filePreview}>
-                    <Image src={previewUrl} alt="Logo preview" width={100} height={100} unoptimized />
+                    <Image 
+                      src={previewUrl} 
+                      alt="Logo preview" 
+                      width={100} 
+                      height={100} 
+                      unoptimized // จำเป็นสำหรับ external URLs
+                    />
                     <p className={styles.fileInfo}>{logo ? logo.name : 'Current logo'}</p>
                   </div>
                 )}
