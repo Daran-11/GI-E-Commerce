@@ -20,6 +20,16 @@ async function uploadToGCS(file) {
   return `https://storage.googleapis.com/${bucketName}/${filename}`;
 }
 
+async function deleteFromGCS(url) {
+  if (!url) return;
+  const filename = url.split('/').pop();
+  try {
+    await storage.bucket(bucketName).file(filename).delete();
+  } catch (error) {
+    console.error('Error deleting file:', error);
+  }
+}
+
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const id = searchParams.get('id');
@@ -92,12 +102,19 @@ export async function PUT(request) {
       return NextResponse.json({ error: 'Name is required' }, { status: 400 });
     }
 
+    const currentStandard = await prisma.standard.findUnique({
+      where: { id: parseInt(id) }
+    });
+
     let updatedData = {
       name,
       description: description || '',
     };
 
     if (logo) {
+      if (currentStandard?.logoUrl) {
+        await deleteFromGCS(currentStandard.logoUrl);
+      }
       updatedData.logoUrl = await uploadToGCS(logo);
     }
 
@@ -125,6 +142,14 @@ export async function DELETE(request) {
   }
 
   try {
+    const standard = await prisma.standard.findUnique({
+      where: { id: parseInt(id) }
+    });
+
+    if (standard?.logoUrl) {
+      await deleteFromGCS(standard.logoUrl);
+    }
+
     const deletedStandard = await prisma.standard.delete({
       where: { id: parseInt(id) },
     });
