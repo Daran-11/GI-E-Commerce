@@ -1,35 +1,40 @@
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { writeFile } from "fs/promises";
+import { Storage } from "@google-cloud/storage";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import path from "path";
 import prisma from "../../../../../../../lib/prisma";
 
-// Helper function to handle file uploads
+// Initialize Google Cloud Storage client
+const storage = new Storage();
+const bucketName = 'gipineapple'; // เปลี่ยนเป็นชื่อของ bucket ของคุณ
+
+// Helper function to handle file uploads to Google Cloud Storage
 async function handleFileUpload(file) {
   try {
     if (!file) {
       throw new Error("No file uploaded");
     }
 
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
+    const buffer = Buffer.from(await file.arrayBuffer());
 
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    const filename =
-      file.name.replace(/\.[^/.]+$/, "") +
-      "-" +
-      uniqueSuffix +
-      path.extname(file.name);
+    const filename = file.name.replace(/\.[^/.]+$/, "") + "-" + uniqueSuffix + path.extname(file.name);
 
-    const uploadDir = path.join(process.cwd(), "public", "uploads");
-    const filepath = path.join(uploadDir, filename);
+    const blob = storage.bucket(bucketName).file(filename);
+    const blobStream = blob.createWriteStream();
 
-    // Write file to the filesystem
-    await writeFile(filepath, buffer);
+    // Pipe the buffer to Google Cloud Storage
+    blobStream.end(buffer);
 
     // Return the file's public URL
-    return `/uploads/${filename}`;
+    await new Promise((resolve, reject) => {
+      blobStream.on('finish', resolve);
+      blobStream.on('error', reject);
+    });
+
+    // Generate the public URL for the uploaded file
+    return `https://storage.googleapis.com/${bucketName}/${filename}`;
   } catch (error) {
     console.error("Error in file upload:", error);
     throw error;
@@ -79,21 +84,17 @@ export async function POST(request, { params }) {
     // Ensure Certificates is an array of integers
     let certificateIds = [];
     if (Certificates.length === 1 && typeof Certificates[0] === "string") {
-      // If it's a single string, split it by comma
       certificateIds = Certificates[0].split(',').map((id) => parseInt(id.trim()));
     } else {
-      // Otherwise, map the array directly to integers
       certificateIds = Certificates.map((id) => parseInt(id.trim()));
     }
 
-    // Filter out any NaN values (in case of invalid parsing)
     certificateIds = certificateIds.filter((id) => !isNaN(id));
 
-    // Log the parsed certificate IDs for debugging
     console.log("Parsed certificate IDs:", certificateIds);
 
     // Handle multiple image files
-    const imageFiles = formData.getAll("images"); // Adjusted for multiple images
+    const imageFiles = formData.getAll("images");
     const imageUrls = [];
 
     // Handle file uploads for each image
@@ -114,18 +115,18 @@ export async function POST(request, { params }) {
         Amount: parseInt(Amount, 10),
         Cost: parseInt(Cost, 10),
         status,
-        farmerId: farmer.id, // Link the product to the farmer
+        farmerId: farmer.id,
         Details,
       },
     });
 
-    // Now, add the associated images in the ProductImage model
+    // Add the associated images in the ProductImage model
     if (imageUrls.length > 0) {
       const imagePromises = imageUrls.map((url) =>
         prisma.productImage.create({
           data: {
             imageUrl: url,
-            productId: product.ProductID, // Link the image to the created product
+            productId: product.ProductID,
           },
         })
       );
@@ -145,10 +146,10 @@ export async function POST(request, { params }) {
       await Promise.all(productCertificatePromises);
     }
 
-    console.log("Product added successfully:", product); // Debug successful addition
+    console.log("Product added successfully:", product);
     return NextResponse.json(product, { status: 201 });
   } catch (error) {
-    console.error("Failed to add product:", error); // Enhanced error logging
+    console.error("Failed to add product:", error);
     return NextResponse.json(
       { error: error.message || "Failed to add product" },
       { status: 500 }
