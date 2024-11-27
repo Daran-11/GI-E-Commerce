@@ -46,7 +46,7 @@ const Certificate = () => {
     <div className={styles.container}>
       <div className={styles.top}>
         <Search placeholder="ค้นหาผู้ใช้..." />
-        <Link href="/dashboard_municipality/certificate/history">
+        <Link href="/municipality-dashboard/certificate/history">
           <button className={styles.addButton}>ประวัติการรับรอง</button>
         </Link>
       </div>
