@@ -15,7 +15,6 @@ export default function Login() {
     // ทำงานบางอย่าง เช่น ตรวจสอบฟอร์ม
     // แล้วนำทางไปยังหน้า dashboard
     try {
-      console.log('password', password)
       const result = await signIn('credentials',{
         redirect: false,
         identifier,
