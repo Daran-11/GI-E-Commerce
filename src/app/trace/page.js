@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import Image from "next/image";
-import { Camera, QrCode } from "lucide-react";
 import { Html5QrcodeScanner } from "html5-qrcode";
+import { Camera, QrCode } from "lucide-react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function TracePage() {
   const [trackingCode, setTrackingCode] = useState("");
@@ -20,26 +20,42 @@ export default function TracePage() {
           width: 250,
           height: 250,
         },
-        fps: 5,
+        fps: 10,
+        aspectRatio: 1.0,
+        verbose: false,
+        videoConstraints: {
+          facingMode: { exact: "environment" }, // บังคับใช้กล้องหลัง
+          width: { min: 640, ideal: 1280, max: 1920 },
+          height: { min: 480, ideal: 720, max: 1080 }
+        }
       });
 
-      scanner.render(
-        async (decodedText) => {
-          scanner.clear();
-          setShowScanner(false);
-          setTrackingCode(decodedText);
-          handleValidation(decodedText);
-        },
-        (error) => {
-          console.warn(error);
-        }
-      );
-
-      return () => {
-        scanner.clear();
-      };
-    }
-  }, [showScanner]);
+        scanner.render(
+          async (decodedText) => {
+            console.log("Success:", decodedText);
+            scanner.clear();
+            setShowScanner(false);
+            setTrackingCode(decodedText);
+            handleValidation(decodedText);
+          },
+          (error) => {
+            // แสดง error ให้ละเอียดขึ้น
+            console.error("Scanner Error:", error);
+            if (error.name === "NotAllowedError") {
+              setError("กรุณาอนุญาตการใช้งานกล้อง");
+            } else if (error.name === "NotFoundError") {
+              setError("ไม่พบกล้องในอุปกรณ์");
+            } else {
+              setError("เกิดข้อผิดพลาดในการใช้งานกล้อง: " + error.message);
+            }
+          }
+        );
+    
+        return () => {
+          scanner.clear().catch(console.error);
+        };
+      }
+    }, [showScanner]);
 
   const handleValidation = async (code) => {
     setIsLoading(true);
@@ -100,7 +116,7 @@ export default function TracePage() {
 
             {showScanner ? (
               <div className="mb-6">
-                <div id="qr-reader" className="w-full"></div>
+              <div id="qr-reader" className="w-full"></div>
                 <button
                   onClick={() => setShowScanner(false)}
                   className="mt-4 w-full rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700"
