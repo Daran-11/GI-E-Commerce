@@ -1,7 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import styles from "../../ui/dashboard/users/users.module.css";
+import styles from "@/app/ui/dashboard/certificate/certificate.module.css";
+import Search from "@/app/ui/dashboard/search/search";
+import Pagination from "@/app/ui/dashboard/pagination/pagination";
 
 export default function UsersPage() {
   const [users, setUsers] = useState([]);
@@ -28,9 +30,13 @@ export default function UsersPage() {
   }, []);
 
   if (loading) {
-    return <div className="text-center p-4">กำลังโหลด...</div>;
+    return <div className="flex flex-col items-center justify-center min-h-screen">
+    <div className="w-12 h-12 border-4 border-t-green-500 border-r-green-500 border-b-green-200 border-l-green-200 rounded-full animate-spin"></div>
+    <p className="mt-4 text-gray-600">กำลังโหลดข้อมูล...</p>
+  </div>;
   }
 
+  
   if (error) {
     return <div className="text-center text-red-500 p-4">Error: {error}</div>;
   }
@@ -38,6 +44,7 @@ export default function UsersPage() {
   return (
     <div className={styles.container}>
       <div className={styles.top}>
+      <Search placeholder="ค้นหาผู้ใช้..." />
         <Link href="/municipality-dashboard/users/account">
           <span className={styles.addButton}>บัญชีผู้ใช้ ทั้งหมด</span>
         </Link>
@@ -88,28 +95,7 @@ export default function UsersPage() {
           )}
         </tbody>
       </table>
-
-      <div className="mt-4">
-        <nav className="flex justify-center">
-          <ul className="flex space-x-2">
-            <li>
-              <button className="px-3 py-1 bg-gray-200 rounded">
-                Previous
-              </button>
-            </li>
-            <li>
-              <button className="px-3 py-1 bg-blue-500 text-white rounded">
-                1
-              </button>
-            </li>
-            <li>
-              <button className="px-3 py-1 bg-gray-200 rounded">
-                Next
-              </button>
-            </li>
-          </ul>
-        </nav>
-      </div>
+      <Pagination />
     </div>
   );
 }
