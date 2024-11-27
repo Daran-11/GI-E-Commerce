@@ -47,10 +47,10 @@ export default function page() {
     <div className="space-y-10 "> 
     <div className=' w-full h-[500px] p-6 rounded-xl flex justify-center items-center'>
       <div className=' w-[500px] text-xl text-center text-gray-600  animate-slideFadeIn'>
-      "GI Pineapple E-commerce ก่อตั้งขึ้นด้วยความตั้งใจที่จะสนับสนุนเกษตรกรท้องถิ่น 
+      &quot;GI Pineapple E-commerce ก่อตั้งขึ้นด้วยความตั้งใจที่จะสนับสนุนเกษตรกรท้องถิ่น 
       พร้อมส่งมอบสับปะรดคุณภาพสูงจากสวนถึงมือคุณ ด้วยการรับรองมาตรฐาน GI 
       ที่สะท้อนถึงเอกลักษณ์และความภูมิใจของไทย 
-      เราเชื่อมั่นว่าการสนับสนุนเกษตรกรคือการสร้างความยั่งยืนให้กับชุมชนในระยะยาว"
+      เราเชื่อมั่นว่าการสนับสนุนเกษตรกรคือการสร้างความยั่งยืนให้กับชุมชนในระยะยาว&quot;
       </div>
 
 
@@ -71,8 +71,8 @@ export default function page() {
    
 
           <div className='w-fit lg:w-[600px]'>
-                          <h1 className='text-2xl mb-2 text-gray-700'> สิ่งบ่งชี้ทางภูมิศาสตร์ (GI)</h1>
-                          <p className='text-lg text-gray-600 animate-slideFadeInRight '  style={{ animationDelay: '1s' }}>
+                          <h1 className="text-2xl mb-2 text-gray-700"> สิ่งบ่งชี้ทางภูมิศาสตร์ (GI)</h1>
+                          <p className="text-lg text-gray-600 animate-slideFadeInRight"  style={{ animationDelay: '1s' }}>
                                 คือเครื่องหมายที่ใช้กับสินค้าที่มาจากแหล่งผลิตที่เฉพาะเจาะจง ซึ่งคุณภาพหรือชื่อเสียงของสินค้านั้นๆ เป็นผลมาจากการผลิตในพื้นที่ดังกล่าว GI 
                                 จึงเปรียบเสมือนเป็นแบรนด์ของท้องถิ่นที่บ่งบอกถึงคุณภาพและแหล่งที่มาของสินค้า ตราสัญลักษณ์สิ่งบ่งชี้ทางภูมิศาสตร์ (GI) 
                                 ไทย คือ ตราของกรมทรัพย์สินทางปัญญาที่ออกให้แก่ผู้ผลิตสินค้าเพื่อรับรองว่าเป็นสินค้าที่มาจากแหล่งภูมิศาสตร์ที่ได้รับขึ้นทะเบียนไว้โดยต้องปฏิบัติตามคู่มือและแผนการควบคุมนั้นแล้ว                            
