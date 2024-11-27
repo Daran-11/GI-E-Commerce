@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { MapPin } from "lucide-react";
 
 // Loading Skeleton Component
@@ -166,8 +165,8 @@ const traceDetails_PN = ({ qrData }) => {
     </h4>
     <div className="space-y-4">
       {qrData.Standard.map((standard, index) => (
-        <InfoCard>
-          <div className="ml-4 space-y-4">
+        <InfoCard key={index}>
+          <div className="ml-4 space-y-4" >
             
               <h6 className="font-semibold text-[#4EAC14] mb-1">
                 {standard.name}

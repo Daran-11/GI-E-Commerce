@@ -275,7 +275,7 @@ export const Navbar = () => {
               </div>
             ) : (
               <li>
-                <Link href='/Login' className={currentPath === "/Login" ? "text-[#4EAC14]" : "text-[#595959]"}>
+                <Link href='/login' className={currentPath === "/login" ? "text-[#4EAC14]" : "text-[#595959]"}>
                   เข้าสู่ระบบ
                 </Link>
               </li>
@@ -440,9 +440,9 @@ export const Navbar = () => {
                 ) : (
                   <li>
                     <Link
-                      href="/Login"
+                      href="/login"
                       className={
-                        currentPath === "/Login"
+                        currentPath === "/login"
                           ? "text-[#4EAC14] block px-4 py-2 "
                           : "block  px-4 py-2  text-gray-700 hover:bg-gray-100"
                       }

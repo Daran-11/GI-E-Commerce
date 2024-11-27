@@ -13,16 +13,17 @@ const TileLayer = dynamic(() => import("react-leaflet").then(mod => mod.TileLaye
 const Marker = dynamic(() => import("react-leaflet").then(mod => mod.Marker), { ssr: false });
 const useMapEvents = dynamic(() => import("react-leaflet").then(mod => mod.useMapEvents), { ssr: false });
 
-// Leaflet configuration
-const L = typeof window !== "undefined" ? require("leaflet") : null;
-if (L) {
-  delete L.Icon.Default.prototype._getIconUrl;
-  L.Icon.Default.mergeOptions({
-    iconRetinaUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
-    iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
-    shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
-  });
-}
+// Loading Component
+const Loading = () => {
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+      <div className="bg-white p-8 rounded-lg shadow-xl flex flex-col items-center min-w-[300px]">
+        <div className="w-16 h-16 border-4 border-t-[#98de6d] border-r-[#98de6d] border-b-[#e2e8f0] border-l-[#e2e8f0] rounded-full animate-spin"></div>
+        <p className="mt-4 text-[#333] text-lg">กำลังโหลดข้อมูล...</p>
+      </div>
+    </div>
+  );
+};
 
 const Register = () => {
   const { data: session, status } = useSession();
@@ -145,6 +146,23 @@ const Register = () => {
     return true;
   };
 
+  const LocationMarker = () => {
+    useMapEvents({
+      click(e) {
+        const { lat, lng } = e.latlng;
+        setFormData((prev) => ({
+          ...prev,
+          latitude: lat,
+          longitude: lng,
+        }));
+      },
+    });
+
+    return formData.latitude && formData.longitude ? (
+      <Marker position={[formData.latitude, formData.longitude]}></Marker>
+    ) : null;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -202,7 +220,7 @@ const Register = () => {
 
   // Check authentication
   if (status === 'loading' || isLoading) {
-    return <Loading />;
+    return <Loading/>;
   }
 
   if (!session || session?.user?.role !== 'farmer') {
