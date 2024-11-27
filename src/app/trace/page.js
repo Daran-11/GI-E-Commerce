@@ -20,42 +20,26 @@ export default function TracePage() {
           width: 250,
           height: 250,
         },
-        fps: 10,
-        aspectRatio: 1.0,
-        verbose: false,
-        videoConstraints: {
-          facingMode: { exact: "environment" }, // บังคับใช้กล้องหลัง
-          width: { min: 640, ideal: 1280, max: 1920 },
-          height: { min: 480, ideal: 720, max: 1080 }
-        }
+        fps: 5,
       });
 
-        scanner.render(
-          async (decodedText) => {
-            console.log("Success:", decodedText);
-            scanner.clear();
-            setShowScanner(false);
-            setTrackingCode(decodedText);
-            handleValidation(decodedText);
-          },
-          (error) => {
-            // แสดง error ให้ละเอียดขึ้น
-            console.error("Scanner Error:", error);
-            if (error.name === "NotAllowedError") {
-              setError("กรุณาอนุญาตการใช้งานกล้อง");
-            } else if (error.name === "NotFoundError") {
-              setError("ไม่พบกล้องในอุปกรณ์");
-            } else {
-              setError("เกิดข้อผิดพลาดในการใช้งานกล้อง: " + error.message);
-            }
-          }
-        );
-    
-        return () => {
-          scanner.clear().catch(console.error);
-        };
-      }
-    }, [showScanner]);
+      scanner.render(
+        async (decodedText) => {
+          scanner.clear();
+          setShowScanner(false);
+          setTrackingCode(decodedText);
+          handleValidation(decodedText);
+        },
+        (error) => {
+          console.warn(error);
+        }
+      );
+
+      return () => {
+        scanner.clear();
+      };
+    }
+  }, [showScanner]);
 
   const handleValidation = async (code) => {
     setIsLoading(true);
@@ -88,9 +72,11 @@ export default function TracePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-green-50 to-white">
-      <div className="container mx-auto px-4">
-        <div className="text-center pt-16 pb-12">
-          <div className="relative h-[100px] w-[300px] mx-auto">
+      <div className="container mx-auto px-4 md:px-6">
+        {/* Header Section */}
+        <div className="text-center pt-12 md:pt-16 pb-8 md:pb-12">
+          {/* Logo */}
+          <div className="relative h-[90px] w-[250px] mt-4 md:mt-0 -ml-6 md:ml-0 mb-8 md:mb-0 mx-auto md:mx-0">
             <Image
               src="/logo/logo.png"
               alt="GI PLATFORM"
@@ -99,62 +85,66 @@ export default function TracePage() {
               className="object-contain"
             />
           </div>
-          <h1 className="text-3xl font-bold text-gray-800 mb-4">
+
+          <h1 className="text-xl md:text-2xl font-bold text-gray-800 mb-3 md:mb-4">
             ระบบตรวจสอบย้อนกลับ
           </h1>
-          <p className="text-gray-600 max-w-2xl mx-auto">
+          <p className="text-sm md:text-base text-gray-600 max-w-2xl mx-auto px-4 md:px-0">
             เพื่อความมั่นใจในคุณภาพและความปลอดภัยของผลิตภัณฑ์
             คุณสามารถตรวจสอบแหล่งที่มาและข้อมูลการผลิตได้ทันที
           </p>
         </div>
 
+        {/* Main Content */}
         <div className="max-w-2xl mx-auto">
-          <div className="bg-white rounded-2xl shadow-lg p-8">
-            <h2 className="text-xl font-semibold text-gray-800 mb-6 text-center">
+          <div className="bg-white rounded-2xl shadow-lg p-4 md:p-8">
+            <h2 className="text-lg md:text-xl font-semibold text-gray-800 mb-4 md:mb-6 text-center">
               กรุณากรอกรหัสบรรจุภัณฑ์
             </h2>
 
             {showScanner ? (
               <div className="mb-6">
-              <div id="qr-reader" className="w-full"></div>
+                <div
+                  id="qr-reader"
+                  className="w-full max-w-[300px] md:max-w-none mx-auto"
+                ></div>
                 <button
                   onClick={() => setShowScanner(false)}
-                  className="mt-4 w-full rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700"
+                  className="mt-4 w-full md:max-w-[300px] mx-auto block rounded-lg bg-red-600 px-4 py-2.5 text-white hover:bg-red-700"
                 >
                   ยกเลิกการสแกน
                 </button>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center space-x-2">
-                    <QrCode className="h-5 w-5 text-gray-400" />
+                  <div className="flex items-center space-x-2">
                     <button
                       type="button"
                       onClick={() => setShowScanner(true)}
-                      className="text-gray-400 hover:text-gray-600"
+                      className="absolute inset-y-0 left-3 flex items-center text-gray-400 hover:text-gray-600"
                     >
-                      <Camera className="h-5 w-5" />
+                      <Camera className="ml-3 h-5 w-5" />
+                    </button>
+                    <input
+                      type="text"
+                      value={trackingCode}
+                      onChange={(e) => setTrackingCode(e.target.value)}
+                      placeholder="ใส่รหัสบรรจุภัณฑ์"
+                      className="block w-full rounded-lg border border-gray-300 bg-white py-3 pl-12 pr-20 text-gray-900 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/20"
+                    />
+                    <button
+                      type="submit"
+                      disabled={isLoading}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg bg-green-600 px-4 py-2 text-white transition-all hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:bg-green-400"
+                    >
+                      {isLoading ? (
+                        <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                      ) : (
+                        "ค้นหา"
+                      )}
                     </button>
                   </div>
-                  <input
-                    type="text"
-                    value={trackingCode}
-                    onChange={(e) => setTrackingCode(e.target.value)}
-                    placeholder="ใส่รหัสหน้าบรรจุภัณฑ์ / Enter tracking code"
-                    className="block w-full rounded-lg border border-gray-300 bg-white py-3 pl-24 pr-4 text-gray-900 focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/20"
-                  />
-                  <button
-                    type="submit"
-                    disabled={isLoading}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg bg-green-600 px-4 py-2 text-white transition-all hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:bg-green-400"
-                  >
-                    {isLoading ? (
-                      <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                    ) : (
-                      "ค้นหา"
-                    )}
-                  </button>
                 </div>
 
                 {error && (
@@ -165,35 +155,56 @@ export default function TracePage() {
               </form>
             )}
 
-            <div className="mt-8 border-t border-gray-200 pt-6">
-              <h3 className="text-lg font-medium text-gray-800 mb-4">
+            {/* Instructions */}
+            <div className="mt-6 md:mt-8 border-t border-gray-200 pt-4 md:pt-6">
+              <h3 className="text-base md:text-lg font-medium text-gray-800 mb-3 md:mb-4">
                 วิธีการตรวจสอบ
               </h3>
               <div className="space-y-3">
-                <div className="flex items-start">
-                  <div className="flex-shrink-0 h-6 w-6 rounded-full bg-green-100 text-green-600 flex items-center justify-center">
-                    1
-                  </div>
-                  <p className="ml-3 text-gray-600">
-                    สแกน QR Code บนบรรจุภัณฑ์หรือกรอกรหัสบรรจุภัณฑ์ในช่องด้านบน
-                  </p>
+                {/* Mobile Instructions */}
+                <div className="md:hidden space-y-4">
+                  {[
+                    "สแกน QR Code บนบรรจุภัณฑ์หรือกรอกรหัสบรรจุภัณฑ์",
+                    "ระบบจะแสดงข้อมูลแหล่งที่มา ข้อมูลเกษตรกร และมาตรฐานการผลิต",
+                    "สามารถตรวจสอบสถานที่ผลิตผ่าน Google Maps และดูข้อมูลการรับรองมาตรฐาน",
+                  ].map((text, index) => (
+                    <div key={index} className="flex items-start">
+                      <div className="flex-shrink-0 h-6 w-6 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-sm">
+                        {index + 1}
+                      </div>
+                      <p className="ml-3 text-sm text-gray-600">{text}</p>
+                    </div>
+                  ))}
                 </div>
-                <div className="flex items-start">
-                  <div className="flex-shrink-0 h-6 w-6 rounded-full bg-green-100 text-green-600 flex items-center justify-center">
-                    2
+
+                {/* Desktop Instructions */}
+                <div className="hidden md:block space-y-3">
+                  <div className="flex items-start">
+                    <div className="flex-shrink-0 h-6 w-6 rounded-full bg-green-100 text-green-600 flex items-center justify-center">
+                      1
+                    </div>
+                    <p className="ml-3 text-gray-600">
+                      สแกน QR Code
+                      บนบรรจุภัณฑ์หรือกรอกรหัสบรรจุภัณฑ์ในช่องด้านบน
+                    </p>
                   </div>
-                  <p className="ml-3 text-gray-600">
-                    ระบบจะแสดงข้อมูลแหล่งที่มา ข้อมูลเกษตรกร และมาตรฐานการผลิต
-                  </p>
-                </div>
-                <div className="flex items-start">
-                  <div className="flex-shrink-0 h-6 w-6 rounded-full bg-green-100 text-green-600 flex items-center justify-center">
-                    3
+                  <div className="flex items-start">
+                    <div className="flex-shrink-0 h-6 w-6 rounded-full bg-green-100 text-green-600 flex items-center justify-center">
+                      2
+                    </div>
+                    <p className="ml-3 text-gray-600">
+                      ระบบจะแสดงข้อมูลแหล่งที่มา ข้อมูลเกษตรกร และมาตรฐานการผลิต
+                    </p>
                   </div>
-                  <p className="ml-3 text-gray-600">
-                    สามารถตรวจสอบสถานที่ผลิตผ่าน Google Maps
-                    และดูข้อมูลการรับรองมาตรฐาน
-                  </p>
+                  <div className="flex items-start">
+                    <div className="flex-shrink-0 h-6 w-6 rounded-full bg-green-100 text-green-600 flex items-center justify-center">
+                      3
+                    </div>
+                    <p className="ml-3 text-gray-600">
+                      สามารถตรวจสอบสถานที่ผลิตผ่าน Google Maps
+                      และดูข้อมูลการรับรองมาตรฐาน
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
