@@ -1,41 +1,61 @@
-//completed
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { unlink, writeFile } from "fs/promises";
+import { Storage } from "@google-cloud/storage";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import path from "path";
 import prisma from "../../../../../../../../lib/prisma";
 
+// Initialize Google Cloud Storage client
+const storage = new Storage({
+  keyFile: process.env.GOOGLE_APPLICATION_CREDENTIALS, // ระบุพาธของไฟล์ service account
+});
+const bucketName = 'gipineapple'; // เปลี่ยนเป็นชื่อของ bucket ของคุณ
 
-// Helper function to handle file uploads
+
 async function handleFileUpload(file) {
-  if (!file) {
-    throw new Error("No file uploaded");
+  try {
+    if (!file) {
+      throw new Error("No file uploaded");
+    }
+
+    const buffer = Buffer.from(await file.arrayBuffer());
+
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    const filename = file.name.replace(/\.[^/.]+$/, "") + "-" + uniqueSuffix + path.extname(file.name);
+
+    const blob = storage.bucket(bucketName).file(filename);
+    const blobStream = blob.createWriteStream();
+
+    // Pipe the buffer to Google Cloud Storage
+    blobStream.end(buffer);
+
+    // Return the file's public URL
+    await new Promise((resolve, reject) => {
+      blobStream.on('finish', resolve);
+      blobStream.on('error', reject);
+    });
+
+    // Generate the public URL for the uploaded file
+    return `https://storage.googleapis.com/${bucketName}/${filename}`;
+  } catch (error) {
+    console.error("Error in file upload:", error);
+    throw error;
   }
-
-  const bytes = await file.arrayBuffer();
-  const buffer = Buffer.from(bytes);
-
-  const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-  const filename =
-    file.name.replace(/\.[^/.]+$/, "") +
-    "-" +
-    uniqueSuffix +
-    path.extname(file.name);
-
-  const uploadDir = path.join(process.cwd(), "public", "uploads");
-  const filepath = path.join(uploadDir, filename);
-
-  // Write file to the filesystem
-  await writeFile(filepath, buffer);
-
-  // Return the file's public URL
-  return `/uploads/${filename}`;
 }
 
-// Function to delete a file from the filesystem
-async function deleteFile(filePath) {
-  await unlink(filePath);
+// Helper function to delete file from Google Cloud Storage
+async function deleteFileFromCloudStorage(imageUrl) {
+  try {
+    const fileName = imageUrl.split('/').pop(); // Extract the file name from the URL
+    const file = storage.bucket(bucketName).file(fileName);
+
+    // Delete the file from the bucket
+    await file.delete();
+    console.log(`File deleted from cloud storage: ${imageUrl}`);
+  } catch (error) {
+    console.error("Error deleting file from Google Cloud Storage:", error);
+    throw error;
+  }
 }
 
 export async function PUT(request, { params }) {
@@ -52,7 +72,7 @@ export async function PUT(request, { params }) {
 
   // Fetch the farmer data using the userId
   const farmer = await prisma.farmer.findUnique({
-    where: { userId: parseInt(userId) }
+    where: { userId: parseInt(userId) },
   });
 
   if (!farmer) {
@@ -72,7 +92,7 @@ export async function PUT(request, { params }) {
   }
 
   try {
-    const formData = await request.formData();  
+    const formData = await request.formData();
     const id = formData.get("ProductID");
     const ProductName = formData.get("ProductName");
     const ProductType = formData.get("ProductType");
@@ -85,24 +105,25 @@ export async function PUT(request, { params }) {
     const imagesToDelete = formData.getAll("imagesToDelete");
     const Details = formData.get("Details");
 
-    // Handle image deletions
+    // Handle image deletions from Google Cloud Storage
     if (imagesToDelete.length > 0) {
       const deletePromises = imagesToDelete.map(async (imageUrl) => {
-        const filePath = path.join(process.cwd(), "public", "uploads", path.basename(imageUrl));
-        await deleteFile(filePath);
+        // Call the function to delete file from Google Cloud Storage
+        await deleteFileFromCloudStorage(imageUrl);
       });
       await Promise.all(deletePromises);
 
+      // Delete the image records from the database
       await prisma.productImage.deleteMany({
         where: { imageUrl: { in: imagesToDelete } },
       });
     }
 
-    // Handle new image uploads
+    // Handle new image uploads (to Google Cloud Storage)
     let newImageUrls = [];
     if (newImageFiles.length > 0) {
       const uploadPromises = newImageFiles.map(async (file) => {
-        return await handleFileUpload(file);
+        return await handleFileUpload(file); // Assume this function uploads files to Google Cloud Storage
       });
       newImageUrls = await Promise.all(uploadPromises);
     }
