@@ -7,13 +7,15 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { MapContainer, Marker, TileLayer, useMapEvents } from "react-leaflet";
 
+import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
+import markerIcon from "leaflet/dist/images/marker-icon.png";
+import markerShadow from "leaflet/dist/images/marker-shadow.png";
 // Fix for the missing marker icon in Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
-  iconRetinaUrl:
-    "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
-  iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
-  shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
+  iconRetinaUrl: markerIcon2x.src,
+  iconUrl: markerIcon.src,
+  shadowUrl: markerShadow.src
 });
 
 const ApproveCertificatePage = ({ params }) => {
@@ -78,45 +80,62 @@ const ApproveCertificatePage = ({ params }) => {
   
   const fetchUsersData = async (name) => {
     try {
-      // แสดง log เพื่อตรวจสอบค่าที่ได้รับ
       console.log("Searching for farmer with name:", name);
   
-      const response = await fetch(`/api/manage_farmer`);
+      const response = await fetch("/api/manage_farmer", {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+  
       if (!response.ok) {
-        throw new Error('Failed to fetch farmers data');
+        throw new Error('ไม่สามารถดึงข้อมูลเกษตรกรได้');
       }
   
       const farmers = await response.json();
-      console.log("All farmers:", farmers);
-  
-      // ค้นหาเกษตรกรที่มีชื่อตรงกัน
       const matchedFarmer = farmers.find(
-        (farmer) => farmer.farmerNameApprove.toLowerCase() === name.toLowerCase()
+        (farmer) => farmer.farmerNameApprove?.toLowerCase() === name?.toLowerCase()
       );
-  
-      console.log("Matched farmer:", matchedFarmer);
   
       if (matchedFarmer) {
         setUsersData(matchedFarmer);
         setMatchFound(true);
   
-        // ดึงข้อมูลใบรับรอง
-        const certsResponse = await fetch(
-          `/api/farmer_certificates/${matchedFarmer.id}`
-        );
-        if (certsResponse.ok) {
+        try {
+          const certsResponse = await fetch(
+            `/api/farmer_certificates/${matchedFarmer.id}`,
+            {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            }
+          );
+          
+          if (!certsResponse.ok) {
+            if (certsResponse.status === 404) {
+              setUsersCertificates([]);
+              return;
+            }
+            throw new Error('ไม่สามารถดึงข้อมูลใบรับรองได้');
+          }
+  
           const certsData = await certsResponse.json();
-          setUsersCertificates(certsData);
-        } else {
-          console.error("Failed to fetch certificates");
+          setUsersCertificates(Array.isArray(certsData) ? certsData : []);
+          
+        } catch (certError) {
+          console.error("Certificates fetch error:", certError);
+          setUsersCertificates([]);
         }
       } else {
         setMatchFound(false);
         setUsersData(null);
         setUsersCertificates([]);
       }
+  
     } catch (error) {
-      console.error("Failed to fetch farmer data:", error);
+      console.error("Farmer data fetch error:", error);
       setMatchFound(false);
       setUsersData(null);
       setUsersCertificates([]);
