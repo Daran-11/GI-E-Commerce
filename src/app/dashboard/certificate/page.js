@@ -126,7 +126,7 @@ const Certificate = () => {
             </td>
             <td>
               <div className={styles.standardsContainer}>
-                {certificate.status === "ไม่อนุมัติ" ? (
+                {certificate.status === "ไม่ผ่านการรับรอง" ? (
                   <div className={styles.buttons}>
                     <button
                       className={`${styles.button} ${styles.view}`}
