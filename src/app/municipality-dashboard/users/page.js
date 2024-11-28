@@ -73,7 +73,7 @@ export default function UsersPage() {
                   </span>
                 </td>
                 <td>
-                  <Link href={`/dashboard_municipality/users/${user.id}`}>
+                  <Link href={`/municipality-dashboard/users/${user.id}`}>
                     <span className={`${styles.button} ${styles.checkButton}`}>
                       ตรวจสอบ
                     </span>
