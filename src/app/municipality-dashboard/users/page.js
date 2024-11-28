@@ -38,7 +38,7 @@ export default function UsersPage() {
   return (
     <div className={styles.container}>
       <div className={styles.top}>
-        <Link href="/dashboard_municipality/users/account">
+        <Link href="/municipality-dashboard/users/account">
           <span className={styles.addButton}>บัญชีผู้ใช้ ทั้งหมด</span>
         </Link>
       </div>
