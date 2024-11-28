@@ -380,3 +380,24 @@ model History {
 
   @@index([orderId, userId])
 }
+model ManageType {
+  id        Int       @id @default(autoincrement())
+  type      String    // ชนิด
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  varieties Variety[] // ความสัมพันธ์แบบ one-to-many กับสายพันธุ์
+
+  @@map("manage_type")
+}
+
+model Variety {
+  id          Int        @id @default(autoincrement())
+  name        String     // ชื่อสายพันธุ์
+  typeId      Int        // Foreign key ไปยัง ManageType
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  manageType  ManageType @relation(fields: [typeId], references: [id], onDelete: Cascade)
+
+  @@index([typeId])
+  @@map("varieties")
+}

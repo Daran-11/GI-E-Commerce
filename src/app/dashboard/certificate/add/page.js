@@ -18,10 +18,9 @@ delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: markerIcon2x.src,
   iconUrl: markerIcon.src,
-  shadowUrl: markerShadow.src
+  shadowUrl: markerShadow.src,
 });
 
-// Loading Component
 const Loading = () => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
@@ -33,7 +32,6 @@ const Loading = () => {
   );
 };
 
-// Map Marker Component
 const LocationMarker = ({ formData, setFormData }) => {
   useMapEvents({
     click(e) {
@@ -55,6 +53,9 @@ const Register = () => {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
+  const [types, setTypes] = useState([]);
+  const [selectedType, setSelectedType] = useState(null);
+  const [standards, setStandards] = useState([]);
   const [formData, setFormData] = useState({
     type: "",
     variety: "",
@@ -63,62 +64,83 @@ const Register = () => {
     productionQuantity: "",
     standards: [],
   });
-  const [standards, setStandards] = useState([]);
-  const [showConfirm, setShowConfirm] = useState(false);
 
-  // Fetch standards on component mount
   useEffect(() => {
-    const fetchStandards = async () => {
-      if (status === 'authenticated' && session?.user?.role === 'farmer') {
+    const fetchData = async () => {
+      if (status === "authenticated" && session?.user?.role === "farmer") {
         try {
-          const response = await fetch("/api/standards");
-          if (!response.ok) {
-            throw new Error("ไม่สามารถโหลดข้อมูลมาตรฐานได้");
+          setIsLoading(true);
+          const [typesRes, standardsRes] = await Promise.all([
+            fetch("/api/manage_type"),
+            fetch("/api/standards"),
+          ]);
+
+          if (!typesRes.ok || !standardsRes.ok) {
+            throw new Error("ไม่สามารถโหลดข้อมูลได้");
           }
-          const data = await response.json();
-          setStandards(data);
+
+          const [typesData, standardsData] = await Promise.all([
+            typesRes.json(),
+            standardsRes.json(),
+          ]);
+
+          setTypes(typesData);
+          setStandards(standardsData);
         } catch (error) {
-          console.error("Error fetching standards:", error);
-          alert("ไม่สามารถโหลดข้อมูลมาตรฐาน กรุณาลองใหม่อีกครั้ง");
+          console.error("Error fetching data:", error);
+          alert("ไม่สามารถโหลดข้อมูล กรุณาลองใหม่อีกครั้ง");
         } finally {
           setIsLoading(false);
         }
       }
     };
 
-    fetchStandards();
+    fetchData();
   }, [status, session?.user?.role]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+
+    if (name === "type") {
+      const selected = types.find((t) => t.type === value);
+      setSelectedType(selected);
+      setFormData((prev) => ({
+        ...prev,
+        type: value,
+        variety: "",
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
+  };
+  const handleStandardChange = (standard, checked) => {
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      standards: checked
+        ? [
+            ...prev.standards,
+            {
+              id: standard.id,
+              name: standard.name,
+              logo: standard.logoUrl,
+              certNumber: "",
+              certDate: "",
+            },
+          ]
+        : prev.standards.filter((s) => s.id !== standard.id),
     }));
   };
 
-  const handleStandardChange = (standard, checked) => {
-    setFormData((prev) => {
-      const updatedStandards = checked
-        ? [...prev.standards, {
-            id: standard.id,
-            name: standard.name,
-            logo: standard.logoUrl,
-            certNumber: "",
-            certDate: "",
-          }]
-        : prev.standards.filter((s) => s.id !== standard.id);
-      return { ...prev, standards: updatedStandards };
-    });
-  };
-
   const handleStandardDetailChange = (standardId, field, value) => {
-    setFormData((prev) => {
-      const updatedStandards = prev.standards.map((s) =>
+    setFormData((prev) => ({
+      ...prev,
+      standards: prev.standards.map((s) =>
         s.id === standardId ? { ...s, [field]: value } : s
-      );
-      return { ...prev, standards: updatedStandards };
-    });
+      ),
+    }));
   };
 
   const getCurrentLocation = () => {
@@ -130,11 +152,10 @@ const Register = () => {
     setIsLoading(true);
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        const { latitude, longitude } = position.coords;
         setFormData((prev) => ({
           ...prev,
-          latitude,
-          longitude,
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
         }));
         setIsLoading(false);
       },
@@ -144,6 +165,40 @@ const Register = () => {
         setIsLoading(false);
       }
     );
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!validateForm()) return;
+
+    if (!confirm("คุณต้องการขอใบรับรองใช่หรือไม่?")) return;
+
+    setIsLoading(true);
+    try {
+      const response = await fetch("/api/certificate/add", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...formData,
+          userId: session.user.id,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("ไม่สามารถเพิ่มใบรับรองได้");
+      }
+
+      alert("เพิ่มใบรับรองเรียบร้อย");
+      router.push("/dashboard/certificate");
+    } catch (error) {
+      console.error("Error:", error);
+      alert(error.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const validateForm = () => {
@@ -172,67 +227,11 @@ const Register = () => {
     return true;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
-
-    if (window.confirm("คุณต้องการขอใบรับรองใช่หรือไม่?")) {
-      setIsLoading(true);
-      try {
-        const formDataToSend = new FormData();
-        
-        // Append basic form data
-        Object.keys(formData).forEach(key => {
-          if (key !== "standards") {
-            formDataToSend.append(key, formData[key]);
-          }
-        });
-
-        // Append standards data
-        formData.standards.forEach((standard, index) => {
-          formDataToSend.append(`standards[${index}][id]`, standard.id);
-          formDataToSend.append(`standards[${index}][name]`, standard.name);
-          formDataToSend.append(`standards[${index}][logo]`, standard.logo);
-          formDataToSend.append(`standards[${index}][certNumber]`, standard.certNumber);
-          formDataToSend.append(`standards[${index}][certDate]`, standard.certDate);
-        });
-
-        // Add user ID
-        if (session?.user?.id) {
-          formDataToSend.append("userId", session.user.id);
-        } else {
-          throw new Error("กรุณาเข้าสู่ระบบใหม่อีกครั้ง");
-        }
-
-        const response = await fetch("/api/certificate/add", {
-          method: "POST",
-          body: formDataToSend,
-        });
-
-        if (!response.ok) {
-          throw new Error("ไม่สามารถเพิ่มใบรับรองได้");
-        }
-
-        alert("เพิ่มใบรับรองเรียบร้อย");
-        router.push("/dashboard/certificate");
-      } catch (error) {
-        console.error("Error:", error);
-        alert(error.message);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-  };
-
-  // Check authentication
-  if (status === 'loading' || isLoading) {
+  if (status === "loading" || isLoading) {
     return <Loading />;
   }
 
-  if (!session || session?.user?.role !== 'farmer') {
+  if (!session || session?.user?.role !== "farmer") {
     return (
       <div className="container">
         <main className="mainContent">
@@ -250,7 +249,6 @@ const Register = () => {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="form-container">
-            {/* ส่วนของข้อมูลพื้นฐาน */}
             <p className="section-name">ชนิด</p>
             <select
               name="type"
@@ -259,22 +257,35 @@ const Register = () => {
               className="formInput"
               required
             >
-              <option value="" disabled hidden>-</option>
-              <option value="สับปะรด">สับปะรด</option>
+              <option value="" disabled hidden>
+                -
+              </option>
+              {types.map((type) => (
+                <option key={type.id} value={type.type}>
+                  {type.type}
+                </option>
+              ))}
             </select>
 
             <p className="section-name">สายพันธุ์</p>
-            <input
+            <select
               name="variety"
-              type="text"
-              placeholder="สายพันธุ์"
               value={formData.variety}
               onChange={handleChange}
-              className="form-input"
+              className="formInput"
               required
-            />
+              disabled={!selectedType}
+            >
+              <option value="" disabled hidden>
+                เลือกสายพันธุ์
+              </option>
+              {selectedType?.varieties.map((variety) => (
+                <option key={variety.id} value={variety.name}>
+                  {variety.name}
+                </option>
+              ))}
+            </select>
 
-            {/* ส่วนของแผนที่ */}
             <p className="section-name">พิกัด</p>
             <MapContainer
               center={[20.046061226911785, 99.890654]}
@@ -288,8 +299,8 @@ const Register = () => {
 
             {formData.latitude && formData.longitude && (
               <p className="mt-2 text-sm text-gray-600">
-                พิกัดที่เลือก: ละติจูด {formData.latitude.toFixed(6)}, 
-                ลองจิจูด {formData.longitude.toFixed(6)}
+                พิกัดที่เลือก: ละติจูด {formData.latitude.toFixed(6)}, ลองจิจูด{" "}
+                {formData.longitude.toFixed(6)}
               </p>
             )}
 
@@ -313,21 +324,31 @@ const Register = () => {
               min="0"
             />
 
-            {/* ส่วนของมาตรฐาน */}
             <p className="section-name">มาตรฐาน</p>
             <div className="standards-container">
               {standards.map((standard) => {
-                const isSelected = formData.standards.some(s => s.id === standard.id);
-                const currentStandard = formData.standards.find(s => s.id === standard.id);
-                
+                const isSelected = formData.standards.some(
+                  (s) => s.id === standard.id
+                );
+                const currentStandard = formData.standards.find(
+                  (s) => s.id === standard.id
+                );
+
                 return (
-                  <div key={standard.id} className={`standard-item-container ${isSelected ? "selected" : ""}`}>
+                  <div
+                    key={standard.id}
+                    className={`standard-item-container ${
+                      isSelected ? "selected" : ""
+                    }`}
+                  >
                     <div className="standard-item-container1">
                       <label>
                         <input
                           type="checkbox"
                           checked={isSelected}
-                          onChange={(e) => handleStandardChange(standard, e.target.checked)}
+                          onChange={(e) =>
+                            handleStandardChange(standard, e.target.checked)
+                          }
                         />
                         <span className="standard-logo">
                           <Image
@@ -347,7 +368,13 @@ const Register = () => {
                           className="form-input1"
                           placeholder="เลขที่ใบรับรอง"
                           value={currentStandard?.certNumber || ""}
-                          onChange={(e) => handleStandardDetailChange(standard.id, "certNumber", e.target.value)}
+                          onChange={(e) =>
+                            handleStandardDetailChange(
+                              standard.id,
+                              "certNumber",
+                              e.target.value
+                            )
+                          }
                           required
                         />
                         <input
@@ -355,7 +382,13 @@ const Register = () => {
                           className="form-input1"
                           placeholder="วันที่ใบรับรอง"
                           value={currentStandard?.certDate || ""}
-                          onChange={(e) => handleStandardDetailChange(standard.id, "certDate", e.target.value)}
+                          onChange={(e) =>
+                            handleStandardDetailChange(
+                              standard.id,
+                              "certDate",
+                              e.target.value
+                            )
+                          }
                           required
                         />
                       </>
