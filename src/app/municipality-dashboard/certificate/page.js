@@ -44,6 +44,7 @@ const Certificate = () => {
 
   return (
     <div className={styles.container}>
+    <h1 className="text-2xl ">ตรวจสอบใบรับรอง</h1><br></br>
       <div className={styles.top}>
         <Search placeholder="ค้นหาผู้ใช้..." />
         <Link href="/municipality-dashboard/certificate/history">

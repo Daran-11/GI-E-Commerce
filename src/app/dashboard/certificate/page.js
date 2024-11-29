@@ -65,10 +65,11 @@ const Certificate = () => {
 
   return (
     <div className={styles.container}>
+    <h1 className="text-2xl ">ใบรับรองทั้งหมด</h1><br></br>
       <div className={styles.top}>
-        <Search placeholder="ค้นหาผู้ใช้..." />
+        <Search placeholder="ค้นหาใบรับรอง..." />
         <Link href="/dashboard/certificate/add">
-          <button className={styles.addButton}>Add New</button>
+          <button className={styles.addButton}>เพิ่มใบรับรอง</button>
         </Link>
       </div>
       <table className={styles.table}>
