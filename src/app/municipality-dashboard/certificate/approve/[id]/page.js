@@ -32,6 +32,7 @@ const ApproveCertificatePage = ({ params }) => {
   const [UsersCertificates, setUsersCertificates] = useState([]);
   const [showCommentField, setShowCommentField] = useState(false);
   const [showCertificates, setShowCertificates] = useState(false);
+  const [standardsInfo, setStandardsInfo] = useState({});
   const [errors, setErrors] = useState({});
   const [matchFound, setMatchFound] = useState(false);
   const router = useRouter();
@@ -209,6 +210,29 @@ const ApproveCertificatePage = ({ params }) => {
     ) : null;
   };
 
+  useEffect(() => {
+    // เพิ่มการเรียก API เพื่อดึงข้อมูล standards
+    const fetchStandards = async () => {
+      try {
+        const response = await fetch("/api/standards");
+        if (response.ok) {
+          const standardsData = await response.json();
+          // สร้าง map ของ certificationInfo
+          const infoMap = {};
+          standardsData.forEach(standard => {
+            infoMap[standard.name] = standard.certificationInfo || "เลขที่ใบรับรอง";
+          });
+          setStandardsInfo(infoMap);
+        }
+      } catch (error) {
+        console.error("Failed to fetch standards:", error);
+      }
+    };
+
+    fetchStandards();
+  }, []);
+
+
   return (
     <div className="flex min-h-screen bg-gray-100">
       {/* Left Side - Original Form */}
@@ -282,12 +306,12 @@ const ApproveCertificatePage = ({ params }) => {
                             <p className="font-medium">{cert.standardName}</p>
                           </div>
                           <div>
-                            <p className="text-sm font-medium text-gray-600">
-                              เลขที่ใบรับรอง
-                            </p>
-                            <p className="font-medium">
-                              {cert.certificateNumber}
-                            </p>
+                          <p className="text-sm font-medium text-gray-600">
+                            {standardsInfo[cert.standardName] || "เลขที่ใบรับรอง"}
+                          </p>
+                          <p className="font-medium">
+                            {cert.certificateNumber}
+                          </p>
                           </div>
                         </div>
                         <div className="mt-2 pt-2 border-t">
@@ -423,7 +447,7 @@ const ApproveCertificatePage = ({ params }) => {
                           {standard.name}
                         </h3>
                         <p className="text-sm text-gray-600">
-                          เลขที่: {standard.certNumber}
+                          {standardsInfo[standard.name] || "เลขที่ใบรับรอง"}: {standard.certNumber}
                         </p>
                         <p className="text-sm text-gray-600">
                           วันที่: {standard.certDate}
