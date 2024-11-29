@@ -1,36 +1,17 @@
-// app/api/certificate/add/route.js
 import { NextResponse } from "next/server";
 import prisma from "../../../../../lib/prisma";
-
-
-
 export async function POST(request) {
   try {
-    const formData = await request.formData();
+    const data = await request.json(); // เปลี่ยนจาก formData เป็น json
 
-    const userId = formData.get('userId');
+    const userId = data.userId;
     if (!userId) {
-      throw new Error("Users ID is not provided in the form data.");
+      throw new Error("Users ID is not provided.");
     }
 
-    const latitude = parseFloat(formData.get('latitude'));
-    const longitude = parseFloat(formData.get('longitude'));
-    
+    const { latitude, longitude } = data;
     if (!latitude || !longitude) {
       throw new Error("Invalid latitude or longitude values.");
-    }
-
-
-    const standards = [];
-    for (let i = 0; formData.get(`standards[${i}][id]`); i++) {
-      const standard = {
-        id: parseInt(formData.get(`standards[${i}][id]`), 10),
-        name: formData.get(`standards[${i}][name]`),
-        logo: formData.get(`standards[${i}][logo]`),
-        certNumber: formData.get(`standards[${i}][certNumber]`),
-        certDate: formData.get(`standards[${i}][certDate]`),
-      };
-      standards.push(standard);
     }
 
     const farmer = await prisma.farmer.findUnique({
@@ -38,30 +19,25 @@ export async function POST(request) {
         userId: parseInt(userId)
       }
     });
-    
-    
-  
+
     if (!farmer) {
       return NextResponse.json({ error: 'Farmer profile not found for this user' }, { status: 404 });
     }
 
     const certificateData = {
-      type: formData.get('type'),
-      variety: formData.get('variety'),
+      type: data.type,
+      variety: data.variety,
       latitude,
       longitude,
-      productionQuantity: parseInt(formData.get('productionQuantity'), 10),
-      standards: JSON.stringify(standards),
+      productionQuantity: parseInt(data.productionQuantity, 10),
+      standards: JSON.stringify(data.standards),
       status: 'รอตรวจสอบใบรับรอง',
       registrationDate: new Date(),
-      expiryDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)), // Set expiry to 1 year from now
+      expiryDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
       Users: {
         connect: { id: parseInt(farmer.id, 10) },
       },
-      
     };
-
-
 
     const certificate = await prisma.certificate.create({
       data: certificateData,
@@ -71,7 +47,7 @@ export async function POST(request) {
   } catch (error) {
     console.error("Failed to add certificate:", error);
     return NextResponse.json(
-      { error: "Failed to add certificate" },
+      { error: error.message || "Failed to add certificate" },
       { status: 500 }
     );
   }

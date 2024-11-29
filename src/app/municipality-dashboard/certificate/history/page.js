@@ -44,6 +44,7 @@ const Historycer = () => {
 
   return (
     <div className={styles.container}>
+    <h1 className="text-2xl ">ประวัติการรับรอง</h1><br></br>
       <div className={styles.top}>
         <Search placeholder="ค้นหาผู้ใช้..." />
       </div>

@@ -44,6 +44,7 @@ const Standards = () => {
 
   return (
     <div className={styles.container}>
+    <h1 className="text-2xl ">จัดการมาตรฐาน</h1><br></br>
       <div className={styles.top}>
         <Search placeholder="ค้นหามาตรฐาน..." />
         <Link href="/municipality-dashboard/manage_standards/add">
@@ -54,9 +55,9 @@ const Standards = () => {
         <thead>
           <tr>
             <td>#</td>
-            <td>โลโก้</td>
             <td>ชื่อมาตรฐาน</td>
-            <td>คำอธิบาย</td>
+            <td>โลโก้</td>
+            <td>ข้อมูลมาตรฐานการรับรองสินค้า</td>
             <td>การดำเนินการ</td>
           </tr>
         </thead>
@@ -65,7 +66,7 @@ const Standards = () => {
             standards.map((standard, index) => (
               <tr key={standard.id}>
                 <td>{index + 1}</td>
-
+                <td>{standard.name}</td>
                 <td>
                   <div className={styles.standardsContainer}>
                     <Image
@@ -77,9 +78,7 @@ const Standards = () => {
                     />
                   </div>
                 </td>
-
-                <td>{standard.name}</td>
-                <td>{standard.description}</td>
+                <td>{standard.certificationInfo}</td>
                 <td>
                   <div className={styles.standardsContainer}>
                     <div className={styles.buttons}>

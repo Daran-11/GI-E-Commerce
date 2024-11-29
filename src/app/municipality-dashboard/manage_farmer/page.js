@@ -7,9 +7,28 @@ import Search from "@/app/ui/dashboard/search/search";
 import { MdEdit, MdDelete } from 'react-icons/md';
 
 const ManageFarmer = () => {
-  const [manage_farmer, setManage_farmer] = useState([]); // แก้ให้ชื่อตัวแปรตรงกัน
+  const [manage_farmer, setManage_farmer] = useState([]);
+  const [standards, setStandards] = useState({});
 
-  // เพิ่มฟังก์ชันสำหรับดึงข้อมูล
+  // เพิ่มฟังก์ชันสำหรับดึงข้อมูลมาตรฐานทั้งหมด
+  const fetchStandards = async () => {
+    try {
+      const response = await fetch("/api/standards");
+      if (!response.ok) {
+        throw new Error('Failed to fetch standards');
+      }
+      const data = await response.json();
+      // สร้าง object map ของมาตรฐาน โดยใช้ชื่อมาตรฐานเป็น key
+      const standardsMap = {};
+      data.forEach(standard => {
+        standardsMap[standard.name] = standard.certificationInfo;
+      });
+      setStandards(standardsMap);
+    } catch (error) {
+      console.error("Failed to fetch standards:", error);
+    }
+  };
+
   const fetchFarmers = async () => {
     try {
       const response = await fetch("/api/manage_farmer");
@@ -24,6 +43,7 @@ const ManageFarmer = () => {
   };
 
   useEffect(() => {
+    fetchStandards();
     fetchFarmers();
   }, []);
 
@@ -47,8 +67,16 @@ const ManageFarmer = () => {
     }
   };
 
+  // สร้างฟังก์ชันสำหรับแสดงข้อมูลมาตรฐาน
+  const renderCertificationInfo = (standardName, certificateNumber) => {
+    const certInfo = standards[standardName];
+    if (!certInfo) return certificateNumber;
+    return `${certInfo}: ${certificateNumber}`;
+  };
+
   return (
     <div className={styles.container}>
+    <h1 className="text-2xl ">จัดการเกษตกร</h1><br></br>
       <div className={styles.top}>
         <Search placeholder="ค้นหาเกษตรกร..." />
         <Link href="/municipality-dashboard/manage_farmer/add">
@@ -63,7 +91,7 @@ const ManageFarmer = () => {
             <td>ชนิด</td>
             <td>พันธุ์</td>
             <td>ชื่อมาตรฐาน</td>
-            <td>หมายเลขใบรับรอง</td>
+            <td>ข้อมูลมาตรฐานการรับรองสินค้า</td>
             <td>วันที่อนุมัติ</td>
             <td>การดำเนินการ</td>
           </tr>
@@ -81,11 +109,14 @@ const ManageFarmer = () => {
                       <td>{manage_farmer.certificates[0].type}</td>
                       <td>{manage_farmer.certificates[0].variety}</td>
                       <td>{manage_farmer.certificates[0].standardName}</td>
-                      <td>{manage_farmer.certificates[0].certificateNumber}</td>
+                      <td>{renderCertificationInfo(
+                        manage_farmer.certificates[0].standardName,
+                        manage_farmer.certificates[0].certificateNumber
+                      )}</td>
                       <td>{new Date(manage_farmer.certificates[0].approvalDate).toLocaleDateString()}</td>
                     </>
                   ) : (
-                    <td colSpan={3}>ไม่มีใบรับรอง</td>
+                    <td colSpan={5}>ไม่มีใบรับรอง</td>
                   )}
                   <td>
                     <div className={styles.standardsContainer}>
@@ -107,7 +138,7 @@ const ManageFarmer = () => {
                   </td>
                 </tr>
 
-
+                {/* แสดงใบรับรองที่เหลือ */}
                 {manage_farmer.certificates.slice(1).map((certificate, certIndex) => (
                   <tr key={certIndex}>
                     <td></td>
@@ -115,7 +146,10 @@ const ManageFarmer = () => {
                     <td>{certificate.type}</td>
                     <td>{certificate.variety}</td>
                     <td>{certificate.standardName}</td>
-                    <td>{certificate.certificateNumber}</td>
+                    <td>{renderCertificationInfo(
+                      certificate.standardName,
+                      certificate.certificateNumber
+                    )}</td>
                     <td>{new Date(certificate.approvalDate).toLocaleDateString()}</td>
                     <td></td>
                   </tr>
@@ -124,7 +158,7 @@ const ManageFarmer = () => {
             ))
           ) : (
             <tr>
-              <td colSpan={7}>ไม่พบข้อมูล</td>
+              <td colSpan={8}>ไม่พบข้อมูล</td>
             </tr>
           )}
         </tbody>
