@@ -59,7 +59,7 @@ export async function POST(request) {
   try {
     const data = await request.formData();
     const name = data.get('name');
-    const description = data.get('description');
+    const certificationInfo = data.get('certificationInfo');
     const logo = data.get('logo');
 
     if (!name) {
@@ -74,7 +74,7 @@ export async function POST(request) {
     const newStandard = await prisma.standard.create({
       data: {
         name,
-        description: description || '',
+        certificationInfo: certificationInfo || '',
         logoUrl,
       },
     });
@@ -97,7 +97,7 @@ export async function PUT(request) {
   try {
     const data = await request.formData();
     const name = data.get('name');
-    const description = data.get('description');
+    const certificationInfo = data.get('certificationInfo');
     const logo = data.get('logo');
 
     if (!name) {
@@ -110,7 +110,7 @@ export async function PUT(request) {
 
     let updatedData = {
       name,
-      description: description || '',
+      certificationInfo: certificationInfo || '',
     };
 
     if (logo) {

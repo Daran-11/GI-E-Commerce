@@ -1,12 +1,12 @@
 "use client";
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import styles from '@/app/municipality-dashboard/manage_standards/add/standards.module.css';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 export default function EditStandard({ params }) {
   const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
+  const [certificationInfo, setcertificationInfo] = useState('');
   const [logo, setLogo] = useState(null);
   const [previewUrl, setPreviewUrl] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -21,8 +21,7 @@ export default function EditStandard({ params }) {
         if (response.ok) {
           const data = await response.json();
           setName(data.name);
-          setDescription(data.description);
-          // ใช้ URL จาก Google Cloud Storage โดยตรง
+          setcertificationInfo(data.certificationInfo);
           setPreviewUrl(data.logoUrl);
         } else {
           throw new Error('Failed to fetch standard');
@@ -55,7 +54,7 @@ export default function EditStandard({ params }) {
 
     const formData = new FormData();
     formData.append('name', name);
-    formData.append('description', description);
+    formData.append('certificationInfo', certificationInfo);
     if (logo) {
       formData.append('logo', logo);
     }
@@ -102,11 +101,11 @@ export default function EditStandard({ params }) {
                 />
               </div>
               <div className={styles.formGroup}>
-                <label className={styles.formLabel} htmlFor="description">คำอธิบาย</label>
-                <textarea
-                  id="description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
+                <label className={styles.formLabel} htmlFor="certificationInfo">ข้อมูลมาตรฐานการรับรองสินค้า</label>
+                <input
+                  id="certificationInfo"
+                  value={certificationInfo}
+                  onChange={(e) => setcertificationInfo(e.target.value)}
                   className={styles.formInput}
                 />
               </div>

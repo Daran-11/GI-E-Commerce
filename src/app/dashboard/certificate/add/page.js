@@ -57,6 +57,8 @@ const Register = () => {
     standards: [],
   });
 
+  const [standardsInfo, setStandardsInfo] = useState({});
+
   useEffect(() => {
     const fetchData = async () => {
       if (status === "authenticated" && session?.user?.role === "farmer") {
@@ -78,6 +80,13 @@ const Register = () => {
 
           setTypes(typesData);
           setStandards(standardsData);
+
+          // สร้าง map ของ certificationInfo
+          const infoMap = {};
+          standardsData.forEach(standard => {
+            infoMap[standard.id] = standard.certificationInfo || "เลขที่ใบรับรอง";
+          });
+          setStandardsInfo(infoMap);
         } catch (error) {
           console.error("Error fetching data:", error);
           alert("ไม่สามารถโหลดข้อมูล กรุณาลองใหม่อีกครั้ง");
@@ -89,6 +98,7 @@ const Register = () => {
 
     fetchData();
   }, [status, session?.user?.role]);
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -159,6 +169,7 @@ const Register = () => {
     );
   };
 
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -168,6 +179,7 @@ const Register = () => {
 
     setIsLoading(true);
     try {
+      // เปลี่ยนเป็นส่ง JSON แทน FormData
       const response = await fetch("/api/certificate/add", {
         method: "POST",
         headers: {
@@ -180,7 +192,8 @@ const Register = () => {
       });
 
       if (!response.ok) {
-        throw new Error("ไม่สามารถเพิ่มใบรับรองได้");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "ไม่สามารถเพิ่มใบรับรองได้");
       }
 
       alert("เพิ่มใบรับรองเรียบร้อย");
@@ -377,7 +390,7 @@ const Register = () => {
               ตำแหน่งปัจจุบัน
             </button>
 
-            <p className="section-name">จำนวนผลผลิต (กิโลกรัม)</p>
+            <p className="section-name">จำนวนผลผลิต ต่อปี(กิโลกรัม)</p>
             <input
               name="productionQuantity"
               type="number"
@@ -389,78 +402,89 @@ const Register = () => {
               min="0"
             />
 
-            <p className="section-name">มาตรฐาน</p>
-            <div className="standards-container">
-              {standards.map((standard) => {
-                const isSelected = formData.standards.some(
-                  (s) => s.id === standard.id
-                );
-                const currentStandard = formData.standards.find(
-                  (s) => s.id === standard.id
-                );
+<p className="section-name">มาตรฐาน</p>
+<div className="standards-container">
+  {standards.map((standard) => {
+    const isSelected = formData.standards.some(
+      (s) => s.id === standard.id
+    );
+    const currentStandard = formData.standards.find(
+      (s) => s.id === standard.id
+    );
 
-                return (
-                  <div
-                    key={standard.id}
-                    className={`standard-item-container ${
-                      isSelected ? "selected" : ""
-                    }`}
-                  >
-                    <div className="standard-item-container1">
-                      <label>
-                        <input
-                          type="checkbox"
-                          checked={isSelected}
-                          onChange={(e) =>
-                            handleStandardChange(standard, e.target.checked)
-                          }
-                        />
-                        <span className="standard-logo">
-                          <Image
-                            src={standard.logoUrl}
-                            alt={standard.name}
-                            width={80}
-                            height={80}
-                          />
-                        </span>
-                      </label>
-                    </div>
-                    <span className="standard-name">{standard.name}</span>
-                    {isSelected && (
-                      <>
-                        <input
-                          type="text"
-                          className="form-input1"
-                          placeholder="เลขที่ใบรับรอง"
-                          value={currentStandard?.certNumber || ""}
-                          onChange={(e) =>
-                            handleStandardDetailChange(
-                              standard.id,
-                              "certNumber",
-                              e.target.value
-                            )
-                          }
-                          required
-                        />
-                        <input
-                          type="date"
-                          className="form-input1"
-                          placeholder="วันที่ใบรับรอง"
-                          value={currentStandard?.certDate || ""}
-                          onChange={(e) =>
-                            handleStandardDetailChange(
-                              standard.id,
-                              "certDate",
-                              e.target.value
-                            )
-                          }
-                          required
-                        />
-                      </>
-                    )}
-                  </div>
-                );
-              })}
+    return (
+      <div
+        key={standard.id}
+        className={`standard-item-container ${
+          isSelected ? "selected" : ""
+        }`}
+      >
+        <div className="standard-info">
+          <div className="standard-header">
+            <div className="standard-item-container1">
+              <label>
+                <input
+                  type="checkbox"
+                  checked={isSelected}
+                  onChange={(e) =>
+                    handleStandardChange(standard, e.target.checked)
+                  }
+                />
+                <span className="standard-logo">
+                  <Image
+                    src={standard.logoUrl}
+                    alt={standard.name}
+                    width={80}
+                    height={80}
+                  />
+                </span>
+              </label>
+            </div>
+            <span className="standard-name">{standard.name}</span>
+          </div>
+          
+          <div className="standard-details">
+            <div className="form-group">
+              <label className="form-label">
+                {standardsInfo[standard.id]}
+              </label>
+              <input
+                type="text"
+                className="form-input1"
+                value={currentStandard?.certNumber || ""}
+                onChange={(e) =>
+                  handleStandardDetailChange(
+                    standard.id,
+                    "certNumber",
+                    e.target.value
+                  )
+                }
+                disabled={!isSelected}
+                required={isSelected}
+              />
+            </div>
+            <div className="form-group">
+              <label className="form-label">วันที่ใบรับรอง</label>
+              <input
+                type="date"
+                className="form-input1"
+                value={currentStandard?.certDate || ""}
+                onChange={(e) =>
+                  handleStandardDetailChange(
+                    standard.id,
+                    "certDate",
+                    e.target.value
+                  )
+                }
+                disabled={!isSelected}
+                required={isSelected}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  })}
             </div>
           </div>
 

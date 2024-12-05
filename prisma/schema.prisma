@@ -316,12 +316,12 @@ model Certificate_farmer {
 }
 
 model Standard {
-  id          Int      @id @default(autoincrement())
-  name        String
-  description String?
-  logoUrl     String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id                Int      @id @default(autoincrement())
+  name              String
+  certificationInfo String?
+  logoUrl           String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 }
 
 model Certificate {

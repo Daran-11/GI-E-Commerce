@@ -62,6 +62,7 @@ export default async function UsersByRolePage() {
 
   return (
     <div className={styles.container}>
+    <h1 className="text-2xl ">บัญชีผู้ใช้ทั้งหมด</h1><br></br>
       <table className={styles.table}>
         <thead>
           <tr>

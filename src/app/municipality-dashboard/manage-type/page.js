@@ -62,7 +62,7 @@ const ManageTypePage = () => {
       )}
 
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">จัดการชนิดและสายพันธุ์</h1>
+        <h1 className="text-2xl">จัดการชนิดและสายพันธุ์</h1>
         <Link href="/municipality-dashboard/manage-type/add">
           <button className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition">
             <MdAdd /> เพิ่มชนิดใหม่
