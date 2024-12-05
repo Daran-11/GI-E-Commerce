@@ -40,30 +40,30 @@ export default function AddressSelection({ onChange, disabled = false }) {
   
     const handleAddressChange = (e) => {
       const { name, value } = e.target;
-      setAddressForm(prev => ({
-        ...prev,
-        [name]: value
-      }));
-  
-      // Find the selected location names
-      let province = "", district = "", sub_district = "";
-      if (name === "provinceId") {
-        province = provinces.find(p => p.id === parseInt(value))?.name_th || "";
-      } else if (name === "amphoeId") {
-        district = amphoes.find(a => a.id === parseInt(value))?.name_th || "";
-      } else if (name === "tambonId") {
-        sub_district = tambons.find(t => t.id === parseInt(value))?.name_th || "";
-      }
-  
-      // Pass the complete address data to parent
-      onChange({
-        ...addressForm,
-        [name]: value,
-        province: name === "provinceId" ? province : addressForm.province,
-        district: name === "amphoeId" ? district : addressForm.district,
-        sub_district: name === "tambonId" ? sub_district : addressForm.sub_district,
-        address: addressForm.addressLine,
-        zip_code: addressForm.postalCode
+      setAddressForm(prev => {
+        const newForm = {
+          ...prev,
+          [name]: value
+        };
+    
+        // สร้างข้อมูลที่จะส่งให้ parent
+        const selectedProvince = provinces.find(p => p.id === parseInt(newForm.provinceId))?.name_th || "";
+        const selectedDistrict = amphoes.find(a => a.id === parseInt(newForm.amphoeId))?.name_th || "";
+        const selectedSubDistrict = tambons.find(t => t.id === parseInt(newForm.tambonId))?.name_th || "";
+    
+        const addressData = {
+          address: newForm.addressLine,
+          sub_district: selectedSubDistrict,
+          district: selectedDistrict,
+          province: selectedProvince,
+          zip_code: newForm.postalCode,
+        };
+    
+        // เช็คว่าข้อมูลครบทุกฟิลด์หรือไม่
+        const isComplete = Object.values(addressData).every(value => value?.trim());
+        
+        onChange(addressData, isComplete);
+        return newForm;
       });
     };
   
