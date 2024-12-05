@@ -10,6 +10,7 @@ import { MapContainer, Marker, TileLayer, useMapEvents } from "react-leaflet";
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
+
 // Fix for the missing marker icon in Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -35,6 +36,10 @@ const ApproveCertificatePage = ({ params }) => {
   const [standardsInfo, setStandardsInfo] = useState({});
   const [errors, setErrors] = useState({});
   const [matchFound, setMatchFound] = useState(false);
+  const [certificateValidation, setCertificateValidation] = useState({
+    isValid: false,
+    details: []
+  });
   const router = useRouter();
   const { id } = params;
 
@@ -44,8 +49,7 @@ const ApproveCertificatePage = ({ params }) => {
         const response = await fetch(`/api/approvecertificate/?id=${id}`);
         if (response.ok) {
           const data = await response.json();
-          console.log("Certificate data:", data);
-  
+          
           if (data.Users) {
             setFormData({
               type: data.type || "",
@@ -54,17 +58,16 @@ const ApproveCertificatePage = ({ params }) => {
               longitude: data.longitude || "",
               productionQuantity: data.productionQuantity || "",
               standards: JSON.parse(data.standards) || [],
-              registrationDate: data.registrationDate? new Date(data.registrationDate).toLocaleDateString('th-TH'): "",
-              expiryDate: data.expiryDate? new Date(data.expiryDate).toLocaleDateString('th-TH'): "",
+              registrationDate: data.registrationDate ? new Date(data.registrationDate).toLocaleDateString('th-TH') : "",
+              expiryDate: data.expiryDate ? new Date(data.expiryDate).toLocaleDateString('th-TH') : "",
               status: data.status || "",
               municipalComment: "",
-              farmerName: data.Users.farmerName || "" ,
-              address:data.Users.address || "",
-              phone:data.Users.phone || "",
-              contactLine:data.Users.contactLine || ""
+              farmerName: data.Users.farmerName || "",
+              address: data.Users.address || "",
+              phone: data.Users.phone || "",
+              contactLine: data.Users.contactLine || ""
             });
 
-            // เรียกใช้ fetchUsersData โดยส่งชื่อเกษตรกร
             await fetchUsersData(data.Users.farmerName);
           }
         } else {
@@ -75,42 +78,130 @@ const ApproveCertificatePage = ({ params }) => {
         alert("ไม่สามารถดึงข้อมูลใบรับรองได้");
       }
     };
-  
+
     fetchCertificate();
   }, [id]);
+
+  useEffect(() => {
+    const fetchStandards = async () => {
+      try {
+        const response = await fetch("/api/standards");
+        if (response.ok) {
+          const standardsData = await response.json();
+          const infoMap = {};
+          standardsData.forEach(standard => {
+            infoMap[standard.name] = standard.certificationInfo || "เลขที่ใบรับรอง";
+          });
+          setStandardsInfo(infoMap);
+        }
+      } catch (error) {
+        console.error("Failed to fetch standards:", error);
+      }
+    };
+
+    fetchStandards();
+  }, []);
+
+  useEffect(() => {
+    if (formData.standards.length > 0 && UsersCertificates.length > 0) {
+      validateCertificates();
+    }
+  }, [formData.standards, UsersCertificates]);
+
+  const validateCertificates = () => {
+    if (!formData.standards || !UsersCertificates) {
+      setCertificateValidation({
+        isValid: false,
+        details: [{ message: "ไม่พบข้อมูลใบรับรอง" }]
+      });
+      return false;
+    }
   
+    const validationResults = formData.standards.map(standard => {
+      // ค้นหาใบรับรองที่มีข้อมูลตรงกันทั้งหมด
+      const matchingCert = UsersCertificates.find(cert => {
+        // เช็คเป็นลำดับ
+        const typeMatch = cert.type === formData.type;
+        const varietyMatch = cert.variety === formData.variety;
+        const standardMatch = cert.standardName === standard.name;
+        const certNumberMatch = cert.certificateNumber === standard.certNumber;
+  
+        return typeMatch && varietyMatch && standardMatch && certNumberMatch;
+      });
+  
+      // สร้างข้อความแสดงผลการตรวจสอบ
+      let validationMessage = '';
+      if (!matchingCert) {
+        if (!UsersCertificates.some(cert => cert.type === formData.type)) {
+          validationMessage = `ไม่พบประเภท ${formData.type}`;
+        } else if (!UsersCertificates.some(cert => cert.variety === formData.variety)) {
+          validationMessage = `ไม่พบสายพันธุ์ ${formData.variety}`;
+        } else if (!UsersCertificates.some(cert => cert.standardName === standard.name)) {
+          validationMessage = `ไม่พบมาตรฐาน ${standard.name}`;
+        } else {
+          validationMessage = `เลขที่ใบรับรอง ${standard.certNumber} ไม่ถูกต้อง`;
+        }
+      }
+  
+      return {
+        standardName: standard.name,
+        isValid: !!matchingCert,
+        certNumber: standard.certNumber,
+        message: matchingCert 
+          ? `ใบรับรอง ${standard.name} ข้อมูลถูกต้องครบถ้วน`
+          : validationMessage,
+        details: !matchingCert ? {
+          type: {
+            submitted: formData.type,
+            registered: UsersCertificates.find(c => c.standardName === standard.name)?.type || '-'
+          },
+          variety: {
+            submitted: formData.variety,
+            registered: UsersCertificates.find(c => c.standardName === standard.name)?.variety || '-'
+          },
+          certNumber: {
+            submitted: standard.certNumber,
+            registered: UsersCertificates.find(c => c.standardName === standard.name)?.certificateNumber || '-'
+          }
+        } : null
+      };
+    });
+  
+    const allValid = validationResults.every(result => result.isValid);
+    setCertificateValidation({
+      isValid: allValid,
+      details: validationResults
+    });
+    return allValid;
+  };
+
   const fetchUsersData = async (name) => {
     try {
       console.log("Searching for farmer with name:", name);
-  
       const response = await fetch("/api/manage_farmer", {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
       });
-  
+
       if (!response.ok) {
         throw new Error('ไม่สามารถดึงข้อมูลเกษตรกรได้');
       }
-  
+
       const farmers = await response.json();
       const matchedFarmer = farmers.find(
         (farmer) => farmer.farmerNameApprove?.toLowerCase() === name?.toLowerCase()
       );
-  
+
       if (matchedFarmer) {
         setUsersData(matchedFarmer);
         setMatchFound(true);
-  
+
         try {
           const certsResponse = await fetch(
             `/api/farmer_certificates/${matchedFarmer.id}`,
             {
               method: 'GET',
-              headers: {
-                'Content-Type': 'application/json',
-              },
+              headers: { 'Content-Type': 'application/json' },
             }
           );
           
@@ -121,7 +212,7 @@ const ApproveCertificatePage = ({ params }) => {
             }
             throw new Error('ไม่สามารถดึงข้อมูลใบรับรองได้');
           }
-  
+
           const certsData = await certsResponse.json();
           setUsersCertificates(Array.isArray(certsData) ? certsData : []);
           
@@ -134,7 +225,6 @@ const ApproveCertificatePage = ({ params }) => {
         setUsersData(null);
         setUsersCertificates([]);
       }
-  
     } catch (error) {
       console.error("Farmer data fetch error:", error);
       setMatchFound(false);
@@ -153,10 +243,14 @@ const ApproveCertificatePage = ({ params }) => {
   };
 
   const handleSubmit = async (action) => {
+    if (action === "อนุมัติ" && !certificateValidation.isValid) {
+      alert("ไม่สามารถอนุมัติได้เนื่องจากข้อมูลใบรับรองไม่ตรงกัน");
+      return;
+    }
+
     const newErrors = {};
     if (action === "ไม่อนุมัติ" && !formData.municipalComment) {
-      newErrors.municipalComment =
-        "กรุณากรอกความคิดเห็นเมื่อไม่อนุมัติใบรับรอง";
+      newErrors.municipalComment = "กรุณากรอกความคิดเห็นเมื่อไม่อนุมัติใบรับรอง";
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -179,8 +273,6 @@ const ApproveCertificatePage = ({ params }) => {
         const errorData = await response.json();
         throw new Error(errorData.message || "ไม่สามารถอัพเดตใบรับรอง");
       }
-      const result = await response.json();
-      console.log("Response from server:", result);
 
       alert(
         `ใบรับรอง${
@@ -210,41 +302,54 @@ const ApproveCertificatePage = ({ params }) => {
     ) : null;
   };
 
-  useEffect(() => {
-    // เพิ่มการเรียก API เพื่อดึงข้อมูล standards
-    const fetchStandards = async () => {
-      try {
-        const response = await fetch("/api/standards");
-        if (response.ok) {
-          const standardsData = await response.json();
-          // สร้าง map ของ certificationInfo
-          const infoMap = {};
-          standardsData.forEach(standard => {
-            infoMap[standard.name] = standard.certificationInfo || "เลขที่ใบรับรอง";
-          });
-          setStandardsInfo(infoMap);
-        }
-      } catch (error) {
-        console.error("Failed to fetch standards:", error);
-      }
-    };
-
-    fetchStandards();
-  }, []);
-
+  const ValidationStatus = () => (
+    <div className="mb-4">
+      <h3 className="text-lg font-medium mb-2">สถานะการตรวจสอบใบรับรอง</h3>
+      <div className="space-y-2">
+        {certificateValidation.details.map((detail, index) => (
+          <div
+            key={index}
+            className={`p-4 rounded-md ${
+              detail.isValid ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
+            }`}
+          >
+            <p className="font-medium">{detail.message}</p>
+            {!detail.isValid && detail.details && (
+              <div className="mt-2 text-sm space-y-1">
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <p className="font-medium">ข้อมูลที่ส่งมา:</p>
+                    <p>ประเภท: {detail.details.type.submitted}</p>
+                    <p>สายพันธุ์: {detail.details.variety.submitted}</p>
+                    <p>เลขที่ใบรับรอง: {detail.details.certNumber.submitted}</p>
+                  </div>
+                  <div>
+                    <p className="font-medium">ข้อมูลที่ลงทะเบียน:</p>
+                    <p>ประเภท: {detail.details.type.registered}</p>
+                    <p>สายพันธุ์: {detail.details.variety.registered}</p>
+                    <p>เลขที่ใบรับรอง: {detail.details.certNumber.registered}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 
   return (
     <div className="flex min-h-screen bg-gray-100">
-      {/* Left Side - Original Form */}
+      {/* Left Side - Farmer Information */}
       <div className="w-1/2 p-6">
         <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="mb-6" style={{ fontSize: '1.5rem' }}>ข้อมูลเกษตรกร</h2>
+          <h2 className="mb-6 text-2xl font-semibold">ข้อมูลเกษตรกร</h2>
           {matchFound ? (
             <div>
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <h3 className="text-lg font-medium">
-                    {formData.farmerName} {/* ใช้ชื่อจาก formData แทน */}
+                    {formData.farmerName}
                   </h3>
                   {UsersData && (
                     <div className="text-sm text-gray-600">
@@ -253,7 +358,7 @@ const ApproveCertificatePage = ({ params }) => {
                       <p>Line ID: {formData.contactLine}</p>
                     </div>
                   )}
-              </div>
+                </div>
                 <button
                   onClick={() => setShowCertificates(!showCertificates)}
                   className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors flex items-center space-x-2"
@@ -289,7 +394,7 @@ const ApproveCertificatePage = ({ params }) => {
                         <div className="grid grid-cols-2 gap-4">
                           <div>
                             <p className="text-sm font-medium text-gray-600">
-                              ประเภท
+                              ชนิด
                             </p>
                             <p className="font-medium">{cert.type}</p>
                           </div>
@@ -306,20 +411,17 @@ const ApproveCertificatePage = ({ params }) => {
                             <p className="font-medium">{cert.standardName}</p>
                           </div>
                           <div>
-                          <p className="text-sm font-medium text-gray-600">
-                            {standardsInfo[cert.standardName] || "เลขที่ใบรับรอง"}
-                          </p>
-                          <p className="font-medium">
-                            {cert.certificateNumber}
-                          </p>
+                            <p className="text-sm font-medium text-gray-600">
+                              {standardsInfo[cert.standardName] || "เลขที่ใบรับรอง"}
+                            </p>
+                            <p className="font-medium">
+                              {cert.certificateNumber}
+                            </p>
                           </div>
                         </div>
                         <div className="mt-2 pt-2 border-t">
                           <p className="text-sm text-gray-600">
-                            วันที่อนุมัติ:{" "}
-                            {new Date(cert.approvalDate).toLocaleDateString(
-                              "th-TH"
-                            )}
+                            วันที่อนุมัติ: {new Date(cert.approvalDate).toLocaleDateString("th-TH")}
                           </p>
                         </div>
                       </div>
@@ -348,7 +450,7 @@ const ApproveCertificatePage = ({ params }) => {
                 />
               </svg>
               <p className="text-gray-600 text-lg">
-              ไม่พบรายชื่อเกษตรกร: {formData.farmerName}
+                ไม่พบรายชื่อเกษตรกร: {formData.farmerName}
               </p>
               <p className="text-gray-500 text-sm mt-2">
                 กรุณาตรวจสอบข้อมูลเกษตรกรอีกครั้ง
@@ -357,11 +459,17 @@ const ApproveCertificatePage = ({ params }) => {
           )}
         </div>
       </div>
-      {/* Right Side - Users Details */}
+
+      {/* Right Side - Certificate Details */}
       <div className="w-1/2 p-6">
         <div className="bg-white rounded-lg shadow p-6">
           <h1 className="text-2xl mb-6">ตรวจสอบใบรับรอง</h1>
+          
+          {/* แสดงผลการตรวจสอบใบรับรอง */}
+          {matchFound && <ValidationStatus />}
+
           <div className="space-y-4">
+            {/* ข้อมูลพื้นฐาน */}
             <div className="form-group">
               <label className="block text-sm font-medium mb-2">
                 ชื่อ-นามสกุล
@@ -427,42 +535,39 @@ const ApproveCertificatePage = ({ params }) => {
               />
             </div>
 
+
+            {/* รายละเอียดใบรับรอง */}
             <div className="form-group">
               <label className="block text-sm font-medium mb-2">มาตรฐาน</label>
               <div className="grid grid-cols-2 gap-4">
-                {formData.standards && formData.standards.length > 0 ? (
-                  formData.standards.map((standard, index) => (
-                    <div key={index} className="border rounded-lg p-4">
-                      <div className="flex flex-col items-center">
-                        <div className="w-20 h-20 mb-2">
-                          <Image
-                            src={standard.logo}
-                            alt={standard.name}
-                            width={80}
-                            height={80}
-                            className="object-contain"
-                          />
-                        </div>
-                        <h3 className="font-medium text-center">
-                          {standard.name}
-                        </h3>
-                        <p className="text-sm text-gray-600">
-                          {standardsInfo[standard.name] || "เลขที่ใบรับรอง"}: {standard.certNumber}
-                        </p>
-                        <p className="text-sm text-gray-600">
-                          วันที่: {standard.certDate}
-                        </p>
+                {formData.standards?.map((standard, index) => (
+                  <div key={index} className="border rounded-lg p-4">
+                    <div className="flex flex-col items-center">
+                      <div className="w-20 h-20 mb-2">
+                        <Image
+                          src={standard.logo}
+                          alt={standard.name}
+                          width={80}
+                          height={80}
+                          className="object-contain"
+                        />
                       </div>
+                      <h3 className="font-medium text-center">
+                        {standard.name}
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        {standardsInfo[standard.name] || "เลขที่ใบรับรอง"}: {standard.certNumber}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        วันที่:{new Date(standard.certDate).toLocaleDateString("th-TH")}
+                      </p>
                     </div>
-                  ))
-                ) : (
-                  <div className="col-span-2 text-center py-4 text-gray-500">
-                    ไม่พบข้อมูลมาตรฐาน
                   </div>
-                )}
+                ))}
               </div>
             </div>
 
+            {/* ปุ่มดำเนินการ */}
             <div className="flex space-x-4">
               <button
                 type="button"
@@ -474,16 +579,20 @@ const ApproveCertificatePage = ({ params }) => {
               <button
                 type="button"
                 onClick={() => handleSubmit("อนุมัติ")}
-                className="flex-1 bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 transition-colors"
+                disabled={!certificateValidation.isValid || !matchFound}
+                className={`flex-1 text-white py-2 px-4 rounded-md transition-colors ${
+                  certificateValidation.isValid && matchFound
+                    ? 'bg-green-500 hover:bg-green-600'
+                    : 'bg-gray-400 cursor-not-allowed'
+                }`}
               >
                 อนุมัติใบรับรอง
               </button>
-              
             </div>
 
-            {/* Display comment field conditionally */}
+            {/* Modal สำหรับกรอกความคิดเห็น */}
             {showCommentField && (
-              <div className="fixed inset-0 z-40  flex items-center justify-center bg-black bg-opacity-50">
+              <div className="fixed inset-0 z-40 flex items-center justify-center bg-black bg-opacity-50">
                 <div className="bg-white rounded-lg p-6 w-1/3">
                   <label className="block text-sm font-medium mb-2">
                     ความคิดเห็น (เหตุผลที่ไม่อนุมัติ)
@@ -505,18 +614,17 @@ const ApproveCertificatePage = ({ params }) => {
                     <button
                       type="button"
                       onClick={() => setShowCommentField(false)}
-                      className="ml-2 bg-gray-300 text-black py-2 px-4 rounded-md hover:bg-gray-400 transition-colors"
+                      className="mr-2 px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
                     >
                       ยกเลิก
                     </button>
                     <button
                       type="button"
                       onClick={() => handleSubmit("ไม่อนุมัติ")}
-                      className="bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600 transition-colors"
+                      className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
                     >
                       ยืนยันการไม่อนุมัติ
                     </button>
-                    
                   </div>
                 </div>
               </div>
@@ -524,7 +632,6 @@ const ApproveCertificatePage = ({ params }) => {
           </div>
         </div>
       </div>
-
     </div>
   );
 };
