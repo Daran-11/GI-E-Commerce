@@ -22,8 +22,10 @@ export default function RegisterFarmer() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const [isAddressComplete, setIsAddressComplete] = useState(false);
 
-  const handleAddressChange = (addressData) => {
+  const handleAddressChange = (addressData, isComplete) => {
+    setIsAddressComplete(isComplete);
     setFormData(prev => ({
       ...prev,
       address: addressData.address,
@@ -61,9 +63,7 @@ export default function RegisterFarmer() {
       return false;
     }
   
-    // ตรวจสอบข้อมูลที่อยู่จาก formData แทน selectedAddress
-    if (!formData.address || !formData.sub_district || !formData.district || 
-        !formData.province || !formData.zip_code) {
+    if (!isAddressComplete) {
       setError("กรุณากรอกข้อมูลที่อยู่ให้ครบถ้วน");
       return false;
     }
@@ -116,21 +116,34 @@ export default function RegisterFarmer() {
     }
   
     setLoading(true);
-  
     try {
+      // สร้าง object ข้อมูลใหม่แทนการใช้ formData โดยตรง
+      const submitData = {
+        farmerName: `${firstName} ${lastName}`.trim(),
+        userId: formData.userId,
+        phone: formData.phone,
+        contactLine: formData.contactLine,
+        // ข้อมูลที่อยู่
+        address: formData.address,
+        sub_district: formData.sub_district,
+        district: formData.district,
+        province: formData.province,
+        zip_code: formData.zip_code
+      };
+  
+      // ตรวจสอบข้อมูลก่อนส่ง
+      if (!submitData.address || !submitData.sub_district || 
+          !submitData.district || !submitData.province || 
+          !submitData.zip_code) {
+        setError("กรุณากรอกข้อมูลที่อยู่ให้ครบถ้วน");
+        setLoading(false);
+        return;
+      }
+  
       const response = await fetch("/api/register_farmer", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...formData,
-          farmerName: `${firstName} ${lastName}`.trim(),
-          // ใช้ข้อมูลจาก formData แทน selectedAddress
-          address: formData.address,
-          sub_district: formData.sub_district,
-          district: formData.district,
-          province: formData.province,
-          zip_code: formData.zip_code,
-        }),
+        body: JSON.stringify(submitData)
       });
   
       const data = await response.json();
@@ -144,6 +157,7 @@ export default function RegisterFarmer() {
         setError(data.message || "เกิดข้อผิดพลาดในการลงทะเบียน");
       }
     } catch (error) {
+      console.error('Submit error:', error);
       setError("เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์");
     } finally {
       setLoading(false);
@@ -206,7 +220,10 @@ export default function RegisterFarmer() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   ที่อยู่ <span className="text-red-500">*</span>
                 </label>
-                <AddressRegisterFarmer onChange={handleAddressChange} />
+                <AddressRegisterFarmer
+                  onChange={(data, isComplete) => handleAddressChange(data, isComplete)}
+                  disabled={loading}
+                />
               </div>
             </div>
 
