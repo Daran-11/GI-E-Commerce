@@ -12,8 +12,12 @@ const prompt = Prompt({
   weight: ['300', '400'],
 });
 
+
+
 export default async function RootLayout({ children }) {
+
   const session = await getServerSession();
+
 
   return (
     <html lang="th">
@@ -24,9 +28,9 @@ export default async function RootLayout({ children }) {
       <body className={`${prompt.className} bg-[#f1f1f1] m-0 p-0`}>
         <SessionProvider session={session}>
           <PlausibleProvider
-            domain="gipineapple" // Ensure this matches your actual production domain
-            trackLocalhost={true} // Allows tracking while developing on localhost
-            enabled={true}
+            domain="cri-gi-pineapple-851653706332.asia-southeast1.run.app" // Ensure this matches your actual production domain
+            trackLocalhost={false} // Allows tracking while developing on localhost
+            enabled={false}
             taggedEvents={true}
           >
             <ClientLayout session={session}>

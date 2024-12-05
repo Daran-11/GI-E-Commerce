@@ -1,5 +1,4 @@
 "use client";
-import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
@@ -18,12 +17,18 @@ const TileLayer = dynamic(() => import("react-leaflet").then(mod => mod.TileLaye
 const Marker = dynamic(() => import("react-leaflet").then(mod => mod.Marker), { ssr: false });
 const useMapEvents = dynamic(() => import("react-leaflet").then(mod => mod.useMapEvents), { ssr: false });
 // Fix for Leaflet marker icon
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: markerIcon2x.src,
-  iconUrl: markerIcon.src,
-  shadowUrl: markerShadow.src
-});
+
+// Leaflet configuration
+const L = typeof window !== "undefined" ? require("leaflet") : null;
+if (L) {
+  delete L.Icon.Default.prototype._getIconUrl;
+  L.Icon.Default.mergeOptions({
+    iconRetinaUrl: markerIcon2x.src,
+    iconUrl: markerIcon.src,
+    shadowUrl: markerShadow.src
+  });
+}
+
 
 // Loading Component
 const Loading = () => {

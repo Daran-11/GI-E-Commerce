@@ -6,7 +6,9 @@ import path from "path";
 import prisma from "../../../../../../../lib/prisma";
 
 // Initialize Google Cloud Storage client
-const storage = new Storage();
+const storage = new Storage({
+  keyFile: process.env.GOOGLE_APPLICATION_CREDENTIALS, // ระบุพาธของไฟล์ service account
+});
 const bucketName = 'gipineapple'; // เปลี่ยนเป็นชื่อของ bucket ของคุณ
 
 // Helper function to handle file uploads to Google Cloud Storage

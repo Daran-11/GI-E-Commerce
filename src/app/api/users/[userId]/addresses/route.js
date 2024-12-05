@@ -1,4 +1,4 @@
-// /pages/api/users/[userId]/addresses.js
+// /api/users/[userId]/addresses.js
 
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { getServerSession } from 'next-auth';
@@ -6,20 +6,18 @@ import { NextResponse } from 'next/server';
 import prisma from '../../../../../../lib/prisma';
 
 export async function GET(req, { params }) {
-  const session = await getServerSession({ req, ...authOptions });
 
-  console.log('chk Session for addresses:', session); // Debug session
-  console.log('User ID:', session?.user?.id); // Debug user ID
-
-  if (!session) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
 
   const { userId } = params;
 
-  if (session.user.id !== parseInt(userId)) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+
+  const session = await getServerSession(authOptions);
+  if (!session || session.user.id !== parseInt(userId, 10)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  console.log('chk Session for addresses:', session); // Debug session
+  console.log('User ID:', session?.user?.id); // Debug user ID
+
 
   try {
     const addresses = await prisma.address.findMany({

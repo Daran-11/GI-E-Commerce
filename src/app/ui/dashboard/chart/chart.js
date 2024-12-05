@@ -1,26 +1,25 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import styles from "./chart.module.css";
+import { useEffect, useState } from "react";
 import {
-  AreaChart,
   Area,
+  AreaChart,
+  Legend,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
 } from "recharts";
+import styles from "./chart.module.css";
 
-const siteId = process.env.NEXT_PUBLIC_PLAUSIBLE_SITE_ID;
-const apiKey = process.env.NEXT_PUBLIC_PLAUSIBLE_API_KEY;
+const siteId = "cri-gi-pineapple-851653706332.asia-southeast1.run.app" // Access the environment variable
+const apiKey = "puRJOYBRiOuELk89pRC1Nka8r5OkOcbYJRVJinl3MNf67hewtEG6aHZPyFisgrrk"
 
 
 const Chart = () => {
   const [data, setData] = useState([]);
-
+  const period = "month";
   const fetchData = async () => {
     try {
-      const period = "7d";
 
       // Fetch timeseries data for visitors
       const visitorsResponse = await fetch(
@@ -42,7 +41,6 @@ const Chart = () => {
         date: item.date,
         visitors: item.visitors,
       }));
-
       // Fetch total page views for the same period
       const pageViewsResponse = await fetch(
         `https://plausible.io/api/v1/stats/timeseries?site_id=${siteId}&period=${period}&metrics=pageviews`,
@@ -92,7 +90,7 @@ const Chart = () => {
 
   return (
     <div className={styles.container}>
-      <h2 className={styles.title}>สรุปรายสัปดาห์</h2>
+      <h2 className={styles.title}>สรุปรายเดือน</h2>
       <ResponsiveContainer width="100%" height={400}>
         <AreaChart
           data={data}

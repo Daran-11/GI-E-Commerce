@@ -48,7 +48,7 @@ function Purchases() {
         try {
           if (session?.user?.id) {
             const response = await fetch(
-              `http://localhost:3000/api/users/${session.user.id}/purchases?page=${currentPage}&limit=${itemsPerPage}&status=${initialFilter}`
+              `/api/users/${session.user.id}/purchases?page=${currentPage}&limit=${itemsPerPage}&status=${initialFilter}`
             );
             if (response.ok) {
               const data = await response.json();

@@ -9,19 +9,13 @@ export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
   const [cartItemCount, setCartItemCount] = useState(0);
 
-  useEffect(() => {
+
     const fetchCartItems = async () => {
-      if (status === 'authenticated' && session) {
-        const response = await fetch('/api/auth/cart', {
-          headers: {
-            'Cache-Control': 'no-cache',
-          },
-        });
+      if (status === 'authenticated' ) {
+        const response = await fetch('/api/auth/cart');
         if (response.ok) {
           const data = await response.json();
-
-          setCartItems(data);
-
+          setCartItems(data);         
           const uniqueItemsCount = new Set(data.map(item => item.productId)).size;
           setCartItemCount(Math.min(uniqueItemsCount, 99));
         }
@@ -33,14 +27,27 @@ export const CartProvider = ({ children }) => {
       }
     };
 
-    fetchCartItems();
-  }, [ session ]);
+    const clearCartItems = async (productId) => {
+      const response = await fetch('/api/auth/cart/delete', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId }),
+      });
+      if (response.ok) {
+        await fetchCartItems(); // Refresh cart after deletion
+      }
+    };
+
 
   useEffect(() => {
-    if (session) {
+    fetchCartItems();
+  }, []);
+
+  useEffect(() => {
+    if (status ==='authenticated') {
       syncCartWithServer(session);
     }
-  }, [session]);
+  }, [status]);
 
   // ใส่ตัวเช็คว่าจำนวนจะเกินไหมใน syncCartwithServer
   const syncCartWithServer = async (session) => {
@@ -69,6 +76,7 @@ export const CartProvider = ({ children }) => {
       if (response.ok) {
         const data = await response.json();
         setCartItems(data); // Update state with server data
+        console.log("synce with server finished, cartItems:",cartItems);
         const uniqueItemsCount = new Set(data.map(item => item.productId)).size;
         setCartItemCount(Math.min(uniqueItemsCount, 99)); // Update count
       }
@@ -113,7 +121,7 @@ export const CartProvider = ({ children }) => {
           return updatedItems;
         });
       }
-      if (session) {
+      if (status === 'authenticated') {
         syncCartWithServer(session);
       }
     } else {
@@ -148,6 +156,7 @@ export const CartProvider = ({ children }) => {
         body: JSON.stringify({ productId }),
       }).then((response) => {
         if (response.ok) {
+          localStorage.removeItem('cart');
           setCartItems(prevItems => prevItems.filter(item => item.productId !== productId));
           setCartItemCount(prevCount => prevCount - 1);
         }
@@ -194,7 +203,7 @@ export const CartProvider = ({ children }) => {
   };
 
   return (
-    <CartContext.Provider value={{ cartItems, cartItemCount, setCartItems, setCartItemCount, addItemToCart, removeItemFromCart, updateItemQuantity }}>
+    <CartContext.Provider value={{ cartItems, cartItemCount, setCartItems, setCartItemCount, addItemToCart, removeItemFromCart, updateItemQuantity, clearCartItems  }}>
       {children}
     </CartContext.Provider>
   );

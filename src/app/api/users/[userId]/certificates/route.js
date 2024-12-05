@@ -25,7 +25,7 @@ export async function GET(req, { params }) {
         const certificates = await prisma.certificate.findMany({
             where: {
                 farmerId: farmer.id,
-                status: "อนุมัติ",
+                status: "ได้รับการรับรอง",
             },
             select: {
                 id: true,

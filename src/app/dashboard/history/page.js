@@ -1,11 +1,11 @@
 "use client";
+import styles from "@/app/ui/dashboard/products/products.module.css";
 import Search from "@/app/ui/dashboard/search/search";
+import VisibilityRoundedIcon from '@mui/icons-material/VisibilityRounded';
+import { IconButton, Tooltip } from '@mui/material';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import styles from "@/app/ui/dashboard/products/products.module.css";
-import { Box, Button, FormControl, IconButton, InputLabel, MenuItem, Modal, Select, TextField, Tooltip } from '@mui/material';
-import VisibilityRoundedIcon from '@mui/icons-material/VisibilityRounded';
 
 export default function History() {
   const { data: session, status } = useSession();
@@ -14,27 +14,39 @@ export default function History() {
   const router = useRouter();
 
   useEffect(() => {
-    if (status === 'authenticated') {
-      // Fetch orders only when the session is available and the user is authenticated
+    if (status === 'authenticated' && session?.user?.id) {
       fetchOrders(session.user.id);
     }
   }, [session, status]);
 
+
+  const [error, setError] = useState(null);
+
   const fetchOrders = async (userId) => {
+    if (!userId) {
+      setError("User ID is missing");
+      setLoading(false);
+      return;
+    }
+
     try {
       const res = await fetch(`/api/users/${userId}/farmer/history`);
       if (!res.ok) {
         throw new Error('Failed to fetch orders');
       }
       const data = await res.json();
+
       setOrders(data);
-      console.log("This is the data from history", data)
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      console.error(err);
+
     } finally {
       setLoading(false);
     }
   };
+
+
+
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -61,10 +73,7 @@ export default function History() {
   };
 
   if (status === 'loading' || loading) {
-    return <div className="flex flex-col items-center justify-center min-h-screen">
-    <div className="w-12 h-12 border-4 border-t-green-500 border-r-green-500 border-b-green-200 border-l-green-200 rounded-full animate-spin"></div>
-    <p className="mt-4 text-gray-600">กำลังโหลดข้อมูล...</p>
-  </div>;
+    return <div>Loading...</div>;
   }
 
   if (status === 'unauthenticated') {
