@@ -107,6 +107,7 @@ const Certificate = () => {
 
   return (
     <div className={styles.container}>
+    <h1 className="text-2xl ">ตรวจสอบย้อนกลับ</h1><br></br>
       <div className={styles.top}>
         <Search placeholder="ค้นหา QR Code..." />
       </div>

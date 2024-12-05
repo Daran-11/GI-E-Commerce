@@ -6,7 +6,7 @@ import styles from '@/app/municipality-dashboard/manage_standards/add/standards.
 
 export default function AddStandard() {
   const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
+  const [certificationInfo, setCertificationInfo] = useState('');
   const [logo, setLogo] = useState(null);
   const [previewUrl, setPreviewUrl] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -28,7 +28,7 @@ export default function AddStandard() {
 
     const formData = new FormData();
     formData.append('name', name);
-    formData.append('description', description);
+    formData.append('certificationInfo', certificationInfo);
     if (logo) {
       formData.append('logo', logo);
     }
@@ -57,7 +57,7 @@ export default function AddStandard() {
   return (
     <div className={styles.container}>
       <div className={styles.mainContent}>
-        <h1 className={styles.title}>เพิ่มมาตรฐาน</h1>
+      <h1 className="text-2xl ">เพิ่มรายชื่อเกษตรกร</h1>
         <h3 className={styles.subtitle}>ข้อมูลมาตรฐานการรับรองสินค้า</h3>
         {error && <p className={styles.errorMessage}>{error}</p>}
         <form onSubmit={handleSubmit}>
@@ -68,6 +68,7 @@ export default function AddStandard() {
                 <input
                   type="text"
                   id="name"
+                  placeholder="ชื่อมาตรฐาน"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
@@ -75,11 +76,15 @@ export default function AddStandard() {
                 />
               </div>
               <div className={styles.formGroup}>
-                <label className={styles.formLabel} htmlFor="description">คำอธิบาย</label>
-                <textarea
-                  id="description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
+                <label className={styles.formLabel} htmlFor="certificationInfo">
+                ข้อมูลมาตรฐานการรับรองสินค้า
+                </label>
+                <input
+                  id="certificationInfo"
+                  placeholder="เช่น GI: ลำดับที่ในใบรับรอง, GAP: รหัสเเปลง"
+                  value={certificationInfo}
+                  onChange={(e) => setCertificationInfo(e.target.value)}
+                  required
                   className={styles.formInput}
                 />
               </div>

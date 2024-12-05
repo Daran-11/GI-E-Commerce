@@ -3,23 +3,36 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { getSession } from "next-auth/react";
+import AddressRegisterFarmer from "@/components/AddressRegisterFarmer"; // ปรับ path ตามโครงสร้างโปรเจค
 
 export default function RegisterFarmer() {
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [formData, setFormData] = useState({
-    farmerName: "",
+    phone: "",
+    contactLine: "",
+    userId: "",
     address: "",
     sub_district: "",
     district: "",
     province: "",
-    zip_dode: "",
-    phone: "",
-    contactLine: "",
-    userId: "", // เพิ่มฟิลด์ userId
+    zip_code: "",
   });
-
+  const [selectedAddress, setSelectedAddress] = useState(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  const handleAddressChange = (addressData) => {
+    setFormData(prev => ({
+      ...prev,
+      address: addressData.address,
+      sub_district: addressData.sub_district,
+      district: addressData.district,
+      province: addressData.province,
+      zip_code: addressData.zip_code,
+    }));
+  };
 
   useEffect(() => {
     const fetchUserId = async () => {
@@ -27,7 +40,7 @@ export default function RegisterFarmer() {
       if (session) {
         setFormData((prev) => ({
           ...prev,
-          userId: session.user.id, // ดึง userId จาก session และบันทึกลงใน formData
+          userId: session.user.id,
         }));
       }
     };
@@ -43,70 +56,99 @@ export default function RegisterFarmer() {
   };
 
   const validateForm = () => {
-    const requiredFields = [
-      "farmerName", "address",
-      "sub_district", "district", "province",
-      "zip_code", "phone", "contactLine",
-    ];
-
-    const emptyFields = requiredFields.filter((field) => !formData[field]);
-    if (emptyFields.length > 0) {
-      setError("กรุณากรอกข้อมูลให้ครบทุกช่อง");
+    if (!firstName.trim() || !lastName.trim()) {
+      setError("กรุณากรอกชื่อและนามสกุล");
       return false;
     }
-
+  
+    // ตรวจสอบข้อมูลที่อยู่จาก formData แทน selectedAddress
+    if (!formData.address || !formData.sub_district || !formData.district || 
+        !formData.province || !formData.zip_code) {
+      setError("กรุณากรอกข้อมูลที่อยู่ให้ครบถ้วน");
+      return false;
+    }
+  
+    if (!formData.phone || !formData.contactLine) {
+      setError("กรุณากรอกข้อมูลให้ครบถ้วน");
+      return false;
+    }
+  
     const phoneRegex = /^[0-9]{10}$/;
     if (!phoneRegex.test(formData.phone)) {
       setError("กรุณากรอกเบอร์โทรศัพท์ให้ถูกต้อง (ตัวเลข 10 หลัก)");
       return false;
     }
-
-    const zip_codeRegex = /^[0-9]{5}$/;
-    if (!zip_codeRegex.test(formData.zip_code)) {
+  
+    const zipCodeRegex = /^[0-9]{5}$/;
+    if (!zipCodeRegex.test(formData.zip_code)) {
       setError("กรุณากรอกรหัสไปรษณีย์ให้ถูกต้อง (ตัวเลข 5 หลัก)");
       return false;
     }
-
+  
     return true;
   };
 
   const [success, setSuccess] = useState(false);
 
-  const handleSubmit = async (e) => {
-      e.preventDefault();
-      setError("");
-      setSuccess(false);
-  
-      if (!validateForm()) {
-        return;
-      }
-  
-      setLoading(true);
-  
-      try {
-        const response = await fetch("/api/register_farmer", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
-        });
-  
-        const data = await response.json();
-  
-        if (response.ok) {
-          setSuccess(true);
-          // รอ 3 วินาทีก่อน redirect
-          setTimeout(() => {
-            router.push("/");
-          }, 3000);
-        } else {
-          setError(data.message || "เกิดข้อผิดพลาดในการลงทะเบียน");
+  const handleAddressSelect = async () => {
+    // รอให้ที่อยู่ถูกบันทึกและได้รับการอัพเดท
+    try {
+      const res = await fetch(`/api/users/${formData.userId}/addresses?default=true`);
+      if (res.ok) {
+        const addresses = await res.json();
+        const defaultAddress = addresses.find(addr => addr.isDefault);
+        if (defaultAddress) {
+          setSelectedAddress(defaultAddress);
         }
-      } catch (error) {
-        setError("เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์");
-      } finally {
-        setLoading(false);
       }
-    };
+    } catch (error) {
+      console.error("Failed to fetch default address:", error);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setSuccess(false);
+  
+    if (!validateForm()) {
+      return;
+    }
+  
+    setLoading(true);
+  
+    try {
+      const response = await fetch("/api/register_farmer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...formData,
+          farmerName: `${firstName} ${lastName}`.trim(),
+          // ใช้ข้อมูลจาก formData แทน selectedAddress
+          address: formData.address,
+          sub_district: formData.sub_district,
+          district: formData.district,
+          province: formData.province,
+          zip_code: formData.zip_code,
+        }),
+      });
+  
+      const data = await response.json();
+  
+      if (response.ok) {
+        setSuccess(true);
+        setTimeout(() => {
+          router.push("/");
+        }, 3000);
+      } else {
+        setError(data.message || "เกิดข้อผิดพลาดในการลงทะเบียน");
+      }
+    } catch (error) {
+      setError("เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
@@ -125,105 +167,49 @@ export default function RegisterFarmer() {
           ลงทะเบียนเกษตรกร
         </h2>
       </div>
-  
+
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-2xl">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
           <form className="space-y-6" onSubmit={handleSubmit}>
-            {/* ส่วนข้อมูลส่วนตัว */}
-            
+            {/* ส่วนชื่อ-นามสกุล */}
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                  ชื่อ-นามสกุล <span className="text-red-500">*</span>
+                  ชื่อ <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
-                  name="farmerName"
-                  value={formData.farmerName}
-                  onChange={handleChange}
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                   required
                 />
               </div>
-          
-  
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  นามสกุล <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  required
+                />
+              </div>
+            </div>
+
             {/* ส่วนที่อยู่ */}
             <div className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   ที่อยู่ <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="text"
-                  name="address"
-                  value={formData.address}
-                  onChange={handleChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                  required
-                />
-              </div>
-  
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    ตำบล <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="sub_district"
-                    value={formData.sub_district}
-                    onChange={handleChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                    required
-                  />
-                </div>
-  
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    อำเภอ <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="district"
-                    value={formData.district}
-                    onChange={handleChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                    required
-                  />
-                </div>
-              </div>
-  
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    จังหวัด <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="province"
-                    value={formData.province}
-                    onChange={handleChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                    required
-                  />
-                </div>
-  
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    รหัสไปรษณีย์ <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="zip_code"
-                    value={formData.zip_code}
-                    onChange={handleChange}
-                    maxLength="5"
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                    required
-                  />
-                </div>
+                <AddressRegisterFarmer onChange={handleAddressChange} />
               </div>
             </div>
-  
+
             {/* ส่วนข้อมูลการติดต่อ */}
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               <div>
@@ -240,7 +226,7 @@ export default function RegisterFarmer() {
                   required
                 />
               </div>
-  
+
               <div>
                 <label className="block text-sm font-medium text-gray-700">
                   Line ID <span className="text-red-500">*</span>
@@ -255,6 +241,8 @@ export default function RegisterFarmer() {
                 />
               </div>
             </div>
+
+            {/* แสดงข้อความสำเร็จและข้อผิดพลาด */}
             {success && (
               <div className="rounded-md bg-green-50 p-4 mb-4">
                 <div className="flex">
@@ -274,6 +262,7 @@ export default function RegisterFarmer() {
                 </div>
               </div>
             )}
+
             {error && (
               <div className="rounded-md bg-red-50 p-4">
                 <div className="flex">
@@ -288,7 +277,7 @@ export default function RegisterFarmer() {
                 </div>
               </div>
             )}
-  
+
             <div className="flex justify-center">
               <button
                 type="submit"
@@ -303,4 +292,4 @@ export default function RegisterFarmer() {
       </div>
     </div>
   );
-}  
+}

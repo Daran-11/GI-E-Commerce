@@ -60,32 +60,7 @@ export default function UserDetails({ user: initialUser }) {
 
   return (
     <div className="bg-white shadow-lg rounded-lg p-6">
-      <h2 className="text-2xl font-bold mb-6">ข้อมูลผู้ใช้</h2>
 
-      {/* ข้อมูลพื้นฐาน */}
-      <div className="mb-8">
-        <h3 className="text-xl font-semibold mb-4">ข้อมูลทั่วไป</h3>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <p className="text-gray-600">ชื่อ-นามสกุล:</p>
-            <p className="font-medium">{user.name}</p>
-          </div>
-          <div>
-            <p className="text-gray-600">อีเมล:</p>
-            <p className="font-medium">{user.email}</p>
-          </div>
-          <div>
-            <p className="text-gray-600">เบอร์โทรศัพท์:</p>
-            <p className="font-medium">{user.phone}</p>
-          </div>
-          <div>
-            <p className="text-gray-600">สถานะ:</p>
-            <p className={`font-medium ${user.role === 'customer' ? 'text-yellow-600' : 'text-green-600'}`}>
-              {user.role === 'customer' ? 'รอการอนุมัติ' : 'เกษตรกร'}
-            </p>
-          </div>
-        </div>
-      </div>
 
       {/* ข้อมูลเกษตรกร */}
       <div className="mb-8">
