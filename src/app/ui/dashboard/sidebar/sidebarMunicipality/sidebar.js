@@ -56,6 +56,11 @@ const menuItems = [
         icon: <MdSupervisedUserCircle />,
       },
       {
+        title: "จัดการชนิดของสินค้า",
+        path: "/municipality-dashboard/manage-type",
+        icon: <MdSupervisedUserCircle />,
+      },
+      {
         title: "ตรวจสอบใบรับรอง",
         path: "/municipality-dashboard/certificate",
         icon: <MdAssignment />,

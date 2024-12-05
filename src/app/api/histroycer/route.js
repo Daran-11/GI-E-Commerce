@@ -108,10 +108,10 @@ export async function PUT(request) {
 
     let status;
 
-    if (action === "อนุมัติ") {
-      status = "อนุมัติ";
-    } else if (action === "ไม่อนุมัติ") {
-      status = "ไม่อนุมัติ";
+    if (action === "ได้รับการรับรอง") {
+      status = "ได้รับการรับรอง";
+    } else if (action === "ไม่ผ่านการรับรอง") {
+      status = "ไม่ผ่านการรับรอง";
       if (!municipalComment) {
         return NextResponse.json({ error: "Comment is required for rejection" }, { status: 400 });
       }
