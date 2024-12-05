@@ -41,13 +41,13 @@ const ProductCard = ({products}) => {
         {products.map((product) => (
           
               <div key={product.ProductID} className="Card flex-col w-full justify-center h-fit lg:h-[350px] xl:h-full rounded-2xl pb-2 bg-[#FBFBFB] shadow-lg transition duration-500 ease-in-out transform hover:scale-105 ">
-                  <Link key={product.ProductID} href={`/product/${product.ProductID}${product.ProductName}${product.ProductType}`}>
+                  <Link key={product.ProductID} href={`/product/${product.ProductID}`}>
                   
 
                   <div className="w-full h-[120px] md:h-[120px] xl:h-[160px] flex justify-center items-center ">
                   {product.images?.[0]?.imageUrl ? (
                     <Image
-                      src={product.images[0].imageUrl || "/phulae.jpg"} // Fallback to a default image
+                      src={product.images[0].imageUrl} 
                       alt={product.ProductName}
                       width={100}
                       height={100}
@@ -60,6 +60,10 @@ const ProductCard = ({products}) => {
                     <Image
                       className="w-full h-full object-cover object-center rounded-t-2xl"
                       src="/phulae.jpg"
+                      width={100}
+                      height={100}
+                      sizes="50vw"
+                      loading="lazy"
                       alt="Card Image"
                     />// Fallback if image fails to load
                   )}

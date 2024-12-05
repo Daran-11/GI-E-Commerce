@@ -1,10 +1,10 @@
 "use client"
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { MdSupervisedUserCircle } from "react-icons/md";
 import styles from "./card.module.css";
 
-const siteId = process.env.NEXT_PUBLIC_PLAUSIBLE_SITE_ID;
-const apiKey = process.env.NEXT_PUBLIC_PLAUSIBLE_API_KEY;
+const siteId = "cri-gi-pineapple-851653706332.asia-southeast1.run.app" // Access the environment variable
+const apiKey = "puRJOYBRiOuELk89pRC1Nka8r5OkOcbYJRVJinl3MNf67hewtEG6aHZPyFisgrrk"
 
 
 const Card = () => {
@@ -14,7 +14,7 @@ const Card = () => {
 
   const fetchPageViews = async () => {
     try {
-      const period = "7d";
+      const period = "month";
 
       // Fetch page views data for the specified period
       const response = await fetch(
@@ -31,7 +31,7 @@ const Card = () => {
       }
 
       const result = await response.json();
-
+      console.log(result)
       // Attempt to extract the pageviews count
       // If the API response contains nested objects, adapt this as necessary
       const pageViewsCount =

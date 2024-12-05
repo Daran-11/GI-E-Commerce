@@ -1,68 +1,81 @@
 "use client";
 import AddressManagement from "@/components/AddressManagement";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import useSWR from "swr";
+
+const fetcher = (url) => fetch(url).then((res) => res.json());
 
 export default function CheckoutClient({ userId }) {
+  const { data: session, status } = useSession();
   const router = useRouter();
   const [selectedItems, setSelectedItems] = useState([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [addressId, setAddressId] = useState(null);
   const [addressUpdated, setAddressUpdated] = useState(false);
-  const [clicked, setClicked] = useState(false); // New state for button click
+  const [clicked, setClicked] = useState(false);
   const [checkoutData, setCheckoutData] = useState(null);
+  const [addressManagementLoaded, setAddressManagementLoaded] = useState(false);
 
   // Function to fetch the default address
   const fetchDefaultAddress = async () => {
     try {
+      console.log("fetchDefaultAddress called"); // ตรวจสอบว่าเรียกฟังก์ชันนี้หรือไม่
       const res = await fetch(`/api/users/${userId}/default-address`);
       if (res.ok) {
         const data = await res.json();
         if (data) {
           setAddressId(data.id);
+          setError("");
         } else {
-          setError("กรุณาตั้งค่าที่อยู่จัดส่งเริ่มต้น"); // "Please set a default shipping address"
+          setError("กรุณาตั้งค่าที่อยู่จัดส่งเริ่มต้น");
         }
       } else {
         console.error("Failed to fetch default address");
-        setError("ไม่สามารถดึงที่อยู่เริ่มต้นได้"); // "Unable to fetch default address"
+        setError("ไม่พบที่อยู่หลักในการจัดส่ง โปรดเพิ่มที่อยู่หลักสำหรับจัดส่ง");
       }
     } catch (error) {
       console.error("Error fetching default address:", error);
-      setError("เกิดข้อผิดพลาดในการดึงที่อยู่"); // "An error occurred while fetching the address"
+      setError("เกิดข้อผิดพลาดในการดึงที่อยู่");
     }
   };
 
-  const refetchCheckoutData = async () => {
-    const res = await fetch('/api/checkout');
-    if (res.ok) {
-      const data = await res.json();
-      setCheckoutData(data);
-    } else {
-      console.error('Failed to fetch checkout data');
-    }
-  };
+  // ใช้ SWR ดึงข้อมูลที่อยู่จาก API
+  const { data: addresses, mutate: mutateAddresses, error: fetchAddressError, isLoading } = useSWR(
+    userId ? `/api/users/${userId}/addresses` : null,
+    fetcher,
+    { revalidateOnFocus: false }
+  );
+
+    // ฟังก์ชันที่ใช้รีเฟรชข้อมูลเมื่อมีการอัปเดตที่อยู่
+    const refetchCheckoutData = () => {
+      mutateAddresses(); // รีเฟรชข้อมูลที่อยู่จาก SWR
+      fetchDefaultAddress(); // ดึงที่อยู่เริ่มต้น
+    };
 
   useEffect(() => {
-    fetchDefaultAddress();
-  }, [userId, addressUpdated]); // Re-fetch address when userId or addressUpdated changes
+    if (addressManagementLoaded) {
+      console.log("Address management loaded. Fetching default address...");
+      fetchDefaultAddress();
+    }
+  }, [userId, addressUpdated, addressManagementLoaded, addressId ]); // Fetch address when component is loaded
 
   useEffect(() => {
     const storedItems = localStorage.getItem("selectedItems");
     if (storedItems) {
       setSelectedItems(JSON.parse(storedItems));
-      console.log("storedItems found");
     } else {
-      setError("ไม่พบสินค้าที่เลือก"); // "No selected items found"
+      setError("ไม่พบสินค้าที่เลือก");
     }
   }, []);
 
   const handleConfirmOrder = async () => {
-    if (loading || !addressId || clicked) return; // Prevent if clicked or no address
+    if (loading || !addressId || clicked) return;
 
     setLoading(true);
-    setClicked(true); // Set clicked state to true
+    setClicked(true);
 
     try {
       const itemsByFarmer = selectedItems.reduce((acc, item) => {
@@ -101,27 +114,32 @@ export default function CheckoutClient({ userId }) {
       router.push('/payment');
     } catch (error) {
       console.error('Error creating order:', error);
-      setError("เกิดข้อผิดพลาดในการสร้างคำสั่งซื้อ"); // "An error occurred while creating the order"
+      setError("เกิดข้อผิดพลาดในการสร้างคำสั่งซื้อ");
     } finally {
       setLoading(false);
     }
   };
 
-  // Reset loading state on component mount
-  useEffect(() => {
-    setLoading(false); // Reset loading state
-  }, []); // This runs once when the component mounts
+  // Set addressManagementLoaded to true once AddressManagement is loaded
+  const handleAddressManagementLoad = () => {
+    setAddressManagementLoaded(true);
+  };
 
   return (
     <div className="w-[95%] lg:w-[65%] ml-auto mr-auto mt-[100px]">
-      {error && <div className='bg-red-500 text-sm text-white py-1 px-3'>{error}</div>}
+    
       <div className="bg-white w-full h-fit p-5 rounded-xl text-[#535353] ">
         <h1 className="text-4xl pb-2 border-b-2 mb-5">เช็คเอาท์</h1>
         <h1 className="text-2xl mb-2">ที่อยู่สำหรับจัดส่ง</h1>
-        <AddressManagement onSave={refetchCheckoutData} onUpdateAddress={() => setAddressUpdated(prev => !prev)} />
+        <AddressManagement 
+        onLoad={handleAddressManagementLoad} 
+        onSave={refetchCheckoutData} 
+        onUpdateAddress={() => setAddressUpdated(prev => !prev)} />
+         {error && <div className="border-t-2 mt-2  pt-1 text-red-500 text-base pr-3">*{error}</div>}
       </div>
+     
 
-      {addressId === null && (
+      {!addressId && addressManagementLoaded && error &&(
         <div className="bg-yellow-200 p-4 rounded mt-4">
           <p>กรุณาตั้งค่าที่อยู่จัดส่งเริ่มต้นเพื่อดำเนินการต่อ</p>
         </div>
@@ -129,7 +147,6 @@ export default function CheckoutClient({ userId }) {
 
       <div className="bg-white w-full h-fit p-5 rounded-xl mt-5 text-[#535353]">
         <h2 className="text-2xl mb-2">สรุปสินค้า</h2>
-
         <table className="w-full">
           <thead>
             <tr className="text-base lg:text-xl text-start">
@@ -176,7 +193,7 @@ export default function CheckoutClient({ userId }) {
           className={`w-[200px] h-[50px] mt-5 font-light rounded-xl text-white ${loading || clicked || addressId === null ? 'bg-gray-500' : 'bg-[#4EAC14] hover:bg-[#84d154]'}`}
           type="button"
           onClick={handleConfirmOrder}
-          disabled={loading || clicked || addressId === null} // Disable if loading, clicked, or no address
+          disabled={loading || clicked || addressId === null}
         >
           {loading ? (
             <span className="flex items-center justify-center">
@@ -187,12 +204,12 @@ export default function CheckoutClient({ userId }) {
                 viewBox="0 0 24 24"
               >
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 0116 0H4z" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 1 1 16 0 8 8 0 0 1-16 0z" />
               </svg>
-              ชำระเงิน
+              กำลังดำเนินการ...
             </span>
           ) : (
-            'ชำระเงิน'
+            "ชำระเงิน"
           )}
         </button>
       </div>

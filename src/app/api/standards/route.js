@@ -1,8 +1,10 @@
+import { Storage } from '@google-cloud/storage';
 import { NextResponse } from 'next/server';
 import prisma from '../../../../lib/prisma';
-import { Storage } from '@google-cloud/storage';
 
-const storage = new Storage();
+const storage = new Storage({
+  keyFile: process.env.GOOGLE_APPLICATION_CREDENTIALS, // ระบุพาธของไฟล์ service account
+});
 const bucketName = 'gipineapple';
 
 async function uploadToGCS(file) {

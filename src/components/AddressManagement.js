@@ -1,14 +1,17 @@
 "use client";
 
+import { CircularProgress } from "@mui/material";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import useSWR from "swr";
 
-export default function AddressManagement({ onSave }) {
+const fetcher = (url) => fetch(url).then((res) => res.json());
+
+export default function AddressManagement({ onSave , onLoad, onSuccess }) {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [selectedAddress, setSelectedAddress] = useState(null);
-  const [addresses, setAddresses] = useState([]);
   const [addressForm, setAddressForm] = useState({
     id: "",
     addressLine: "",
@@ -19,95 +22,76 @@ export default function AddressManagement({ onSave }) {
     isDefault: false,
   });
 
-  const [provinces, setProvinces] = useState([]);
-  const [amphoes, setAmphoes] = useState([]);
-  const [tambons, setTambons] = useState([]);
   const [isFormVisible, setIsFormVisible] = useState(false);
+
+  // Fetch addresses using SWR
+  const { data: addresses, mutate: mutateAddresses, isLoading, error } = useSWR(
+    session?.user?.id ? `/api/users/${session.user.id}/addresses` : null,
+    fetcher,
+    { revalidateOnFocus: false } // ป้องกันการ re-fetch ขณะเปลี่ยนแท็บ
+  );
+
+  useEffect(() => {
+    // เรียก onLoad เมื่อ component โหลดเสร็จ
+    if (onLoad) {
+      onLoad();
+    }
+  }, []); // [] หมายถึงเรียกแค่ครั้งเดียวเมื่อ component โหลดเสร็จ
+
+
 
 
   useEffect(() => {
-    if (status === "loading") return; // Optionally handle loading state
-    if (!session) {
-      router.push("/login");
-    } else {
-      console.log('Client Session:', session);
-      console.log('Client Status:', status);
-      fetchAddresses();
-      fetchProvinces();
+    if (status === 'unauthenticated') {
+      router.push('/login')
     }
-  }, [session, status, router]);
-
-  const fetchAddresses = async () => {
-    if (session?.user?.id) {
-      const res = await fetch(`/api/users/${session.user.id}/addresses`);
-      if (res.ok) {
-        const data = await res.json();
-        console.log('Fetched Addresses:', data); // Debug the response
-        setAddresses(data);
-      } else {
-        console.error("Failed to fetch addresses:", res.statusText);
-      }
-    } else {
-      console.error("User ID is not available.");
-    }
-  };
+  }, [status, router])
 
 
-  const fetchProvinces = async () => {
-    const res = await fetch("/api/provinces");
-    const data = await res.json();
-    setProvinces(data);
-  };
 
-  const fetchAmphoes = async (provinceId) => {
-    const res = await fetch(`/api/provinces/${provinceId}/amphoes`);
-    const data = await res.json();
-    setAmphoes(data);
-  };
-
-  const fetchTambons = async (amphoeId) => {
-    const res = await fetch(`/api/amphoes/${amphoeId}/tambons`);
-    const data = await res.json();
-    setTambons(data);
-  };
+  const { data: provinces = [], error: provincesError } = useSWR(
+    "/api/provinces",
+    fetcher
+  );
+  
+  const { data: amphoes = [], error: amphoesError } = useSWR(
+    addressForm.provinceId ? `/api/provinces/${addressForm.provinceId}/amphoes` : null,
+    fetcher
+  );
+  
+  const { data: tambons = [], error: tambonsError } = useSWR(
+    addressForm.amphoeId ? `/api/amphoes/${addressForm.amphoeId}/tambons` : null,
+    fetcher
+  );
 
   const handleAddressChange = (e) => {
     setAddressForm({ ...addressForm, [e.target.name]: e.target.value });
   };
 
-  const handleProvinceChange = async (e) => {
+  const handleProvinceChange = (e) => {
     const provinceId = e.target.value;
     setAddressForm((prev) => ({
       ...prev,
       provinceId,
       amphoeId: "",
-      tambonId: ""
+      tambonId: "",
     }));
-
-    if (provinceId) {
-      await fetchAmphoes(provinceId);
-    } else {
-      setAmphoes([]);
-      setTambons([]);
-    }
   };
-
-  const handleAmphoeChange = async (e) => {
+  
+  const handleAmphoeChange = (e) => {
     const amphoeId = e.target.value;
     setAddressForm((prev) => ({
       ...prev,
       amphoeId,
-      tambonId: ""
+      tambonId: "",
     }));
-
-    if (amphoeId) {
-      await fetchTambons(amphoeId);
-    } else {
-      setTambons([]);
-    }
   };
 
-  const handleSave = async (onSuccess) => {
+  const handleSave = async (onSuccess, onSave) => {
+    if (onSave) {
+      onSave(); // Trigger the checkout page refetch
+    }
+
     const method = addressForm.id ? "PUT" : "POST";
     const url = `/api/users/${session.user.id}/addresses`;
 
@@ -121,7 +105,7 @@ export default function AddressManagement({ onSave }) {
     });
 
     if (res.ok) {
-      await fetchAddresses(); // Refetch addresses after save
+      await mutateAddresses(); // Refetch addresses after save
       setAddressForm({
         id: "",
         addressLine: "",
@@ -137,13 +121,14 @@ export default function AddressManagement({ onSave }) {
       if (onSuccess) {
         onSuccess(); // Trigger the checkout page refetch
       }
+
     } else {
       console.error("Failed to save address");
     }
   };
 
 
-  const handleSetDefault = async (addressId) => {
+  const handleSetDefault = async (addressId , onSave) => {
     if (session?.user?.id) {
       const userId = session.user.id;
 
@@ -185,7 +170,10 @@ export default function AddressManagement({ onSave }) {
       });
 
       if (response.ok) {
-        fetchAddresses(); // Refresh the list of addresses
+        mutateAddresses(); // Refresh the list of addresses
+        if (onSave) {
+          onSave(); // Trigger onSave หลังจากลบเสร็จ
+        }
       } else {
         console.error('Failed to set default address');
       }
@@ -204,19 +192,14 @@ export default function AddressManagement({ onSave }) {
       postalCode: address.postalCode,
       isDefault: address.isDefault || false,
     });
-    fetchAmphoes(address.province.id);
-    fetchTambons(address.amphoe.id);
     setIsFormVisible(true); // Show form for editing
   };
 
-  const handleDelete = async (addressId) => {
+  const handleDelete = async (addressId, onSave) => {
     const confirmDelete = window.confirm('Are you sure you want to delete this address?');
 
     if (confirmDelete && session?.user?.id) {
       const userId = session.user.id;
-
-      // Ensure that there are at least 2 addresses before allowing deletion
-
 
       try {
         const response = await fetch(`/api/users/${userId}/addresses/${addressId}`, {
@@ -227,20 +210,38 @@ export default function AddressManagement({ onSave }) {
         });
 
         if (response.ok) {
-          // Remove the deleted address from the state to refresh the UI
-          setAddresses((prevAddresses) => prevAddresses.filter((addr) => addr.id !== addressId));
-          alert('Address deleted successfully');
+          console.log('Response:', await response.json()); // ดูว่า API ตอบอะไรกลับมา
+          mutateAddresses((prevAddresses) => prevAddresses.filter((addr) => addr.id !== addressId));
+          alert('ลบที่อยู่จัดส่งสำเร็จ');
+          if (onSave) {
+            onSave(); // Trigger onSave หลังจากลบเสร็จ
+          }
+          
         } else {
           const errorData = await response.json();
-          console.error('Failed to delete address:', errorData.message);
+          console.error('Failed to delete address:', response.status, errorData.message);
           alert('Failed to delete address. Please try again.');
         }
       } catch (error) {
         console.error('Error deleting address:', error);
-        alert('An error occurred while deleting the address. Please try again.');
+        alert('ไม่สามารถลบได้ โปรดลองอีกครั้ง');
       }
     }
   };
+
+  
+  if (isLoading) {
+    return (
+        <div className="flex items-center justify-center h-screen w-screen fixed top-0 left-0 bg-white bg-opacity-80 z-50">
+            <CircularProgress />
+        </div>
+    );
+
+}
+
+if (error) {
+  return <div>เกิดข้อผิดพลาดในการโหลดข้อมูล</div>;
+}
 
   return (
     <div>
@@ -251,19 +252,19 @@ export default function AddressManagement({ onSave }) {
           <div className="md:flex  gap-x-2">
 
             <div className="">
-              <select
-                name="provinceId"
-                value={addressForm.provinceId}
-                onChange={handleProvinceChange}
-                className="input-address p-2 w-full md:w-[200px] h-15"
-              >
-                <option value="" >เลือกจังหวัด</option>
-                {provinces.map((province) => (
-                  <option key={province.id} value={province.id}>
-                    {province.name_th}
-                  </option>
-                ))}
-              </select>
+            <select
+              name="provinceId"
+              value={addressForm.provinceId}
+              onChange={handleProvinceChange}
+              className="input-address p-2 w-full md:w-[200px] h-15"
+            >
+              <option value="">เลือกจังหวัด</option>
+              {provinces.map((province) => (
+                <option key={province.id} value={province.id}>
+                  {province.name_th}
+                </option>
+              ))}
+            </select>
             </div>
 
 
@@ -341,22 +342,32 @@ export default function AddressManagement({ onSave }) {
           </div>
 
           <div className="">
-
+          <label className="ml-1">
             <input
               type="checkbox"
-              className=""
+              className="w-7"
               name="default"
               checked={addressForm.isDefault}
               onChange={(e) => setAddressForm({ ...addressForm, isDefault: e.target.checked })}
             />
-            <label className="ml-1"> เลือกเป็นที่อยู่ตั้งต้น
-            </label>
+             เลือกเป็นที่อยู่ตั้งต้น
+          </label>
           </div>
 
           <div className="border-b-2 pb-3 mb-3">
+
+
+            <button
+              className="px-6 mt-4 mr-5 p-2  w-fit bg-blue-500 text-white  rounded-lg hover:outline hover:outline-2 hover:outline-blue-500  hover:bg-white  hover:text-blue-500"
+              type="button"
+              onClick={() => handleSave(onSave)} // Pass onSave to handleSave
+            >
+              {addressForm.id ? "อัปเดตที่อยู่" : "บันทึกที่อยู่"}
+            </button>
+
             {isFormVisible ?
               <button
-                className="text-gray-400 w-fit rounded-lg bg-gray-200 hover:bg-gray-300 h-fit  mt-4 mr-5 p-2"
+                className="px-4 text-gray-700 w-fit rounded-lg  bg-gray-200 hover:bg-white hover:outline hover:outline-0 hover:underline   mt-4 mr-5 p-2"
                 onClick={() => {
                   setIsFormVisible(false);
                   setAddressForm({
@@ -368,19 +379,12 @@ export default function AddressManagement({ onSave }) {
                     postalCode: "",
                     isDefault: false,
                   });
+                  
                 }}
               >
                 ยกเลิก
               </button> : ""
             }
-
-            <button
-              className="w-fit h-fit p-2 text-blue-500 border-2 border-blue-400 rounded-lg hover:bg-blue-500 hover:text-white"
-              type="button"
-              onClick={() => handleSave(onSave)} // Pass onSave to handleSave
-            >
-              {addressForm.id ? "อัปเดตที่อยู่" : "บันทึกที่อยู่"}
-            </button>
 
           </div>
 
@@ -390,35 +394,76 @@ export default function AddressManagement({ onSave }) {
 
       <ul>
         <div className="">
-          {addresses.length > 0 && addresses.map((address) => (
-            <li className="flex justify-between bg-slate-100 rounded-xl px-2 py-2 my-2" key={address.id}>
+        {!isLoading &&
+    addresses?.length > 0 &&
+    addresses.map((address) => (
+      <li
+        className="flex justify-between bg-slate-100 rounded-xl px-2 py-2 my-2"
+        key={address.id}
+      >
+        <div className="text-sm md:text-base flex justify-start space-x-2">
+          {/* Loading is gone when data is loaded */}
+          <div className="text-start ">
+            {address.addressLine}, {address.province.name_th},{" "}
+            {address.amphoe.name_th}, {address.tambon.name_th},{" "}
+            {address.postalCode}, {address.isDefault}
+          </div>
+          {address.isDefault && (
+            <div className="text-center w-fit  px-2 bg-[#4eac14] text-white rounded-xl">
+              ที่อยู่หลัก
+            </div>
+          )}
+        </div>
 
-              <div className="text-sm md:text-base flex justify-start space-x-3">
-                <div>
-                  {address.addressLine}, {address.province.name_th}, {address.amphoe.name_th}, {address.tambon.name_th}, {address.postalCode}, {address.isDefault}
-                </div>
-                {address.isDefault && (<div className="px-2 bg-[#4eac14] text-white rounded-xl"> Default </div>)}
-              </div>
+        <div className="flex justify-end items-center gap-x-4 md:gap-x-8 text-sm md:text-base">
+          <button
+            disabled={address.isDefault}
+            className={`${
+              address.isDefault
+                ? "text-gray-500 hidden sm:flex"
+                : "text-[#4eac14] hover:text-[#7ddb43] hidden sm:flex"
+            }`}
+            onClick={() => handleSetDefault(address.id , onSave)}
+          >
+            {address.isDefault ? "ที่อยู่จัดส่งหลัก" : "เลือกเป็นที่อยู่จัดส่งหลัก"}
+          </button>
+          <button
+            className="flex w-15 text-blue-500"
+            onClick={() => {
+              handleEdit(address);
+              {/*add trigger onsave function*/ }
 
-              <div className="flex justify-end items-center gap-x-4 md:gap-x-8 text-sm md:text-base">
-                <button disabled={address.isDefault} className={`text-[#4eac14]  ${address.isDefault ? 'text-gray-500' : 'text-[#4eac14] hover:text-[#7ddb43]'}`} onClick={() => handleSetDefault(address.id)}>
-                  {address.isDefault ? "ที่อยู่จัดส่งหลัก" : "เลือกเป็นที่อยู่จัดส่งหลัก"}
-                </button>
-                <button className="hidden sm:flex w-15 text-blue-500" onClick={() => handleEdit(address)}>แก้ไข</button>
-                <button className="hidden sm:flex w-15 text-red-700" onClick={() => handleDelete(address.id)}>ลบ</button>
+            }}
+          >
+            แก้ไข
+          </button>
 
-              </div>
+          <button
+            className="flex w-15 text-red-700"
+            onClick={() => {
 
-            </li>
-          ))}
+              handleDelete(address.id, onSave)
+            }
+
+            
+            }
+          >
+            ลบ
+          </button>
+
+        </div>
+      </li>
+    ))}
         </div>
 
         <li>
           {isFormVisible ? "" :
             <button
-              className={isFormVisible ? "text-gray-400" : "text-blue-500"}
-              onClick={() => setIsFormVisible(!isFormVisible)}>
-              เพิ่ม
+              className={isFormVisible ? "text-gray-400" : "rounded-lg px-5 py-2 bg-blue-500 text-white hover:outline hover:outline-2 hover:outline-blue-500 hover:text-blue-500 hover:bg-white "}
+              onClick={() => {
+
+                setIsFormVisible(!isFormVisible)}}>
+              เพิ่มที่อยู่ใหม่
             </button>}
         </li>
       </ul>

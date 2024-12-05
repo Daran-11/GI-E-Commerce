@@ -1,10 +1,12 @@
 "use client";
 import PaymentForm from "@/components/paymentForm";
+import { useCart } from "@/context/cartContext";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function PaymentPage() {
   const router = useRouter();
+  const { cartItems, clearCartItems, fetchCartItems } = useCart();
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [orderId, setOrderId] = useState([]);
@@ -50,25 +52,21 @@ export default function PaymentPage() {
       setLoading(true);
       try {
         orderSelected = selectedItems.map(async (item) => {
-          const response = await fetch('/api/auth/cart/delete', {
-            method: 'DELETE',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              productId: item.productId  // Send the productId to the API for deletion
-            }),
-          });          
-          if (response.ok) {
-            localStorage.removeItem('selectedItems');
-            console.log('Cart items deleted successfully');
-            router.push(`/order-confirmation`);
-          } else {
-            console.error('Failed to delete cart items');
-          }        
+          if (selectedItems.length) {
+            setLoading(true);
+            try {
+              for (const item of selectedItems) {
+                await clearCartItems(item.productId);
+              }
+              localStorage.removeItem('selectedItems');
+              router.push('/order-confirmation');
+            } catch (error) {
+              console.error('Error clearing cart items:', error);
+            } finally {
+              setLoading(false);
+            }
+          }       
         });
-
-
 
       } catch (error) {
         console.error('Error deleting cart items:', error);
@@ -76,7 +74,6 @@ export default function PaymentPage() {
         setLoading(false);
       }
     }
-
   };
 
   return (

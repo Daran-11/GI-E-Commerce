@@ -30,9 +30,12 @@ COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/next.config.mjs ./
 COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/credentials ./credentials 
 
 # Set environment for production
 ENV NODE_ENV=production
+ENV GOOGLE_APPLICATION_CREDENTIALS="/app/credentials/enhanced-bonito-440512-q9-1a175654d076.json"
+ENV NEXT_PUBLIC_DEBUG=true
 
 # Expose port
 EXPOSE 3000

@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 
 const prisma = new PrismaClient();
 
-const VALID_STATUSES = ["อนุมัติ", "ไม่อนุมัติ", "หมดอายุ"];
+const VALID_STATUSES = ["ได้รับการรับรอง", "ไม่ผ่านการรับรอง", "หมดอายุ"];
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);

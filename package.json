@@ -51,7 +51,8 @@
     "react-simple-star-rating": "^5.1.7",
     "recharts": "^2.9.0",
     "styled-components": "^6.1.13",
-    "swiper": "^11.1.14"
+    "swiper": "^11.1.14",
+    "swr": "^2.2.5"
   },
   "devDependencies": {
     "@types/node": "22.5.0",
