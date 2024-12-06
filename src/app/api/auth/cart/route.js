@@ -5,13 +5,14 @@ import { authOptions } from "../[...nextauth]/route";
 
 
 
-export async function GET() {
-  const session = await getServerSession({authOptions});
+export async function GET(req) {
+  const session = await getServerSession({ req, ...authOptions });
   if (!session) {
     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     
   }
   const userId = session.user.id;
+  console.log("user id is:",userId);
 
   try {
     const cartItems = await prisma.cartItem.findMany({

@@ -178,8 +178,9 @@ export default function ProductDetailsClient({ product, totalReviewsCount, Produ
             <div className="lg:hidden flex justify-center">
             <EmblaCarousel images={product.images || []} />
             </div>
-            <div className="flex justify-start">
+            <div className="text-[#535353]">
               <p className="mt-3 text-4xl lg:text-5xl">{product.ProductName} {product.ProductType}</p>
+              <p className="text-xl"> ผู้ขาย {product.farmer.farmerName} </p>
             </div>
             <div className="flex w-full text-[#767676] text-xl">
 
@@ -193,7 +194,9 @@ export default function ProductDetailsClient({ product, totalReviewsCount, Produ
                 />
                 <p className="text-sm">{avgRating} / 5</p>
               </div>
+              
               <p className="hidden md:flex"> ขายแล้ว {totalOrderAmount} กิโลกรัม</p>
+             
             </div>
             <p className="text-[#4eac14] text-[35px] lg:mb-2 lg:mt-2">
               {Number(product.Price).toLocaleString()} บาท/กิโล
@@ -311,12 +314,16 @@ export default function ProductDetailsClient({ product, totalReviewsCount, Produ
 
       <div className='text-[#535353] bg-white rounded-2xl mt-5 p-4'>
         <p className='text-2xl'>รายละเอียด</p>
-        <p className='mt-2'>{product.Details}</p>
+        {product.Details ? (
+          <p className="mt-2">{product.Details}</p>
+        ) : (
+          <p className="mt-2 text-gray-500">ไม่มีข้อมูลรายละเอียดสินค้า</p>
+        )}
       </div>
 
-      <div className="w-full h-fit bg-white mt-6 p-6 rounded-2xl">
+      <div className="text-[#535353] w-full h-fit bg-white mt-6 p-4 rounded-2xl">
         <div className="w-full flex justify-between items-center">
-          <h3 className="text-xl">รีวิวสินค้า</h3>
+          <h3 className="text-2xl mb-2">รีวิวสินค้า</h3>
         </div>
         {reviews.length > 0 ? (
           reviews.map((review) => (
@@ -331,7 +338,7 @@ export default function ProductDetailsClient({ product, totalReviewsCount, Produ
             </div>
           ))
         ) : (
-          <p className="text-center text-gray-500">ยังไม่มีรีวิว</p>
+          <p className=" text-gray-500">ยังไม่มีรีวิวในสินค้านี้</p>
         )}
         {hasMore && (
           <button

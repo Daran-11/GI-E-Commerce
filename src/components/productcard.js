@@ -41,7 +41,7 @@ const ProductCard = ({products}) => {
         {products.map((product) => (
           
               <div key={product.ProductID} className="Card flex-col w-full justify-center h-fit lg:h-[350px] xl:h-full rounded-2xl pb-2 bg-[#FBFBFB] shadow-lg transition duration-500 ease-in-out transform hover:scale-105 ">
-                  <Link key={product.ProductID} href={`/product/${product.ProductID}`}>
+                  <Link key={product.ProductID} href={`/product/${product.ProductID}${product.ProductName}${product.ProductType}${product.farmer.farmerName}`}>
                   
 
                   <div className="w-full h-[120px] md:h-[120px] xl:h-[160px] flex justify-center items-center ">
