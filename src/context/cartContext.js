@@ -9,10 +9,18 @@ export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
   const [cartItemCount, setCartItemCount] = useState(0);
 
-
+  let isFetching = false;
     const fetchCartItems = async () => {
+      if (isFetching) return; // หากกำลัง fetch อยู่แล้ว ให้หยุดทำงาน
+      isFetching = true;
+      try {
       if (status === 'authenticated' ) {
-        const response = await fetch('/api/auth/cart');
+        console.log("authenticated fetching cart")
+        const response = await fetch('/api/auth/cart', {
+          headers: {
+            'Cache-Control': 'max-age=120',
+          },
+        });
         if (response.ok) {
           const data = await response.json();
           setCartItems(data);         
@@ -24,6 +32,9 @@ export const CartProvider = ({ children }) => {
         setCartItems(localCart);
         const uniqueItemsCount = new Set(localCart.map(item => item.productId)).size;
         setCartItemCount(Math.min(uniqueItemsCount, 99));
+      }
+      } finally {
+        isFetching = false;
       }
     };
 
@@ -40,19 +51,23 @@ export const CartProvider = ({ children }) => {
 
 
   useEffect(() => {
-    fetchCartItems();
-  }, []);
-
-  useEffect(() => {
     if (status ==='authenticated') {
       syncCartWithServer(session);
+      fetchCartItems();
+    } 
+    if (status ==='unauthenticated' && !session) {
+      fetchCartItems();
     }
+
   }, [status]);
 
   // ใส่ตัวเช็คว่าจำนวนจะเกินไหมใน syncCartwithServer
   const syncCartWithServer = async (session) => {
     const localCart = JSON.parse(localStorage.getItem('cart')) || [];
-    for (const item of localCart) {
+    if (!localCart.length) return; // ถ้าไม่มีสินค้าก็ไม่ต้องซิงค์
+    for (const item of localCart) 
+      
+      {
       await fetch('/api/auth/cart/add', {
         method: 'POST',
         headers: {
@@ -76,7 +91,7 @@ export const CartProvider = ({ children }) => {
       if (response.ok) {
         const data = await response.json();
         setCartItems(data); // Update state with server data
-        console.log("synce with server finished, cartItems:",cartItems);
+        console.log("synced with server finished, cartItems:",cartItems);
         const uniqueItemsCount = new Set(data.map(item => item.productId)).size;
         setCartItemCount(Math.min(uniqueItemsCount, 99)); // Update count
       }
@@ -148,6 +163,7 @@ export const CartProvider = ({ children }) => {
 
   const removeItemFromCart = (productId) => {
     if (status === 'authenticated') {
+      console.log("authenticated for item cart deletion");
       fetch('/api/auth/cart/delete', {
         method: 'DELETE',
         headers: {
@@ -162,6 +178,7 @@ export const CartProvider = ({ children }) => {
         }
       });
     } else {
+      console.log("delete cart items without login");
       const localCart = JSON.parse(localStorage.getItem('cart')) || [];
       const updatedCart = localCart.filter(item => item.productId !== productId);
       localStorage.setItem('cart', JSON.stringify(updatedCart));

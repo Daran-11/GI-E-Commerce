@@ -30,6 +30,7 @@ if (L) {
 }
 
 
+
 const Loading = () => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
@@ -39,6 +40,23 @@ const Loading = () => {
       </div>
     </div>
   );
+};
+
+const LocationMarker = ({ formData, setFormData }) => {
+  useMapEvents({
+    click(e) {
+      const { lat, lng } = e.latlng;
+      setFormData((prev) => ({
+        ...prev,
+        latitude: lat,
+        longitude: lng,
+      }));
+    },
+  });
+
+  return formData.latitude && formData.longitude ? (
+    <Marker position={[formData.latitude, formData.longitude]} />
+  ) : null;
 };
 
 const Register = () => {
@@ -232,81 +250,8 @@ const Register = () => {
     return true;
   };
 
-  const LocationMarker = () => {
-    useMapEvents({
-      click(e) {
-        const { lat, lng } = e.latlng;
-        setFormData((prev) => ({
-          ...prev,
-          latitude: lat,
-          longitude: lng,
-        }));
-      },
-    });
-
-    return formData.latitude && formData.longitude ? (
-      <Marker position={[formData.latitude, formData.longitude]}></Marker>
-    ) : null;
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
-
-    if (window.confirm("คุณต้องการขอใบรับรองใช่หรือไม่?")) {
-      setIsLoading(true);
-      try {
-        const formDataToSend = new FormData();
-        
-        // Append basic form data
-        Object.keys(formData).forEach(key => {
-          if (key !== "standards") {
-            formDataToSend.append(key, formData[key]);
-          }
-        });
-
-        // Append standards data
-        formData.standards.forEach((standard, index) => {
-          formDataToSend.append(`standards[${index}][id]`, standard.id);
-          formDataToSend.append(`standards[${index}][name]`, standard.name);
-          formDataToSend.append(`standards[${index}][logo]`, standard.logo);
-          formDataToSend.append(`standards[${index}][certNumber]`, standard.certNumber);
-          formDataToSend.append(`standards[${index}][certDate]`, standard.certDate);
-        });
-
-        // Add user ID
-        if (session?.user?.id) {
-          formDataToSend.append("userId", session.user.id);
-        } else {
-          throw new Error("กรุณาเข้าสู่ระบบใหม่อีกครั้ง");
-        }
-
-        const response = await fetch("/api/certificate/add", {
-          method: "POST",
-          body: formDataToSend,
-        });
-
-        if (!response.ok) {
-          throw new Error("ไม่สามารถเพิ่มใบรับรองได้");
-        }
-
-        alert("เพิ่มใบรับรองเรียบร้อย");
-        router.push("/dashboard/certificate");
-      } catch (error) {
-        console.error("Error:", error);
-        alert(error.message);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-  };
-
-  // Check authentication
-  if (status === 'loading' || isLoading) {
-    return <Loading/>;
+  if (status === "loading" || isLoading) {
+    return <Loading />;
   }
 
   if (!session || session?.user?.role !== "farmer") {
