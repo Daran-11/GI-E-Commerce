@@ -18,7 +18,33 @@ export async function POST(request) {
     return new Response(JSON.stringify({ error: 'Missing required fields' }), { status: 400 });
   }
 
+  
+
   try {
+     // ตรวจสอบจำนวนสินค้าในว่ามีพอกับที่จะซื้อไหม
+    for (const item of items) {
+      const product = await prisma.product.findUnique({
+        where: { ProductID: item.productId },
+        select: { Amount: true },
+      });
+
+      if (!product) {
+        return new Response(
+          JSON.stringify({ message: `Product with ID ${item.productId} not found` }),
+          { status: 404 }
+        );
+      }
+
+      if (product.amount < item.quantity) {
+        return new Response(
+          JSON.stringify({
+            message: `Insufficient stock for product ID ${item.productId}. Available: ${product.amount}, Requested: ${item.quantity}`,
+          }),
+          { status: 400 }
+        );
+      }
+    }
+
     // Get the selected address (you can choose between the selected address or default)
     const selectedAddress = await prisma.address.findFirst({
       where: {
@@ -35,6 +61,8 @@ export async function POST(request) {
     if (!selectedAddress) {
       return new Response(JSON.stringify({ message: 'Address not found' }), { status: 404 });
     }
+
+
 
     // Prepare the address text
     const addressText = `${selectedAddress.addressLine}, ${selectedAddress.tambon.name_th}, ${selectedAddress.amphoe.name_th}, ${selectedAddress.province.name_th}, ${selectedAddress.postalCode}`;
