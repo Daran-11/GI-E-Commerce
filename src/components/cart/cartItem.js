@@ -81,8 +81,8 @@ export default function CartItem({ initialItems }) {
           ตะกร้าสินค้า
           </a>
         </div>
-
-        <table className="min-w-full table-auto">
+            <div className="overflow-y-auto h-[40vh] sm:h-full ">
+          <table className="min-w-full table-auto ">
           <thead className="">
             <tr className=" text-base lg:text-xl text-[#535353]">
               <th className="hidden md:table-cell px-2 text-start">เลือก</th>
@@ -94,17 +94,22 @@ export default function CartItem({ initialItems }) {
               <th className="hidden md:table-cell px-2 text-right">แอ็คชั่น</th>
             </tr>
           </thead>
-          <tbody className="">
+          <tbody className="flex-grow  w-full max-h-[300px]">
           <tr className="h-4"></tr>
             {cartItems.length > 0 ? (
               cartItems.map((item) => (
                 <tr className="border-b-2 text-sm md:text-base " key={item.productId}>
                   <td className="cart-data items-center justify-center ">
-                    <input
-                      type="checkbox"
-                      checked={selectedItems.includes(item.productId)}
-                      onChange={() => selectItem(item.productId)}
-                    />
+                    {item.productAmount === 0 ? (
+                      <span className="text-red-500">สินค้าหมด</span>
+                    ) : (
+                      <input
+                        type="checkbox"
+                        checked={selectedItems.includes(item.productId)}
+                        onChange={() => selectItem(item.productId)}
+                        disabled={item.productAmount === 0} // Disable checkbox if productAmount is 0
+                      />
+                    )}
                   </td>
                   <td className="cart-data px-2">              
                     {item.imageUrl ? (
@@ -113,22 +118,22 @@ export default function CartItem({ initialItems }) {
                       alt={item.productName}
                       width={25} // Adjust width as needed
                       height={25} // Adjust height as needed
-                      sizes="100vw" 
+                      sizes="30vw" 
                       className='w-[75px] h-[75px] object-cover rounded-2xl'
                     />
                   ) : (
                     <img className="w-[75px] h-[75px] object-cover rounded-2xl" src="/phulae.jpg" alt="Card Image" />
                   )}</td>
                   <td className="cart-data px-2">
-                    <div className="md:hidden">
-                      <strong>
+                    <div className="md:hidden text-base">
+
                       {item.farmerName}                        
-                      </strong>
+
                     </div>
-                    <div className="hidden md:flex">
-                    <strong>
+                    <div className="hidden md:flex text-base">
+
                     {item.farmerName}                       
-                    </strong>
+
 
                     </div>
                     <div>        
@@ -147,7 +152,7 @@ export default function CartItem({ initialItems }) {
                   <td className="hidden md:table-cell">{item.productPrice || item.product.Price}</td>
                   <td className="cart-data ">
                     <QuantityHandler 
-                      productAmount={item.productAmount || item.product.Amount} 
+                      productAmount={item.productAmount } 
                       productId={item.productId || item.product.ProductID} 
                       initialQuantity={item.quantity} 
                       onQuantityChange={handleUpdateQuantity} 
@@ -171,6 +176,9 @@ export default function CartItem({ initialItems }) {
             )}
           </tbody>
         </table>
+
+            </div>
+
       </div>
 
       <div className=" flex justify-start  xl:justify-center w-fit  xl:w-[20vw] rounded-xl ">
