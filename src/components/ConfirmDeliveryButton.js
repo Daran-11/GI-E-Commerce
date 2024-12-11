@@ -1,5 +1,6 @@
 import { Box, Button, Modal, Typography } from '@mui/material';
 import { useState } from 'react';
+import { toast } from 'react-toastify';
 
 function ConfirmDeliveryButton({ orderId, userId, productId }) {
   const [open, setOpen] = useState(false);
@@ -25,13 +26,15 @@ function ConfirmDeliveryButton({ orderId, userId, productId }) {
 
       const data = await response.json();
       if (data.success) {
+
         setShowRating(true); // Show rating form after confirmation
+        toast.success("ขอบคุณที่ใช้บริการ อย่าลืมให้คะแนนสินค้าของเรา")
       } else {
-        alert('เกิดข้อผิดพลาด: ' + data.error);
+        toast.error('เกิดข้อผิดพลาด: ' + data.error);
       }
     } catch (error) {
       console.error('Error confirming receipt:', error);
-      alert('ไม่สามารถยืนยันการได้รับสินค้าได้');
+      toast.error('ไม่สามารถยืนยันการได้รับสินค้าได้');
     }
   };
 
@@ -47,14 +50,14 @@ function ConfirmDeliveryButton({ orderId, userId, productId }) {
 
       const data = await response.json();
       if (data.success) {
-        alert('ขอบคุณสำหรับการรีวิวของคุณ!');
+        toast.success('ขอบคุณสำหรับการรีวิวของท่าน!');
         //handleClose();
       } else {
-        alert('เกิดข้อผิดพลาด: ' + data.error);
+        toast.error('เกิดข้อผิดพลาด: ' + data.error);
       }
     } catch (error) {
       console.error('Error submitting rating:', error);
-      alert('ไม่สามารถส่งรีวิวได้');
+      toast.error('ไม่สามารถส่งรีวิวได้');
     }
   };
 
@@ -80,23 +83,23 @@ function ConfirmDeliveryButton({ orderId, userId, productId }) {
             p: 4,
             borderRadius: 2,
           }}
-        >     
-            <>
-              <Typography variant="h6" component="h2">
-                Confirm Delivery
-              </Typography>
-              <Typography sx={{ mt: 2 }}>
-                Are you sure you received the product?
-              </Typography>
-              <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-                <Button variant="contained" color="primary" onClick={handleConfirmDelivery}>
-                  Confirm
-                </Button>
-                <Button variant="outlined" color="secondary" onClick={handleClose}>
-                  Cancel
-                </Button>
-              </Box>
-            </>
+        >
+          <>
+            <Typography variant="h6" component="h2">
+              ยืนยันการได้รับสินค้า
+            </Typography>
+            <Typography sx={{ mt: 2 }}>
+              ท่านยืนยันว่าได้รับสินค้าแล้วใช้หรือไม่?
+            </Typography>
+            <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
+              <Button variant="contained" color="primary" onClick={handleConfirmDelivery}>
+                ยืนยัน
+              </Button>
+              <Button variant="outlined" color="secondary" onClick={handleClose}>
+                ยกเลิก
+              </Button>
+            </Box>
+          </>
         </Box>
       </Modal>
     </>

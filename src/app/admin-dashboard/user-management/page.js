@@ -18,7 +18,7 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import TextField from '@mui/material/TextField';
-
+import { toast } from "react-toastify";
 const Users = () => {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -59,10 +59,10 @@ const Users = () => {
         if (response.ok) {
           setUsers(users.filter(user => user.id !== userId));
         } else {
-          alert("Failed to delete user");
+          toast.error("ไม่สามารถลบผู้ใช้ได้");
         }
       } catch (error) {
-        console.error("Failed to delete user:", error);
+        console.error("ไม่สามารถลบผู้ใช้ได้:", error);
       }
     }
   };
@@ -93,10 +93,10 @@ const Users = () => {
         await fetchUsers(); // Refresh the user list
         handleCloseDialog(); // Close the dialog
       } else {
-        alert("Failed to add user");
+        toast.error("ไม่สามารถเพิ่มผู้ใช้ได้");
       }
     } catch (error) {
-      console.error("Failed to add user:", error);
+      console.error("ไม่สามารถเพิ่มผู้ใช้ได้:", error);
     }
   };
 

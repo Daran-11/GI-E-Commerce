@@ -18,6 +18,7 @@ import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { toast } from "react-toastify";
 
 const CustomPaper = styled(Paper)(({ theme }) => ({
   borderRadius: "16px",
@@ -65,77 +66,77 @@ const EditProductDialog = ({ open, onClose, ProductID, onSuccess }) => {
   const { data: session, status } = useSession();
   const [hasFetched, setHasFetched] = useState(false);
   const userId = session.user.id;
-  
-useEffect(() => {
-  const fetchProduct = async () => {
-    if (!session || !ProductID || hasFetched) return;
 
-    try {
-      const response = await fetch(`/api/users/${session.user.id}/product/get?ProductID=${ProductID}`);
-      if (!response.ok) {
-        console.error("Error fetching product:", await response.text());
-        alert("Failed to fetch product data. Please try again.");
-        return;
-      }
+  useEffect(() => {
+    const fetchProduct = async () => {
+      if (!session || !ProductID || hasFetched) return;
 
-      const data = await response.json();
-      console.log("data cer",data.certificates)
+      try {
+        const response = await fetch(`/api/users/${session.user.id}/product/get?ProductID=${ProductID}`);
+        if (!response.ok) {
+          console.error("Error fetching product:", await response.text());
+          toast.error("ไม่สามารถดึงข้อมูลสินค้าได้: โปรดกดปุ่ม F5 เพื่อรีเฟรชหน้าจอ หรือ ลองอีกหลังในภายหลัง");
+          return;
+        }
 
-      // Process certificates to extract certNumber
-      const certNumbers = Array.isArray(data.certificates)
-        ? data.certificates.flatMap(cert =>
+        const data = await response.json();
+        console.log("data cer", data.certificates)
+
+        // Process certificates to extract certNumber
+        const certNumbers = Array.isArray(data.certificates)
+          ? data.certificates.flatMap(cert =>
             cert.certificate?.standards?.map(standard => standard.certNumber) || []
           )
-        : [];
+          : [];
 
-      console.log("certNumbers", certNumbers); // Log certNumbers for debugging      
-      
-      reset({
-        ProductName: data.ProductName || "",
-        ProductType: data.ProductType || "",
-        Price: data.Price ? parseFloat(data.Price).toFixed(2) : "",
-        Cost: data.Cost || "",
-        Amount: data.Amount || "",
-        status: data.status || "",
-        Description: data.Description || "",
-        Details: data.Details || "",
-        Certificates: data.certificates || [] // Set existing certificates
-      });
+        console.log("certNumbers", certNumbers); // Log certNumbers for debugging      
+
+        reset({
+          ProductName: data.ProductName || "",
+          ProductType: data.ProductType || "",
+          Price: data.Price ? parseFloat(data.Price).toFixed(2) : "",
+          Cost: data.Cost || "",
+          Amount: data.Amount || "",
+          status: data.status || "",
+          Description: data.Description || "",
+          Details: data.Details || "",
+          Certificates: data.certificates || [] // Set existing certificates
+        });
 
 
-      const imageUrls = Array.isArray(data.images) ? data.images.map(img => img.imageUrl) : [];
-      setInitialImages(imageUrls);
-      setImagePreviews(imageUrls);
-      setCertNumbers(certNumbers);
-      // Set `hasFetched` to true after successfully fetching and setting data
-      setHasFetched(true);
-    } catch (error) {
-      console.error("Error occurred while fetching product:", error);
-      alert("An error occurred while fetching the product data.");
+        const imageUrls = Array.isArray(data.images) ? data.images.map(img => img.imageUrl) : [];
+        setInitialImages(imageUrls);
+        setImagePreviews(imageUrls);
+        setCertNumbers(certNumbers);
+        // Set `hasFetched` to true after successfully fetching and setting data
+        setHasFetched(true);
+      } catch (error) {
+        console.error("Error occurred while fetching product:", error);
+        toast.error("พบข้อผิดพลาดขณะดึงข้อมูลสินค้า");
+      }
+    };
+
+    // Fetch product only if `ProductID` is available and it hasn't been fetched yet
+    if (ProductID && !hasFetched) {
+      fetchProduct();
     }
-  };
+  }, [ProductID, reset, session, hasFetched]);
 
-  // Fetch product only if `ProductID` is available and it hasn't been fetched yet
-  if (ProductID && !hasFetched) {
-    fetchProduct();
-  }
-}, [ProductID, reset, session, hasFetched]);
+  useEffect(() => {
+    // Fetch the available certificates for the farmer
+    if (status === 'authenticated' && userId) {
+      console.log("user id is", userId);
+      async function fetchCertificates() {
+        const response = await fetch(`/api/users/${userId}/certificates`);
+        const data = await response.json();
+        console.log("cert data is", data);
+        setCertificates(data);
+      }
 
-useEffect(() => {
-  // Fetch the available certificates for the farmer
-  if (status === 'authenticated' && userId) {
-    console.log("user id is",userId);
-    async function fetchCertificates() {
-      const response = await fetch(`/api/users/${userId}/certificates`);
-      const data = await response.json();
-      console.log("cert data is",data);
-      setCertificates(data);
+      fetchCertificates();
     }
 
-    fetchCertificates();      
-  }
-
-}, [status]);
+  }, [status]);
 
 
   const handleFileChange = (files) => {
@@ -217,10 +218,11 @@ useEffect(() => {
       }
 
       await onSuccess();
+      toast.success("แก้ไขสินค้าสำเร็จ")
       handleClose();
     } catch (error) {
       console.error("Failed to update product:", error);
-      alert("Failed to update product: " + error.message);
+      toast.error("ไม่สามารถแก้ไขสินค้าได้: " + error.message);
     }
   };
 
@@ -242,7 +244,7 @@ useEffect(() => {
   }, [reset, onClose]);
 
   const selectedCertNumber = certificates
-  .find(cert => cert.id === selectedCertificate)?.certificate?.[0]?.standards?.[0]?.certNumber || '';
+    .find(cert => cert.id === selectedCertificate)?.certificate?.[0]?.standards?.[0]?.certNumber || '';
 
 
   return (
@@ -283,23 +285,23 @@ useEffect(() => {
                       <Select {...field} label="ประเภทสินค้า">
                         <MenuItem value="นางแล">นางแล</MenuItem>
                         <MenuItem value="ภูแล">ภูแล</MenuItem>
-                      
+
                       </Select>
                     )} />
                   </FormControl>
                 </Grid>
                 <Grid item xs={12}>
-              <TextField
-                value={certNumbers}
-                label="ใบรับรอง"
-                variant="outlined"
-                fullWidth
-                disabled
-                InputProps={{
-                  readOnly: true, // Make it read-only if the field is just for display
-                }}
-              />
-            </Grid>
+                  <TextField
+                    value={certNumbers}
+                    label="ใบรับรอง"
+                    variant="outlined"
+                    fullWidth
+                    disabled
+                    InputProps={{
+                      readOnly: true, // Make it read-only if the field is just for display
+                    }}
+                  />
+                </Grid>
                 <Grid item xs={12} sm={6}>
                   <Controller name="Price" control={control} rules={{ required: "ราคาสินค้า is required" }} render={({ field }) => (
                     <TextField {...field} label="ราคาสินค้า (บาท)" variant="outlined" fullWidth error={!!errors.Price} helperText={errors.Price?.message} onChange={(e) => field.onChange(e.target.value.replace(/[^0-9,.]/g, "").replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,"))} />
@@ -351,10 +353,10 @@ useEffect(() => {
             </Grid>
           </Grid>
           <DialogActions>
-          <Button onClick={handleClose} color="error" variant="contained">ยกเลิก</Button>
-        <Button onClick={handleSubmit(onSubmit)} color="success" variant="contained">
-          อัปเดตสินค้า
-        </Button>
+            <Button onClick={handleClose} color="error" variant="contained">ยกเลิก</Button>
+            <Button onClick={handleSubmit(onSubmit)} color="success" variant="contained">
+              อัปเดตสินค้า
+            </Button>
           </DialogActions>
         </form>
       </DialogContent>

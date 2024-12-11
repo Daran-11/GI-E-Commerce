@@ -9,7 +9,7 @@ const omise = Omise({
 export async function POST(request) {
   try {
     const { orderId, userId } = await request.json();
-    console.log("orderId: ",orderId );
+    console.log("orderId: ", orderId);
     // Retrieve the order to get the farmer's information
     const order = await prisma.order.findUnique({
       where: { id: parseInt(orderId) },
@@ -19,7 +19,7 @@ export async function POST(request) {
     if (!order) {
       return NextResponse.json({ error: 'Order not found' }, { status: 404 });
     }
-    console.log("order is ",order);
+    console.log("order is ", order);
     // Retrieve the farmer's default bank account
     const bankAccount = await prisma.bankAccount.findFirst({
       where: {
@@ -28,7 +28,7 @@ export async function POST(request) {
       },
     });
 
-    console.log("bankAccount is ",bankAccount);
+    console.log("bankAccount is ", bankAccount);
 
     if (!bankAccount || !bankAccount.recipientId) {
       return NextResponse.json(
@@ -37,7 +37,7 @@ export async function POST(request) {
       );
     }
 
-    console.log("recipient is ",bankAccount.recipientId);
+    console.log("recipient is ", bankAccount.recipientId);
     console.log("price is ", Math.floor(order.totalPrice * 100))
     // Perform the Omise transfer to the farmer's recipient ID
     const transfer = await omise.transfers.create({
@@ -56,9 +56,22 @@ export async function POST(request) {
       },
     });
 
+    await prisma.history.create({
+      data: {
+        orderId: order.id,
+        userId: order.userId,
+        farmerId: order.farmerId,
+        totalPrice: order.totalPrice,
+        status: order.status,
+        paymentStatus: order.paymentStatus,
+        deliveryStatus: order.deliveryStatus,
+        completedAt: new Date(), // Manually set the completion time
+      },
+    });
+
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error confirming receipt and transferring funds:', error);
     return NextResponse.json({ error: 'Failed to confirm receipt' }, { status: 500 });
   }
-}
+} 

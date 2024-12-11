@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import QRCode from 'qrcode';
 import Image from 'next/image';
+import { toast } from "react-toastify";
 
 const Loading = () => {
   return (
@@ -79,7 +80,7 @@ const Certificate = () => {
       document.body.removeChild(link);
     } catch (error) {
       console.error("Error generating QR code:", error);
-      alert("ไม่สามารถสร้าง QR Code ได้");
+      toast.error("ไม่สามารถสร้าง QR Code ได้");
     }
   };
 
@@ -107,7 +108,7 @@ const Certificate = () => {
 
   return (
     <div className={styles.container}>
-    <h1 className="text-2xl ">ตรวจสอบย้อนกลับ</h1><br></br>
+      <h1 className="text-2xl ">ตรวจสอบย้อนกลับ</h1><br></br>
       <div className={styles.top}>
         <Search placeholder="ค้นหา QR Code..." />
       </div>
@@ -120,7 +121,7 @@ const Certificate = () => {
             <td>สายพันธุ์</td>
             <td>จำนวนผลผลิต</td>
             <td>มาตรฐาน</td>
-            
+
             <td>QR Code</td>
           </tr>
         </thead>

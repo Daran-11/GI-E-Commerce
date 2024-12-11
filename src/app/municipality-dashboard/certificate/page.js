@@ -5,6 +5,7 @@ import Link from "next/link";
 import Pagination from "@/app/ui/dashboard/pagination/pagination";
 import Search from "@/app/ui/dashboard/search/search";
 import Image from "next/image";
+import { toast } from "react-toastify";
 
 const Certificate = () => {
   const [certificates, setCertificates] = useState([]);
@@ -31,10 +32,10 @@ const Certificate = () => {
           headers: { "Content-Type": "application/json" },
         });
         if (response.ok) {
-          alert("Certificate deleted successfully");
+          toast.success("ลบรับรองสำเร็จ");
           setCertificates(certificates.filter((cert) => cert.id !== id));
         } else {
-          alert("Failed to delete certificate");
+          toast.error("ไม่สามารถลบใบรับรองได้");
         }
       } catch (error) {
         console.error("Failed to delete certificate:", error);
@@ -44,7 +45,7 @@ const Certificate = () => {
 
   return (
     <div className={styles.container}>
-    <h1 className="text-2xl ">ตรวจสอบใบรับรอง</h1><br></br>
+      <h1 className="text-2xl ">ตรวจสอบใบรับรอง</h1><br></br>
       <div className={styles.top}>
         <Search placeholder="ค้นหาผู้ใช้..." />
         <Link href="/municipality-dashboard/certificate/history">
@@ -76,14 +77,14 @@ const Certificate = () => {
                     <div className={styles.standardsContainer}>
                       {standards.length > 0
                         ? standards.map((standard) => (
-                            <Image
-                              key={standard.id}
-                              src={standard.logo}
-                              alt={standard.name}
-                              width={40}
-                              height={40}
-                            />
-                          ))
+                          <Image
+                            key={standard.id}
+                            src={standard.logo}
+                            alt={standard.name}
+                            width={40}
+                            height={40}
+                          />
+                        ))
                         : "ไม่มี"}
                     </div>
                   </td>
@@ -91,24 +92,23 @@ const Certificate = () => {
                   <td>{certificate.productionQuantity}</td>
                   <td>
                     <span
-                      className={`${styles.status} ${
-                        styles[certificate.status]
-                      }`}
+                      className={`${styles.status} ${styles[certificate.status]
+                        }`}
                     >
                       {certificate.status}
                     </span>
                   </td>
                   <td>
-                  <div className={styles.standardsContainer}>
-                    <div className={styles.buttons}>
-                      <Link
-                        href={`/municipality-dashboard/certificate/approve/${certificate.id}`}
-                      >
-                        <button className={`${styles.button} ${styles.view}`}>
-                          ตรวจสอบใบรับรอง
-                        </button>
-                      </Link>
-                    </div>
+                    <div className={styles.standardsContainer}>
+                      <div className={styles.buttons}>
+                        <Link
+                          href={`/municipality-dashboard/certificate/approve/${certificate.id}`}
+                        >
+                          <button className={`${styles.button} ${styles.view}`}>
+                            ตรวจสอบใบรับรอง
+                          </button>
+                        </Link>
+                      </div>
                     </div>
                   </td>
                 </tr>
@@ -117,7 +117,7 @@ const Certificate = () => {
           ) : (
             <tr>
               <td colSpan={10}>ไม่พบข้อมูล</td>{" "}
-            
+
             </tr>
           )}
         </tbody>

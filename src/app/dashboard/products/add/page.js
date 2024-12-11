@@ -21,6 +21,7 @@ import { useSession } from 'next-auth/react';
 import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { toast } from "react-toastify";
 
 
 
@@ -110,8 +111,8 @@ const AddProductDialog = ({ open, onClose, onAddProduct }) => {
       Price: parseFloat(data.Price.replace(/,/g, "")).toFixed(2),
     };
 
-      // Log the formattedData.Certificates to check its structure
-  console.log("Formatted Certificates:", formattedData.Certificates);
+    // Log the formattedData.Certificates to check its structure
+    console.log("Formatted Certificates:", formattedData.Certificates);
 
     // Prepare form data for submission
     const formDataToSend = new FormData();
@@ -146,8 +147,8 @@ const AddProductDialog = ({ open, onClose, onAddProduct }) => {
         throw new Error("Error creating product");
       }
     } catch (error) {
-      console.error("Failed to add product:", error);
-      alert("Failed to add product: " + error.message);
+      console.error("ไม่สามารถเพิ่มสินค้าได้:", error);
+      toast.error("ไม่สามารถเพิ่มสินค้าได้: " + error.message);
     }
   };
 
@@ -161,19 +162,19 @@ const AddProductDialog = ({ open, onClose, onAddProduct }) => {
   useEffect(() => {
     // Fetch the available certificates for the farmer
     if (status === 'authenticated' && userId) {
-      console.log("user id is",userId);
+      console.log("user id is", userId);
       async function fetchCertificates() {
         const response = await fetch(`/api/users/${userId}/certificates`);
         const data = await response.json();
-        console.log("cert data is",data);
+        console.log("cert data is", data);
         setCertificates(data);
       }
 
-      fetchCertificates();      
+      fetchCertificates();
     }
 
   }, [status]);
-  
+
 
   return (
     <Dialog open={open} onClose={handleClose} PaperComponent={CustomPaper} maxWidth="lg">
@@ -275,72 +276,72 @@ const AddProductDialog = ({ open, onClose, onAddProduct }) => {
                   </FormControl>
                 </Grid>
                 <Grid item xs={12}>
-                <FormControl fullWidth>
-                  <InputLabel>การรับรอง</InputLabel>
-                  <Controller
-                    name="Certificates"
-                    control={control}
-                    render={({ field }) => (
-                      <Select
-                        {...field}
-                        label="การรับรอง"
-                        multiple
-                        renderValue={(selected) => {
-                          if (selected.length === 0) {
-                            return "Please select certificates"; // Optional placeholder when nothing is selected
-                          }
+                  <FormControl fullWidth>
+                    <InputLabel>การรับรอง</InputLabel>
+                    <Controller
+                      name="Certificates"
+                      control={control}
+                      render={({ field }) => (
+                        <Select
+                          {...field}
+                          label="การรับรอง"
+                          multiple
+                          renderValue={(selected) => {
+                            if (selected.length === 0) {
+                              return "Please select certificates"; // Optional placeholder when nothing is selected
+                            }
 
-                          return selected
-                            .map((selectedId) => {
-                              // Find the certificate that matches the selected ID
-                              const selectedCertificate = certificates.find(
-                                (certificate) => certificate.id === selectedId
-                              );
+                            return selected
+                              .map((selectedId) => {
+                                // Find the certificate that matches the selected ID
+                                const selectedCertificate = certificates.find(
+                                  (certificate) => certificate.id === selectedId
+                                );
 
-                              // If a certificate is found, look into its parsed standards for the name
-                              if (selectedCertificate) {
-                                const standards = JSON.parse(selectedCertificate.standards);
-                                return Array.isArray(standards) && standards.length > 0
-                                  ? standards.map((cert) => cert.certNumber).join(", ") // Join multiple names if needed
-                                  : "Unnamed certificate";
-                              }
-                              return "";
-                            })
-                            .join(", ");
-                        }}
-                      >
-                        {certificates.length > 0 ? (
-                          certificates.map((certificate) => {
-                            const standards = JSON.parse(certificate.standards); // Parse the standards JSON
-                            return (
-                              Array.isArray(standards) && standards.length > 0 ? (
-                                standards.map((cert, index) => (
-                                  <MenuItem key={`${certificate.id}-${index}`} value={certificate.id}>
-                                    {/* Ensure the value is certificate.id for selection */}
-                                    <Checkbox
-                                      checked={field.value.includes(certificate.id)} // Check if certificate.id is selected
-                                    />
-                                    <ListItemText
-                                      primary={cert.name}
-                                      secondary={`Cert No: ${cert.certNumber}, Date: ${cert.certDate}`}
-                                    />
+                                // If a certificate is found, look into its parsed standards for the name
+                                if (selectedCertificate) {
+                                  const standards = JSON.parse(selectedCertificate.standards);
+                                  return Array.isArray(standards) && standards.length > 0
+                                    ? standards.map((cert) => cert.certNumber).join(", ") // Join multiple names if needed
+                                    : "Unnamed certificate";
+                                }
+                                return "";
+                              })
+                              .join(", ");
+                          }}
+                        >
+                          {certificates.length > 0 ? (
+                            certificates.map((certificate) => {
+                              const standards = JSON.parse(certificate.standards); // Parse the standards JSON
+                              return (
+                                Array.isArray(standards) && standards.length > 0 ? (
+                                  standards.map((cert, index) => (
+                                    <MenuItem key={`${certificate.id}-${index}`} value={certificate.id}>
+                                      {/* Ensure the value is certificate.id for selection */}
+                                      <Checkbox
+                                        checked={field.value.includes(certificate.id)} // Check if certificate.id is selected
+                                      />
+                                      <ListItemText
+                                        primary={cert.name}
+                                        secondary={`Cert No: ${cert.certNumber}, Date: ${cert.certDate}`}
+                                      />
+                                    </MenuItem>
+                                  ))
+                                ) : (
+                                  <MenuItem key={certificate.id} disabled>
+                                    No standards information available
                                   </MenuItem>
-                                ))
-                              ) : (
-                                <MenuItem key={certificate.id} disabled>
-                                  No standards information available
-                                </MenuItem>
-                              )
-                            );
-                          })
-                        ) : (
-                          <MenuItem disabled>No certificates available</MenuItem>
-                        )}
-                      </Select>
-                    )}
-                  />
-                </FormControl>
-              </Grid>
+                                )
+                              );
+                            })
+                          ) : (
+                            <MenuItem disabled>No certificates available</MenuItem>
+                          )}
+                        </Select>
+                      )}
+                    />
+                  </FormControl>
+                </Grid>
 
 
 

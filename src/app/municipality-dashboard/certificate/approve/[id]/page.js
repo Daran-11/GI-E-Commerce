@@ -10,6 +10,7 @@ import { MapContainer, Marker, TileLayer, useMapEvents } from "react-leaflet";
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
+import { toast } from "react-toastify";
 
 // Fix for the missing marker icon in Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -49,7 +50,7 @@ const ApproveCertificatePage = ({ params }) => {
         const response = await fetch(`/api/approvecertificate/?id=${id}`);
         if (response.ok) {
           const data = await response.json();
-          
+
           if (data.Users) {
             setFormData({
               type: data.type || "",
@@ -75,7 +76,7 @@ const ApproveCertificatePage = ({ params }) => {
         }
       } catch (error) {
         console.error("Failed to fetch certificate:", error);
-        alert("ไม่สามารถดึงข้อมูลใบรับรองได้");
+        toast.error("ไม่สามารถดึงข้อมูลใบรับรองได้");
       }
     };
 
@@ -116,7 +117,7 @@ const ApproveCertificatePage = ({ params }) => {
       });
       return false;
     }
-  
+
     const validationResults = formData.standards.map(standard => {
       // ค้นหาใบรับรองที่มีข้อมูลตรงกันทั้งหมด
       const matchingCert = UsersCertificates.find(cert => {
@@ -125,10 +126,10 @@ const ApproveCertificatePage = ({ params }) => {
         const varietyMatch = cert.variety === formData.variety;
         const standardMatch = cert.standardName === standard.name;
         const certNumberMatch = cert.certificateNumber === standard.certNumber;
-  
+
         return typeMatch && varietyMatch && standardMatch && certNumberMatch;
       });
-  
+
       // สร้างข้อความแสดงผลการตรวจสอบ
       let validationMessage = '';
       if (!matchingCert) {
@@ -142,12 +143,12 @@ const ApproveCertificatePage = ({ params }) => {
           validationMessage = `เลขที่ใบรับรอง ${standard.certNumber} ไม่ถูกต้อง`;
         }
       }
-  
+
       return {
         standardName: standard.name,
         isValid: !!matchingCert,
         certNumber: standard.certNumber,
-        message: matchingCert 
+        message: matchingCert
           ? `ใบรับรอง ${standard.name} ข้อมูลถูกต้องครบถ้วน`
           : validationMessage,
         details: !matchingCert ? {
@@ -166,7 +167,7 @@ const ApproveCertificatePage = ({ params }) => {
         } : null
       };
     });
-  
+
     const allValid = validationResults.every(result => result.isValid);
     setCertificateValidation({
       isValid: allValid,
@@ -204,7 +205,7 @@ const ApproveCertificatePage = ({ params }) => {
               headers: { 'Content-Type': 'application/json' },
             }
           );
-          
+
           if (!certsResponse.ok) {
             if (certsResponse.status === 404) {
               setUsersCertificates([]);
@@ -215,7 +216,7 @@ const ApproveCertificatePage = ({ params }) => {
 
           const certsData = await certsResponse.json();
           setUsersCertificates(Array.isArray(certsData) ? certsData : []);
-          
+
         } catch (certError) {
           console.error("Certificates fetch error:", certError);
           setUsersCertificates([]);
@@ -244,7 +245,7 @@ const ApproveCertificatePage = ({ params }) => {
 
   const handleSubmit = async (action) => {
     if (action === "อนุมัติ" && !certificateValidation.isValid) {
-      alert("ไม่สามารถอนุมัติได้เนื่องจากข้อมูลใบรับรองไม่ตรงกัน");
+      toast.error("ไม่สามารถอนุมัติได้เนื่องจากข้อมูลใบรับรองไม่ตรงกัน");
       return;
     }
 
@@ -274,15 +275,14 @@ const ApproveCertificatePage = ({ params }) => {
         throw new Error(errorData.message || "ไม่สามารถอัพเดตใบรับรอง");
       }
 
-      alert(
-        `ใบรับรอง${
-          action === "อนุมัติ" ? "ได้รับการอนุมัติ" : "ถูกปฏิเสธ"
+      toast.success(
+        `ใบรับรอง${action === "อนุมัติ" ? "ได้รับการอนุมัติ" : "ถูกปฏิเสธ"
         }เรียบร้อยแล้ว`
       );
       router.push("/municipality-dashboard/certificate");
     } catch (error) {
       console.error("Error:", error);
-      alert(error.message || "ไม่สามารถอัพเดตใบรับรอง");
+      toast.error(error.message || "ไม่สามารถอัพเดตใบรับรอง");
     }
   };
 
@@ -309,9 +309,8 @@ const ApproveCertificatePage = ({ params }) => {
         {certificateValidation.details.map((detail, index) => (
           <div
             key={index}
-            className={`p-4 rounded-md ${
-              detail.isValid ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
-            }`}
+            className={`p-4 rounded-md ${detail.isValid ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
+              }`}
           >
             <p className="font-medium">{detail.message}</p>
             {!detail.isValid && detail.details && (
@@ -365,9 +364,8 @@ const ApproveCertificatePage = ({ params }) => {
                 >
                   <span>{showCertificates ? "ซ่อนข้อมูล" : "ดูเพิ่มเติม"}</span>
                   <svg
-                    className={`w-4 h-4 transform transition-transform ${
-                      showCertificates ? "rotate-180" : ""
-                    }`}
+                    className={`w-4 h-4 transform transition-transform ${showCertificates ? "rotate-180" : ""
+                      }`}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -464,7 +462,7 @@ const ApproveCertificatePage = ({ params }) => {
       <div className="w-1/2 p-6">
         <div className="bg-white rounded-lg shadow p-6">
           <h1 className="text-2xl mb-6">ตรวจสอบใบรับรอง</h1>
-          
+
           {/* แสดงผลการตรวจสอบใบรับรอง */}
           {matchFound && <ValidationStatus />}
 
@@ -511,7 +509,7 @@ const ApproveCertificatePage = ({ params }) => {
                   center={[20.046061226911785, 99.890654]}
                   zoom={15}
                   style={{ height: "100%", width: "100%" }}
-                   className="map-container "
+                  className="map-container "
                 >
                   <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                   <LocationMarker />
@@ -580,11 +578,10 @@ const ApproveCertificatePage = ({ params }) => {
                 type="button"
                 onClick={() => handleSubmit("อนุมัติ")}
                 disabled={!certificateValidation.isValid || !matchFound}
-                className={`flex-1 text-white py-2 px-4 rounded-md transition-colors ${
-                  certificateValidation.isValid && matchFound
-                    ? 'bg-green-500 hover:bg-green-600'
-                    : 'bg-gray-400 cursor-not-allowed'
-                }`}
+                className={`flex-1 text-white py-2 px-4 rounded-md transition-colors ${certificateValidation.isValid && matchFound
+                  ? 'bg-green-500 hover:bg-green-600'
+                  : 'bg-gray-400 cursor-not-allowed'
+                  }`}
               >
                 อนุมัติใบรับรอง
               </button>

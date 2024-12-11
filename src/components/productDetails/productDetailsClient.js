@@ -8,7 +8,7 @@ import { Rating } from "react-simple-star-rating";
 import { formatDateToThaiBuddhist } from "../../../utils/formatDate";
 import Breadcrumb from "../BreadCrumb";
 import EmblaCarousel from "../EmblaCarousel";
-
+import { toast } from "react-toastify";
 
 export default function ProductDetailsClient({ product, totalReviewsCount, ProductID }) {
   const router = useRouter();
@@ -43,10 +43,10 @@ export default function ProductDetailsClient({ product, totalReviewsCount, Produ
       };
 
       await addItemToCart(item);
-      alert("Product added to cart");
+      toast.success("สินค้าได้ถูกเพิ่มไปยังตะกร้า");
     } catch (error) {
       console.error("Error adding product to cart:", error);
-      alert("Failed to add product to cart");
+      toast.error("ไม่สามารถเพิ่มสินค้าไปยังตะกร้า");
     }
   };
 
@@ -71,7 +71,7 @@ export default function ProductDetailsClient({ product, totalReviewsCount, Produ
         router.push("/checkout");
       } catch (error) {
         console.error("Error during buy now:", error);
-        alert("Failed to proceed to checkout");
+        toast.error("ไม่สามารถไปยังหน้าชำระเงิน");
       }
     } else {
       router.push("/login");
@@ -121,7 +121,7 @@ export default function ProductDetailsClient({ product, totalReviewsCount, Produ
 
   const handleQuantityChange = (newQuantity) => {
     if (newQuantity > 0 && newQuantity <= product.Amount)
-    console.log('newQuantity',newQuantity);
+      console.log('newQuantity', newQuantity);
     setQuantity(newQuantity);
   };
 
@@ -167,16 +167,16 @@ export default function ProductDetailsClient({ product, totalReviewsCount, Produ
 
       <div className="detail flex justify-center md:justify-start">
         <div className="hidden lg:flex">
-        <EmblaCarousel images={product.images || []} />        
+          <EmblaCarousel images={product.images || []} />
         </div>
 
-          {/*replace with Embla carousel here*/}
+        {/*replace with Embla carousel here*/}
 
 
         <div className="w-full h-fit  bg-white lg:ml-[15px] rounded-2xl p-6">
           <div className="text-[#535353]">
             <div className="lg:hidden flex justify-center">
-            <EmblaCarousel images={product.images || []} />
+              <EmblaCarousel images={product.images || []} />
             </div>
             <div className="text-[#535353]">
               <p className="mt-3 text-4xl lg:text-5xl">{product.ProductName} {product.ProductType}</p>
@@ -194,70 +194,70 @@ export default function ProductDetailsClient({ product, totalReviewsCount, Produ
                 />
                 <p className="text-sm">{avgRating} / 5</p>
               </div>
-              
+
               <p className="hidden md:flex"> ขายแล้ว {totalOrderAmount} กิโลกรัม</p>
-             
+
             </div>
             <p className="text-[#4eac14] text-[35px] lg:mb-2 lg:mt-2">
               {Number(product.Price).toLocaleString()} บาท/กิโล
             </p>
             <div className="space-y-2 md:space-y-4 w-full  text-[#767676] text-[20px] mb-5">
               <div className="lg:w-fit">
-              <div>
-        {product.certificates.map((cert) => {
-          // Ensure certificate exists and has the 'certificate' property
-          if (cert.certificate && cert.certificate.standards) {
-            const standards = cert.certificate.standards; // This is the JSON field
+                <div>
+                  {product.certificates.map((cert) => {
+                    // Ensure certificate exists and has the 'certificate' property
+                    if (cert.certificate && cert.certificate.standards) {
+                      const standards = cert.certificate.standards; // This is the JSON field
 
-            try {
-              // Assuming standards is a JSON string, parse it if necessary
-              const standardsObj = JSON.parse(standards);
-              console.log("standardsObj :",standardsObj)
+                      try {
+                        // Assuming standards is a JSON string, parse it if necessary
+                        const standardsObj = JSON.parse(standards);
+                        console.log("standardsObj :", standardsObj)
 
-              return (
-                <div key={cert.certificate.id}>
-                  <div>
-                    {standardsObj.map((standard, index) => (
-                      <div className="flex space-x-3 mb-2 justify-start items-center" key={index}>
-                        <div>
-                        <Image
-                        key={index}
-                        src={standard.logo}
-                        alt={standard.name}
-                        width={50}
-                        height={50}
-                      />                          
+                        return (
+                          <div key={cert.certificate.id}>
+                            <div>
+                              {standardsObj.map((standard, index) => (
+                                <div className="flex space-x-3 mb-2 justify-start items-center" key={index}>
+                                  <div>
+                                    <Image
+                                      key={index}
+                                      src={standard.logo}
+                                      alt={standard.name}
+                                      width={50}
+                                      height={50}
+                                    />
+                                  </div>
+                                  <div>
+                                    <p className="text-sm">ทะเบียน: {standard.certNumber}</p>
+                                  </div>
+                                  <div>
+                                    <p className="text-sm">วันที่รับรอง: {standard.certDate}</p>
+                                  </div>
+
+
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      } catch (error) {
+                        console.error('Error parsing standards:', error);
+                        return <div>Invalid standards data</div>;
+                      }
+                    } else {
+                      // If no standards found for the certificate
+                      return (
+                        <div key={cert.certificate ? cert.certificate.id : 'no-id'}>
+                          No standards found for this certificate.
                         </div>
-                      <div>
-                        <p className="text-sm">ทะเบียน: {standard.certNumber}</p>                        
-                      </div>
-                      <div> 
-                        <p className="text-sm">วันที่รับรอง: {standard.certDate}</p>                        
-                      </div>
-
-
-                      </div>
-                    ))}
-                  </div>
+                      );
+                    }
+                  })}
                 </div>
-              );
-            } catch (error) {
-              console.error('Error parsing standards:', error);
-              return <div>Invalid standards data</div>;
-            }
-          } else {
-            // If no standards found for the certificate
-            return (
-              <div key={cert.certificate ? cert.certificate.id : 'no-id'}>
-                No standards found for this certificate.
-              </div>
-            );
-          }
-        })}
-      </div>
                 <div className="w-[250px]">คำอธิบาย</div>
                 <div className="w-full text-[#535353]">{product.Description}</div>
-                
+
               </div>
               <div className="w-fit">
                 <div className="w-[250px]">ช่องทางติดต่อ</div>
@@ -268,28 +268,28 @@ export default function ProductDetailsClient({ product, totalReviewsCount, Produ
                 <div className="w-fit flex items-center">
 
 
-              <div className='flex items-center w-fit '>
-                <button className='btn w-10 h-10 text-3xl md:text-2xl md:border-2  rounded-full  text-center' onClick={decrement}>
-                  -
-                </button>
-                <div className='items-center justify-center'>
-                <input
-                  type="number"
-                  className="w-4 h-5 lg:w-8 lg:h-10 lg:mx-1 text-center appearance-none"
-                  value={quantity}
-                  onChange={handleInputChange}
-                  onBlur={handleBlur}
-                  min="1"
-                  max={product.Amount}
-                />
-                </div>
-                <button className='btn w-10 h-10 text-3xl md:text-2xl md:border-2 rounded-full' onClick={increment}>
-                  +
-                </button>
-              </div>
+                  <div className='flex items-center w-fit '>
+                    <button className='btn w-10 h-10 text-3xl md:text-2xl md:border-2  rounded-full  text-center' onClick={decrement}>
+                      -
+                    </button>
+                    <div className='items-center justify-center'>
+                      <input
+                        type="number"
+                        className="w-4 h-5 lg:w-8 lg:h-10 lg:mx-1 text-center appearance-none"
+                        value={quantity}
+                        onChange={handleInputChange}
+                        onBlur={handleBlur}
+                        min="1"
+                        max={product.Amount}
+                      />
+                    </div>
+                    <button className='btn w-10 h-10 text-3xl md:text-2xl md:border-2 rounded-full' onClick={increment}>
+                      +
+                    </button>
+                  </div>
 
-                  
-                  
+
+
                   <p className="ml-3 text-[#535353]">มีสินค้า {product.Amount} กิโลกรัม</p>
                 </div>
               </div>
@@ -328,7 +328,7 @@ export default function ProductDetailsClient({ product, totalReviewsCount, Produ
         {reviews.length > 0 ? (
           reviews.map((review) => (
             <div key={review.id} className="bg-white p-4 rounded-lg shadow mb-4">
-              
+
               <div className="flex items-center">
                 <Rating readonly initialValue={review.rating} size={20} iconsCount={5} />
                 <p className="ml-2 text-sm text-gray-500">{formatDateToThaiBuddhist(review.createdAt)}</p>
