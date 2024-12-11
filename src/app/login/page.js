@@ -4,7 +4,7 @@ import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
-export default function LoginPage() {
+export default function Login() {
   const router = useRouter()
   const [identifier, setIdentifier] = useState('')
   const [password, setPassword] = useState('') 
@@ -15,6 +15,7 @@ export default function LoginPage() {
     // ทำงานบางอย่าง เช่น ตรวจสอบฟอร์ม
     // แล้วนำทางไปยังหน้า dashboard
     try {
+      console.log('password', password)
       const result = await signIn('credentials',{
         redirect: false,
         identifier,

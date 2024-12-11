@@ -17,6 +17,7 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import TextField from '@mui/material/TextField';
+import { toast } from 'react-toastify';
 
 const ProductManagement = () => {
     const { data: session, status } = useSession();
@@ -59,10 +60,10 @@ const ProductManagement = () => {
                 if (response.ok) {
                     setProducts(products.filter(product => product.id !== productId));
                 } else {
-                    alert("Failed to delete product");
+                    toast.error("ไม่สามารถลบสินค้าได้");
                 }
             } catch (error) {
-                console.error("Failed to delete product:", error);
+                console.error("ไม่สามารถลบสินค้าได้:", error);
             }
         }
     };
@@ -81,7 +82,7 @@ const ProductManagement = () => {
     // Handle adding a new product
     const handleSaveProduct = async () => {
         if (!newProduct.name || newProduct.price <= 0) {
-            alert("Name and price are required!");
+            toast.warning("โปรดใส่ชื่อสินค้าและราคา!");
             return;
         }
 
@@ -100,10 +101,10 @@ const ProductManagement = () => {
                 setDialogOpen(false); // Close the dialog
                 await fetchProducts(); // Refresh product list after addition
             } else {
-                alert("Failed to save product");
+                toast.error("ไม่สามารถบันทึกสินค้าได้");
             }
         } catch (error) {
-            console.error("Failed to save product:", error);
+            console.error("ไม่สามารถบันทึกสินค้าได้:", error);
         }
     };
 

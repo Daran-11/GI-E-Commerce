@@ -6,7 +6,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Rating } from 'react-simple-star-rating';
-
+import { toast } from "react-toastify";
 const deliveryStatusTranslations = {
   Preparing: 'เตรียมสินค้า',
   Shipped: 'การจัดส่ง',
@@ -37,7 +37,7 @@ function OrderDetails({ params }) {
     if (status === 'unauthenticated') {
       router.push('/login');
     }
-  
+
     if (status === 'authenticated' && session?.user?.id && orderId) {
       const fetchOrderDetails = async () => {
         try {
@@ -45,12 +45,12 @@ function OrderDetails({ params }) {
           if (response.ok) {
             const data = await response.json();
             setOrderDetails(data.order);
-      
+
             // Fetch user reviews for each product in the order
             const reviewResponse = await fetch(`/api/users/${session.user.id}/reviews-rating/${orderId}`);
             if (reviewResponse.ok) {
               const reviewData = await reviewResponse.json();
-              
+
               // Set reviewed product IDs
               setUserReviews(reviewData.reviewedProductIds || []);
             } else {
@@ -66,13 +66,13 @@ function OrderDetails({ params }) {
           setLoading(false);
         }
       };
-      
+
       fetchOrderDetails();
     }
   }, [status, session, router, orderId]);
-  
 
-  
+
+
   const submitReview = async () => {
     try {
       const response = await fetch('/api/rating-reviews', {
@@ -88,16 +88,16 @@ function OrderDetails({ params }) {
           review,  // Optional review text field
         }),
       });
-      
+
       const data = await response.json();
       if (data.success) {
-        alert('Review submitted successfully!');
+        toast.success('ได้รับรีวิวแล้ว ขอบคุณครับ/ค่ะ');
       } else {
-        alert('Error submitting review: ' + data.error);
+        toast.error('พบข้อผิดพลาด' + data.error);
       }
     } catch (error) {
-      console.error('Error submitting review:', error);
-      alert('Could not submit the review');
+      console.error('พบข้อผิดพลาดในการยืนยันเขียนรีวิว', error);
+      toast.error('ไม่สามารถส่งรีวิวได้');
     } finally {
       closeReviewModal();
 
@@ -118,8 +118,11 @@ function OrderDetails({ params }) {
     setRating(0);
   };
 
-  if (loading) {
-    return <div>Loading order details...</div>;
+  if (status === 'loading' || loading) {
+    return <div className="flex flex-col items-center justify-center min-h-screen">
+      <div className="w-12 h-12 border-4 border-t-green-500 border-r-green-500 border-b-green-200 border-l-green-200 rounded-full animate-spin"></div>
+      <p className="mt-4 text-gray-600">กำลังโหลดข้อมูล...</p>
+    </div>;
   }
 
   if (error) {
@@ -130,10 +133,10 @@ function OrderDetails({ params }) {
     return <div>No order details found.</div>;
   }
 
-// Calculate current step based on delivery status, ensuring it only uses the defined deliveryStatuses array
-const currentStepIndex = deliveryStatuses.includes(orderDetails.deliveryStatus)
-  ? deliveryStatuses.indexOf(orderDetails.deliveryStatus)
-  : deliveryStatuses.length - 1; // Default to the last step if the status is not found
+  // Calculate current step based on delivery status, ensuring it only uses the defined deliveryStatuses array
+  const currentStepIndex = deliveryStatuses.includes(orderDetails.deliveryStatus)
+    ? deliveryStatuses.indexOf(orderDetails.deliveryStatus)
+    : deliveryStatuses.length - 1; // Default to the last step if the status is not found
 
   return (
     <div className="w-full h-screen bg-white p-6 rounded-xl">
@@ -145,11 +148,11 @@ const currentStepIndex = deliveryStatuses.includes(orderDetails.deliveryStatus)
         <p><strong>รวมทั้งสิ้น</strong> {orderDetails.totalPrice} บาท</p>
         <p><strong>ที่อยู่จัดส่ง:</strong> {orderDetails.addressText}</p>
         <p><strong>บริการขนส่ง:</strong> {orderDetails.delivery?.deliveryService?.name || (
-              <span className="text-gray-300">ไม่พบข้อมูลในตอนนี้</span>
-            )} </p>
+          <span className="text-gray-300">ไม่พบข้อมูลในตอนนี้</span>
+        )} </p>
         <p><strong>รหัสพัสดุ:</strong> {orderDetails.delivery?.trackingNum || (
-              <span className="text-gray-300">ไม่พบข้อมูลในตอนนี้</span>
-            )} </p>
+          <span className="text-gray-300">ไม่พบข้อมูลในตอนนี้</span>
+        )} </p>
 
         {/* Progress bar */}
         <div className="progress-bar-container my-4   ">
@@ -160,11 +163,11 @@ const currentStepIndex = deliveryStatuses.includes(orderDetails.deliveryStatus)
             <div
               className={` absolute top-3 left-0  h-2 rounded-full progress-pulse`}
               style={{
-                width: `${((currentStepIndex + 1) / deliveryStatuses.length) * 100 }%`,
-                maxWidth: `83%` ,
+                width: `${((currentStepIndex + 1) / deliveryStatuses.length) * 100}%`,
+                maxWidth: `83%`,
                 backgroundColor: '#4eac14',
               }}
-            ></div>            
+            ></div>
           </div>
 
 
@@ -173,9 +176,8 @@ const currentStepIndex = deliveryStatuses.includes(orderDetails.deliveryStatus)
             {deliveryStatuses.map((status, index) => (
               <div key={status} className="flex-1  text-center relative ">
                 <div
-                  className={` w-8 h-8 rounded-full flex mx-auto   ${
-                    index <= currentStepIndex ? 'bg-[#4eac14]' : 'bg-gray-300'
-                  }`}
+                  className={` w-8 h-8 rounded-full flex mx-auto   ${index <= currentStepIndex ? 'bg-[#4eac14]' : 'bg-gray-300'
+                    }`}
                 >
 
                 </div>
@@ -202,12 +204,12 @@ const currentStepIndex = deliveryStatuses.includes(orderDetails.deliveryStatus)
                 <td className="border border-gray-300 px-2 py-2 text-start">
                   {item.product.ProductName}
                   {item.product.ProductType}
-                   {orderDetails.farmer.farmerName}
+                  {orderDetails.farmer.farmerName}
                   {orderDetails.deliveryStatus === 'Delivered' && !userReviews.includes(item.product.ProductID) && (
                     <div>
                       <button onClick={() => openReviewModal(item.product.ProductID)} className="text-blue-600 underline">
                         เขียนรีวิว
-                      </button>                      
+                      </button>
                     </div>
 
                   )}
@@ -246,25 +248,25 @@ const currentStepIndex = deliveryStatuses.includes(orderDetails.deliveryStatus)
           </div>
         )}
 
-      {/* Review Modal */}
-      <Modal open={isReviewModalOpen} onClose={closeReviewModal}>
-        <Box className="p-6 bg-white rounded-lg shadow-lg mx-auto mt-20 max-w-md">
-          <h2 className="text-lg font-semibold mb-4">Rate the Product</h2>
-          <Rating onClick={handleRating} ratingValue={rating} allowHover={true} size={30} />
-          <TextField
-                  fullWidth
-                  multiline
-                  rows={3}
-                  label="Review (optional)"
-                  value={review}
-                  onChange={(e) => setReview(e.target.value)}
-                  sx={{ mt: 2 }}
-                />
-          <div className="mt-4">
-            <Button variant="contained" color="primary" onClick={submitReview}>Submit Review</Button>
-          </div>
-        </Box>
-      </Modal>
+        {/* Review Modal */}
+        <Modal open={isReviewModalOpen} onClose={closeReviewModal}>
+          <Box className="p-6 bg-white rounded-lg shadow-lg mx-auto mt-20 max-w-md">
+            <h2 className="text-lg font-semibold mb-4">ให้คะแนนสินค้า</h2>
+            <Rating onClick={handleRating} ratingValue={rating} allowHover={true} size={30} />
+            <TextField
+              fullWidth
+              multiline
+              rows={3}
+              label="Review (optional)"
+              value={review}
+              onChange={(e) => setReview(e.target.value)}
+              sx={{ mt: 2 }}
+            />
+            <div className="mt-4">
+              <Button variant="contained" color="primary" onClick={submitReview}>ยืนยัน</Button>
+            </div>
+          </Box>
+        </Modal>
       </div>
     </div>
   );

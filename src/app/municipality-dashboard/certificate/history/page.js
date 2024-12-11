@@ -5,6 +5,7 @@ import Link from "next/link";
 import Pagination from "@/app/ui/dashboard/pagination/pagination";
 import Search from "@/app/ui/dashboard/search/search";
 import Image from "next/image";
+import { toast } from "react-toastify";
 
 const Historycer = () => {
   const [certificates, setCertificates] = useState([]);
@@ -31,10 +32,10 @@ const Historycer = () => {
           headers: { "Content-Type": "application/json" },
         });
         if (response.ok) {
-          alert("Certificate deleted successfully");
+          toast.success("ลบใบรับรองสำเร็จ");
           setCertificates(certificates.filter((cert) => cert.id !== id));
         } else {
-          alert("Failed to delete certificate");
+          toast.error("ลบใบรับรองไม่สำเร็จ");
         }
       } catch (error) {
         console.error("Failed to delete certificate:", error);
@@ -44,7 +45,7 @@ const Historycer = () => {
 
   return (
     <div className={styles.container}>
-    <h1 className="text-2xl ">ประวัติการรับรอง</h1><br></br>
+      <h1 className="text-2xl ">ประวัติการรับรอง</h1><br></br>
       <div className={styles.top}>
         <Search placeholder="ค้นหาผู้ใช้..." />
       </div>

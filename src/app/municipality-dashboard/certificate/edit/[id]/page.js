@@ -6,6 +6,7 @@ import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import Image from "next/image";
 import "@/app/dashboard/certificate/add/add.css";
+import { toast } from "react-toastify";
 
 // Fix for the missing marker icon in Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -51,10 +52,10 @@ const ApproveCertificatePage = ({ params }) => {
             municipalComment: "",
           });
         } else {
-          alert("Failed to fetch certificate");
+          toast.error("ไม่สามารถดึงข้อมูลใบรับรองได้");
         }
       } catch (error) {
-        console.error("Failed to fetch certificate:", error);
+        console.error("ไม่สามารถดึงข้อมูลใบรับรองได้:", error);
       }
     };
 
@@ -101,11 +102,11 @@ const ApproveCertificatePage = ({ params }) => {
       const result = await response.json();
       console.log("Response from server:", result);
 
-      alert(`ใบรับรอง${action === "อนุมัติ" ? "ได้รับการอนุมัติ" : "ถูกปฏิเสธ"}เรียบร้อยแล้ว`);
+      toast.error(`ใบรับรอง${action === "อนุมัติ" ? "ได้รับการอนุมัติ" : "ถูกปฏิเสธ"}เรียบร้อยแล้ว`);
       router.push("/municipality-dashboard/certificate");
     } catch (error) {
       console.error("Error:", error);
-      alert(error.message || "ไม่สามารถอัพเดตใบรับรอง");
+      toast.error(error.message || "ไม่สามารถอัพเดตใบรับรอง");
     }
   };
 

@@ -8,6 +8,7 @@ import { Box, Button, FormControl, IconButton, InputLabel, MenuItem, Modal, Sele
 import { useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
 
 const deliveryStatusTranslations = {
   Preparing: 'กำลังเตรียมพัสดุ',
@@ -82,7 +83,7 @@ export default function IncomingOrders() {
   const [selectedOrderStatus, setSelectedOrderStatus] = useState(''); // State for selected order status
   const [selectedPaymentStatus, setSelectedPaymentStatus] = useState(''); // State for selected payment status
   const [selectedDeliveryStatus, setSelectedDeliveryStatus] = useState(''); // State for selected delivery status
-  
+
   const query = searchParams.get("query") || ""; // Get the search query
 
   const router = useRouter();
@@ -141,7 +142,7 @@ export default function IncomingOrders() {
 
   const handleSubmit = async () => {
     if (!deliveryService || !trackingNum) {
-      alert("Please fill out both fields.");
+      toast.warning("โปรดใส่ข้อมูลให้ครบถ้วน");
       return;
     }
     const orderId = selectedOrder.id;
@@ -163,7 +164,7 @@ export default function IncomingOrders() {
 
       handleClose();
       fetchOrders(session.user.id);
-      alert('Delivery details submitted successfully!');
+      toast.success('บันทึกข้อมูลการจัดส่งสำเร็จ!');
     } catch (error) {
       console.error(error);
     }
@@ -203,9 +204,9 @@ export default function IncomingOrders() {
 
   if (status === 'loading' || loading) {
     return <div className="flex flex-col items-center justify-center min-h-screen">
-    <div className="w-12 h-12 border-4 border-t-green-500 border-r-green-500 border-b-green-200 border-l-green-200 rounded-full animate-spin"></div>
-    <p className="mt-4 text-gray-600">กำลังโหลดข้อมูล...</p>
-  </div>;
+      <div className="w-12 h-12 border-4 border-t-green-500 border-r-green-500 border-b-green-200 border-l-green-200 rounded-full animate-spin"></div>
+      <p className="mt-4 text-gray-600">กำลังโหลดข้อมูล...</p>
+    </div>;
   }
 
   if (status === 'unauthenticated') {
@@ -216,22 +217,21 @@ export default function IncomingOrders() {
   return (
     <div className=" h-fit space-y-5 ">
 
-      <div className='w-full h-fit  bg-white px-6 pt-6 pb-2 rounded-xl'> 
-      <h1 className='page-header '>จัดการคำสั่งซื้อ</h1>          
+      <div className='w-full h-fit  bg-white px-6 pt-6 pb-2 rounded-xl'>
+        <h1 className='page-header '>จัดการคำสั่งซื้อ</h1>
         {/*  Buttons for Status Filtering */}
         <div className="flex space-x-2 mb-4">
-        <button
+          <button
             onClick={handleAllFilter}
-            className={`btn p-2 hover:outline outline-2 outline-[#4eac14] rounded-xl ${
-              selectedDeliveryStatus === '' ? 'bg-[#4eac14] text-white' : 'bg-[#f1f1f1]'
-            }`}
+            className={`btn p-2 hover:outline outline-2 outline-[#4eac14] rounded-xl ${selectedDeliveryStatus === '' ? 'bg-[#4eac14] text-white' : 'bg-[#f1f1f1]'
+              }`}
           >
             ทั้งหมด
           </button>
 
-        {Object.keys(statusOptions).map((status) => (
+          {Object.keys(statusOptions).map((status) => (
             <button
-            
+
               key={status}
               color="primary"
               className={`btn p-1 md:p-2 hover:outline outline-2 outline-[#4eac14] rounded-xl ${selectedDeliveryStatus === status ? 'bg-[#4eac14] text-white' : 'bg-[#f1f1f1]'}`}
@@ -240,10 +240,10 @@ export default function IncomingOrders() {
               {statusOptions[status]}
             </button>
           ))}
-      </div>
+        </div>
 
-      <div className=''>
-        <Search placeholder="ค้นหาจากรหัสคำสั่งซื้อ..."/>
+        <div className=''>
+          <Search placeholder="ค้นหาจากรหัสคำสั่งซื้อ..." />
         </div>
 
         {/* Dropdown for filtering orders by status */}
