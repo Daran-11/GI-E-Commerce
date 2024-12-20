@@ -1,26 +1,47 @@
 import { NextResponse } from 'next/server';
-import prisma from '../../../../../lib/prisma';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
+
+export const dynamic = 'force-dynamic';
 
 export async function GET(request, { params }) {
   try {
+    const code = params.code;
+
+    // ค้นหาข้อมูล QR Code พร้อมกับ relations ทั้งหมด
     const qrCode = await prisma.qR_Code.findUnique({
       where: {
-        Product_ID: params.code,
+        qrcodeId: code
       },
       include: {
         farmer: {
           select: {
             farmerName: true,
             address: true,
+            sub_district: true,
+            district: true,
+            province: true,
+            zip_code: true,
             phone: true,
+            contactLine: true
+          }
+        },
+        certificate: {
+          include: {
+            products: {
+              include: {
+                product: true
+              }
+            }
+          }
+        },
+        product: {
+          include: {
+            images: true,
             certificates: {
-              select: {
-                type: true,
-                variety: true,
-                registrationDate: true,
-                expiryDate: true,
-                standards: true,
-                status: true,
+              include: {
+                certificate: true
               }
             }
           }
@@ -35,50 +56,15 @@ export async function GET(request, { params }) {
       );
     }
 
-    // Format standards data
-    let standardsData = [];
-    try {
-      if (typeof qrCode.Standard === 'string') {
-        standardsData = JSON.parse(qrCode.Standard);
-      } else if (typeof qrCode.Standard === 'object') {
-        standardsData = qrCode.Standard;
-      }
-    } catch (e) {
-      console.error('Error parsing standards:', e);
-    }
+    return NextResponse.json(qrCode);
 
-    // Format the response data
-    const responseData = {
-      Product_ID: qrCode.Product_ID,
-      Type: qrCode.Type,
-      Variety: qrCode.Variety,
-      ProductionQuantity: Number(qrCode.ProductionQuantity),
-      Address: qrCode.Address,
-      Phone: qrCode.Phone,
-      farmerName: qrCode.farmerName,
-      Latitude: qrCode.Latitude,
-      Longitude: qrCode.Longitude,
-      Standard: standardsData,
-      // Include farmer certificates if needed
-      certificates: qrCode.farmer?.certificates?.map(cert => ({
-        type: cert.type,
-        variety: cert.variety,
-        standards: typeof cert.standards === 'string' 
-          ? JSON.parse(cert.standards)
-          : cert.standards,
-        registrationDate: cert.registrationDate,
-        expiryDate: cert.expiryDate,
-        status: cert.status
-      })) || [],
-      createdAt: qrCode.createdAt
-    };
-
-    return NextResponse.json(responseData);
   } catch (error) {
     console.error('Error fetching QR code data:', error);
     return NextResponse.json(
-      { error: 'เกิดข้อผิดพลาดในการดึงข้อมูล กรุณาลองใหม่อีกครั้ง' },
+      { error: 'เกิดข้อผิดพลาดในการดึงข้อมูล' },
       { status: 500 }
     );
+  } finally {
+    await prisma.$disconnect();
   }
 }
