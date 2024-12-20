@@ -1,51 +1,53 @@
-// api/qrcode/validate/[code]/route.js
 import { NextResponse } from 'next/server';
-import prisma from '../../../../../../lib/prisma';
+import { PrismaClient } from '@prisma/client';
 
-// Regex patterns for QR code validation
-const QR_CODE_PATTERNS = {
-  PP: /^\d{3}PP\d{4}$/, // เช่น 001PP0002
-  PN: /^\d{3}PN\d{4}$/, // เช่น 001PN0002
-};
+const prisma = new PrismaClient();
+
+export const dynamic = 'force-dynamic';
 
 export async function GET(request, { params }) {
   try {
-    const { code } = params;
+    const code = params.code;
 
-    // Validate code format
-    const isPP = QR_CODE_PATTERNS.PP.test(code);
-    const isPN = QR_CODE_PATTERNS.PN.test(code);
-
-    if (!isPP && !isPN) {
+    // เช็คว่ามีค่า code หรือไม่
+    if (!code) {
       return NextResponse.json(
-        { 
-          error: 'รูปแบบรหัสไม่ถูกต้อง',
-          details: 'รหัสต้องอยู่ในรูปแบบ 000PP0000 หรือ 000PN0000'
-        },
+        { error: 'กรุณาระบุรหัสบรรจุภัณฑ์' },
         { status: 400 }
       );
     }
 
+    // เช็คความยาวรหัส
+    if (code.length !== 11) {
+      return NextResponse.json(
+        { error: 'รหัสต้องมีความยาว 11 หลัก' },
+        { status: 400 }
+      );
+    }
+
+    // เช็ครูปแบบรหัส PP หรือ PN ในตำแหน่งที่ 5-6
+    const productType = code.substring(4, 6);
+    if (productType !== 'PP' && productType !== 'PN') {
+      return NextResponse.json(
+        { error: 'รูปแบบรหัสไม่ถูกต้อง (ต้องมี PP หรือ PN)' },
+        { status: 400 }
+      );
+    }
+
+    // ค้นหารหัสในฐานข้อมูล
     const qrCode = await prisma.qR_Code.findUnique({
       where: {
-        Product_ID: code,
+        qrcodeId: code
       },
-      select: {
-        Product_ID: true,
-        createdAt: true,
-        Type: true, // เพิ่มเพื่อตรวจสอบประเภทสินค้า
-        farmer: {
-          select: {
+      include: {
+        farmer: true,
+        certificate: true,
+        product: {
+          include: {
+            images: true,
             certificates: {
-              select: {
-                status: true,
-                expiryDate: true
-              },
-              where: {
-                status: "ผ่านการรับรอง",
-                expiryDate: {
-                  gt: new Date()
-                }
+              include: {
+                certificate: true
               }
             }
           }
@@ -53,35 +55,27 @@ export async function GET(request, { params }) {
       }
     });
 
-    const headers = new Headers();
-    headers.set('Cache-Control', 'public, max-age=60');
-    headers.set('Content-Type', 'application/json');
+    // ถ้าไม่พบรหัสในระบบ
+    if (!qrCode) {
+      return NextResponse.json(
+        { error: 'ไม่พบรหัสบรรจุภัณฑ์นี้ในระบบ' },
+        { status: 404 }
+      );
+    }
 
-    const hasValidCertificates = qrCode?.farmer?.certificates?.length > 0;
-    const codeType = code.substring(3, 5); // 'PP' or 'PN'
-
+    // ส่งข้อมูลกลับ
     return NextResponse.json({
-      exists: !!qrCode,
-      isValid: hasValidCertificates,
-      productType: codeType,
-      metadata: qrCode ? {
-        createdAt: qrCode.createdAt,
-        type: qrCode.Type,
-        certificateStatus: hasValidCertificates ? 'valid' : 'expired'
-      } : null,
-    }, {
-      status: 200,
-      headers
+      success: true,
+      data: qrCode
     });
 
   } catch (error) {
     console.error('Error validating QR code:', error);
     return NextResponse.json(
-      { 
-        error: 'ไม่สามารถตรวจสอบรหัสได้ กรุณาลองใหม่อีกครั้ง',
-        errorCode: error.code || 'UNKNOWN_ERROR'
-      },
+      { error: 'เกิดข้อผิดพลาดในการตรวจสอบรหัส' },
       { status: 500 }
     );
+  } finally {
+    await prisma.$disconnect();
   }
 }
