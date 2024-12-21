@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { MdAdd, MdDelete } from "react-icons/md";
+import styles from "../../../../ui/dashboard/users/managetype/AddTypePage.module.css";
 
 const EditTypePage = ({ params }) => {
   const router = useRouter();
@@ -102,85 +103,85 @@ const EditTypePage = ({ params }) => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      <div className={styles.loadingContainer}>
+        <div className={styles.loadingSpinner}></div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-2xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6">แก้ไขชนิด</h1>
+    <div className={styles.container}>
+      <h1 className="text-2xl ">เเก้ไขชนิดเเละสายพันธุ์</h1><br></br>
 
       {error && (
-        <div className="p-4 mb-6 text-red-700 bg-red-100 rounded-md">
+        <div className={styles.error}>
           {error}
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+      <form onSubmit={handleSubmit} className={styles.form}>
+        <div className={styles.formGroup}>
+          <label className={styles.label}>
             ชนิด
           </label>
           <input
             type="text"
             value={formData.type}
             onChange={(e) => setFormData(prev => ({ ...prev, type: e.target.value }))}
-            className="w-full p-2 border border-gray-300 rounded-md"
+            className={styles.input}
             placeholder="กรอกชื่อชนิด"
             required
           />
         </div>
 
-        <div className="space-y-4">
-          <div className="flex justify-between items-center">
-            <label className="block text-sm font-medium text-gray-700">
+        <div className={styles.formGroup}>
+          <div className={styles.varietyHeader}>
+            <label className={styles.label}>
               สายพันธุ์
             </label>
             <button
               type="button"
               onClick={handleAddVariety}
-              className="flex items-center gap-1 px-3 py-1 text-sm bg-green-500 text-white rounded hover:bg-green-600"
+              className={styles.addButton}
             >
               <MdAdd /> เพิ่มสายพันธุ์
             </button>
           </div>
 
           {formData.varieties.map((variety, index) => (
-            <div key={index} className="flex gap-2">
+            <div key={index} className={styles.varietyItem}>
               <input
                 type="text"
                 value={variety.name}
                 onChange={(e) => handleVarietyChange(index, e.target.value)}
-                className="flex-1 p-2 border border-gray-300 rounded-md"
+                className={styles.input}
                 placeholder={`สายพันธุ์ที่ ${index + 1}`}
                 required
               />
               <button
                 type="button"
                 onClick={() => handleRemoveVariety(index)}
-                className="text-red-500 hover:text-red-700"
+                className={styles.deleteButton}
                 title="ลบสายพันธุ์"
               >
-                <MdDelete size={24} />
+                <MdDelete />
               </button>
             </div>
           ))}
         </div>
 
-        <div className="flex justify-end gap-4 pt-4">
+        <div className={styles.buttonGroup}>
           <button
             type="button"
             onClick={() => router.back()}
-            className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
+            className={styles.cancelButton}
           >
             ยกเลิก
           </button>
           <button
             type="submit"
             disabled={isSaving}
-            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:bg-blue-300"
+            className={styles.submitButton}
           >
             {isSaving ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
           </button>
