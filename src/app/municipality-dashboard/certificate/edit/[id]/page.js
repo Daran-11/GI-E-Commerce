@@ -1,32 +1,42 @@
 "use client";
-import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
-import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
-import "leaflet/dist/leaflet.css";
-import L from "leaflet";
-import Image from "next/image";
 import "@/app/dashboard/certificate/add/add.css";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { MapContainer, Marker, TileLayer, useMap } from "react-leaflet";
+
+import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
+import markerIcon from "leaflet/dist/images/marker-icon.png";
+import markerShadow from "leaflet/dist/images/marker-shadow.png";
 
 // Fix for the missing marker icon in Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
-  iconRetinaUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
-  iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
-  shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
+  iconRetinaUrl: markerIcon2x.src,
+  iconUrl: markerIcon.src,
+  shadowUrl: markerShadow.src
 });
 
-const ApproveCertificatePage = ({ params }) => {
-  const [formData, setFormData] = useState({
+const ViewCertificatePage = ({ params }) => {
+  const [certificateData, setCertificateData] = useState({
     type: "",
     variety: "",
     latitude: "",
     longitude: "",
     productionQuantity: "",
     standards: [],
-    municipalComment: "",
+    farmerName: "",
+    address: "",
+    phone: "",
+    contactLine: "",
+    registrationDate: "",
+    expiryDate: "",
+    status: "",
   });
-  const [showCommentField, setShowCommentField] = useState(false);
-  const [errors, setErrors] = useState({});
+  const [allCertificates, setAllCertificates] = useState([]);
+  const [standardsInfo, setStandardsInfo] = useState({});
   const router = useRouter();
   const { id } = params;
 
@@ -36,217 +46,238 @@ const ApproveCertificatePage = ({ params }) => {
         const response = await fetch(`/api/histroycer/?id=${id}`);
         if (response.ok) {
           const data = await response.json();
-          setFormData({
-            type: data.type || "",
-            variety: data.variety || "",
-            plotCode: data.plotCode || "",
-            latitude: data.latitude || "",
-            longitude: data.longitude || "",
-            productionQuantity: data.productionQuantity || "",
-            standards: JSON.parse(data.standards) || [],
-            UsersId: data.Users?.id || "",
-            registrationDate: new Date(data.registrationDate).toISOString().split("T")[0],
-            expiryDate: new Date(data.expiryDate).toISOString().split("T")[0],
-            status: data.status || "",
-            municipalComment: "",
-          });
+          
+          if (data.Users) {
+            setCertificateData({
+              type: data.type || "",
+              variety: data.variety || "",
+              latitude: data.latitude || "",
+              longitude: data.longitude || "",
+              productionQuantity: data.productionQuantity || "",
+              standards: JSON.parse(data.standards) || [],
+              registrationDate: data.registrationDate ? new Date(data.registrationDate).toLocaleDateString('th-TH') : "",
+              expiryDate: data.expiryDate ? new Date(data.expiryDate).toLocaleDateString('th-TH') : "",
+              status: data.status || "",
+              farmerName: data.Users.farmerName || "",
+              address: data.Users.address || "",
+              phone: data.Users.phone || "",
+              contactLine: data.Users.contactLine || ""
+            });
+
+            // Fetch all certificates for this farmer
+            fetchAllCertificates(data.Users.id);
+          }
         } else {
-          alert("Failed to fetch certificate");
+          throw new Error("Failed to fetch certificate");
         }
       } catch (error) {
         console.error("Failed to fetch certificate:", error);
+        alert("ไม่สามารถดึงข้อมูลใบรับรองได้");
       }
     };
 
     fetchCertificate();
   }, [id]);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-    setErrors((prev) => ({ ...prev, [name]: "" }));
-  };
-
-  const handleSubmit = async (action) => {
-    const newErrors = {};
-    if (action === "ไม่อนุมัติ" && !formData.municipalComment) {
-      newErrors.municipalComment = "กรุณากรอกความคิดเห็นเมื่อไม่อนุมัติใบรับรอง";
-    }
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return;
-    }
-
+  const fetchAllCertificates = async (farmerId) => {
     try {
-      const response = await fetch("/api/histroycer", {
-        method: "PUT",
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          id: id,
-          action: action,
-          municipalComment: formData.municipalComment
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "ไม่สามารถอัพเดตใบรับรอง");
+      const response = await fetch(`/api/farmer_certificates/${farmerId}`);
+      if (response.ok) {
+        const data = await response.json();
+        setAllCertificates(data);
+      } else {
+        throw new Error("Failed to fetch all certificates");
       }
-      const result = await response.json();
-      console.log("Response from server:", result);
-
-      alert(`ใบรับรอง${action === "อนุมัติ" ? "ได้รับการอนุมัติ" : "ถูกปฏิเสธ"}เรียบร้อยแล้ว`);
-      router.push("/municipality-dashboard/certificate");
     } catch (error) {
-      console.error("Error:", error);
-      alert(error.message || "ไม่สามารถอัพเดตใบรับรอง");
+      console.error("Failed to fetch all certificates:", error);
     }
   };
 
-  const handleReject = () => {
-    setShowCommentField(true);
-  };
+  useEffect(() => {
+    const fetchStandards = async () => {
+      try {
+        const response = await fetch("/api/standards");
+        if (response.ok) {
+          const standardsData = await response.json();
+          const infoMap = {};
+          standardsData.forEach(standard => {
+            infoMap[standard.name] = standard.certificationInfo || "เลขที่ใบรับรอง";
+          });
+          setStandardsInfo(infoMap);
+        }
+      } catch (error) {
+        console.error("Failed to fetch standards:", error);
+      }
+    };
+
+    fetchStandards();
+  }, []);
 
   const LocationMarker = () => {
-    const map = useMapEvents({
-      load() {
-        map.setView([formData.latitude, formData.longitude], 13);
-      },
-    });
+    const map = useMap();
+    const { latitude, longitude } = certificateData;
 
-    return formData.latitude && formData.longitude ? (
-      <Marker position={[formData.latitude, formData.longitude]}></Marker>
+    useEffect(() => {
+      if (latitude && longitude) {
+        map.setView([latitude, longitude], map.getZoom());
+      }
+    }, [latitude, longitude, map]);
+
+    return latitude && longitude ? (
+      <Marker position={[latitude, longitude]} />
     ) : null;
   };
 
   return (
-    <div className="container">
-      <main className="mainContent">
-        <h1 className="title-name">อนุมัติใบรับรอง</h1>
-        <form onSubmit={(e) => e.preventDefault()} className="space-y-4">
-          <div className="form-container">
-            <p className="section-name">ชนิด</p>
-            <input
-              name="type"
-              type="text"
-              value={formData.type}
-              className="form-input"
-              disabled
-            />
+    <div className="flex min-h-screen bg-gray-100">
+      {/* Left Side - Farmer Information and All Certificates */}
+      <div className="w-1/2 p-6">
+        <div className="bg-white rounded-lg shadow p-6 mb-6">
+          <h2 className="mb-6 text-2xl font-semibold">ข้อมูลเกษตรกร</h2>
+          <div>
+            <h3 className="text-lg font-medium mb-2">
+              {certificateData.farmerName}
+            </h3>
+            <div className="text-sm text-gray-600">
+              <p>ที่อยู่: {certificateData.address}</p>
+              <p>เบอร์โทร: {certificateData.phone}</p>
+              <p>Line ID: {certificateData.contactLine}</p>
+            </div>
+          </div>
+        </div>
 
-            <p className="section-name">สายพันธุ์</p>
-            <input
-              name="variety"
-              type="text"
-              value={formData.variety}
-              className="form-input"
-              disabled
-            />
+        <div className="bg-white rounded-lg shadow p-6">
+          <h2 className="mb-6 text-2xl font-semibold">ใบรับรองทั้งหมด</h2>
+          {allCertificates.length > 0 ? (
+            allCertificates.map((cert, index) => (
+              <div key={index} className="mb-4 p-4 border rounded-lg">
+                <p><strong>ชนิด:</strong> {cert.type}</p>
+                <p><strong>สายพันธุ์:</strong> {cert.variety}</p>
+                <p><strong>มาตรฐาน:</strong> {cert.standardName}</p>
+                <p><strong>{standardsInfo[cert.standardName] || "เลขที่ใบรับรอง"}:</strong> {cert.certificateNumber}</p>
+                <p><strong>วันที่อนุมัติ:</strong> {new Date(cert.approvalDate).toLocaleDateString("th-TH")}</p>
+              </div>
+            ))
+          ) : (
+            <p>ไม่พบใบรับรอง</p>
+          )}
+        </div>
+      </div>
 
+      {/* Right Side - Certificate Details */}
+      <div className="w-1/2 p-6">
+        <div className="bg-white rounded-lg shadow p-6">
+          <h1 className="text-2xl mb-6">รายละเอียดใบรับรอง</h1>
+          
+          <div className="space-y-4">
+            <div className="form-group">
+              <label className="block text-sm font-medium mb-2">ชนิด</label>
+              <p className="w-full p-2 border rounded-md bg-gray-50">
+                {certificateData.type}
+              </p>
+            </div>
 
-            <p className="section-name">พิกัด</p>
-            <MapContainer
-              center={[20.046061226911785, 99.890654]}
-              zoom={15}
-              style={{ height: "400px", width: "100%" }}
-            >
-              <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-              <LocationMarker />
-            </MapContainer>
-            <p>
-              พิกัด: ละติจูด {formData.latitude}, ลองจิจูด {formData.longitude}
-            </p>
+            <div className="form-group">
+              <label className="block text-sm font-medium mb-2">สายพันธุ์</label>
+              <p className="w-full p-2 border rounded-md bg-gray-50">
+                {certificateData.variety}
+              </p>
+            </div>
 
-            <p className="section-name">จำนวนผลผลิต (กิโลกรัม)</p>
-            <input
-              name="productionQuantity"
-              type="text"
-              value={formData.productionQuantity}
-              className="form-input"
-              disabled
-            />
+            <div className="form-group">
+              <label className="block text-sm font-medium mb-2">พิกัด</label>
+              <div className="h-96 w-full rounded-lg overflow-hidden mb-2">
+                <MapContainer
+                  center={[20.046061226911785, 99.890654]}
+                  zoom={15}
+                  style={{ height: "100%", width: "100%" }}
+                  className="map-container"
+                >
+                  <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                  <LocationMarker />
+                </MapContainer>
+              </div>
+              <p className="text-sm text-gray-600">
+                พิกัด: ละติจูด {Number(certificateData.latitude).toFixed(6)}, ลองจิจูด{" "}
+                {Number(certificateData.longitude).toFixed(6)}
+              </p>
+            </div>
 
-            <p className="section-name">มาตรฐาน</p>
-            <div className="standards-container">
-              {formData.standards.map((standard, index) => (
-                <div key={index} className="standard-item">
-                  <div key={standard.id} className="standard-item-container">
-                    <span className="title-standard">{standard.logoUrl}</span>
-                    <div className="standard-image">
-                      {standard.certImageUrl && (
+            <div className="form-group">
+              <label className="block text-sm font-medium mb-2">
+                จำนวนผลผลิต (กิโลกรัม)
+              </label>
+              <p className="w-full p-2 border rounded-md bg-gray-50">
+                {certificateData.productionQuantity}
+              </p>
+            </div>
+
+            <div className="form-group">
+              <label className="block text-sm font-medium mb-2">มาตรฐาน</label>
+              <div className="grid grid-cols-2 gap-4">
+                {certificateData.standards?.map((standard, index) => (
+                  <div key={index} className="border rounded-lg p-4">
+                    <div className="flex flex-col items-center">
+                      <div className="w-20 h-20 mb-2">
                         <Image
-                          src={standard.logoUrl}
+                          src={standard.logo}
                           alt={standard.name}
                           width={80}
                           height={80}
-                          className="standard-logo"
+                          className="object-contain"
                         />
-                      )}
+                      </div>
+                      <h3 className="font-medium text-center">
+                        {standard.name}
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        {standardsInfo[standard.name] || "เลขที่ใบรับรอง"}: {standard.certNumber}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        วันที่: {new Date(standard.certDate).toLocaleDateString("th-TH")}
+                      </p>
                     </div>
                   </div>
-                  <span className="standard-name">{standard.name}</span>
-                  <p>เลขที่ใบรับรอง: {standard.certNumber}</p>
-                  <p>วันที่ใบรับรอง: {standard.certDate}</p>
-                </div>
+                ))}
+              </div>
+            </div>
 
-              ))}
+            <div className="form-group">
+              <label className="block text-sm font-medium mb-2">สถานะ</label>
+              <p className="w-full p-2 border rounded-md bg-gray-50">
+                {certificateData.status}
+              </p>
+            </div>
 
+            <div className="form-group">
+              <label className="block text-sm font-medium mb-2">วันที่ลงทะเบียน</label>
+              <p className="w-full p-2 border rounded-md bg-gray-50">
+                {certificateData.registrationDate}
+              </p>
+            </div>
+
+            <div className="form-group">
+              <label className="block text-sm font-medium mb-2">วันที่หมดอายุ</label>
+              <p className="w-full p-2 border rounded-md bg-gray-50">
+                {certificateData.expiryDate}
+              </p>
+            </div>
+
+            {/* ปุ่มย้อนกลับ */}
+            <div className="flex justify-center mt-6">
+              <button
+                type="button"
+                onClick={() => router.back()}
+                className="bg-gray-500 text-white py-2 px-4 rounded-md hover:bg-gray-600 transition-colors"
+              >
+                ย้อนกลับ
+              </button>
             </div>
           </div>
-
-          {showCommentField && (
-            <div className="form-container">
-              <p className="section-name">ความคิดเห็น (เหตุผลที่ไม่อนุมัติ)</p>
-              <textarea
-                name="municipalComment"
-                value={formData.municipalComment}
-                onChange={handleChange}
-                className="form-input"
-                rows="4"
-                required
-              />
-              {errors.municipalComment && (
-                <p className="error">{errors.municipalComment}</p>
-              )}
-            </div>
-          )}
-
-          <div className="button-group">
-            <button
-              type="button"
-              className="button-submitt"
-              onClick={() => handleSubmit("อนุมัติ")}
-            >
-              อนุมัติใบรับรอง
-            </button>
-            <button
-              type="button"
-              className="button-submittt"
-              onClick={handleReject}
-            >
-              ไม่อนุมัติใบรับรอง
-            </button>
-          </div>
-
-          {showCommentField && (
-            <button
-              type="button"
-              className="button-submittt"
-              onClick={() => handleSubmit("ไม่อนุมัติ")}
-            >
-              ยืนยันการไม่อนุมัติ
-            </button>
-          )}
-        </form>
-      </main>
+        </div>
+      </div>
     </div>
   );
 };
 
-export default ApproveCertificatePage;
+export default ViewCertificatePage;
