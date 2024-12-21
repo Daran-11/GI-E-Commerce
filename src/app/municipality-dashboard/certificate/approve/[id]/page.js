@@ -118,9 +118,7 @@ const ApproveCertificatePage = ({ params }) => {
     }
   
     const validationResults = formData.standards.map(standard => {
-      // ค้นหาใบรับรองที่มีข้อมูลตรงกันทั้งหมด
       const matchingCert = UsersCertificates.find(cert => {
-        // เช็คเป็นลำดับ
         const typeMatch = cert.type === formData.type;
         const varietyMatch = cert.variety === formData.variety;
         const standardMatch = cert.standardName === standard.name;
@@ -129,7 +127,6 @@ const ApproveCertificatePage = ({ params }) => {
         return typeMatch && varietyMatch && standardMatch && certNumberMatch;
       });
   
-      // สร้างข้อความแสดงผลการตรวจสอบ
       let validationMessage = '';
       if (!matchingCert) {
         if (!UsersCertificates.some(cert => cert.type === formData.type)) {
@@ -244,7 +241,7 @@ const ApproveCertificatePage = ({ params }) => {
 
   const handleSubmit = async (action) => {
     if (action === "อนุมัติ" && !certificateValidation.isValid) {
-      alert("ไม่สามารถอนุมัติได้เนื่องจากข้อมูลใบรับรองไม่ตรงกัน");
+      alert("ไม่สามารถอนุมัติได้เนื่องจากข้อมูลใบรับรองไม่ถูกต้อง");
       return;
     }
 
@@ -305,35 +302,21 @@ const ApproveCertificatePage = ({ params }) => {
   const ValidationStatus = () => (
     <div className="mb-4">
       <h3 className="text-lg font-medium mb-2">สถานะการตรวจสอบใบรับรอง</h3>
-      <div className="space-y-2">
-        {certificateValidation.details.map((detail, index) => (
-          <div
-            key={index}
-            className={`p-4 rounded-md ${
-              detail.isValid ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
-            }`}
-          >
-            <p className="font-medium">{detail.message}</p>
-            {!detail.isValid && detail.details && (
-              <div className="mt-2 text-sm space-y-1">
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <p className="font-medium">ข้อมูลที่ส่งมา:</p>
-                    <p>ประเภท: {detail.details.type.submitted}</p>
-                    <p>สายพันธุ์: {detail.details.variety.submitted}</p>
-                    <p>เลขที่ใบรับรอง: {detail.details.certNumber.submitted}</p>
-                  </div>
-                  <div>
-                    <p className="font-medium">ข้อมูลที่ลงทะเบียน:</p>
-                    <p>ประเภท: {detail.details.type.registered}</p>
-                    <p>สายพันธุ์: {detail.details.variety.registered}</p>
-                    <p>เลขที่ใบรับรอง: {detail.details.certNumber.registered}</p>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        ))}
+      <div className={`p-4 rounded-md ${
+        certificateValidation.isValid ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
+      }`}>
+        <p className="font-medium">
+          {certificateValidation.isValid 
+            ? "ข้อมูลใบรับรองถูกต้องครบถ้วน สามารถอนุมัติได้" 
+            : "ข้อมูลใบรับรองไม่ถูกต้อง ไม่สามารถอนุมัติได้"}
+        </p>
+        {!certificateValidation.isValid && (
+          <ul className="mt-2 list-disc list-inside">
+            {certificateValidation.details.map((detail, index) => (
+              !detail.isValid && <li key={index}>{detail.message}</li>
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   );
@@ -376,8 +359,7 @@ const ApproveCertificatePage = ({ params }) => {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth={2}
-                      d="M19 9l-7 7-7-7"
-                    />
+                      d="M19 9l-7 7-7-7"/>
                   </svg>
                 </button>
               </div>
@@ -534,7 +516,6 @@ const ApproveCertificatePage = ({ params }) => {
                 disabled
               />
             </div>
-
 
             {/* รายละเอียดใบรับรอง */}
             <div className="form-group">
