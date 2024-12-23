@@ -35,23 +35,27 @@ const EmblaCarousel = ({ images }) => {
     <div className="embla w-[500px]">
       {/* Embla Main Carousel */}
       <div className="embla__viewport w-full overflow-hidden " ref={emblaMainRef}>
-        <div className="embla__container flex">
-          {images.map((image, index) => (
+          <div className="embla__container flex">
+        {images?.length > 0 ? (
+          images.map((image, index) => (
             <div
               className="embla__slide  min-w-full h-[400px]   max-h-[200px] md:max-w-[200px]  md:max-h-[500px]  rounded-2xl px-2 "
               key={index}
             >
-            <Image
-            src={image.imageUrl}
-            alt={`Product image ${index + 1}`}
-            width={500}
-            height={500}
-            loading="lazy"
-            className="  w-[500px] h-full bg-white  max-h-[200px] md:max-h-[500px] object-contain object-center  rounded-xl "
-            />
+              <Image
+                src={image.imageUrl}
+                alt={`Product image ${index + 1}`}
+                width={500}
+                height={500}
+                loading="lazy"
+                className="  w-[500px] h-full bg-white  max-h-[200px] md:max-h-[500px] object-contain object-center  rounded-xl "
+              />
             </div>
-          ))}
-        </div>
+          ))
+        ) : (
+          <p className="text-center text-gray-500">No images available</p> // แสดงข้อความถ้าไม่มีรูปภาพ
+        )}
+      </div>
       </div>
 
       {/* Thumbnails */}

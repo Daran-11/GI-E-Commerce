@@ -37,7 +37,7 @@ model Product {
   farmerId     Int
   ProductName  String               @db.VarChar(11)
   ProductType  String               @db.VarChar(11)
-  Description  String?              @db.VarChar(200)
+  Description  String              @db.VarChar(200)
   Details      String?
   Price        Int                  @db.SmallInt // ราคาขาย
   Cost         Int                  @db.SmallInt // ราคาต้นทุน
@@ -47,6 +47,7 @@ model Product {
   isDeleted    Boolean              @default(false) // New field to indicate the product is deleted
   soldCount    Int                  @default(0)
   DateCreated  DateTime             @default(now()) @db.Timestamp(0)
+  HarvestedAt  DateTime
   cartItems    CartItem[]
   OrderItems   OrderItem[]
   reviews      RatingReview[]

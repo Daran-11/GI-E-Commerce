@@ -1,11 +1,13 @@
 // src/app/layout.js
 import CookieConsentBanner from '@/components/cookieConsent';
+import DateProvider from '@/components/dateProvider';
 import { getServerSession } from 'next-auth';
 import PlausibleProvider from 'next-plausible';
 import { Prompt } from 'next/font/google';
 import ClientLayout from '../components/ClientLayout';
 import SessionProvider from '../components/SessionProvider';
 import './globals.css';
+
 
 const prompt = Prompt({
   subsets: ['thai'],
@@ -26,6 +28,7 @@ export default async function RootLayout({ children }) {
         <script async src="https://plausible.io/js/plausible.js"></script>
       </head>
       <body className={`${prompt.className} bg-[#f1f1f1] m-0 p-0`}>
+      <DateProvider>
         <SessionProvider session={session}>
           <PlausibleProvider
             domain="cri-gi-pineapple-851653706332.asia-southeast1.run.app" // Ensure this matches your actual production domain
@@ -39,6 +42,7 @@ export default async function RootLayout({ children }) {
             </ClientLayout>
           </PlausibleProvider>
         </SessionProvider>
+        </DateProvider>
       </body>
     </html>
   );

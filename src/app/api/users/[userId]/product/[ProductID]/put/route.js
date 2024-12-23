@@ -105,6 +105,12 @@ export async function PUT(request, { params }) {
     const imagesToDelete = formData.getAll("imagesToDelete");
     const Details = formData.get("Details");
 
+    console.log("imagesToDelete is ",imagesToDelete)
+
+    if (!ProductName || !ProductType || !Price || !Cost || !Amount) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+
     // Handle image deletions from Google Cloud Storage
     if (imagesToDelete.length > 0) {
       const deletePromises = imagesToDelete.map(async (imageUrl) => {

@@ -1,5 +1,6 @@
 // ตัวform/model ไว้เพิ่มข้อมูลในหน้productของfarmer completed
 "use client";
+import AddIcon from '@mui/icons-material/Add';
 import {
   Button,
   Checkbox,
@@ -10,17 +11,21 @@ import {
   FormControl,
   Grid,
   InputLabel,
+  Link,
   ListItemText,
   MenuItem,
   Paper,
   Select,
   styled,
-  TextField
+  TextField,
+  Typography
 } from "@mui/material";
 import { useSession } from 'next-auth/react';
 import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+
+import { DatePicker } from "@mui/x-date-pickers";
 
 
 
@@ -49,8 +54,13 @@ const DropZone = styled("div")(({ theme }) => ({
 const AddProductDialog = ({ open, onClose, onAddProduct }) => {
   const { data: session, status } = useSession()
   const [certificates, setCertificates] = useState([]);
-
+  const today = new Date(); // วันที่ปัจจุบัน
   const userId = session.user.id;
+  const [charCount, setCharCount] = useState(0);
+  const [manageTypes, setManageTypes] = useState([]);
+  const [selectedType, setSelectedType] = useState('');
+  const [varieties, setVarieties] = useState([]);
+
 
 
   const { control, handleSubmit, reset, formState: { errors } } = useForm({
@@ -65,6 +75,7 @@ const AddProductDialog = ({ open, onClose, onAddProduct }) => {
       status: "",
       Description: "",
       Details: "",
+      HarvestedAt: "",
     },
     mode: "onChange"
   });
@@ -111,7 +122,7 @@ const AddProductDialog = ({ open, onClose, onAddProduct }) => {
     };
 
       // Log the formattedData.Certificates to check its structure
-  console.log("Formatted Certificates:", formattedData.Certificates);
+    console.log("Formatted Certificates:", formattedData.Certificates);
 
     // Prepare form data for submission
     const formDataToSend = new FormData();
@@ -123,6 +134,7 @@ const AddProductDialog = ({ open, onClose, onAddProduct }) => {
     formDataToSend.append("Amount", formattedData.Amount);
     formDataToSend.append("status", formattedData.status);
     formDataToSend.append("Description", formattedData.Description);
+    formDataToSend.append("HarvestedAt", formattedData.HarvestedAt);
     formDataToSend.append("Details", formattedData.Details);
     formDataToSend.append("Certificates", formattedData.Certificates);
 
@@ -173,6 +185,41 @@ const AddProductDialog = ({ open, onClose, onAddProduct }) => {
     }
 
   }, [status]);
+
+  useEffect(() => {
+    if (status === 'authenticated' && userId) {
+    async function fetchManageTypes() {
+      try {
+        const response = await fetch('/api/product-types');
+        if (response.ok) {
+          const data = await response.json();
+          setManageTypes(data.manageTypes);
+        } else {
+          console.error('Failed to fetch manage types');
+        }
+      } catch (error) {
+        console.error('Error fetching manage types:', error);
+      }
+    }
+
+    fetchManageTypes();
+  }
+  }, [status]);
+  
+
+  const handleDescriptionChange = (e) => {
+    const inputText = e.target.value;
+    // นับจำนวนตัวอักษร
+    setCharCount(inputText.length);
+  };
+
+    // Handle type selection and update varieties
+    const handleTypeChange = (type) => {
+      setSelectedType(type);
+      const selectedManageType = manageTypes.find((manageType) => manageType.type === type);
+      setVarieties(selectedManageType?.varieties || []);
+    };
+  
   
 
   return (
@@ -243,37 +290,53 @@ const AddProductDialog = ({ open, onClose, onAddProduct }) => {
             <Grid item xs={12} sm={5}>
               <Grid container spacing={2} paddingTop={2}>
                 <Grid item xs={12}>
-                  <Controller
-                    name="ProductName"
-                    control={control}
-                    rules={{ required: "ชื่อสินค้า is required" }}
-                    render={({ field }) => (
-                      <TextField
-                        {...field}
-                        label="ชื่อสินค้า"
-                        variant="outlined"
-                        fullWidth
-                        error={!!errors.ProductName}
-                        helperText={errors.ProductName?.message}
-                      />
-                    )}
-                  />
-                </Grid>
-                <Grid item xs={12}>
                   <FormControl fullWidth>
-                    <InputLabel>ประเภทสินค้า</InputLabel>
+                    <InputLabel>ชื่อสินค้า</InputLabel>
                     <Controller
-                      name="ProductType"
+                      name="ProductName"
                       control={control}
                       render={({ field }) => (
-                        <Select {...field} label="ประเภทสินค้า">
-                          <MenuItem value="นางแล">นางแล</MenuItem>
-                          <MenuItem value="ภูแล">ภูแล</MenuItem>
+                        <Select
+                          {...field}
+                          onChange={(e) => {
+                            field.onChange(e);
+                            handleTypeChange(e.target.value);
+                          }}
+                          label="ประเภทสินค้า"
+                        >
+                          {manageTypes.map((manageType) => (
+                            <MenuItem key={manageType.id} value={manageType.type}>
+                              {manageType.type}
+                            </MenuItem>
+                          ))}
                         </Select>
                       )}
                     />
                   </FormControl>
                 </Grid>
+         
+
+                {/* Variety Selection */}
+                <Grid item xs={12}>
+                  <FormControl fullWidth>
+                    <InputLabel>ประเภท/พันธุ์ของสินค้า</InputLabel>
+                    <Controller
+                      name="ProductType"
+                      control={control}
+                      render={({ field }) => (
+                        <Select {...field} label="ประเภท/พันธุ์ของสินค้า">
+                          {varieties.map((variety) => (
+                            <MenuItem key={variety.id} value={variety.name}>
+                              {variety.name}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      )}
+                    />
+                  </FormControl>
+                </Grid>
+
+
                 <Grid item xs={12}>
                 <FormControl fullWidth>
                   <InputLabel>การรับรอง</InputLabel>
@@ -281,6 +344,7 @@ const AddProductDialog = ({ open, onClose, onAddProduct }) => {
                     name="Certificates"
                     control={control}
                     render={({ field }) => (
+                      
                       <Select
                         {...field}
                         label="การรับรอง"
@@ -334,7 +398,9 @@ const AddProductDialog = ({ open, onClose, onAddProduct }) => {
                             );
                           })
                         ) : (
-                          <MenuItem disabled>No certificates available</MenuItem>
+                          <MenuItem > <Link href="/dashboard/certificate/add">
+                         <AddIcon/> ไม่พบใบรับรอง คลิกที่นี่เพื่อเพิ่มข้อมูลใบรับรองลงในระบบ  </Link>
+                         </MenuItem>
                         )}
                       </Select>
                     )}
@@ -387,6 +453,7 @@ const AddProductDialog = ({ open, onClose, onAddProduct }) => {
                     )}
                   />
                 </Grid>
+
                 <Grid item xs={12} sm={6}>
                   <Controller
                     name="Amount"
@@ -412,6 +479,36 @@ const AddProductDialog = ({ open, onClose, onAddProduct }) => {
                     )}
                   />
                 </Grid>
+
+                <Grid item xs={12} sm={6}>
+                  <Controller
+                    name="HarvestedAt"
+                    control={control}
+                    rules={{ 
+                      required: "วันที่เก็บเกี่ยว is required" ,
+                      validate: (value) => value !== null || "กรุณาเลือกวันที่" // ตรวจสอบให้แน่ใจว่าเลือกวันแล้ว
+                    }}
+                    render={({ field }) => (
+                      <DatePicker
+                        {...field}
+                        label="วันที่เก็บเกี่ยว"
+                        format="dd/MMMM/yyyy" // รูปแบบวันที่
+                        maxDate={today} // จำกัดไม่ให้เลือกวันที่เกินวันนี้
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            fullWidth
+                            error={!!errors.HarvestedAt}
+                            helperText={errors.HarvestedAt?.message}
+                            placeholder="กรุณาเลือกวันที่" // ตั้งค่า placeholder
+                          />
+                        )}
+                        onChange={(date) => field.onChange(date)} // บันทึกค่าลงในฟอร์ม
+                        value={field.value || null} // ถ้าไม่มีการเลือกวัน จะเป็น null
+                      />
+                    )}
+                  />
+                </Grid>
                 <Grid item xs={12}>
                   <FormControl fullWidth>
                     <InputLabel>สถานะสินค้า</InputLabel>
@@ -428,20 +525,25 @@ const AddProductDialog = ({ open, onClose, onAddProduct }) => {
                   </FormControl>
                 </Grid>
                 <Grid item xs={12}>
-                  <Controller
-                    name="Description"
-                    control={control}
-                    render={({ field }) => (
-                      <TextField
-                        {...field}
-                        label="คำอธิบาย"
-                        variant="outlined"
-                        fullWidth
-                        multiline
-                        rows={4}
-                      />
-                    )}
-                  />
+                  <Controller name="Description" control={control} rules={{ required: "โปรดใส่คำอธิบายสินค้านี้" }} render={({ field }) => (
+                    <TextField {...field} 
+                    label="คำอธิบายสินค้า" 
+                    variant="outlined"  
+                    fullWidth 
+                    error={!!errors.Description} 
+                    helperText={errors.Description?.message} 
+                    multiline 
+                    rows={4} 
+                    inputProps={{ maxLength: 200 }} 
+                    onChange={(e) => {
+                      field.onChange(e); // เรียกใช้ onChange ของ field เพื่อให้ React Hook Form จัดการข้อมูล
+                      handleDescriptionChange(e); // คำนวณจำนวนคำ
+                    }}
+                    />
+                  )} />
+               <Typography variant="body2" color="textSecondary" mt={2}>
+              จำนวนอักษร: {charCount} / 200
+            </Typography>
                 </Grid>
                 <Grid item xs={12}>
                   <Controller
