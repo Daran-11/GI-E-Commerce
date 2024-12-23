@@ -11,6 +11,7 @@ import { toast } from "react-toastify";
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
+import { useMap } from 'react-leaflet';
 
 // Dynamically import Map components
 const MapContainer = dynamic(() => import("react-leaflet").then(mod => mod.MapContainer), { ssr: false });
@@ -44,6 +45,8 @@ const Loading = () => {
 };
 
 const LocationMarker = ({ formData, setFormData }) => {
+  const map = useMap();
+
   useMapEvents({
     click(e) {
       const { lat, lng } = e.latlng;
@@ -54,6 +57,12 @@ const LocationMarker = ({ formData, setFormData }) => {
       }));
     },
   });
+
+  useEffect(() => {
+    if (formData.latitude && formData.longitude) {
+      map.setView([formData.latitude, formData.longitude], map.getZoom());
+    }
+  }, [formData.latitude, formData.longitude, map]);
 
   return formData.latitude && formData.longitude ? (
     <Marker position={[formData.latitude, formData.longitude]} />
@@ -169,14 +178,15 @@ const Register = () => {
       toast.error("เบราว์เซอร์ของคุณไม่รองรับการระบุตำแหน่ง");
       return;
     }
-
+  
     setIsLoading(true);
     navigator.geolocation.getCurrentPosition(
       (position) => {
+        const { latitude, longitude } = position.coords;
         setFormData((prev) => ({
           ...prev,
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
+          latitude,
+          longitude,
         }));
         setIsLoading(false);
       },
