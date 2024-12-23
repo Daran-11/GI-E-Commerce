@@ -80,7 +80,7 @@ export default function EditStandard({ params }) {
   return (
     <div className={styles.container}>
       <div className={styles.mainContent}>
-        <h1 className={styles.title}>แก้ไขมาตรฐาน</h1>
+        <h1 className="text-2xl">แก้ไขมาตรฐาน</h1>
         <h3 className={styles.subtitle}>ข้อมูลมาตรฐานการรับรองสินค้า</h3>
         {error && <p className={styles.errorMessage}>{error}</p>}
         <form onSubmit={handleSubmit}>
@@ -131,7 +131,7 @@ export default function EditStandard({ params }) {
               ยกเลิก
             </button>
             <button type="submit" disabled={isSubmitting} className={styles.buttonSubmit}>
-              {isSubmitting ? 'กำลังอัปเดต...' : 'อัปเดตมาตรฐาน'}
+              {isSubmitting ? 'กำลังอัปเดต...' : 'อัปเดตข้อมูล'}
             </button>
           </div>
         </form>

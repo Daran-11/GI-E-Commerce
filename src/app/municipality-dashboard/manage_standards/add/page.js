@@ -57,7 +57,7 @@ export default function AddStandard() {
   return (
     <div className={styles.container}>
       <div className={styles.mainContent}>
-      <h1 className="text-2xl ">เพิ่มรายชื่อเกษตรกร</h1>
+      <h1 className="text-2xl ">เพิ่มมาตรฐาน</h1>
         <h3 className={styles.subtitle}>ข้อมูลมาตรฐานการรับรองสินค้า</h3>
         {error && <p className={styles.errorMessage}>{error}</p>}
         <form onSubmit={handleSubmit}>
@@ -113,7 +113,7 @@ export default function AddStandard() {
               ยกเลิก
             </button>
             <button type="submit" disabled={isSubmitting} className={styles.buttonSubmit}>
-              {isSubmitting ? 'กำลังเพิ่ม...' : 'เพิ่มมาตรฐาน'}
+              {isSubmitting ? 'กำลังเพิ่ม...' : 'บันทึกข้อมูล'}
             </button>
           </div>
         </form>

@@ -83,7 +83,7 @@ const AddTypePage = () => {
 
   return (
     <div className={styles.container}>
-       <h1 className="text-2xl ">เพิ่มชนิดเเละสายพันธุ์</h1><br></br>
+       <h1 className="text-2xl ">เพิ่มชนิดสินค้า</h1><br></br>
 
       {error && (
         <div className={styles.error}>

@@ -273,7 +273,7 @@ const AddUsers = ({ UsersId }) => {
 
         <div className={styles.buttonContainer}>
           <button type="submit" className={styles.Submitbutton}>
-            {UsersId ? "อัปเดตเกษตรกร" : "เพิ่มรายชื่อเกษตรกร"}
+            {UsersId ? "อัปเดตเกษตรกร" : "บันทึกข้อมูล"}
           </button>
         </div>
       </form>

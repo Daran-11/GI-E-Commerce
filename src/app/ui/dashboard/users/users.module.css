@@ -9,11 +9,11 @@
 /* Flexbox container for top section */
 .top {
     display: flex;
-    justify-content: flex-end; /* Aligns children to the right */
-    margin-bottom: 10px;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
 }
 
-/* Add new button styles */
 .addButton {
     padding: 10px;
     background-color: #98de6d;
@@ -21,11 +21,11 @@
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    transition: background-color 0.3s ease; /* Smooth transition */
+    transition: background-color 0.3s ease;
 }
 
 .addButton:hover {
-    background-color: #7fc05b; /* Darker shade on hover */
+    background-color: #7fc05b;
 }
 
 /* Table styles */
