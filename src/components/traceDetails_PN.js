@@ -1,8 +1,9 @@
 "use client";
 
 import { MapPin } from "lucide-react";
+import Image from "next/image";
+import { useEffect, useState } from "react";
 
-// Loading Skeleton Component
 const DetailsSkeleton = () => (
   <div className="animate-pulse space-y-6">
     <div className="h-8 w-1/3 bg-gray-200 rounded"></div>
@@ -24,46 +25,99 @@ const InfoCard = ({ title, children }) => (
   </div>
 );
 
-const traceDetails_PN = ({ qrData }) => {
-  if (!qrData) {
-    return <DetailsSkeleton />;
-  }
+const TraceDetailsPN = ({ qrData }) => {
+  const [certificates, setCertificates] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchCertData = async () => {
+      try {
+        if (!qrData?.qrcodeId) return;
+        
+        setLoading(true);
+        const response = await fetch(`/api/certificates/${qrData.qrcodeId}`);
+        const data = await response.json();
+        
+        console.log('API Response:', data); // Debug log
+        
+        if (data.success && data.data.certificate?.standards) {
+          setCertificates(data.data.certificate.standards);
+        } else {
+          setError('ไม่พบข้อมูลใบรับรอง');
+        }
+      } catch (error) {
+        console.error("Failed to fetch certificates:", error);
+        setError('เกิดข้อผิดพลาดในการโหลดข้อมูล');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCertData();
+  }, [qrData]);
+
+  if (!qrData) return <DetailsSkeleton />;
+
+  const formatDate = (dateString) => {
+    try {
+      return new Date(dateString).toLocaleDateString('th-TH', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    } catch (error) {
+      return dateString;
+    }
+  };
 
   // Format coordinates for Google Maps URL
-  const googleMapsUrl =
-    qrData?.Latitude && qrData?.Longitude
-      ? `https://www.google.com/maps?q=${qrData.Latitude},${qrData.Longitude}`
+  const googleMapsUrl = 
+    qrData?.certificate?.latitude && qrData?.certificate?.longitude
+      ? `https://www.google.com/maps?q=${qrData.certificate.latitude},${qrData.certificate.longitude}`
       : null;
 
   return (
-    <div className="bg-gray-100 rounded-3xl shadow-md relative">
+    <div className="max-w-6xl mx-auto bg-white p-6 rounded-3xl ">
       <div className="p-6 space-y-6">
-        {/* Product Information Section */}
+        <h1 className="text-2xl font-bold text-[#4EAC14] text-center">
+        หวานกรอบ เนื้อเหลืองทอง หอมเหมือนน้ำผึง
+        </h1>
+
         <section>
-          <h4 className="text-lg font-bold  mb-2">
-            ข้อมูลผลิตภัณฑ์ และแหล่งผลิต
-          </h4>
-          <div className="space-y-4">
-            <InfoCard>
-              <div className="ml-4 space-y-4">
+          <h4 className="text-lg font-bold mb-2">ข้อมูลสินค้า</h4>
+          <InfoCard>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div className="space-y-4">
                 <div>
-                  <h6 className="font-semibold text-[#4EAC14] mb-1">
-                    ชื่อสินค้า
-                  </h6>
-                  <p className="ml-4">
-                    {qrData?.Type} {qrData?.Variety}
+                  <h6 className="text-[#4EAC14] font-semibold ml-6">รหัสสินค้า</h6>
+                  <p className="ml-12">{qrData.qrcodeId}</p>
+                </div>
+                <div>
+                  <h6 className="text-[#4EAC14] font-semibold ml-6">สินค้า</h6>
+                  <p className="ml-12">
+                    {qrData.certificate?.type} {qrData.certificate?.variety}
                   </p>
                 </div>
 
                 <div>
-                  <h6 className="font-semibold text-[#4EAC14] mb-1">
+                  <h6 className="text-[#4EAC14] font-semibold ml-6">
                     ระดับความหวาน
                   </h6>
-                  <p className="ml-4">16-20° brix</p>
+                  <p className="ml-12">16-20° brix</p>
                 </div>
 
                 <div>
-                  <h6 className="font-semibold text-[#4EAC14] mb-1">
+                  <h6 className="text-[#4EAC14] font-semibold ml-6">
+                    วันที่เก็บเกี่ยว
+                  </h6>
+                  <p className="ml-12">
+                    {qrData.product?.DateCreated ? formatDate(qrData.product.DateCreated) : '-'}
+                  </p>
+                </div>
+
+                <div>
+                  <h6 className="text-[#4EAC14] font-semibold ml-6">
                     ที่ตั้งแปลง
                   </h6>
                   {googleMapsUrl && (
@@ -71,16 +125,65 @@ const traceDetails_PN = ({ qrData }) => {
                       href={googleMapsUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center text-[#4EAC14] hover:text-[#3d9110]"
+                      className="inline-flex items-center text-[#4EAC14] hover:text-[#3d9110] ml-12"
                     >
-                      <MapPin className="h-4 w-4 mr-1 ml-4" />
+                      <MapPin className="h-4 w-4 mr-1" />
                       ดูแผนที่
                     </a>
                   )}
                 </div>
               </div>
-            </InfoCard>
-          </div>
+
+              <div className="flex items-center justify-center">
+                <div className="relative h-[150px] md:h-[250px] w-full">
+                  <Image
+                    src="/pineapple/PP.png"
+                    alt="สับปะรดนางแล"
+                    fill
+                    className="object-contain"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {loading ? (
+              <div className="text-center py-4">กำลังโหลดข้อมูลใบรับรอง...</div>
+            ) : error ? (
+              <div className="text-red-500 text-center py-4">{error}</div>
+            ) : certificates.length > 0 && (
+              <div className="mt-6">
+                <h6 className="text-[#4EAC14] font-semibold mb-3 ml-6">
+                  ใบรับรอง
+                </h6>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 ml-12 mr-12">
+                  {certificates.map((cert, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center space-x-4 border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                    >
+                      <div className="relative h-20 w-20">
+                        <Image
+                          src={cert.logo}
+                          alt={cert.name}
+                          fill
+                          className="object-contain"
+                        />
+                      </div>
+                      <div>
+                        <p className="font-semibold">{cert.name}</p>
+                        <p className="text-sm text-gray-600">
+                          เลขที่: {cert.certNumber}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          วันที่ออกใบรับรอง: {formatDate(cert.certDate)}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </InfoCard>
         </section>
 
         {/* Product Characteristics Section */}
@@ -90,12 +193,13 @@ const traceDetails_PN = ({ qrData }) => {
             {/* Definition */}
             <InfoCard>
               <div className="ml-4 space-y-4">
-                
-                  <h6 className="font-semibold text-[#4EAC14] mb-1">คำนิยาม</h6>
-                  <p className="ml-4">
-                    สับปะรดนางแล (Nanglae pineapple) หมายถึง สับปะรดพันธุ์น้ำผึ้ง ซึ่งอยู่ในกลุ่ม Smooth cayenne เช่นเดียวกับพันธุ์ปัตตาเวีย ปลูกในตำบลนางแล อำเภอเมือง จังหวัดเชียงราย
-                  </p>
-               
+                <h6 className="font-semibold text-[#4EAC14] mb-1">คำนิยาม</h6>
+                <p className="ml-4">
+                  สับปะรดนางแล (Nanglae pineapple) หมายถึง สับปะรดพันธุ์น้ำผึ้ง
+                  ซึ่งอยู่ในกลุ่ม Smooth cayenne เช่นเดียวกับพันธุ์ปัตตาเวีย
+                  ปลูกในตำบลนางแล อำเภอเมือง จังหวัดเชียงราย
+                </p>
+
                 <div className="mt-[10px]">
                   <h6 className="font-semibold text-[#4EAC14] mb-1">
                     พันธุ์สับปะรด
@@ -106,18 +210,14 @@ const traceDetails_PN = ({ qrData }) => {
                   <h6 className="font-semibold text-[#4EAC14] mb-1">
                     ลักษณะทางกายภาพ
                   </h6>
+                  <p className="ml-4">ผล ทรงกลม ป้อมเตี้ย ตาตื้น</p>
                   <p className="ml-4">
-                  ผล ทรงกลม ป้อมเตี้ย ตาตื้น
+                    เปลือก บาง สีเขียวปนเหลืองหรือเหลืองแดง
                   </p>
                   <p className="ml-4">
-                  เปลือก บาง สีเขียวปนเหลืองหรือเหลืองแดง
+                    เนื้อ ละเอียด ไม่แข็ง สีเหลืองคล้ายน้ำผึ้ง มีกลิ่นหอมน้ำผึ้ง
                   </p>
-                  <p className="ml-4">
-                  เนื้อ ละเอียด ไม่แข็ง สีเหลืองคล้ายน้ำผึ้ง มีกลิ่นหอมน้ำผึ้ง
-                  </p>
-                  <p className="ml-4">
-                  รสชาติ หวานน้ำผึ้ง ความหวานค่อนข้างสูง
-                  </p>
+                  <p className="ml-4">รสชาติ หวานน้ำผึ้ง ความหวานค่อนข้างสูง</p>
                 </div>
               </div>
             </InfoCard>
@@ -131,60 +231,35 @@ const traceDetails_PN = ({ qrData }) => {
             {/* Chemical Characteristics */}
             <InfoCard>
               <div className="ml-4 space-y-4">
-                
-                  <h6 className="font-semibold text-[#4EAC14] mb-1">
-                    ลักษณะทางเคมี
-                  </h6>
-                  <p className="ml-4">
-                    ปริมาณกรดโดยรวม เฉลี่ยร้อยละ 0.5–0.8% ความหวานอยู่ระหว่าง 16-20° brix
-                  </p>
-                
+                <h6 className="font-semibold text-[#4EAC14] mb-1">
+                  ลักษณะทางเคมี
+                </h6>
+                <p className="ml-4">
+                  ปริมาณกรดโดยรวม เฉลี่ยร้อยละ 0.5–0.8% ความหวานอยู่ระหว่าง
+                  16-20° brix
+                </p>
 
                 <div className="mt-[10px]">
                   <h6 className="font-semibold text-[#4EAC14] mb-1">การปลูก</h6>
                   <p className="ml-4">
-                  ปลูกได้ตลอดปี แต่นิยมปลูกต้นฤดูฝนการปลูกใช้ทั้งระบบการปลูกแบบแถวเดี่ยวและแถวคู่
+                    ปลูกได้ตลอดปี
+                    แต่นิยมปลูกต้นฤดูฝนการปลูกใช้ทั้งระบบการปลูกแบบแถวเดี่ยวและแถวคู่
                   </p>
                   <p>
-                   - แถวเดี่ยว ระหว่างต้น 50 เซนติเมตร ระหว่างแถว 100 เซนติเมตร
+                    - แถวเดี่ยว ระหว่างต้น 50 เซนติเมตร ระหว่างแถว 100 เซนติเมตร
                   </p>
                   <p>
-                  - แถวคู่ ร่องระหว่างต้น 50 เซนติเมตร ระหว่างแถว 50 เซนติเมตร ระหว่างแถวคู่ 150 เซนติเมตร
+                    - แถวคู่ ร่องระหว่างต้น 50 เซนติเมตร ระหว่างแถว 50 เซนติเมตร
+                    ระหว่างแถวคู่ 150 เซนติเมตร
                   </p>
                 </div>
               </div>
             </InfoCard>
           </div>
         </section>
-
-       {/* Standards Section */}
-{qrData?.Standard && qrData.Standard.length > 0 && (
-  <section>
-    <h4 className="text-lg font-bold  mb-2">
-      มาตรฐานการผลิต
-    </h4>
-    <div className="space-y-4">
-      {qrData.Standard.map((standard, index) => (
-        <InfoCard key={index}>
-          <div className="ml-4 space-y-4" >
-            
-              <h6 className="font-semibold text-[#4EAC14] mb-1">
-                {standard.name}
-              </h6>
-              <div className="ml-4 space-y-2">
-                <p>เลขที่การรับรอง: {standard.certNumber}</p>
-                <p>วันที่รับรอง: {standard.certDate}</p>
-              </div>
-            </div>
-          
-        </InfoCard>
-      ))}
-    </div>
-  </section>
-)}
       </div>
     </div>
   );
 };
 
-export default traceDetails_PN;
+export default TraceDetailsPN;
