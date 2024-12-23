@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { MdAdd } from "react-icons/md";
 import { FaTrash } from "react-icons/fa";
+import styles from "../../../ui/dashboard/users/managetype/AddTypePage.module.css";
 
 const AddTypePage = () => {
   const router = useRouter();
@@ -10,7 +11,7 @@ const AddTypePage = () => {
   const [error, setError] = useState(null);
   const [formData, setFormData] = useState({
     type: "",
-    varieties: [""] // เริ่มต้นด้วยช่องว่างเปล่า 1 ช่อง
+    varieties: [""]
   });
 
   const handleSubmit = async (e) => {
@@ -20,7 +21,6 @@ const AddTypePage = () => {
     try {
       setIsLoading(true);
       
-      // ตรวจสอบข้อมูล
       if (!formData.type.trim()) {
         throw new Error("กรุณาระบุชนิด");
       }
@@ -29,7 +29,6 @@ const AddTypePage = () => {
         throw new Error("กรุณาระบุสายพันธุ์อย่างน้อย 1 รายการ");
       }
 
-      // เตรียมข้อมูลสำหรับส่ง API
       const data = {
         type: formData.type,
         varieties: formData.varieties
@@ -83,51 +82,51 @@ const AddTypePage = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6">เพิ่มชนิดใหม่</h1>
+    <div className={styles.container}>
+       <h1 className="text-2xl ">เพิ่มชนิดเเละสายพันธุ์</h1><br></br>
 
       {error && (
-        <div className="p-4 mb-6 text-red-700 bg-red-100 rounded-md">
+        <div className={styles.error}>
           {error}
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+      <form onSubmit={handleSubmit} className={styles.form}>
+        <div className={styles.formGroup}>
+          <label className={styles.label}>
             ชนิด
           </label>
           <input
             type="text"
             value={formData.type}
             onChange={(e) => setFormData(prev => ({ ...prev, type: e.target.value }))}
-            className="w-full p-2 border border-gray-300 rounded-md"
+            className={styles.input}
             placeholder="กรอกชื่อชนิด"
             required
           />
         </div>
 
-        <div className="space-y-4">
-          <div className="flex justify-between items-center">
-            <label className="block text-sm font-medium text-gray-700">
+        <div className={styles.formGroup}>
+          <div className={styles.varietyHeader}>
+            <label className={styles.label}>
               สายพันธุ์
             </label>
             <button
               type="button"
               onClick={handleAddVariety}
-              className="flex items-center gap-1 px-3 py-1 text-sm bg-green-500 text-white rounded hover:bg-green-600"
+              className={styles.addButton}
             >
               <MdAdd /> เพิ่มสายพันธุ์
             </button>
           </div>
 
           {formData.varieties.map((variety, index) => (
-            <div key={index} className="flex gap-2">
+            <div key={index} className={styles.varietyItem}>
               <input
                 type="text"
                 value={variety}
                 onChange={(e) => handleVarietyChange(index, e.target.value)}
-                className="flex-1 p-2 border border-gray-300 rounded-md"
+                className={styles.input}
                 placeholder={`สายพันธุ์ที่ ${index + 1}`}
                 required
               />
@@ -135,28 +134,28 @@ const AddTypePage = () => {
                 <button
                   type="button"
                   onClick={() => handleRemoveVariety(index)}
-                  className="text-red-500 hover:text-red-700"
+                  className={styles.deleteButton}
                   title="ลบสายพันธุ์"
                 >
-                  <FaTrash size={20} />
+                  <FaTrash />
                 </button>
               )}
             </div>
           ))}
         </div>
 
-        <div className="flex justify-end gap-4 pt-4">
+        <div className={styles.buttonGroup}>
           <button
             type="button"
             onClick={() => router.back()}
-            className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
+            className={styles.cancelButton}
           >
             ยกเลิก
           </button>
           <button
             type="submit"
             disabled={isLoading}
-            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:bg-blue-300"
+            className={styles.submitButton}
           >
             {isLoading ? "กำลังบันทึก..." : "บันทึกข้อมูล"}
           </button>
