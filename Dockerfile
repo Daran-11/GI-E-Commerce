@@ -1,6 +1,5 @@
 # Step 1: Builder
 FROM node:18-alpine AS builder
-
 WORKDIR /app
 
 # Copy dependencies
@@ -12,6 +11,7 @@ COPY . .
 
 # Set environment variable for Prisma
 ENV DATABASE_URL="mysql://teem:Test123@34.126.168.42:3306/gipineapple"
+
 
 # Generate Prisma Client
 RUN npx prisma generate
@@ -34,7 +34,6 @@ COPY --from=builder /app/credentials ./credentials
 
 # Set environment for production
 ENV NODE_ENV=production
-ENV GOOGLE_APPLICATION_CREDENTIALS="/app/credentials/enhanced-bonito-440512-q9-1a175654d076.json"
 ENV NEXT_PUBLIC_DEBUG=true
 
 # Expose port

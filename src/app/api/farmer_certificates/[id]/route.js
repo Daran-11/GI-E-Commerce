@@ -1,5 +1,5 @@
-import prisma from "../../../../../lib/prisma";
 import { NextResponse } from "next/server";
+import prisma from "../../../../../lib/prisma";
 
 const ERROR_MESSAGES = {
   INVALID_ID: 'Invalid farmer ID',
@@ -98,11 +98,3 @@ export async function GET(request, { params }) {
     await prisma.$disconnect();
   }
 }
-
-// Add rate limiting config
-export const config = {
-  api: {
-    bodyParser: false,
-    externalResolver: true,
-  },
-};
