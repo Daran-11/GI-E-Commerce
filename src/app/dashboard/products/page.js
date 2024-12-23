@@ -17,6 +17,7 @@ import { useSession } from 'next-auth/react';
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 
 const Product = () => {
 
@@ -140,14 +141,15 @@ const Product = () => {
 
         if (response.ok) {
           // After successful deletion, refetch the products and total count
+          toast.success("ลบสินค้าสำเร็จ")
           fetchProducts(page);
           fetchTotalCount(); // Fetch total count separately
           setProducts(products.filter((product) => product.ProductID !== ProductID));
         } else {
-          alert("Failed to delete product");
+          toast.error("ไม่สามารถลบสินค้าได้");
         }
       } catch (error) {
-        console.error("Failed to delete product:", error);
+        console.error("ไม่สามารถลบสินค้าได้:", error);
       }
     }
   };
@@ -177,7 +179,7 @@ const Product = () => {
       formData.append("imageUrl", productData.imageUrl);
     }
 
-    alert("Product added successfully");
+    toast.success("เพิ่มสินค้าสำเร็จ");
     fetchProducts(page);
     fetchTotalCount(); // Fetch total count separately
     handleCloseAddDialog();
@@ -206,21 +208,21 @@ const Product = () => {
     });
 
     if (response.ok) {
-      alert("Product updated successfully");
+      toast.success("แก้ไขสินค้าสำเร็จ");
       fetchProducts(); // Refetch products after editing
       fetchTotalCount(); // Fetch total count separately
       handleCloseEditDialog();
     } else {
-      alert("Failed to update product");
+      toast.error("ไม่สามารถแก้ไขสินค้าได้");
     }
   };
 
 
-  if (loading) {
+  if (status === 'loading' || loading) {
     return <div className="flex flex-col items-center justify-center min-h-screen">
-    <div className="w-12 h-12 border-4 border-t-green-500 border-r-green-500 border-b-green-200 border-l-green-200 rounded-full animate-spin"></div>
-    <p className="mt-4 text-gray-600">กำลังโหลดข้อมูล...</p>
-  </div>;
+      <div className="w-12 h-12 border-4 border-t-green-500 border-r-green-500 border-b-green-200 border-l-green-200 rounded-full animate-spin"></div>
+      <p className="mt-4 text-gray-600">กำลังโหลดข้อมูล...</p>
+    </div>;
   }
 
   return (

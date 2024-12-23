@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { toast } from 'react-toastify';
 
 export default function UserDetails({ user: initialUser }) {
   const [user, setUser] = useState(initialUser);
@@ -14,7 +15,7 @@ export default function UserDetails({ user: initialUser }) {
     try {
       const response = await fetch("/api/manage_farmer");
       const farmers = await response.json();
-      
+
       const exists = farmers.some(
         farmer => farmer.farmerNameApprove?.toLowerCase() === farmerName?.toLowerCase()
       );
@@ -64,12 +65,12 @@ export default function UserDetails({ user: initialUser }) {
 
   const handleApprove = async () => {
     if (!user.Farmer) {
-      alert('ไม่พบข้อมูลเกษตรกร');
+      toast.error('ไม่พบข้อมูลเกษตรกร');
       return;
     }
 
     if (!farmerApproved) {
-      alert('ไม่พบรายชื่อเกษตรกรในฐานข้อมูล');
+      toast.error('ไม่พบรายชื่อเกษตรกรในฐานข้อมูล');
       return;
     }
 
@@ -87,7 +88,7 @@ export default function UserDetails({ user: initialUser }) {
       });
 
       if (response.ok) {
-        alert('อนุมัติเกษตรกรเรียบร้อยแล้ว');
+        toast.success('อนุมัติเกษตรกรเรียบร้อยแล้ว');
         router.push('/municipality-dashboard/users');
         router.refresh();
       } else {
@@ -95,7 +96,7 @@ export default function UserDetails({ user: initialUser }) {
         throw new Error(data.message || 'เกิดข้อผิดพลาดในการอนุมัติ');
       }
     } catch (error) {
-      alert(error.message);
+      toast.error(error.message);
     } finally {
       setLoading(false);
     }
@@ -136,11 +137,10 @@ export default function UserDetails({ user: initialUser }) {
             <div className="flex items-center space-x-2">
               <p className="font-medium">{user.Farmer?.farmerName || "-"}</p>
               {user.Farmer?.farmerName && (
-                <span className={`px-2 py-1 rounded-full text-sm ${
-                  farmerApproved 
-                    ? 'bg-green-100 text-green-800' 
-                    : 'bg-red-100 text-red-800'
-                }`}>
+                <span className={`px-2 py-1 rounded-full text-sm ${farmerApproved
+                  ? 'bg-green-100 text-green-800'
+                  : 'bg-red-100 text-red-800'
+                  }`}>
                   {farmerApproved ? 'พบข้อมูลในระบบ' : 'ไม่พบข้อมูลในระบบ'}
                 </span>
               )}

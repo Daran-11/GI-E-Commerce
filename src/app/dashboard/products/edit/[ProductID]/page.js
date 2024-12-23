@@ -21,7 +21,9 @@ import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { toast } from "react-toastify";
 import useSWR from "swr";
+
 const CustomPaper = styled(Paper)(({ theme }) => ({
   borderRadius: "16px",
   padding: theme.spacing(3),
@@ -212,10 +214,11 @@ const EditProductDialog = ({ open, onClose, ProductID, onSuccess }) => {
       }
 
       await onSuccess();
+      toast.success("แก้ไขสินค้าสำเร็จ")
       handleClose();
     } catch (error) {
       console.error("Failed to update product:", error);
-      alert("Failed to update product: " + error.message);
+      toast.error("ไม่สามารถแก้ไขสินค้าได้: " + error.message);
     }
   };
 
@@ -241,7 +244,7 @@ const EditProductDialog = ({ open, onClose, ProductID, onSuccess }) => {
   
 
   const selectedCertNumber = certificates
-  .find(cert => cert.id === selectedCertificate)?.certificate?.[0]?.standards?.[0]?.certNumber || '';
+    .find(cert => cert.id === selectedCertificate)?.certificate?.[0]?.standards?.[0]?.certNumber || '';
 
   const handleDescriptionChange = (e) => {
     const inputText = e.target.value;
@@ -339,17 +342,17 @@ const EditProductDialog = ({ open, onClose, ProductID, onSuccess }) => {
                 />
                 </Grid>
                 <Grid item xs={12}>
-              <TextField
-                value={certNumbers}
-                label="ใบรับรอง"
-                variant="outlined"
-                fullWidth
-                disabled
-                InputProps={{
-                  readOnly: true, // Make it read-only if the field is just for display
-                }}
-              />
-            </Grid>
+                  <TextField
+                    value={certNumbers}
+                    label="ใบรับรอง"
+                    variant="outlined"
+                    fullWidth
+                    disabled
+                    InputProps={{
+                      readOnly: true, // Make it read-only if the field is just for display
+                    }}
+                  />
+                </Grid>
                 <Grid item xs={12} sm={6}>
                   <Controller name="Price" control={control} rules={{ required: "ราคาสินค้า is required" }} render={({ field }) => (
                     <TextField {...field} label="ราคาสินค้า (บาท)" variant="outlined" fullWidth error={!!errors.Price} helperText={errors.Price?.message} onChange={(e) => field.onChange(e.target.value.replace(/[^0-9,.]/g, "").replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,"))} />
@@ -419,10 +422,10 @@ const EditProductDialog = ({ open, onClose, ProductID, onSuccess }) => {
             </Grid>
           </Grid>
           <DialogActions>
-          <Button onClick={handleClose} color="error" variant="contained">ยกเลิก</Button>
-        <Button onClick={handleSubmit(onSubmit)} color="success" variant="contained">
-          อัปเดตสินค้า
-        </Button>
+            <Button onClick={handleClose} color="error" variant="contained">ยกเลิก</Button>
+            <Button onClick={handleSubmit(onSubmit)} color="success" variant="contained">
+              อัปเดตสินค้า
+            </Button>
           </DialogActions>
         </form>
       </DialogContent>

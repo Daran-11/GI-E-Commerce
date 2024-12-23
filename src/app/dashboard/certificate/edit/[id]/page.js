@@ -6,6 +6,7 @@ import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import Image from "next/image";
 import "@/app/dashboard/certificate/add/add.css";
+import { toast } from "react-toastify";
 
 // Fix for the missing marker icon in Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -56,16 +57,16 @@ const EditCertificatePage = ({ params }) => {
         const response = await fetch(`/api/certificate/add?id=${id}`);
         if (response.ok) {
           const data = await response.json();
-          
+
           // Transform the standards data to include certificate details
-          const certificateStandards = Array.isArray(data.standards) 
+          const certificateStandards = Array.isArray(data.standards)
             ? data.standards.map(standard => ({
-                id: standard.id,
-                name: standard.name,
-                logo: standard.logoUrl,
-                certNumber: standard.certNumber || "",
-                certDate: standard.certDate ? new Date(standard.certDate).toISOString().split('T')[0] : "",
-              }))
+              id: standard.id,
+              name: standard.name,
+              logo: standard.logoUrl,
+              certNumber: standard.certNumber || "",
+              certDate: standard.certDate ? new Date(standard.certDate).toISOString().split('T')[0] : "",
+            }))
             : [];
 
           setFormData({
@@ -80,10 +81,10 @@ const EditCertificatePage = ({ params }) => {
             status: data.status || "",
           });
         } else {
-          alert("Failed to fetch certificate");
+          toast.error("ไม่สารถดึงข้อมูลใบรับรองได้");
         }
       } catch (error) {
-        console.error("Failed to fetch certificate:", error);
+        console.error("ไม่สารถดึงข้อมูลใบรับรองได้:", error);
       }
     };
 
@@ -104,12 +105,12 @@ const EditCertificatePage = ({ params }) => {
       const currentStandards = Array.isArray(prev.standards) ? prev.standards : [];
       const updatedStandards = checked
         ? [...currentStandards, {
-            id: standard.id,
-            name: standard.name,
-            logo: standard.logoUrl,
-            certNumber: "",
-            certDate: ""
-          }]
+          id: standard.id,
+          name: standard.name,
+          logo: standard.logoUrl,
+          certNumber: "",
+          certDate: ""
+        }]
         : currentStandards.filter((s) => s.id !== standard.id);
       return { ...prev, standards: updatedStandards };
     });
@@ -158,11 +159,11 @@ const EditCertificatePage = ({ params }) => {
         },
         (error) => {
           console.error("Error getting location:", error);
-          alert("ไม่สามารถดึงตำแหน่งปัจจุบันได้");
+          toast.error("ไม่สามารถดึงตำแหน่งปัจจุบันได้");
         }
       );
     } else {
-      alert("Geolocation is not supported by this browser.");
+      toast.error("Geolocation is not supported by this browser.");
     }
   };
 
@@ -217,11 +218,11 @@ const EditCertificatePage = ({ params }) => {
         throw new Error(errorData.message || "Failed to update certificate");
       }
 
-      alert("แก้ไขใบรับรองสำเร็จ");
+      toast.success("แก้ไขใบรับรองสำเร็จ");
       router.push("/dashboard/certificate");
     } catch (error) {
       console.error("Error:", error);
-      alert(error.message || "Failed to update certificate");
+      toast.error(error.message || "แก้ไขใบรับรองไม่สำเร็จ");
     }
   };
 
@@ -298,66 +299,65 @@ const EditCertificatePage = ({ params }) => {
 
             <p className="section-name">มาตรฐาน</p>
             <div className="standards-container">
-  {standards.map((standard) => {
-    const currentStandard = formData.standards.find((s) => s.id === standard.id);
-    return (
-      <div
-        key={standard.id}
-        className={`standard-item-container ${
-          currentStandard ? "selected" : ""
-        }`}
-      >
-        <div className={'standard-item-container1'}>
-          <label>
-            <input
-              type="checkbox"
-              checked={!!currentStandard} // เช็คว่า selected หรือไม่
-              onChange={(e) => handleStandardChange(standard, e.target.checked)}
-            />
-            <span className="standard-logo">
-              <Image
-                src={standard.logoUrl}
-                alt={standard.name}
-                width={80}
-                height={80}
-              />
-            </span>
-          </label>
-        </div>
-        <span className="standard-name">{standard.name}</span>
+              {standards.map((standard) => {
+                const currentStandard = formData.standards.find((s) => s.id === standard.id);
+                return (
+                  <div
+                    key={standard.id}
+                    className={`standard-item-container ${currentStandard ? "selected" : ""
+                      }`}
+                  >
+                    <div className={'standard-item-container1'}>
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={!!currentStandard} // เช็คว่า selected หรือไม่
+                          onChange={(e) => handleStandardChange(standard, e.target.checked)}
+                        />
+                        <span className="standard-logo">
+                          <Image
+                            src={standard.logoUrl}
+                            alt={standard.name}
+                            width={80}
+                            height={80}
+                          />
+                        </span>
+                      </label>
+                    </div>
+                    <span className="standard-name">{standard.name}</span>
 
-        <div className="standard-details">
-          <input
-            type="text"
-            className="form-input1"
-            placeholder="เลขที่ใบรับรอง"
-            value={currentStandard ? currentStandard.certNumber : ""} // แสดงค่าเลขที่ใบรับรอง
-            required={!!currentStandard} // ถ้ามีการเลือกต้องกรอก
-            onChange={(e) =>
-              handleStandardDetailChange(standard.id, "certNumber", e.target.value)
-            }
-          />
-          <br />
-          <input
-            type="date"
-            className="form-input1"
-            placeholder="วันที่ใบรับรอง"
-            value={currentStandard ? currentStandard.certDate : ""} // แสดงค่าวันที่ใบรับรอง
-            required={!!currentStandard} // ถ้ามีการเลือกต้องกรอก
-            onChange={(e) =>
-              handleStandardDetailChange(standard.id, "certDate", e.target.value)
-            }
-          />
-        </div>
-      </div>
-    );
-  })}
-</div>
+                    <div className="standard-details">
+                      <input
+                        type="text"
+                        className="form-input1"
+                        placeholder="เลขที่ใบรับรอง"
+                        value={currentStandard ? currentStandard.certNumber : ""} // แสดงค่าเลขที่ใบรับรอง
+                        required={!!currentStandard} // ถ้ามีการเลือกต้องกรอก
+                        onChange={(e) =>
+                          handleStandardDetailChange(standard.id, "certNumber", e.target.value)
+                        }
+                      />
+                      <br />
+                      <input
+                        type="date"
+                        className="form-input1"
+                        placeholder="วันที่ใบรับรอง"
+                        value={currentStandard ? currentStandard.certDate : ""} // แสดงค่าวันที่ใบรับรอง
+                        required={!!currentStandard} // ถ้ามีการเลือกต้องกรอก
+                        onChange={(e) =>
+                          handleStandardDetailChange(standard.id, "certDate", e.target.value)
+                        }
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
 
 
           </div>
 
-        <div className="button-group">
+          <div className="button-group">
             <button type="submit" className="button-submit">
               แก้ไขใบรับรอง
             </button>

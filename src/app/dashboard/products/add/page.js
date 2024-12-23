@@ -26,6 +26,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
 import { DatePicker } from "@mui/x-date-pickers";
+import { toast } from "react-toastify";
 
 
 
@@ -158,8 +159,8 @@ const AddProductDialog = ({ open, onClose, onAddProduct }) => {
         throw new Error("Error creating product");
       }
     } catch (error) {
-      console.error("Failed to add product:", error);
-      alert("Failed to add product: " + error.message);
+      console.error("ไม่สามารถเพิ่มสินค้าได้:", error);
+      toast.error("ไม่สามารถเพิ่มสินค้าได้: " + error.message);
     }
   };
 
@@ -173,15 +174,15 @@ const AddProductDialog = ({ open, onClose, onAddProduct }) => {
   useEffect(() => {
     // Fetch the available certificates for the farmer
     if (status === 'authenticated' && userId) {
-      console.log("user id is",userId);
+      console.log("user id is", userId);
       async function fetchCertificates() {
         const response = await fetch(`/api/users/${userId}/certificates`);
         const data = await response.json();
-        console.log("cert data is",data);
+        console.log("cert data is", data);
         setCertificates(data);
       }
 
-      fetchCertificates();      
+      fetchCertificates();
     }
 
   }, [status]);
@@ -354,12 +355,12 @@ const AddProductDialog = ({ open, onClose, onAddProduct }) => {
                             return "Please select certificates"; // Optional placeholder when nothing is selected
                           }
 
-                          return selected
-                            .map((selectedId) => {
-                              // Find the certificate that matches the selected ID
-                              const selectedCertificate = certificates.find(
-                                (certificate) => certificate.id === selectedId
-                              );
+                            return selected
+                              .map((selectedId) => {
+                                // Find the certificate that matches the selected ID
+                                const selectedCertificate = certificates.find(
+                                  (certificate) => certificate.id === selectedId
+                                );
 
                               // If a certificate is found, look into its parsed standards for the name
                               if (selectedCertificate) {

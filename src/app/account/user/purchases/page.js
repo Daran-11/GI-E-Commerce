@@ -81,15 +81,18 @@ function Purchases() {
     // Update the URL query parameter without navigation
     const newParams = new URLSearchParams(window.location.search);
     if (status) {
-        newParams.set('status', status);
+      newParams.set('status', status);
     } else {
-        newParams.delete('status');
+      newParams.delete('status');
     }
     router.replace(`/account/user/purchases?${newParams.toString()}`);
   };
 
-  if (loading) {
-    return <div className='w-full h-[90vh] bg-white p-6 rounded-xl'>Loading your purchases...</div>;
+  if (status === 'loading' || loading) {
+    return <div className="flex flex-col items-center justify-center min-h-screen">
+      <div className="w-12 h-12 border-4 border-t-green-500 border-r-green-500 border-b-green-200 border-l-green-200 rounded-full animate-spin"></div>
+      <p className="mt-4 text-gray-600">กำลังโหลดข้อมูล...</p>
+    </div>;
   }
 
   if (error) {
@@ -110,129 +113,129 @@ function Purchases() {
   };
 
   return (
-      <div className='w-full h-fit bg-white p-6 rounded-xl'>
-        <h1 className="text-4xl text-[#535353] pb-2 border-b-2 mb-4">คำสั่งซื้อของคุณ</h1>
+    <div className='w-full h-fit bg-white p-6 rounded-xl'>
+      <h1 className="text-4xl text-[#535353] pb-2 border-b-2 mb-4">คำสั่งซื้อของคุณ</h1>
 
-        {/* Filter Buttons */}
-        <p>          หมวดหมู่</p>
-        <div className="mb-4 gap-x-5">
+      {/* Filter Buttons */}
+      <p>          หมวดหมู่</p>
+      <div className="mb-4 gap-x-5">
 
+        <button
+          className={`px-4 py-2 my-2 mr-2 ${selectedStatus === '' ? 'bg-blue-500 text-white' : 'bg-gray-300'}`}
+          onClick={() => handleFilterChange('')}
+        >
+          ทั้งหมด
+        </button>
+        {Object.keys(deliveryStatusTranslations).map((status) => (
           <button
-            className={`px-4 py-2 my-2 mr-2 ${selectedStatus === '' ? 'bg-blue-500 text-white' : 'bg-gray-300'}`}
-            onClick={() => handleFilterChange('')}
+            key={status}
+            className={`px-4 py-2 mr-2 mb-2 ${selectedStatus === status ? 'bg-blue-500 text-white' : 'bg-gray-300'}`}
+            onClick={() => handleFilterChange(status)}
           >
-            ทั้งหมด
+            {deliveryStatusTranslations[status]}
           </button>
-          {Object.keys(deliveryStatusTranslations).map((status) => (
-            <button
-              key={status}
-              className={`px-4 py-2 mr-2 mb-2 ${selectedStatus === status ? 'bg-blue-500 text-white' : 'bg-gray-300'}`}
-              onClick={() => handleFilterChange(status)}
-            >
-              {deliveryStatusTranslations[status]}
-            </button>
-          ))}
-        </div>
-
-        {filteredPurchases.length === 0 ? (
-          <p className='text-[#535353]'>ยังไม่มีข้อมูลคำสั่งซื้อในตอนนี้</p>
-        ) : (
-          <div className="">
-            <table className='w-full'>
-              <thead>
-                <tr>
-                  <th className='w-[100px]  text-start'> </th>
-                  <th className='w-fit text-start'> </th>
-                  <th className='w-fit text-right'> </th>
-                  <th className='w-[100px]'></th> {/* Add this column for the details link */}
-                </tr>
-              </thead>
-              <tbody>
-  {filteredPurchases.map((order) => (
-    <>
-      <tr className='border-b-2'>
-      
-      <td className='cart-data pr-5 flex justify-start'>
-
-
-        <div className=''>
-        {order.orderItems[0].product.images?.[0]?.imageUrl ? (
-        <Image
-            src={order.orderItems[0].product.images[0].imageUrl}
-            alt={order.orderItems[0].product.ProductName}
-            width={0} // Adjust width as needed
-            height={0} // Adjust height as needed
-            sizes="100vw"
-            className='w-fit h-[100px]  object-cover rounded-2xl' />
-        ) : (
-          <img className=" w-fit h-[90px] object-cover rounded-2xl" src="/phulae.jpg" alt="Card Image" />
-        )}
-        </div>
-
-
-
-
-        </td>
-      <td className=''>
-        <div className='flex flex-col '>
-        <p>สั่งซื้อเมื่อ {new Date(order.createdAt).toLocaleDateString('th-TH', {
-          year: '2-digit',
-          month: 'short',
-          day: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit',
-        })}</p>
-        <p className=''>{order.farmer.farmerName} Order#{order.id}</p> {/* Show farmer name */}       
-        <p className='text-lg'>{order.orderItems.length} รายการ</p>
-   
-        </div>
-
-        </td>
-        
-
-        <td className='cart-data text-right pr-5'>
-          <p className="text-lg text-blue-500 ">{deliveryStatusTranslations[order.deliveryStatus]}</p>
-          
-          <p className='text-xl'>{order.totalPrice} บาท</p> {/* Assuming totalPrice is available in order */}
-        </td>
-
-        <td >
-          <button
-            onClick={() => router.push(`/account/user/purchases/${order.id}`)}
-            className="bg-[#4eac14] text-white px-4 py-2 rounded"
-          >
-            ดูรายละเอียด
-          </button>
-        </td>
-      </tr>
-
-
-    </>
-  ))}
-</tbody>
-            </table>
-          </div>
-        )}
-
-        {/* Pagination Controls */}
-        <div className="flex justify-between items-center mt-4">
-          <button
-            className="px-4 py-2 disabled:bg-gray-300 rounded-xl bg-[#4eac14] text-white "
-            onClick={handlePreviousPage}
-            disabled={currentPage === 1}
-          >
-            ย้อนกลับ
-          </button>
-          <span>หน้า {currentPage} / {totalPages}</span>
-          <button
-            className="px-4 py-2 disabled:bg-gray-300  rounded-xl bg-[#4eac14] text-white "
-            onClick={handleNextPage}
-            disabled={currentPage === totalPages}
-          >
-            หน้าต่อไป
-          </button>
-        </div>        
+        ))}
       </div>
+
+      {filteredPurchases.length === 0 ? (
+        <p className='text-[#535353]'>ยังไม่มีข้อมูลคำสั่งซื้อในตอนนี้</p>
+      ) : (
+        <div className="">
+          <table className='w-full'>
+            <thead>
+              <tr>
+                <th className='w-[100px]  text-start'> </th>
+                <th className='w-fit text-start'> </th>
+                <th className='w-fit text-right'> </th>
+                <th className='w-[100px]'></th> {/* Add this column for the details link */}
+              </tr>
+            </thead>
+            <tbody>
+              {filteredPurchases.map((order) => (
+                <>
+                  <tr className='border-b-2'>
+
+                    <td className='cart-data pr-5 flex justify-start'>
+
+
+                      <div className=''>
+                        {order.orderItems[0].product.images?.[0]?.imageUrl ? (
+                          <Image
+                            src={order.orderItems[0].product.images[0].imageUrl}
+                            alt={order.orderItems[0].product.ProductName}
+                            width={0} // Adjust width as needed
+                            height={0} // Adjust height as needed
+                            sizes="100vw"
+                            className='w-fit h-[100px]  object-cover rounded-2xl' />
+                        ) : (
+                          <img className=" w-fit h-[90px] object-cover rounded-2xl" src="/phulae.jpg" alt="Card Image" />
+                        )}
+                      </div>
+
+
+
+
+                    </td>
+                    <td className=''>
+                      <div className='flex flex-col '>
+                        <p>สั่งซื้อเมื่อ {new Date(order.createdAt).toLocaleDateString('th-TH', {
+                          year: '2-digit',
+                          month: 'short',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}</p>
+                        <p className=''>{order.farmer.farmerName} Order#{order.id}</p> {/* Show farmer name */}
+                        <p className='text-lg'>{order.orderItems.length} รายการ</p>
+
+                      </div>
+
+                    </td>
+
+
+                    <td className='cart-data text-right pr-5'>
+                      <p className="text-lg text-blue-500 ">{deliveryStatusTranslations[order.deliveryStatus]}</p>
+
+                      <p className='text-xl'>{order.totalPrice} บาท</p> {/* Assuming totalPrice is available in order */}
+                    </td>
+
+                    <td >
+                      <button
+                        onClick={() => router.push(`/account/user/purchases/${order.id}`)}
+                        className="bg-[#4eac14] text-white px-4 py-2 rounded"
+                      >
+                        ดูรายละเอียด
+                      </button>
+                    </td>
+                  </tr>
+
+
+                </>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Pagination Controls */}
+      <div className="flex justify-between items-center mt-4">
+        <button
+          className="px-4 py-2 disabled:bg-gray-300 rounded-xl bg-[#4eac14] text-white "
+          onClick={handlePreviousPage}
+          disabled={currentPage === 1}
+        >
+          ย้อนกลับ
+        </button>
+        <span>หน้า {currentPage} / {totalPages}</span>
+        <button
+          className="px-4 py-2 disabled:bg-gray-300  rounded-xl bg-[#4eac14] text-white "
+          onClick={handleNextPage}
+          disabled={currentPage === totalPages}
+        >
+          หน้าต่อไป
+        </button>
+      </div>
+    </div>
 
 
   );
