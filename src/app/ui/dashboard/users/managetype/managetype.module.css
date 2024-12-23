@@ -1,0 +1,109 @@
+.container {
+    background-color: var(--bgSoft);
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 20px;
+}
+
+.top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.titleName {
+    font-weight: 600;
+    color: #1f2937;
+    padding-bottom: 0.75rem;
+    
+    width: fit-content;
+}
+
+.addButton {
+    padding: 10px;
+    background-color: #98de6d;
+    color: var(--text);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.addButton:hover {
+    background-color: #7fc05b;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table td {
+    padding: 15px;
+    border-bottom: 1px solid #ddd;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.editButton, .deleteButton {
+    padding: 5px 10px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.3s ease;
+}
+
+.editButton {
+    color: #808080;
+}
+
+.deleteButton {
+    
+    color: #ff4d4d;
+}
+
+.editButton:hover, .deleteButton:hover {
+    opacity: 0.8;
+}
+
+.varietyCell {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 5px;
+}
+
+.varietyTag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    background-color: #e0f2fe;
+    color: #0369a1;
+}
+
+.loading {
+    text-align: center;
+    padding: 20px;
+    font-size: 18px;
+}
+
+.error {
+    text-align: center;
+    color: red;
+    padding: 20px;
+    font-size: 18px;
+}
+
+.noData {
+    text-align: center;
+    color: var(--textSoft);
+    font-style: italic;
+}
