@@ -62,18 +62,15 @@ export default async function UsersByRolePage() {
 
   return (
     <div className={styles.container}>
-    <h1 className="text-2xl ">บัญชีผู้ใช้ทั้งหมด</h1><br></br>
+    <h1 className="text-2xl ">บัญชีคำขอเป็นเกษตรกรทั้งหมด</h1><br></br>
       <table className={styles.table}>
         <thead>
           <tr>
             <td>#</td>
             <td>อีเมล</td>
-            <td>ชื่อ-นามสกุล</td>
-            <td>เบอร์โทรศัพท์</td>
             <td>ชื่อเกษตรกร</td>
-            <td>วันที่สร้าง</td>
-            <td>วันที่อัพเดท</td>
-            <td>สถานะ</td>
+            <td>เบอร์โทรศัพท์</td>
+            <td>วันที่ขออนุมัติ</td>
             <td>การจัดการ</td>
           </tr>
         </thead>
@@ -83,25 +80,15 @@ export default async function UsersByRolePage() {
               <tr key={user.id}>
                 <td>{index + 1}</td>
                 <td>{user.email || '-'}</td>
-                <td>{user.name || '-'}</td>
-                <td>{user.phone || '-'}</td>
                 <td>{user.Farmer?.farmerName || '-'}</td>
+                <td>{user.phone || '-'}</td>
                 <td>{user.createdAt ? new Date(user.createdAt).toLocaleDateString('th-TH') : '-'}</td>
-                <td>{user.updatedAt ? new Date(user.updatedAt).toLocaleDateString('th-TH') : '-'}</td>
-                <td>
-                  <span
-                    className={`inline-block px-2 py-1 rounded-full text-xs font-semibold
-                      ${user.role === 'farmer' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}
-                  >
-                    {user.role === 'farmer' ? 'เกษตรกร' : user.role}
-                  </span>
-                </td>
                 <td>
                   <Link
                     href={`/municipality-dashboard/users/account/${user.id}`}
                     className={`${styles.button} ${styles.viewButton}`}
                   >
-                    ดูข้อมูล
+                    ดูเพิ่มเติม
                   </Link>
                 </td>
               </tr>

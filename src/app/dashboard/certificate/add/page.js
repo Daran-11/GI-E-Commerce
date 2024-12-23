@@ -267,7 +267,7 @@ const Register = () => {
   return (
     <div className="container">
       <main className="mainContent">
-        <h1 className="title-name">ขอใบรับรอง</h1>
+        <h1 className="text-2xl" >เพิ่มใบรับรอง</h1>
         <p className="subtitle-name">ข้อมูลผลิต</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -435,7 +435,7 @@ const Register = () => {
 
           <div className="button-group">
             <button type="submit" className="button-submit">
-              ขอใบรับรอง
+              ลงทะเบียน
             </button>
           </div>
         </form>

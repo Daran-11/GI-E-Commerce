@@ -33,21 +33,27 @@ const menuItems = [
     title: "หน้า",
     list: [
       { title: "หน้าหลัก", path: "/dashboard", icon: <MdDashboard /> },
+    ],
+  },
+  
+  {
+    title: "ใบรับรอง",
+    list: [
+      { title: "ลงทะเบียนใบรับรอง", path: "/dashboard/certificate", icon: <MdSupervisedUserCircle /> },
+    ],
+  },
+  {
+    title: "สินค้า",
+    list: [
       { title: "จัดการสินค้า", path: "/dashboard/products", icon: <MdShoppingBag /> },
       { title: "จัดการคำสั่งซื้อ", path: "/dashboard/orders", icon: <MdPeople /> },
       { title: "ประวัติการขาย", path: "/dashboard/history", icon: <MdAttachMoney /> },
     ],
   },
-  {
-    title: "วิเคราะห์",
-    list: [
-      { title: "ตรวจสอบย้อนกลับ", path: "/dashboard/traceability", icon: <MdAnalytics /> },
-    ],
-  },
+
   {
     title: "ผู้ใช้",
     list: [
-      { title: "ลงทะเบียนใบรับรอง", path: "/dashboard/certificate", icon: <MdSupervisedUserCircle /> },
       { title: "ช่องทางชำระเงิน", path: "/dashboard/chennel", icon: <MdMoney /> },
       { title: "การตั้งค่า", path: "/dashboard/settings", icon: <MdOutlineSettings /> },
       { title: "ช่วยเหลือ", path: "/dashboard/help", icon: <MdHelpCenter /> },

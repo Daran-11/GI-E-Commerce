@@ -1,6 +1,4 @@
-// completed
-'use client'
-
+"use client"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useState } from "react"
 import { MdSearch } from "react-icons/md"
@@ -15,7 +13,7 @@ const debounce = (func, delay) => {
   };
 };
 
-const Search = ({ placeholder }) => {
+const Search = ({ placeholder, onSearch }) => {
   const searchParams = useSearchParams();
   const { replace } = useRouter();
   const pathname = usePathname();
@@ -30,16 +28,19 @@ const Search = ({ placeholder }) => {
       const params = new URLSearchParams(searchParams);
       
       if (query) {
-        // Set the search query
         params.set("query", query);
       } else {
-        // Remove the search query if input is empty
         params.delete("query");
       }
       
       replace(`${pathname}?${params}`);
-    }, 300), // Adjust delay as needed
-    [searchParams, replace, pathname]
+      
+      // เพิ่มการเรียกใช้ onSearch prop
+      if (onSearch) {
+        onSearch(query);
+      }
+    }, 300),
+    [searchParams, replace, pathname, onSearch]
   );
 
   // Update query state and call debounced search handler
@@ -52,12 +53,12 @@ const Search = ({ placeholder }) => {
   return (
     <div className="flex items-center gap-2.5 bg-[#F3F3F3] p-2.5 rounded-lg ">
       <MdSearch />
-      <input 
-        type="text" 
-        placeholder={placeholder} 
-        className={styles.input} 
+      <input
+        type="text"
+        placeholder={placeholder}
+        className={styles.input}
         onChange={onChange}
-        value={query} // Set the current search query as the value
+        value={query}
       />
     </div>
   )
