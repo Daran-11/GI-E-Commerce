@@ -72,14 +72,8 @@ const ProductCard = ({products}) => {
       
 
                   <div className="px-[12px] md:px-[18px] h-fit pb-2 -space-y-1 md:space-y-0">
-                      <div className="flex justify-between items-center text-lg md:mt-2 sm:text-xl xl:text-2xl text-[#535353]  ">
-                          <p className=''>{product.ProductName}{product.ProductType} </p>
-                          
-                      </div>
-                      
-                      <div className="flex justify-between md:mt-[2px] text-[#767676] text-base xl:text-lg ">
-                          <p className='leading-tight '>ผู้ขาย {product.farmer.farmerName} </p> 
-                          <div className='flex space-x-2 items-center'>
+
+                  <div className='flex justify-start items-center w-full '>
                             {product.certificates.map((cert) => {
                               // Ensure certificate exists and has the 'certificate' property
                               if (cert.certificate && cert.certificate.standards) {
@@ -91,11 +85,11 @@ const ProductCard = ({products}) => {
                                   console.log("standardsObj :",standardsObj)
 
                                   return (
-                                    <div key={cert.certificate.id} >
-                                      <div>
+             
+                                      <div className='flex space-x-3 mt-1 justify-center items-center' key={cert.certificate.id} >
                                         {standardsObj.map((standard, index) => (
-                                          <div className="flex space-x-3 mb-2 justify-start items-center" key={index}>
-                                            <Tooltip title={`มาตรฐานการรับรอง ${standard.name}`} arrow>
+                                          <div className="" key={index}>
+                                            <Tooltip title={`มาตรฐานการรับรอง ${standard.name} รหัส ${standard.certNumber}`} arrow>
                                             <div>
                                             <Image
                                             key={index}
@@ -112,7 +106,7 @@ const ProductCard = ({products}) => {
                                           </div>
                                         ))}
                                       </div>
-                                    </div>
+                               
                                   );
                                 } catch (error) {
                                   console.error('Error parsing standards:', error);
@@ -127,7 +121,16 @@ const ProductCard = ({products}) => {
                                 );
                               }
                             })}                            
-                          </div>
+                          </div>                    
+   
+
+                      <div className="flex justify-between items-center text-lg md:mt-2 sm:text-xl xl:text-2xl text-[#535353]  ">
+                          <p className=''>{product.ProductName}{product.ProductType} </p>
+                          
+                      </div>
+                      
+                      <div className="flex justify-between md:mt-[2px] text-[#767676] text-base xl:text-lg ">
+                          <p className='leading-tight '>ผู้ขาย {product.farmer.farmerName} </p> 
                          
                       </div>
 

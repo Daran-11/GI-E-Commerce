@@ -1,14 +1,14 @@
 // src/app/layout.js
 import CookieConsentBanner from '@/components/cookieConsent';
-import DateProvider from '@/components/dateProvider';
+import DateProvider from '@/components/DateProvider';
 import { getServerSession } from 'next-auth';
 import PlausibleProvider from 'next-plausible';
 import { Prompt } from 'next/font/google';
+import { ToastContainer } from 'react-toastify'; // Import ToastContainer
+import 'react-toastify/dist/ReactToastify.css'; // Import Toastify styles
 import ClientLayout from '../components/ClientLayout';
 import SessionProvider from '../components/SessionProvider';
 import './globals.css';
-import { ToastContainer, toast } from 'react-toastify'; // Import ToastContainer
-import 'react-toastify/dist/ReactToastify.css'; // Import Toastify styles
 
 
 const prompt = Prompt({
