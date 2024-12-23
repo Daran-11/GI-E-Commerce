@@ -573,45 +573,45 @@ const LocationMarker = () => {
               </button>
             </div>
 
-            {/* Modal สำหรับกรอกความคิดเห็น */}
             {showCommentField && (
-              <div className="fixed inset-0 z-40 flex items-center justify-center bg-black bg-opacity-50">
-                <div className="bg-white rounded-lg p-6 w-1/3">
-                  <label className="block text-sm font-medium mb-2">
-                    ความคิดเห็น (เหตุผลที่ไม่อนุมัติ)
-                  </label>
-                  <textarea
-                    name="municipalComment"
-                    value={formData.municipalComment}
-                    onChange={handleChange}
-                    className="w-full p-2 border rounded-md"
-                    rows="4"
-                    required
-                  />
-                  {errors.municipalComment && (
-                    <p className="text-red-500 text-sm mt-1">
-                      {errors.municipalComment}
-                    </p>
-                  )}
-                  <div className="flex justify-end mt-4">
-                    <button
-                      type="button"
-                      onClick={() => setShowCommentField(false)}
-                      className="mr-2 px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
-                    >
-                      ยกเลิก
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleSubmit("ไม่อนุมัติ")}
-                      className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
-                    >
-                      ยืนยันการไม่อนุมัติ
-                    </button>
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center">
+                  <div className="absolute inset-0 bg-black bg-opacity-50" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}></div>
+                  <div className="bg-white rounded-lg p-6 w-1/3 z-[10000] relative">
+                    <label className="block text-sm font-medium mb-2">
+                      ความคิดเห็น (เหตุผลที่ไม่อนุมัติ)
+                    </label>
+                    <textarea
+                      name="municipalComment"
+                      value={formData.municipalComment}
+                      onChange={handleChange}
+                      className="w-full p-2 border rounded-md"
+                      rows="4"
+                      required
+                    />
+                    {errors.municipalComment && (
+                      <p className="text-red-500 text-sm mt-1">
+                        {errors.municipalComment}
+                      </p>
+                    )}
+                    <div className="flex justify-end mt-4">
+                      <button
+                        type="button"
+                        onClick={() => setShowCommentField(false)}
+                        className="mr-2 px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
+                      >
+                        ยกเลิก
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleSubmit("ไม่อนุมัติ")}
+                        className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+                      >
+                        ยืนยันการไม่อนุมัติ
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
           </div>
         </div>
       </div>
