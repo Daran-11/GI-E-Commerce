@@ -225,6 +225,7 @@ const Product = () => {
 
   return (
     <div className={styles.container}>
+            <h1 className='page-header '>จัดการสินค้าของคุณ</h1> 
       <div className={styles.top}>
         <Search placeholder="ค้นหาสินค้า..." />
 

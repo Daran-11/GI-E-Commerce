@@ -167,6 +167,7 @@ export default function ProductDetailsClient({ product, totalReviewsCount, Produ
 
       <div className="detail flex justify-center md:justify-start">
         <div className="hidden lg:flex">
+        
         <EmblaCarousel images={product.images || []} />        
         </div>
 
@@ -179,7 +180,7 @@ export default function ProductDetailsClient({ product, totalReviewsCount, Produ
             <EmblaCarousel images={product.images || []} />
             </div>
             <div className="text-[#535353]">
-              <p className="mt-3 text-4xl lg:text-5xl">{product.ProductName} {product.ProductType}</p>
+              <p className=" text-4xl lg:text-5xl">{product.ProductName} {product.ProductType}</p>
               <p className="text-xl"> ผู้ขาย {product.farmer.farmerName} </p>
             </div>
             <div className="flex w-full text-[#767676] text-xl">
@@ -220,6 +221,7 @@ export default function ProductDetailsClient({ product, totalReviewsCount, Produ
                     {standardsObj.map((standard, index) => (
                       <div className="flex space-x-3 mb-2 justify-start items-center" key={index}>
                         <div>
+                            
                         <Image
                         key={index}
                         src={standard.logo}

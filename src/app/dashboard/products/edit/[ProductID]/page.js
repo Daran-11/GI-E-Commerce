@@ -1,6 +1,7 @@
 "use client";
 import {
   Button,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -12,13 +13,15 @@ import {
   Paper,
   Select,
   styled,
-  TextField
+  TextField,
+  Typography
 } from "@mui/material";
+import { format } from 'date-fns';
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-
+import useSWR from "swr";
 const CustomPaper = styled(Paper)(({ theme }) => ({
   borderRadius: "16px",
   padding: theme.spacing(3),
@@ -51,6 +54,7 @@ const EditProductDialog = ({ open, onClose, ProductID, onSuccess }) => {
       Amount: "",
       status: "",
       Description: "",
+      HarvestedAt: "",
       Details: "",
     },
   });
@@ -62,80 +66,65 @@ const EditProductDialog = ({ open, onClose, ProductID, onSuccess }) => {
   const [imagePreviews, setImagePreviews] = useState([]);
   const [imagesToDelete, setImagesToDelete] = useState([]);
   const [initialImages, setInitialImages] = useState([]);
+
   const { data: session, status } = useSession();
   const [hasFetched, setHasFetched] = useState(false);
   const userId = session.user.id;
+  const [charCount, setCharCount] = useState(0);
   
-useEffect(() => {
-  const fetchProduct = async () => {
-    if (!session || !ProductID || hasFetched) return;
 
-    try {
-      const response = await fetch(`/api/users/${session.user.id}/product/get?ProductID=${ProductID}`);
-      if (!response.ok) {
-        console.error("Error fetching product:", await response.text());
-        alert("Failed to fetch product data. Please try again.");
-        return;
-      }
 
-      const data = await response.json();
-      console.log("data cer",data.certificates)
+  
+  // Fetch product data using SWR
+  const fetchProduct = (url) => fetch(url).then(res => res.json());
+  const { data: productData, error: productError, isLoading } = useSWR(
+    ProductID && session ? `/api/users/${session.user.id}/product/get?ProductID=${ProductID}` : null, 
+    fetchProduct
+  );
 
-      // Process certificates to extract certNumber
-      const certNumbers = Array.isArray(data.certificates)
-        ? data.certificates.flatMap(cert =>
+    // Fetch certificates for the user
+    const { data: certificatesData, error: certError } = useSWR(
+      status === 'authenticated' ? `/api/users/${session?.user.id}/certificates` : null,
+      fetchProduct
+    );
+
+    useEffect(() => {
+  if (productData) {
+    const initial = productData.images ? productData.images.map((img) => img.imageUrl) : [];
+    setInitialImages(initial);
+    console.log("Initial images set: ", initial);
+  }
+}, [productData]);
+  
+
+  useEffect(() => {
+    if (productData) {
+      const certNumbers = Array.isArray(productData.certificates)
+        ? productData.certificates.flatMap(cert =>
             cert.certificate?.standards?.map(standard => standard.certNumber) || []
           )
         : [];
-
-      console.log("certNumbers", certNumbers); // Log certNumbers for debugging      
-      
       reset({
-        ProductName: data.ProductName || "",
-        ProductType: data.ProductType || "",
-        Price: data.Price ? parseFloat(data.Price).toFixed(2) : "",
-        Cost: data.Cost || "",
-        Amount: data.Amount || "",
-        status: data.status || "",
-        Description: data.Description || "",
-        Details: data.Details || "",
-        Certificates: data.certificates || [] // Set existing certificates
+        ProductName: productData.ProductName || "",
+        ProductType: productData.ProductType || "",
+        Price: productData.Price ? parseFloat(productData.Price).toFixed(2) : "",
+        Cost: productData.Cost || "",
+        Amount: productData.Amount || "",
+        status: productData.status || "",
+        Description: productData.Description || "",
+        Details: productData.Details || "",
+        Certificates: productData.certificates || [],
+        HarvestedAt: productData.HarvestedAt || '',
       });
-
-
-      const imageUrls = Array.isArray(data.images) ? data.images.map(img => img.imageUrl) : [];
-      setInitialImages(imageUrls);
-      setImagePreviews(imageUrls);
       setCertNumbers(certNumbers);
-      // Set `hasFetched` to true after successfully fetching and setting data
-      setHasFetched(true);
-    } catch (error) {
-      console.error("Error occurred while fetching product:", error);
-      alert("An error occurred while fetching the product data.");
+      setImagePreviews(productData.images ? productData.images.map(img => img.imageUrl) : []);
     }
-  };
-
-  // Fetch product only if `ProductID` is available and it hasn't been fetched yet
-  if (ProductID && !hasFetched) {
-    fetchProduct();
-  }
-}, [ProductID, reset, session, hasFetched]);
-
-useEffect(() => {
-  // Fetch the available certificates for the farmer
-  if (status === 'authenticated' && userId) {
-    console.log("user id is",userId);
-    async function fetchCertificates() {
-      const response = await fetch(`/api/users/${userId}/certificates`);
-      const data = await response.json();
-      console.log("cert data is",data);
-      setCertificates(data);
+    if (certificatesData) {
+      setCertificates(certificatesData);
     }
+  }, [productData, certificatesData, reset]);
 
-    fetchCertificates();      
-  }
 
-}, [status]);
 
 
   const handleFileChange = (files) => {
@@ -168,13 +157,19 @@ useEffect(() => {
 
   const handleImageRemove = (index) => {
     const imageToRemove = imagePreviews[index];
-    setImagePreviews(prev => prev.filter((_, i) => i !== index));
+    console.log("Removing image: ", imageToRemove);
+    setImagePreviews((prev) => prev.filter((_, i) => i !== index));
+    
     if (initialImages.includes(imageToRemove)) {
-      setImagesToDelete(prev => [...prev, imageToRemove]);
+      setImagesToDelete((prev) => [...prev, imageToRemove]);
+      console.log("Images to delete: ", [...imagesToDelete, imageToRemove]);
+    } else {
+      console.log("Image not in initialImages, skipping delete: ", imageToRemove);
     }
   };
 
   const onSubmit = async (data) => {
+    console.log("Images to delete before submit:", imagesToDelete);
     if (!window.confirm("คุณแน่ใจหรือว่าต้องการอัปเดตสินค้านี้?")) {
       return;
     }
@@ -234,15 +229,42 @@ useEffect(() => {
       Amount: "",
       status: "",
       Description: "",
+      HarvestedAt: "",
     });
+    
     setImagePreviews([]);
     setImagesToDelete([]);
     setInitialImages([]);
     onClose();
   }, [reset, onClose]);
 
+  
+
   const selectedCertNumber = certificates
   .find(cert => cert.id === selectedCertificate)?.certificate?.[0]?.standards?.[0]?.certNumber || '';
+
+  const handleDescriptionChange = (e) => {
+    const inputText = e.target.value;
+    // นับจำนวนตัวอักษร
+    setCharCount(inputText.length);
+  };
+
+  const Loading = () => {
+    return (
+      <Dialog open={open} onClose={handleClose} PaperComponent={CustomPaper} maxWidth="lg">
+       <DialogTitle>แก้ไขสินค้า</DialogTitle>    
+       <DialogContent>
+       <div className="flex justify-center items-center">
+          <CircularProgress/>
+       </div>
+       </DialogContent>
+      </Dialog>
+    );
+  };
+
+  if (isLoading) {
+    return <Loading />;
+  }
 
 
   return (
@@ -270,23 +292,51 @@ useEffect(() => {
               </Grid>
             </Grid>
             <Grid item xs={12} sm={5}>
-              <Grid container spacing={2} paddingTop={2}>
+              <Grid container spacing={3} paddingTop={2}>
                 <Grid item xs={12}>
                   <Controller name="ProductName" control={control} rules={{ required: "ชื่อสินค้า is required" }} render={({ field }) => (
-                    <TextField {...field} label="ชื่อสินค้า" variant="outlined" fullWidth error={!!errors.ProductName} helperText={errors.ProductName?.message} />
+                    <TextField {...field} label="ชื่อสินค้า" variant="outlined" fullWidth disabled error={!!errors.ProductName} helperText={errors.ProductName?.message} 
+                    InputProps={{
+                      readOnly: true, // Make it read-only if the field is just for display
+                    }}
+                    />
                   )} />
                 </Grid>
                 <Grid item xs={12}>
-                  <FormControl fullWidth>
-                    <InputLabel>ประเภทสินค้า</InputLabel>
-                    <Controller name="ProductType" control={control} rules={{ required: "ประเภทสินค้า is required" }} render={({ field }) => (
-                      <Select {...field} label="ประเภทสินค้า">
-                        <MenuItem value="นางแล">นางแล</MenuItem>
-                        <MenuItem value="ภูแล">ภูแล</MenuItem>
-                      
-                      </Select>
-                    )} />
-                  </FormControl>
+                  <Controller name="ProductType" control={control}  render={({ field }) => (
+                    <TextField {...field} label="ประเภท" variant="outlined" fullWidth disabled error={!!errors.ProductName} helperText={errors.ProductName?.message} 
+                    InputProps={{
+                      readOnly: true, // Make it read-only if the field is just for display
+                    }}
+                    />
+                  )} />
+                </Grid>
+
+                <Grid item xs={12}>
+                <Controller
+                  name="HarvestedAt"
+                  control={control}
+                  render={({ field }) => {
+                    const validDate = field.value ? new Date(field.value) : null;
+                    const formattedDate = validDate && !isNaN(validDate) ? format(validDate, 'dd/MM/yyyy') : '';
+
+                    return (
+                      <TextField
+                        {...field}
+                        label="วันที่เก็บเกี่ยว"
+                        variant="outlined"
+                        fullWidth
+                        disabled
+                        value={formattedDate}
+                        error={!!errors.HarvestedAt}
+                        helperText={errors.HarvestedAt?.message}
+                        InputProps={{
+                          readOnly: true, // Make it read-only if the field is just for display
+                        }}
+                      />
+                    );
+                  }}
+                />
                 </Grid>
                 <Grid item xs={12}>
               <TextField
@@ -315,6 +365,8 @@ useEffect(() => {
                     <TextField {...field} label="จำนวนสินค้า" variant="outlined" fullWidth error={!!errors.Amount} helperText={errors.Amount?.message} />
                   )} />
                 </Grid>
+
+
                 <Grid item xs={12} sm={6}>
                   <FormControl fullWidth>
                     <InputLabel>สถานะ</InputLabel>
@@ -327,9 +379,25 @@ useEffect(() => {
                   </FormControl>
                 </Grid>
                 <Grid item xs={12}>
-                  <Controller name="Description" control={control} render={({ field }) => (
-                    <TextField {...field} label="รายละเอียดสินค้า" variant="outlined" fullWidth multiline rows={4} />
+                  <Controller name="Description" control={control} rules={{ required: "โปรดใส่คำอธิบายสินค้านี้" }} render={({ field }) => (
+                    <TextField {...field} 
+                    label="คำอธิบายสินค้า" 
+                    variant="outlined"  
+                    fullWidth 
+                    error={!!errors.Description} 
+                    helperText={errors.Description?.message} 
+                    multiline 
+                    rows={4} 
+                    inputProps={{ maxLength: 200 }} 
+                    onChange={(e) => {
+                      field.onChange(e); // เรียกใช้ onChange ของ field เพื่อให้ React Hook Form จัดการข้อมูล
+                      handleDescriptionChange(e); // คำนวณจำนวนคำ
+                    }}
+                    />
                   )} />
+               <Typography variant="body2" color="textSecondary" mt={2}>
+               จำนวนอักษร: {charCount} / 200
+            </Typography>
                 </Grid>
                 <Grid item xs={12}>
                   <Controller

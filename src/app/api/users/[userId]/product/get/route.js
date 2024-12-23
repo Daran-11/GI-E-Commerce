@@ -33,7 +33,7 @@ export async function GET(request, { params }) {
             // Fetching a single product by ProductID
             const product = await prisma.product.findUnique({
                 where: {
-                    ProductID: Number(ProductID),
+                    ProductID: parseInt(ProductID),
                     isDeleted: false,
                     farmer: {
                         userId,
@@ -94,12 +94,24 @@ export async function GET(request, { params }) {
                                     contains: query, // Case-insensitive search
                                 },
                             },
+                            !isNaN(parseFloat(query)) && isFinite(query) ? {
+                                Price: {
+                                  equals: parseFloat(query),
+                                },
+                              } : null,
+                            
                             {
                                 ProductType: {
                                     contains: query, // Case-insensitive search
                                 },
                             },
-                        ],
+                            !isNaN(parseInt(query)) && isFinite(query) ? {
+                                Amount: {
+                                  equals: parseInt(query),
+                                },
+                              } : null,
+                            
+                        ].filter(Boolean),
                     },
                     orderBy: {
                         DateCreated: sortOrder, // Sort by creation date

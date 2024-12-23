@@ -6,7 +6,7 @@ import prisma from "../../../../../../../../lib/prisma";
 
 // สร้าง client ของ Google Cloud Storage
 const storage = new Storage({
-  keyFilename:  process.env.GOOGLE_APPLICATION_CREDENTIALS, // ระบุพาธของไฟล์ service account
+  keyFile:  process.env.GOOGLE_APPLICATION_CREDENTIALS, // ระบุพาธของไฟล์ service account
 });
 const bucketName = 'gipineapple'; // ระบุชื่อของ Google Cloud Storage Bucket
 
@@ -57,10 +57,19 @@ export async function DELETE(request, { params }) {
       try {
         await storage.bucket(bucketName).file(fileName).delete();
         console.log(`Deleted file from Cloud Storage: ${fileName}`);
+        
+        await prisma.productImage.delete({
+          where: {
+            id: image.id,
+          },
+        });
+
       } catch (err) {
         console.error(`Error deleting file from Cloud Storage: ${fileName}`, err);
       }
     }
+
+
 
     // Perform soft delete by updating the isDeleted field in the database, while retaining image paths
     await prisma.product.update({
@@ -71,6 +80,8 @@ export async function DELETE(request, { params }) {
         isDeleted: true,
       },
     });
+
+    
 
     return NextResponse.json({ status: 200 });
   } catch (error) {

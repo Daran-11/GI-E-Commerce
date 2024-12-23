@@ -80,6 +80,7 @@ export async function POST(request, { params }) {
     const Amount = formData.get("Amount");
     const status = formData.get("status");
     const Description = formData.get("Description");
+    const HarvestedAt = formData.get("HarvestedAt");
     const Details = formData.get("Details");
     const Certificates = formData.getAll("Certificates");
 
@@ -95,6 +96,11 @@ export async function POST(request, { params }) {
 
     console.log("Parsed certificate IDs:", certificateIds);
 
+
+
+    // แปลงวันปลูกให้เป็นรูปบบ ISO ก่่อน
+    const isoHarvestedAt = new Date(HarvestedAt).toISOString();
+        
     // Handle multiple image files
     const imageFiles = formData.getAll("images");
     const imageUrls = [];
@@ -119,6 +125,7 @@ export async function POST(request, { params }) {
         status,
         farmerId: farmer.id,
         Details,
+        HarvestedAt: isoHarvestedAt,
       },
     });
 

@@ -27,6 +27,16 @@ export async function GET(req) {
 
           },
         },
+        certificates: {
+          include: {
+            certificate: {
+              select: {
+                id: true,
+                standards: true, // Include standards JSON field
+              },
+            },
+          },
+        },
         reviews: {
           select: {
             rating: true,

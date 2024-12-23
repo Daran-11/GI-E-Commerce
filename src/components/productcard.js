@@ -1,4 +1,5 @@
 
+import Tooltip from '@mui/material/Tooltip';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
@@ -71,14 +72,65 @@ const ProductCard = ({products}) => {
       
 
                   <div className="px-[12px] md:px-[18px] h-fit pb-2 -space-y-1 md:space-y-0">
-                      <div className="text-lg md:mt-2 sm:text-xl xl:text-2xl text-[#535353]  ">
+                      <div className="flex justify-between items-center text-lg md:mt-2 sm:text-xl xl:text-2xl text-[#535353]  ">
                           <p className=''>{product.ProductName}{product.ProductType} </p>
+                          
                       </div>
                       
-                      <div className="md:mt-[2px] text-[#767676] text-base xl:text-lg ">
+                      <div className="flex justify-between md:mt-[2px] text-[#767676] text-base xl:text-lg ">
                           <p className='leading-tight '>ผู้ขาย {product.farmer.farmerName} </p> 
-                          {/* Star Rating Component */}
+                          <div className='flex space-x-2 items-center'>
+                            {product.certificates.map((cert) => {
+                              // Ensure certificate exists and has the 'certificate' property
+                              if (cert.certificate && cert.certificate.standards) {
+                                const standards = cert.certificate.standards; // This is the JSON field
+
+                                try {
+                                  // Assuming standards is a JSON string, parse it if necessary
+                                  const standardsObj = JSON.parse(standards);
+                                  console.log("standardsObj :",standardsObj)
+
+                                  return (
+                                    <div key={cert.certificate.id} >
+                                      <div>
+                                        {standardsObj.map((standard, index) => (
+                                          <div className="flex space-x-3 mb-2 justify-start items-center" key={index}>
+                                            <Tooltip title={`มาตรฐานการรับรอง ${standard.name}`} arrow>
+                                            <div>
+                                            <Image
+                                            key={index}
+                                            src={standard.logo}
+                                            alt={standard.name}
+                                            width={40}
+                                            height={40}
+                                          />
+                                                                    
+                                            </div>
+                                                                                 
+                                            </Tooltip> 
+
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  );
+                                } catch (error) {
+                                  console.error('Error parsing standards:', error);
+                                  return <div>Invalid standards data</div>;
+                                }
+                              } else {
+                                // If no standards found for the certificate
+                                return (
+                                  <div key={cert.certificate ? cert.certificate.id : 'no-id'}>
+                                    ไม่พบมาตรฐาน
+                                  </div>
+                                );
+                              }
+                            })}                            
+                          </div>
+                         
                       </div>
+
                       <div className='flex items-center'>
                         
                       <Rating
