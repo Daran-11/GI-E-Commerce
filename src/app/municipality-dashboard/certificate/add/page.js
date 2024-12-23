@@ -2,6 +2,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import './add.css';
+import { toast } from "react-toastify";
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -48,7 +49,7 @@ const Register = () => {
     if (!formData.productionQuantity) newErrors.productionQuantity = "กรุณากรอกจำนวนผลผลิต";
     if (!formData.hasCertificate) newErrors.hasCertificate = "กรุณาเลือกว่ามีใบรับรองหรือไม่";
     if (formData.hasCertificate === "มี" && !formData.imageUrl) newErrors.imageUrl = "กรุณาอัปโหลดรูปใบรับรอง";
-   
+
     if (!formData.UsersId) newErrors.UsersId = "กรุณากรอกรหัสเกษตร";
 
     // If there are errors, update state and stop submission
@@ -69,7 +70,7 @@ const Register = () => {
       formDataToSend.append("imageUrl", formData.imageUrl);
     }
     formDataToSend.append("UsersId", formData.UsersId);
-    
+
     if (formData.hasCertificate === "มี" && formData.imageUrl) {
       formDataToSend.append("imageUrl", formData.imageUrl);
     }
@@ -85,11 +86,11 @@ const Register = () => {
         throw new Error(errorData.message || "Failed to add certificate");
       }
 
-      alert("Certificate added successfully");
+      toast.success("เพิ่มใบรับรองสำเร็จ");
       router.push("/dashboard/certificate");
     } catch (error) {
       console.error("Error:", error);
-      alert(error.message || "Failed to add certificate");
+      toast.error(error.message || "เพิ่มใบรับรองไม่สำเร็จ");
     }
   };
 

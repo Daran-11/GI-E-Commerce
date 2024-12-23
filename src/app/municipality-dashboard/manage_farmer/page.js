@@ -5,6 +5,7 @@ import Link from "next/link";
 import Pagination from "@/app/ui/dashboard/pagination/pagination";
 import Search from "@/app/ui/dashboard/search/search";
 import { MdEdit, MdDelete } from 'react-icons/md';
+import { toast } from "react-toastify";
 
 const ManageFarmer = () => {
   const [manage_farmer, setManage_farmer] = useState([]);
@@ -55,14 +56,14 @@ const ManageFarmer = () => {
         });
         if (response.ok) {
           setManage_farmer(prev => prev.filter(farmer => farmer.id !== id));
-          alert("ลบเกษตรกรเรียบร้อยแล้ว");
+          toast.success("ลบเกษตรกรเรียบร้อยแล้ว");
         } else {
           const error = await response.json();
           throw new Error(error.message || "ไม่สามารถลบเกษตรกรได้");
         }
       } catch (error) {
         console.error("Failed to delete farmer:", error);
-        alert(error.message || "เกิดข้อผิดพลาดในการลบข้อมูล");
+        toast.error(error.message || "เกิดข้อผิดพลาดในการลบข้อมูล");
       }
     }
   };
@@ -76,7 +77,7 @@ const ManageFarmer = () => {
 
   return (
     <div className={styles.container}>
-    <h1 className="text-2xl ">จัดการเกษตกร</h1><br></br>
+      <h1 className="text-2xl ">จัดการเกษตกร</h1><br></br>
       <div className={styles.top}>
         <Search placeholder="ค้นหาเกษตรกร..." />
         <Link href="/municipality-dashboard/manage_farmer/add">

@@ -7,6 +7,8 @@ import { Prompt } from 'next/font/google';
 import ClientLayout from '../components/ClientLayout';
 import SessionProvider from '../components/SessionProvider';
 import './globals.css';
+import { ToastContainer, toast } from 'react-toastify'; // Import ToastContainer
+import 'react-toastify/dist/ReactToastify.css'; // Import Toastify styles
 
 
 const prompt = Prompt({
@@ -39,6 +41,19 @@ export default async function RootLayout({ children }) {
             <ClientLayout session={session}>
               {children}
               <CookieConsentBanner />
+              <ToastContainer
+                position="top-right" // Keeps it on the top-right
+                autoClose={3000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="light"
+              />
+
             </ClientLayout>
           </PlausibleProvider>
         </SessionProvider>

@@ -8,6 +8,7 @@ import { Box, Button, FormControl, IconButton, InputLabel, MenuItem, Modal, Sele
 import { useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
 
 const deliveryStatusTranslations = {
   Preparing: 'กำลังเตรียมสินค้า',
@@ -81,11 +82,11 @@ export default function IncomingOrders() {
   const userId = session.user.id;
 
   useEffect(() => {
-    if (status === 'authenticated' && userId ) {
+    if (status === 'authenticated' && userId) {
       fetchOrders(userId);
-      fetchDeliveryServices(); 
+      fetchDeliveryServices();
     }
-  }, [session, status,query]);
+  }, [session, status, query]);
 
   const fetchOrders = async (userId) => {
     try {
@@ -132,7 +133,7 @@ export default function IncomingOrders() {
 
   const handleSubmit = async () => {
     if (!deliveryService || !trackingNum) {
-      alert("Please fill out both fields.");
+      toast.warning("โปรดใส่ข้อมูลให้ครบถ้วน");
       return;
     }
     const orderId = selectedOrder.id;
@@ -154,7 +155,7 @@ export default function IncomingOrders() {
 
       handleClose();
       fetchOrders(session.user.id);
-      alert('Delivery details submitted successfully!');
+      toast.success('บันทึกข้อมูลการจัดส่งสำเร็จ!');
     } catch (error) {
       console.error(error);
     }
@@ -180,7 +181,10 @@ export default function IncomingOrders() {
   });
 
   if (status === 'loading' || loading) {
-    return <div>Loading...</div>;
+    return <div className="flex flex-col items-center justify-center min-h-screen">
+      <div className="w-12 h-12 border-4 border-t-green-500 border-r-green-500 border-b-green-200 border-l-green-200 rounded-full animate-spin"></div>
+      <p className="mt-4 text-gray-600">กำลังโหลดข้อมูล...</p>
+    </div>;
   }
 
   if (status === 'unauthenticated') {
@@ -191,194 +195,194 @@ export default function IncomingOrders() {
   return (
     <div className=" h-fit space-y-5 ">
 
-      <div className='w-full h-fit  bg-white px-6 pt-6 pb-2 rounded-xl'> 
-      <h1 className='page-header '>จัดการคำสั่งซื้อ</h1>          
-      {/* Dropdown for filtering orders by status */}
-      <div className="grid grid-cols md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7  gap-[5px]   ">
-        <div className=''>
-        <Search placeholder="ค้นหาจากรหัสคำสั่งซื้อ..."/>
-        </div>     
-        <div>
-          <label htmlFor="order-status-select">สถานะคำสั่งซื้อ</label>
-          <select
-            id="order-status-select"
-            value={selectedOrderStatus}
-            onChange={(e) => setSelectedOrderStatus(e.target.value)}
-            className='text-[#4eac14]'
-          >
-            <option value="" >
-              ทั้งหมด
-            </option>
-            {orderStatuses.map((status) => (
-              <option key={status} value={status}>
-                {orderStatusTranslations[status]}
+      <div className='w-full h-fit  bg-white px-6 pt-6 pb-2 rounded-xl'>
+        <h1 className='page-header '>จัดการคำสั่งซื้อ</h1>
+        {/* Dropdown for filtering orders by status */}
+        <div className="grid grid-cols md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7  gap-[5px]   ">
+          <div className=''>
+            <Search placeholder="ค้นหาจากรหัสคำสั่งซื้อ..." />
+          </div>
+          <div>
+            <label htmlFor="order-status-select">สถานะคำสั่งซื้อ</label>
+            <select
+              id="order-status-select"
+              value={selectedOrderStatus}
+              onChange={(e) => setSelectedOrderStatus(e.target.value)}
+              className='text-[#4eac14]'
+            >
+              <option value="" >
+                ทั้งหมด
               </option>
-            ))}
-          </select>
-        </div>
+              {orderStatuses.map((status) => (
+                <option key={status} value={status}>
+                  {orderStatusTranslations[status]}
+                </option>
+              ))}
+            </select>
+          </div>
 
-        <div>
-          <label htmlFor="payment-status-select">สถานะการชำระเงิน</label>
-          <select
-            id="payment-status-select"
-            value={selectedPaymentStatus}
-            onChange={(e) => setSelectedPaymentStatus(e.target.value)}
-            className='text-[#4eac14]'
-          >
-            <option value="">
-              ทั้งหมด
-            </option>
-            {paymentStatuses.map((status) => (
-              <option key={status} value={status}>
-                {paymentStatusTranslations[status]}
+          <div>
+            <label htmlFor="payment-status-select">สถานะการชำระเงิน</label>
+            <select
+              id="payment-status-select"
+              value={selectedPaymentStatus}
+              onChange={(e) => setSelectedPaymentStatus(e.target.value)}
+              className='text-[#4eac14]'
+            >
+              <option value="">
+                ทั้งหมด
               </option>
-            ))}
-          </select>
+              {paymentStatuses.map((status) => (
+                <option key={status} value={status}>
+                  {paymentStatusTranslations[status]}
+                </option>
+              ))}
+            </select>
 
 
-        </div>
+          </div>
 
-        <div>
-          <label htmlFor="delivery-status-select">สถานะการจัดส่ง</label>
-          <select
-            id="delivery-status-select"
-            value={selectedDeliveryStatus}
-            onChange={(e) => setSelectedDeliveryStatus(e.target.value)}
-            className='text-[#4eac14]'
-          >
-            <option value="">
-              ทั้งหมด
-            </option>
-            {deliveryStatuses.map((status) => (
-              <option key={status} value={status}>
-                {deliveryStatusTranslations[status]}
+          <div>
+            <label htmlFor="delivery-status-select">สถานะการจัดส่ง</label>
+            <select
+              id="delivery-status-select"
+              value={selectedDeliveryStatus}
+              onChange={(e) => setSelectedDeliveryStatus(e.target.value)}
+              className='text-[#4eac14]'
+            >
+              <option value="">
+                ทั้งหมด
               </option>
-            ))}
-          </select>
-        </div>
+              {deliveryStatuses.map((status) => (
+                <option key={status} value={status}>
+                  {deliveryStatusTranslations[status]}
+                </option>
+              ))}
+            </select>
+          </div>
 
-        <div>
-          <label htmlFor="min-price">มูลค่าต่ำสุด</label>
-          <input
-          className='text-[#4eac14] w-full'
-            type="number"
-            id="min-price"
-            value={minPrice}
-            onChange={(e) => setMinPrice(e.target.value)}
-            placeholder="0"
-          />
-        </div>
+          <div>
+            <label htmlFor="min-price">มูลค่าต่ำสุด</label>
+            <input
+              className='text-[#4eac14] w-full'
+              type="number"
+              id="min-price"
+              value={minPrice}
+              onChange={(e) => setMinPrice(e.target.value)}
+              placeholder="0"
+            />
+          </div>
 
-        <div>
-          <label htmlFor="max-price">มูลค่าสูงสุด</label>
-          <input
-          className='text-[#4eac14] w-full'
-            type="number"
-            id="max-price"
-            value={maxPrice}
-            onChange={(e) => setMaxPrice(e.target.value)}
-            placeholder="1000"
-          />
+          <div>
+            <label htmlFor="max-price">มูลค่าสูงสุด</label>
+            <input
+              className='text-[#4eac14] w-full'
+              type="number"
+              id="max-price"
+              value={maxPrice}
+              onChange={(e) => setMaxPrice(e.target.value)}
+              placeholder="1000"
+            />
+          </div>
+
+          {/* Button to reset all filters */}
+          <Button variant="outlined" onClick={resetFilters}>
+            ล้าง Filter
+          </Button>
+
         </div>
-      
-        {/* Button to reset all filters */}
-        <Button variant="outlined" onClick={resetFilters}>
-          ล้าง Filter
-        </Button>
-        
-      </div>      
       </div>
-           
-      
+
+
 
 
 
       <div className='relative overflow-x-auto rounded-xl'>
-  <table className=" min-w-full h-fit border-separate border-spacing-0 bg-white p-6 ">
-  <thead>
-    <tr className='text-xs 2xl:text-base  bg-gray-100'>
-      <th scope="col" className="w-[50px] px-2 pt-5 pb-3 border-b border-r text-start font-normal rounded-tl-lg">รหัส</th>
-      <th scope="col" className="w-[150px] px-2 pt-5 pb-3 border-b border-r text-start font-normal">สถานะคำสั่งซื้อ</th>
-      <th scope="col" className="w-[150px] border-b px-2 pt-5 pb-3 border-r text-start font-normal">วันที่สั่งซื้อ</th>
-      <th scope="col" className="w-[100px] border-b px-2 pt-5 pb-3 border-r text-start font-normal">รวม</th>
-      <th scope="col" className="w-[200px] border-b px-2 pt-5 pb-3 border-r text-start font-normal">ทีอยู่</th>
-      <th scope="col" className="w-[200px] border-b px-2 pt-5 pb-3 border-r text-start font-normal">ผู้ซื้อ</th>
-      <th scope="col" className="w-[150px] border-b px-2 pt-5 pb-3 border-r text-start font-normal">บริการขนส่ง</th>
-      <th scope="col" className="w-[100px] border-b px-2 pt-5 pb-3 border-r text-start font-normal">เลขพัสดุ</th>
-      <th scope="col" className="w-[180px] border-b px-2 pt-5 pb-3 border-r text-start font-normal">สถานะการชำระเงิน</th>
-      <th scope="col" className="w-[180px] border-b px-2 pt-5 pb-3 border-r text-start font-normal">สถานะการจัดส่ง</th>
-      <th scope="col" className="w-[350px] border-b px-2 pt-5 pb-3 border-r text-start font-normal  rounded-tr-lg">แอ็คชั่น</th>
-    </tr>
-  </thead>
-  {filteredOrders.length === 0 ? (
-    <p>No incoming orders at the moment</p>
-  ) : (
-    <tbody>
-      {filteredOrders.map((order) => (
-        <tr key={order.id} className="hover:bg-gray-100 text-sm">
-          <td className=" border-b border-r px-2  md:py-2">{order.id}</td>
-          <td className="border-b border-r  px-2 md:py-2">{orderStatusTranslations[order.status]}</td>
-          <td className="border-b border-r px-2  md:py-2">{new Date(order.createdAt).toLocaleDateString('th-TH')}</td>
-          <td className="border-b border-r px-2 ">{order.totalPrice} บาท</td>
-          <td className="border-b border-r px-2  md:py-2">{order.addressText}</td>
-          <td className='border-b border-r px-2  md:py-2'>  
-            <div className='flex flex-col'>
-              <div className='mb-1'>{order.user?.name || 'User not found'} </div>
-              <div>{order.user?.phone || 'phone not found'}</div>
-            </div>
-          </td>
-          <td className="border-b border-r px-2  md:py-2">
-            {order.delivery?.deliveryService?.name || (
-              <span className="text-gray-300">โปรดใส่บริการขนส่ง</span>
-            )}
-          </td>
-          <td className="border-b border-r px-2  md:py-2">
-            {order.delivery?.trackingNum || (
-              <span className="text-gray-300">โปรดใส่เลขพัสดุ</span>
-            )}
-          </td>
-          <td className="border-b border-r px-2   md:py-2">
-            <div className={`${paymentStatusColors[order.paymentStatus]}   text-center border-2 border-transparent py-1  rounded-3xl`}>
-              {paymentStatusTranslations[order.paymentStatus]}
-            </div>
-            
-          </td>
-          <td className="border-b border-r px-2  md:py-2">
-            <div className={`${statusColors[order.deliveryStatus]} text-center border-2 border-transparent py-1  rounded-3xl `}>
-            {deliveryStatusTranslations[order.deliveryStatus]}
-            </div>
+        <table className=" min-w-full h-fit border-separate border-spacing-0 bg-white p-6 ">
+          <thead>
+            <tr className='text-xs 2xl:text-base  bg-gray-100'>
+              <th scope="col" className="w-[50px] px-2 pt-5 pb-3 border-b border-r text-start font-normal rounded-tl-lg">รหัส</th>
+              <th scope="col" className="w-[150px] px-2 pt-5 pb-3 border-b border-r text-start font-normal">สถานะคำสั่งซื้อ</th>
+              <th scope="col" className="w-[150px] border-b px-2 pt-5 pb-3 border-r text-start font-normal">วันที่สั่งซื้อ</th>
+              <th scope="col" className="w-[100px] border-b px-2 pt-5 pb-3 border-r text-start font-normal">รวม</th>
+              <th scope="col" className="w-[200px] border-b px-2 pt-5 pb-3 border-r text-start font-normal">ทีอยู่</th>
+              <th scope="col" className="w-[200px] border-b px-2 pt-5 pb-3 border-r text-start font-normal">ผู้ซื้อ</th>
+              <th scope="col" className="w-[150px] border-b px-2 pt-5 pb-3 border-r text-start font-normal">บริการขนส่ง</th>
+              <th scope="col" className="w-[100px] border-b px-2 pt-5 pb-3 border-r text-start font-normal">เลขพัสดุ</th>
+              <th scope="col" className="w-[180px] border-b px-2 pt-5 pb-3 border-r text-start font-normal">สถานะการชำระเงิน</th>
+              <th scope="col" className="w-[180px] border-b px-2 pt-5 pb-3 border-r text-start font-normal">สถานะการจัดส่ง</th>
+              <th scope="col" className="w-[350px] border-b px-2 pt-5 pb-3 border-r text-start font-normal  rounded-tr-lg">แอ็คชั่น</th>
+            </tr>
+          </thead>
+          {filteredOrders.length === 0 ? (
+            <p>No incoming orders at the moment</p>
+          ) : (
+            <tbody>
+              {filteredOrders.map((order) => (
+                <tr key={order.id} className="hover:bg-gray-100 text-sm">
+                  <td className=" border-b border-r px-2  md:py-2">{order.id}</td>
+                  <td className="border-b border-r  px-2 md:py-2">{orderStatusTranslations[order.status]}</td>
+                  <td className="border-b border-r px-2  md:py-2">{new Date(order.createdAt).toLocaleDateString('th-TH')}</td>
+                  <td className="border-b border-r px-2 ">{order.totalPrice} บาท</td>
+                  <td className="border-b border-r px-2  md:py-2">{order.addressText}</td>
+                  <td className='border-b border-r px-2  md:py-2'>
+                    <div className='flex flex-col'>
+                      <div className='mb-1'>{order.user?.name || 'User not found'} </div>
+                      <div>{order.user?.phone || 'phone not found'}</div>
+                    </div>
+                  </td>
+                  <td className="border-b border-r px-2  md:py-2">
+                    {order.delivery?.deliveryService?.name || (
+                      <span className="text-gray-300">โปรดใส่บริการขนส่ง</span>
+                    )}
+                  </td>
+                  <td className="border-b border-r px-2  md:py-2">
+                    {order.delivery?.trackingNum || (
+                      <span className="text-gray-300">โปรดใส่เลขพัสดุ</span>
+                    )}
+                  </td>
+                  <td className="border-b border-r px-2   md:py-2">
+                    <div className={`${paymentStatusColors[order.paymentStatus]}   text-center border-2 border-transparent py-1  rounded-3xl`}>
+                      {paymentStatusTranslations[order.paymentStatus]}
+                    </div>
 
-          </td>
-          <td className="border-b border-r px-2  md:py-2">
-            <Tooltip title="ดูรายละเอียด" arrow>
-              <IconButton
-                aria-label="view"
-                color="primary"
-                onClick={() => router.push(`/dashboard/orders/${order.id}`)}
-              >
-                <div className="border-2 text-sm md:px-2 py-1 rounded-xl">
-                  <VisibilityRoundedIcon /> ดูเพิ่มเติม
-                </div>
-              </IconButton>
-            </Tooltip>
+                  </td>
+                  <td className="border-b border-r px-2  md:py-2">
+                    <div className={`${statusColors[order.deliveryStatus]} text-center border-2 border-transparent py-1  rounded-3xl `}>
+                      {deliveryStatusTranslations[order.deliveryStatus]}
+                    </div>
 
-            <Tooltip title="เพิ่มเลขพัสดุ" arrow>
-              <IconButton
-                aria-label="add-tracking"
-                color="primary"
-                onClick={() => handleOpen(order)}
-              >
-                <div className="border-2 text-sm md:px-2 py-1 rounded-xl">
-                  <LocalShippingIcon /> จัดส่ง
-                </div>
-              </IconButton>
-            </Tooltip>
-          </td>
-        </tr>
-      ))}
-    </tbody>
-  )}
-</table>        
+                  </td>
+                  <td className="border-b border-r px-2  md:py-2">
+                    <Tooltip title="ดูรายละเอียด" arrow>
+                      <IconButton
+                        aria-label="view"
+                        color="primary"
+                        onClick={() => router.push(`/dashboard/orders/${order.id}`)}
+                      >
+                        <div className="border-2 text-sm md:px-2 py-1 rounded-xl">
+                          <VisibilityRoundedIcon /> ดูเพิ่มเติม
+                        </div>
+                      </IconButton>
+                    </Tooltip>
+
+                    <Tooltip title="เพิ่มเลขพัสดุ" arrow>
+                      <IconButton
+                        aria-label="add-tracking"
+                        color="primary"
+                        onClick={() => handleOpen(order)}
+                      >
+                        <div className="border-2 text-sm md:px-2 py-1 rounded-xl">
+                          <LocalShippingIcon /> จัดส่ง
+                        </div>
+                      </IconButton>
+                    </Tooltip>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          )}
+        </table>
       </div>
 
 
@@ -390,7 +394,7 @@ export default function IncomingOrders() {
         aria-labelledby="delivery-modal-title"
         aria-describedby="delivery-modal-description"
       >
-        
+
         <Box
           sx={{
             position: 'absolute',
@@ -405,10 +409,10 @@ export default function IncomingOrders() {
           }}
         >
           <div className='flex justify-between items-center mb-4'>
-          <h2 className='text-xl r' id="delivery-modal-title">กรอกข้อมูลขนส่ง</h2>
-          <IconButton onClick={handleClose} sx={{ color: 'gray' }}>
-            <CloseRoundedIcon />
-          </IconButton>
+            <h2 className='text-xl r' id="delivery-modal-title">กรอกข้อมูลขนส่ง</h2>
+            <IconButton onClick={handleClose} sx={{ color: 'gray' }}>
+              <CloseRoundedIcon />
+            </IconButton>
           </div>
           <FormControl fullWidth sx={{ mb: 2 }}>
             <InputLabel id="delivery-service-label">ผู้ให้บริการขนส่ง</InputLabel>

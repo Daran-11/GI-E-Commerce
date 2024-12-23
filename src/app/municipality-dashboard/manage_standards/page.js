@@ -6,6 +6,7 @@ import Pagination from "@/app/ui/dashboard/pagination/pagination";
 import Search from "@/app/ui/dashboard/search/search";
 import Image from "next/image";
 import { MdEdit, MdDelete } from 'react-icons/md';
+import { toast } from "react-toastify";
 
 const Standards = () => {
   const [standards, setStandards] = useState([]);
@@ -31,10 +32,10 @@ const Standards = () => {
           method: "DELETE",
         });
         if (response.ok) {
-          alert("ลบมาตรฐานเรียบร้อยแล้ว");
+          toast.success("ลบมาตรฐานเรียบร้อยแล้ว");
           setStandards(standards.filter((std) => std.id !== id));
         } else {
-          alert("ไม่สามารถลบมาตรฐานได้");
+          toast.error("ไม่สามารถลบมาตรฐานได้");
         }
       } catch (error) {
         console.error("Failed to delete standard:", error);
@@ -44,7 +45,7 @@ const Standards = () => {
 
   return (
     <div className={styles.container}>
-    <h1 className="text-2xl ">จัดการมาตรฐาน</h1><br></br>
+      <h1 className="text-2xl ">จัดการมาตรฐาน</h1><br></br>
       <div className={styles.top}>
         <Search placeholder="ค้นหามาตรฐาน..." />
         <Link href="/municipality-dashboard/manage_standards/add">

@@ -4,11 +4,12 @@ import { CircularProgress } from "@mui/material";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import useSWR from "swr";
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
-export default function AddressManagement({ onSave , onLoad, onSuccess }) {
+export default function AddressManagement({ onSave, onLoad, onSuccess }) {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [selectedAddress, setSelectedAddress] = useState(null);
@@ -53,12 +54,12 @@ export default function AddressManagement({ onSave , onLoad, onSuccess }) {
     "/api/provinces",
     fetcher
   );
-  
+
   const { data: amphoes = [], error: amphoesError } = useSWR(
     addressForm.provinceId ? `/api/provinces/${addressForm.provinceId}/amphoes` : null,
     fetcher
   );
-  
+
   const { data: tambons = [], error: tambonsError } = useSWR(
     addressForm.amphoeId ? `/api/amphoes/${addressForm.amphoeId}/tambons` : null,
     fetcher
@@ -77,7 +78,7 @@ export default function AddressManagement({ onSave , onLoad, onSuccess }) {
       tambonId: "",
     }));
   };
-  
+
   const handleAmphoeChange = (e) => {
     const amphoeId = e.target.value;
     setAddressForm((prev) => ({
@@ -128,7 +129,7 @@ export default function AddressManagement({ onSave , onLoad, onSuccess }) {
   };
 
 
-  const handleSetDefault = async (addressId , onSave) => {
+  const handleSetDefault = async (addressId, onSave) => {
     if (session?.user?.id) {
       const userId = session.user.id;
 
@@ -212,36 +213,36 @@ export default function AddressManagement({ onSave , onLoad, onSuccess }) {
         if (response.ok) {
           console.log('Response:', await response.json()); // ดูว่า API ตอบอะไรกลับมา
           mutateAddresses((prevAddresses) => prevAddresses.filter((addr) => addr.id !== addressId));
-          alert('ลบที่อยู่จัดส่งสำเร็จ');
+          toast.success('ลบที่อยู่จัดส่งสำเร็จ');
           if (onSave) {
             onSave(); // Trigger onSave หลังจากลบเสร็จ
           }
-          
+
         } else {
           const errorData = await response.json();
           console.error('Failed to delete address:', response.status, errorData.message);
-          alert('Failed to delete address. Please try again.');
+          toast.error('ไม่สามารถลบที่อยู่ได้ โปรดลองอีกครั้ง');
         }
       } catch (error) {
         console.error('Error deleting address:', error);
-        alert('ไม่สามารถลบได้ โปรดลองอีกครั้ง');
+        toast.error('ไม่สามารถลบได้ โปรดลองอีกครั้ง');
       }
     }
   };
 
-  
+
   if (isLoading) {
     return (
-        <div className="flex items-center justify-center h-screen w-screen fixed top-0 left-0 bg-white bg-opacity-80 z-50">
-            <CircularProgress />
-        </div>
+      <div className="flex items-center justify-center h-screen w-screen fixed top-0 left-0 bg-white bg-opacity-80 z-50">
+        <CircularProgress />
+      </div>
     );
 
-}
+  }
 
-if (error) {
-  return <div>เกิดข้อผิดพลาดในการโหลดข้อมูล</div>;
-}
+  if (error) {
+    return <div>เกิดข้อผิดพลาดในการโหลดข้อมูล</div>;
+  }
 
   return (
     <div>
@@ -252,19 +253,19 @@ if (error) {
           <div className="md:flex  gap-x-2">
 
             <div className="">
-            <select
-              name="provinceId"
-              value={addressForm.provinceId}
-              onChange={handleProvinceChange}
-              className="input-address p-2 w-full md:w-[200px] h-15"
-            >
-              <option value="">เลือกจังหวัด</option>
-              {provinces.map((province) => (
-                <option key={province.id} value={province.id}>
-                  {province.name_th}
-                </option>
-              ))}
-            </select>
+              <select
+                name="provinceId"
+                value={addressForm.provinceId}
+                onChange={handleProvinceChange}
+                className="input-address p-2 w-full md:w-[200px] h-15"
+              >
+                <option value="">เลือกจังหวัด</option>
+                {provinces.map((province) => (
+                  <option key={province.id} value={province.id}>
+                    {province.name_th}
+                  </option>
+                ))}
+              </select>
             </div>
 
 
@@ -342,16 +343,16 @@ if (error) {
           </div>
 
           <div className="">
-          <label className="ml-1">
-            <input
-              type="checkbox"
-              className="w-7"
-              name="default"
-              checked={addressForm.isDefault}
-              onChange={(e) => setAddressForm({ ...addressForm, isDefault: e.target.checked })}
-            />
-             เลือกเป็นที่อยู่ตั้งต้น
-          </label>
+            <label className="ml-1">
+              <input
+                type="checkbox"
+                className="w-7"
+                name="default"
+                checked={addressForm.isDefault}
+                onChange={(e) => setAddressForm({ ...addressForm, isDefault: e.target.checked })}
+              />
+              เลือกเป็นที่อยู่ตั้งต้น
+            </label>
           </div>
 
           <div className="border-b-2 pb-3 mb-3">
@@ -379,7 +380,7 @@ if (error) {
                     postalCode: "",
                     isDefault: false,
                   });
-                  
+
                 }}
               >
                 ยกเลิก
@@ -394,66 +395,65 @@ if (error) {
 
       <ul>
         <div className="">
-        {!isLoading &&
-    addresses?.length > 0 &&
-    addresses.map((address) => (
-      <li
-        className="flex justify-between bg-slate-100 rounded-xl px-2 py-2 my-2"
-        key={address.id}
-      >
-        <div className="text-sm md:text-base flex justify-start space-x-2">
-          {/* Loading is gone when data is loaded */}
-          <div className="text-start ">
-            {address.addressLine}, {address.province.name_th},{" "}
-            {address.amphoe.name_th}, {address.tambon.name_th},{" "}
-            {address.postalCode}, {address.isDefault}
-          </div>
-          {address.isDefault && (
-            <div className="text-center w-fit  px-2 bg-[#4eac14] text-white rounded-xl">
-              ที่อยู่หลัก
-            </div>
-          )}
-        </div>
+          {!isLoading &&
+            addresses?.length > 0 &&
+            addresses.map((address) => (
+              <li
+                className="flex justify-between bg-slate-100 rounded-xl px-2 py-2 my-2"
+                key={address.id}
+              >
+                <div className="text-sm md:text-base flex justify-start space-x-2">
+                  {/* Loading is gone when data is loaded */}
+                  <div className="text-start ">
+                    {address.addressLine}, {address.province.name_th},{" "}
+                    {address.amphoe.name_th}, {address.tambon.name_th},{" "}
+                    {address.postalCode}, {address.isDefault}
+                  </div>
+                  {address.isDefault && (
+                    <div className="text-center w-fit  px-2 bg-[#4eac14] text-white rounded-xl">
+                      ที่อยู่หลัก
+                    </div>
+                  )}
+                </div>
 
-        <div className="flex justify-end items-center gap-x-4 md:gap-x-8 text-sm md:text-base">
-          <button
-            disabled={address.isDefault}
-            className={`${
-              address.isDefault
-                ? "text-gray-500 hidden sm:flex"
-                : "text-[#4eac14] hover:text-[#7ddb43] hidden sm:flex"
-            }`}
-            onClick={() => handleSetDefault(address.id , onSave)}
-          >
-            {address.isDefault ? "ที่อยู่จัดส่งหลัก" : "เลือกเป็นที่อยู่จัดส่งหลัก"}
-          </button>
-          <button
-            className="flex w-15 text-blue-500"
-            onClick={() => {
-              handleEdit(address);
-              {/*add trigger onsave function*/ }
+                <div className="flex justify-end items-center gap-x-4 md:gap-x-8 text-sm md:text-base">
+                  <button
+                    disabled={address.isDefault}
+                    className={`${address.isDefault
+                      ? "text-gray-500 hidden sm:flex"
+                      : "text-[#4eac14] hover:text-[#7ddb43] hidden sm:flex"
+                      }`}
+                    onClick={() => handleSetDefault(address.id, onSave)}
+                  >
+                    {address.isDefault ? "ที่อยู่จัดส่งหลัก" : "เลือกเป็นที่อยู่จัดส่งหลัก"}
+                  </button>
+                  <button
+                    className="flex w-15 text-blue-500"
+                    onClick={() => {
+                      handleEdit(address);
+                      {/*add trigger onsave function*/ }
 
-            }}
-          >
-            แก้ไข
-          </button>
+                    }}
+                  >
+                    แก้ไข
+                  </button>
 
-          <button
-            className="flex w-15 text-red-700"
-            onClick={() => {
+                  <button
+                    className="flex w-15 text-red-700"
+                    onClick={() => {
 
-              handleDelete(address.id, onSave)
-            }
+                      handleDelete(address.id, onSave)
+                    }
 
-            
-            }
-          >
-            ลบ
-          </button>
 
-        </div>
-      </li>
-    ))}
+                    }
+                  >
+                    ลบ
+                  </button>
+
+                </div>
+              </li>
+            ))}
         </div>
 
         <li>
@@ -462,7 +462,8 @@ if (error) {
               className={isFormVisible ? "text-gray-400" : "rounded-lg px-5 py-2 bg-blue-500 text-white hover:outline hover:outline-2 hover:outline-blue-500 hover:text-blue-500 hover:bg-white "}
               onClick={() => {
 
-                setIsFormVisible(!isFormVisible)}}>
+                setIsFormVisible(!isFormVisible)
+              }}>
               เพิ่มที่อยู่ใหม่
             </button>}
         </li>
