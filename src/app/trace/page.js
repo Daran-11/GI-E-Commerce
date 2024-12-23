@@ -1,7 +1,7 @@
 "use client";
 
 import { Html5QrcodeScanner } from "html5-qrcode";
-import { Camera, QrCode } from "lucide-react";
+import { Camera } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -46,16 +46,31 @@ export default function TracePage() {
     setError("");
 
     try {
+      // ตรวจสอบความยาวรหัส
+      if (code.length !== 11) {
+        throw new Error("รหัสต้องมีความยาว 11 หลัก");
+      }
+
+      // ตรวจสอบรูปแบบรหัส PP หรือ PN
+      // ตรวจสอบรูปแบบรหัส PP หรือ PN ในตำแหน่งที่ 5-6
+      const productType = code.substring(4, 6);
+      if (productType !== "PP" && productType !== "PN") {
+        throw new Error("รูปแบบรหัสไม่ถูกต้อง (ต้องมี PP หรือ PN)");
+      }
+
+      // ตรวจสอบรหัสในฐานข้อมูล
       const response = await fetch(`/api/qrcode/validate/${code}`);
       const data = await response.json();
 
-      if (response.ok && data.exists) {
-        router.push(`/trace/traceback?code=${code}`);
-      } else {
-        setError("ไม่พบรหัสบรรจุภัณฑ์นี้ในระบบ");
+      if (!response.ok) {
+        throw new Error(data.error || "ไม่พบรหัสบรรจุภัณฑ์นี้ในระบบ");
       }
-    } catch (err) {
-      setError("เกิดข้อผิดพลาดในการตรวจสอบรหัส");
+
+      // ถ้าผ่านการตรวจสอบทั้งหมด นำทางไปหน้า traceback
+      router.push(`/trace/traceback?code=${code}&type=${productType}`);
+    } catch (error) {
+      console.error("Error:", error);
+      setError(error.message);
     } finally {
       setIsLoading(false);
     }
