@@ -101,7 +101,7 @@ const Historycer = () => {
                           href={`/municipality-dashboard/certificate/edit/${certificate.id}`}
                         >
                           <button className={`${styles.button} ${styles.view}`}>
-                            ตรวจสอบใบรับรอง
+                            ดูเพิ่มเติม
                           </button>
                         </Link>
                       </div>

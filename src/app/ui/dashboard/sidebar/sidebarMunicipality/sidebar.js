@@ -14,7 +14,9 @@ import {
   MdMoney,
   MdOutlineSettings,
   MdPeople,
-  MdSupervisedUserCircle
+  MdSupervisedUserCircle,
+  MdLocalOffer, 
+  MdGroups 
 } from "react-icons/md";
 import MenuLink from "./menuLink/menuLink";
 import styles from "./sidebar.module.css";
@@ -58,7 +60,7 @@ const menuItems = [
       {
         title: "จัดการชนิดของสินค้า",
         path: "/municipality-dashboard/manage-type",
-        icon: <MdSupervisedUserCircle />,
+        icon: <MdLocalOffer />,
       },
       {
         title: "ตรวจสอบใบรับรอง",
@@ -73,7 +75,7 @@ const menuItems = [
       {
         title: "จัดการเกษตกร",
         path: "/municipality-dashboard/manage_farmer",
-        icon: <MdGavel />,
+        icon: <MdGroups />,
       },
     ],
   },

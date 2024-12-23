@@ -5,7 +5,7 @@ import "leaflet/dist/leaflet.css";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { MapContainer, Marker, TileLayer, useMapEvents } from "react-leaflet";
+import { MapContainer, Marker, TileLayer, useMap } from "react-leaflet";
 
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
@@ -287,17 +287,21 @@ const ApproveCertificatePage = ({ params }) => {
     setShowCommentField(true);
   };
 
-  const LocationMarker = () => {
-    const map = useMapEvents({
-      load() {
-        map.setView([formData.latitude, formData.longitude], 13);
-      },
-    });
 
-    return formData.latitude && formData.longitude ? (
-      <Marker position={[formData.latitude, formData.longitude]}></Marker>
-    ) : null;
-  };
+const LocationMarker = () => {
+  const map = useMap();
+  const { latitude, longitude } = formData;
+
+  useEffect(() => {
+    if (latitude && longitude) {
+      map.setView([latitude, longitude], map.getZoom());
+    }
+  }, [latitude, longitude, map]);
+
+  return latitude && longitude ? (
+    <Marker position={[latitude, longitude]} />
+  ) : null;
+};
 
   const ValidationStatus = () => (
     <div className="mb-4">
@@ -488,15 +492,15 @@ const ApproveCertificatePage = ({ params }) => {
             <div className="form-group">
               <label className="block text-sm font-medium mb-2">พิกัด</label>
               <div className="h-96 w-full rounded-lg overflow-hidden mb-2">
-                <MapContainer
-                  center={[20.046061226911785, 99.890654]}
-                  zoom={15}
-                  style={{ height: "100%", width: "100%" }}
-                  className="map-container "
-                >
-                  <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                  <LocationMarker />
-                </MapContainer>
+              <MapContainer
+                center={[20.046061226911785, 99.890654]}
+                zoom={15}
+                style={{ height: "100%", width: "100%" }}
+                className="map-container"
+              >
+                <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                <LocationMarker />
+              </MapContainer>
               </div>
               <p className="text-sm text-gray-600">
                 พิกัด: ละติจูด {formData.latitude}, ลองจิจูด{" "}
