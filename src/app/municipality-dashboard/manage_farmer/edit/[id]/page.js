@@ -92,7 +92,6 @@ const EditUsers = ({ params }) => {
     fetchDataAndInitialize();
   }, [UsersId]);
 
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -123,6 +122,10 @@ const EditUsers = ({ params }) => {
     } catch (error) {
       console.error(error);
     }
+  };
+
+  const handleCancel = () => {
+    router.push("/municipality-dashboard/manage_farmer");
   };
 
   const handleAddCertificate = () => {
@@ -171,9 +174,9 @@ const EditUsers = ({ params }) => {
 
   return (
     <div className={styles.container}>
-    <h1 className="text-2xl ">เเก้ไขรายชื่อเกษตรกร</h1><br></br>
+      <h1 className="text-2xl ">เเก้ไขรายชื่อเกษตรกร</h1><br></br>
       <form onSubmit={handleSubmit} className={styles.form}>
-      <div className={styles.nameFieldContainer}>
+        <div className={styles.nameFieldContainer}>
           <div className={styles.certificateField}>
             <label className={styles.formLabel} htmlFor="firstName">ชื่อ</label>
             <input
@@ -303,7 +306,16 @@ const EditUsers = ({ params }) => {
         </button>
 
         <div className={styles.buttonContainer}>
-          <button type="submit" className={styles.Submitbutton}>อัปเดตเกษตรกร</button>
+          <button 
+            type="button" 
+            onClick={handleCancel} 
+            className={styles.cancelButton}
+          >
+            ยกเลิก
+          </button>
+          <button type="submit" className={styles.Submitbutton}>
+            อัปเดตเกษตรกร
+          </button>
         </div>
       </form>
     </div>
