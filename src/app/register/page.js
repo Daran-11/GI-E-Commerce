@@ -1,210 +1,276 @@
 "use client"
-
-
+import Image from "next/image";
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import {
-    validateConfirmPassword,
-    validateEmail,
-    validateName,
-    validatePassword,
-    validatePhone
+   validateConfirmPassword,
+   validateEmail,
+   validateName,
+   validatePassword,
+   validatePhone
 } from '../../components/formValidation';
 
 export default function RegisterPage() {
-    const [name, setName] = useState("");
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [confirmPassword, setConfirmPassword] = useState("");
-    const [phone, setPhone] = useState("");
-    const [nameError, setNameError] = useState("");
-    const [emailError, setEmailError] = useState("");
-    const [passwordError, setPasswordError] = useState("");
-    const [confirmPasswordError, setConfirmPasswordError] = useState("");
-    const [phoneError, setPhoneError] = useState("");
-    const [successMessage, setSuccessMessage] = useState("");
-    const [error, setError] = useState("");
-    const router = useRouter()
+   const [firstName, setFirstName] = useState("");
+   const [lastName, setLastName] = useState("");
+   const [email, setEmail] = useState("");
+   const [password, setPassword] = useState("");
+   const [confirmPassword, setConfirmPassword] = useState("");
+   const [phone, setPhone] = useState("");
+   const [firstNameError, setFirstNameError] = useState("");
+   const [lastNameError, setLastNameError] = useState("");
+   const [emailError, setEmailError] = useState("");
+   const [passwordError, setPasswordError] = useState("");
+   const [confirmPasswordError, setConfirmPasswordError] = useState("");
+   const [phoneError, setPhoneError] = useState("");
+   const [successMessage, setSuccessMessage] = useState("");
+   const [error, setError] = useState("");
+   const router = useRouter();
 
+   const handleSubmit = async (e) => {
+       e.preventDefault();
+       const fullName = `${firstName} ${lastName}`.trim();
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+       const nameError = validateName(fullName);
+       const emailError = validateEmail(email);
+       const passwordError = validatePassword(password);
+       const confirmPasswordError = validateConfirmPassword(confirmPassword, password);
+       const phoneError = validatePhone(phone);
 
-        const nameError = validateName(name);
-        const emailError = validateEmail(email);
-        const passwordError = validatePassword(password);
-        const confirmPasswordError = validateConfirmPassword(confirmPassword, password);
-        const phoneError = validatePhone(phone);
+       if (firstNameError || lastNameError || emailError || passwordError || confirmPasswordError || phoneError) {
+           setFirstNameError(firstName ? "" : "กรุณากรอกชื่อ");
+           setLastNameError(lastName ? "" : "กรุณากรอกนามสกุล");
+           setEmailError(emailError);
+           setPasswordError(passwordError);
+           setConfirmPasswordError(confirmPasswordError);
+           setPhoneError(phoneError);
+           return;
+       }
 
-        if (nameError || emailError || passwordError || confirmPasswordError || phoneError) {
-            setNameError(nameError);
-            setEmailError(emailError);
-            setPasswordError(passwordError);
-            setConfirmPasswordError(confirmPasswordError);
-            setPhoneError(phoneError);
-            return;
-        }
+       setFirstNameError("");
+       setLastNameError("");
+       setEmailError("");
+       setPasswordError("");
+       setConfirmPasswordError("");
+       setPhoneError("");
 
-        // Clear errors
-        setNameError("");
-        setEmailError("");
-        setPasswordError("");
-        setConfirmPasswordError("");
-        setPhoneError("");
+       try {
+           const res = await fetch('/api/auth/register', {
+               method: 'POST',
+               headers: {
+                   'Content-Type': 'application/json',
+               },
+               body: JSON.stringify({ name: fullName, email, password, phone }),
+           });
 
-        // Proceed with the form submission
-        //console.log('Form is valid. Submit the form.');
+           const data = await res.json();
 
-            // Call the registration API
-    const res = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ name, email, password, phone }),
-    });
+           if (res.ok) {
+               setSuccessMessage('สมัครสมาชิกสำเร็จ');
+               setError('');
+               setTimeout(() => {
+                   router.push('/');
+               }, 3000);
+           } else {
+               setSuccessMessage('');
+               setError(data.error || 'เกิดข้อผิดพลาดระหว่างการสมัครสมาชิก');
+           }
+       } catch (error) {
+           setError('เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์');
+       }
+   };
 
-    const data = await res.json();
-    
+   const handleChange = (e) => {
+       const { name, value } = e.target;
 
-    if (res.ok) {
-        setSuccessMessage('สมัครสมาชิกสำเร็จ', data);
-        setError('');
+       switch (name) {
+           case 'firstName':
+               setFirstName(value);
+               setFirstNameError(value ? "" : "กรุณากรอกชื่อ");
+               break;
+           case 'lastName':
+               setLastName(value);
+               setLastNameError(value ? "" : "กรุณากรอกนามสกุล");
+               break;
+           case 'email':
+               setEmail(value);
+               setEmailError(validateEmail(value));
+               break;
+           case 'password':
+               setPassword(value);
+               setPasswordError(validatePassword(value));
+               break;
+           case 'confirmPassword':
+               setConfirmPassword(value);
+               setConfirmPasswordError(validateConfirmPassword(value, password));
+               break;
+           case 'phone':
+               setPhone(value);
+               setPhoneError(validatePhone(value));
+               break;
+           default:
+               break;
+       }
+   };
 
-        function myGeeks() {
-            console.log("navigating to mainpage in 3 secs");
-            router.push('/');
-        }  
-        setTimeout(myGeeks, 3000);
-        
-    } else {
-        setSuccessMessage('');
-        setError(data.error || 'เกิดข้อผิดพลาดระหว่างการสมัครสมาชิก');
-    }
-    };
+   return (
+       <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+           <div className="sm:mx-auto sm:w-full sm:max-w-md">
+              
+               <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+                   สมัครสมาชิก
+               </h2>
+           </div>
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
+           <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+               <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+                   <form onSubmit={handleSubmit} noValidate className="space-y-6">
+                       <div className="flex space-x-4">
+                           <div className="w-1/2">
+                               <label className="block text-sm font-medium text-gray-700">
+                                   ชื่อ <span className="text-red-500">*</span>
+                               </label>
+                               <input
+                                   type="text"
+                                   name="firstName"
+                                   value={firstName}
+                                   onChange={handleChange}
+                                   className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 ${
+                                       firstNameError ? 'border-red-500' : ''
+                                   }`}
+                                   required
+                               />
+                               {firstNameError && <p className="mt-2 text-sm text-red-600">{firstNameError}</p>}
+                           </div>
 
-        switch (name) {
-            case 'name':
-                setName(value);
-                setNameError(validateName(value));
-                break;
-            case 'email':
-                setEmail(value);
-                setEmailError(validateEmail(value));
-                break;
-            case 'password':
-                setPassword(value);
-                setPasswordError(validatePassword(value));
-                break;
-            case 'confirmPassword':
-                setConfirmPassword(value);
-                setConfirmPasswordError(validateConfirmPassword(value, password));
-                break;
-            case 'phone':
-                setPhone(value);
-                setPhoneError(validatePhone(value));
-                break;
-            default:
-                break;
-        }
+                           <div className="w-1/2">
+                               <label className="block text-sm font-medium text-gray-700">
+                                   นามสกุล <span className="text-red-500">*</span>
+                               </label>
+                               <input
+                                   type="text"
+                                   name="lastName"
+                                   value={lastName}
+                                   onChange={handleChange}
+                                   className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 ${
+                                       lastNameError ? 'border-red-500' : ''
+                                   }`}
+                                   required
+                               />
+                               {lastNameError && <p className="mt-2 text-sm text-red-600">{lastNameError}</p>}
+                           </div>
+                       </div>
 
-        
-    };
+                       <div>
+                           <label className="block text-sm font-medium text-gray-700">
+                               อีเมล <span className="text-red-500">*</span>
+                           </label>
+                           <input
+                               type="email"
+                               name="email"
+                               value={email}
+                               onChange={handleChange}
+                               className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 ${
+                                   emailError ? 'border-red-500' : ''
+                               }`}
+                               required
+                           />
+                           {emailError && <p className="mt-2 text-sm text-red-600">{emailError}</p>}
+                       </div>
 
-    return (
-        <div className='top-container'>
-            <p>Register</p>
-            <div className='mt-[50px]'>
-                <form onSubmit={handleSubmit} noValidate>
-                    
-                    <label className='label'>ชื่อ</label>
-                    <div className='input-position'>
-                        <input
-                            onChange={handleChange}
-                            value={name}
-                            className={`input-box p-2 w-[500px] h-15 ${nameError ? 'border-red-500' : 'border-gray-300'}`}
-                            type="text"
-                            name="name"
-                            placeholder="กรอกชื่อ"
-                            required
+                       <div>
+                           <label className="block text-sm font-medium text-gray-700">
+                               รหัสผ่าน <span className="text-red-500">*</span>
+                           </label>
+                           <input
+                               type="password"
+                               name="password"
+                               value={password}
+                               onChange={handleChange}
+                               className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 ${
+                                   passwordError ? 'border-red-500' : ''
+                               }`}
+                               required
+                           />
+                           {passwordError && <p className="mt-2 text-sm text-red-600">{passwordError}</p>}
+                       </div>
 
-                        />
-                            {nameError && <div className="input-error isCorrect ? 'border-green-500' : 'border-red-500'">{nameError}</div>}           
-                    </div>
+                       <div>
+                           <label className="block text-sm font-medium text-gray-700">
+                               ยืนยันรหัสผ่าน <span className="text-red-500">*</span>
+                           </label>
+                           <input
+                               type="password"
+                               name="confirmPassword"
+                               value={confirmPassword}
+                               onChange={handleChange}
+                               className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 ${
+                                   confirmPasswordError ? 'border-red-500' : ''
+                               }`}
+                               required
+                           />
+                           {confirmPasswordError && <p className="mt-2 text-sm text-red-600">{confirmPasswordError}</p>}
+                       </div>
 
+                       <div>
+                           <label className="block text-sm font-medium text-gray-700">
+                               เบอร์โทร <span className="text-red-500">*</span>
+                           </label>
+                           <input
+                               type="tel"
+                               name="phone"
+                               value={phone}
+                               onChange={handleChange}
+                               maxLength={10}
+                               className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 ${
+                                   phoneError ? 'border-red-500' : ''
+                               }`}
+                               required
+                           />
+                           {phoneError && <p className="mt-2 text-sm text-red-600">{phoneError}</p>}
+                       </div>
 
-                    <label className='label'>อีเมล</label>
-                    <div className='input-position'>
-                    <input
-                        onChange={handleChange}
-                        value={email}
-                        className={`input-box p-2 w-[500px] h-15 ${emailError ? 'border-red-500' : 'border-gray-300'}`}
-                        type="email"
-                        name="email"
-                        placeholder="กรอกอีเมล"
-                        maxLength={350}
-                        required
-                    />
-                    {emailError && <div className="input-error">{emailError}</div>}
-                    </div>
+                       {successMessage && (
+                           <div className="rounded-md bg-green-50 p-4">
+                               <div className="flex">
+                                   <div className="flex-shrink-0">
+                                       <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                                           <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                       </svg>
+                                   </div>
+                                   <div className="ml-3">
+                                       <p className="text-sm font-medium text-green-800">{successMessage}</p>
+                                   </div>
+                               </div>
+                           </div>
+                       )}
 
+                       {error && (
+                           <div className="rounded-md bg-red-50 p-4">
+                               <div className="flex">
+                                   <div className="flex-shrink-0">
+                                       <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                                           <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                                       </svg>
+                                   </div>
+                                   <div className="ml-3">
+                                       <p className="text-sm font-medium text-red-800">{error}</p>
+                                   </div>
+                               </div>
+                           </div>
+                       )}
 
-
-                    <label className='label'>รหัสผ่าน</label>
-                    <div className='input-position'>
-                    <input
-                        onChange={handleChange}
-                        value={password}
-                        className={`input-box p-2 w-[500px] h-15 ${passwordError ? 'border-red-500' : 'border-gray-300'}`}
-                        type="password"
-                        name="password"
-                        placeholder="กรอกรหัสผ่าน"
-                        maxLength={130}
-                        required
-                    />
-                    {passwordError && <div className="input-error">{passwordError}</div>}                        
-                    </div>
-
-
-                    <label className='label'>ยืนยันรหัสผ่าน</label>
-                    <div className='input-position'>
-                    <input
-                        onChange={handleChange}
-                        value={confirmPassword}
-                        className={`input-box p-2 w-[500px] h-15 ${confirmPasswordError ? 'border-red-500' : 'border-gray-300'}`}
-                        type="password"
-                        name="confirmPassword"
-                        placeholder="ยืนยันรหัสผ่าน"
-                        maxLength={130}
-                        required
-                    />
-                    {confirmPasswordError && <div className="input-error">{confirmPasswordError}</div>}                        
-                    </div>
-
-
-                    <label className='label'>เบอร์โทร</label>
-                    <div className='input-position'>
-                    <input
-                        onChange={handleChange}
-                        value={phone}
-                        className={`input-box p-2 w-[500px] h-15 ${phoneError ? 'border-red-500' : 'border-gray-300'}`}
-                        type="tel"
-                        name="phone"
-                        placeholder="กรอกเบอร์โทร"
-                        maxLength={10}
-                        required
-                    />
-                    {phoneError && <div className="input-error">{phoneError}</div>}                        
-                    </div>
-                    {error && <div className='bg-red-500 text-sm text-white py-1 px-3'>{error}</div>}
-                    {successMessage && <div className='bg-green-500 text-sm text-white py-1 px-3'>{successMessage}</div>}
-                    <button className="bg-[#4EAC14] text-white p-2 my-2 rounded-2xl w-[90px]" type="submit"> สมัคร </button>
-                </form>
-            </div>
-        </div>
-    );
+                       <div className="flex justify-center">
+                           <button
+                               type="submit"
+                               className="w-full md:w-1/2 flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                           >
+                               สมัครสมาชิก
+                           </button>
+                       </div>
+                   </form>
+               </div>
+           </div>
+       </div>
+   );
 }
-
