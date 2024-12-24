@@ -472,7 +472,7 @@ const EditCertificate = ({ params }) => {
 
           <div className="button-group">
             <button type="submit" className="button-submit">
-              บันทึกการแก้ไข
+              บันทึกข้อมูล
             </button>
           </div>
         </form>
