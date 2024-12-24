@@ -57,11 +57,7 @@
 }
 
 /* Button Group Styles */
-.button-group {
-  display: flex; 
-  justify-content: flex-end; 
-  margin-top: 1rem; 
-}
+
 
 /* Submit Button Styles */
 .button-submit {
@@ -102,6 +98,28 @@
   padding-right: 2rem;
  }
  
+ .button-group {
+  display: flex; 
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1rem; 
+}
+
+.button-cancel {
+  padding: 0.5rem 1rem;
+  background-color: #e5e7eb;
+  color: #374151;
+  border: none;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: background-color 0.2s;
+}
+
+.button-cancel:hover {
+  background-color: #d1d5db;
+}
+
  .formInput option {
   padding: 0.5rem;
  }

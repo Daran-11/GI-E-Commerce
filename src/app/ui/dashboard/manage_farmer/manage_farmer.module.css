@@ -32,6 +32,28 @@
     margin-bottom: 10px;
 }
 
+.buttonContainer {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.cancelButton {
+  padding: 0.5rem 1rem;
+  background-color: #e5e7eb;
+  color: #111418;
+  border: none;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: background-color 0.2s;
+}
+
+.cancelButton:hover {
+  background-color: #d1d5db;
+}
+
 .certificateGroup {
     display: flex; 
     align-items: center; 
