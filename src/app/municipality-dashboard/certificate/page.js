@@ -114,7 +114,9 @@ const Certificate = () => {
        <tbody>
          {currentItems.length > 0 ? (
            currentItems.map((certificate, index) => {
-             const standards = JSON.parse(certificate.standards);
+            const standards = Array.isArray(certificate.standards) 
+            ? certificate.standards 
+            : JSON.parse(certificate.standards || '[]');
              return (
                <tr key={certificate.id}>
                  <td>{indexOfFirstItem + index + 1}</td>
