@@ -18,6 +18,7 @@ const fetchUser = async (id) => {
   }
 };
 
+
 export default async function UserDetailsPage({ params }) {
   try {
     const { id } = params;

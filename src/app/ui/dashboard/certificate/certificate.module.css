@@ -52,7 +52,7 @@
 
 /* Button variations */
 .view {
-    background-color: rgba(156, 204, 235, 0.75);
+    background-color: rgba(247, 115, 115, 0.856);
 }
 
 /* Status indicator styles */
@@ -77,15 +77,17 @@
 
 /* Status colors */
 .รอตรวจสอบใบรับรอง {
-    background-color: rgba(247, 203, 115, 0.75); /* Using rgba for better color transparency */
+    color: rgb(238, 155, 0);
 }
 
 .ได้รับการรับรอง {
-    background-color: rgba(175, 214, 238, 0.75);
+    color: rgb(24, 202, 0);
+   
 }
 
 .ไม่ผ่านการรับรอง {
-    background-color: rgba(247, 115, 115, 0.75);
+    color: rgb(238, 0, 0);
+    
 }
 
 .หมดอายุ {
