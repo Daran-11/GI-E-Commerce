@@ -38,16 +38,13 @@ const Certificate = () => {
           );
           const data = await response.json();
 
-          // Log the data structure to understand what you're receiving
           console.log("Fetched data:", data);
 
-          // Check if data is an array before accessing .length
           if (Array.isArray(data)) {
             setCertificates(data);
           } else {
             console.error("Fetched data is not an array:", data);
           }
-
         } catch (error) {
           console.error("Failed to fetch certificates:", error);
         }
@@ -67,7 +64,6 @@ const Certificate = () => {
           toast.success("ลบใบรับรองแล้ว");
           setCertificates(certificates.filter((cert) => cert.id !== id));
 
-          // Check if we need to adjust current page after deletion
           const remainingItems = certificates.length - 1;
           const newMaxPage = Math.ceil(remainingItems / itemsPerPage);
           if (currentPage > newMaxPage && newMaxPage > 0) {
@@ -80,35 +76,6 @@ const Certificate = () => {
         console.error("Failed to delete certificate:", error);
       }
     }
-  };
-
-  // ฟังก์ชันสำหรับจัดการการค้นหา
-  const handleSearch = (searchValue) => {
-    setSearchQuery(searchValue);
-    setCurrentPage(1); // รีเซ็ตหน้าเมื่อมีการค้นหาใหม่
-  };
-
-  // กรองข้อมูลตามการค้นหา
-  const filteredCertificates = certificates.filter((certificate) => {
-    const searchLower = searchQuery.toLowerCase();
-    return (
-      certificate.type.toLowerCase().includes(searchLower) ||
-      certificate.variety.toLowerCase().includes(searchLower)
-    );
-  });
-
-  // Calculate pagination
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentCertificates = filteredCertificates.slice(
-    indexOfFirstItem,
-    indexOfLastItem
-  );
-  const totalItems = filteredCertificates.length;
-
-  // Handle page change
-  const handlePageChange = (pageNumber) => {
-    setCurrentPage(pageNumber);
   };
 
   // ฟังก์ชันสำหรับจัดการการค้นหา
