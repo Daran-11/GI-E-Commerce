@@ -42,8 +42,8 @@ function Purchases() {
       router.push('/login');
     }
 
-    // Fetch user purchases if authenticated
-    if (status === 'authenticated') {
+    // Fetch user purchases 
+    if (session.user) {
       const fetchPurchases = async () => {
         try {
           if (session?.user?.id) {

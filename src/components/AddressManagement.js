@@ -24,13 +24,23 @@ export default function AddressManagement({ onSave, onLoad, onSuccess }) {
   });
 
   const [isFormVisible, setIsFormVisible] = useState(false);
+  
+  
 
   // Fetch addresses using SWR
   const { data: addresses, mutate: mutateAddresses, isLoading, error } = useSWR(
-    session?.user?.id ? `/api/users/${session.user.id}/addresses` : null,
+    status === "authenticated" && session.user && session?.user?.id ? `/api/users/${session.user.id}/addresses` : null,
     fetcher,
     { revalidateOnFocus: false } // ป้องกันการ re-fetch ขณะเปลี่ยนแท็บ
   );
+
+    // Effect to trigger refetch when session status changes
+    useEffect(() => {
+      if (status === "authenticated" && session?.user?.id && session.user ) {
+        // Refetch addresses when session becomes authenticated
+        mutateAddresses();
+      }
+    }, [status,  session, mutateAddresses]); // Re-run the effect when status or session changes
 
   useEffect(() => {
     // เรียก onLoad เมื่อ component โหลดเสร็จ
@@ -231,7 +241,7 @@ export default function AddressManagement({ onSave, onLoad, onSuccess }) {
   };
 
 
-  if (isLoading) {
+  if (isLoading || status === 'loading') {
     return (
       <div className="flex items-center justify-center h-screen w-screen fixed top-0 left-0 bg-white bg-opacity-80 z-50">
         <CircularProgress />
@@ -241,7 +251,13 @@ export default function AddressManagement({ onSave, onLoad, onSuccess }) {
   }
 
   if (error) {
+    console.error(error); // Log error to debug the issue
     return <div>เกิดข้อผิดพลาดในการโหลดข้อมูล</div>;
+  }
+
+  
+  if (!addresses) {
+    console.log("Addresses not fetched yet");
   }
 
   return (

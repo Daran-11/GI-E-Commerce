@@ -182,7 +182,7 @@ export const Navbar = () => {
                 </span>
               </li>
 
-              {session?.user?.role === "farmer" && (
+              {session?.user?.role === "farmer" && session.user && status === 'authenticated' && (
                 <li>
                   <Link
                     href="/dashboard"
