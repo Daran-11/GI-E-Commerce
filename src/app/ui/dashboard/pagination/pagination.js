@@ -23,14 +23,14 @@ const Pagination = ({ currentPage, totalItems, itemsPerPage, onPageChange }) => 
 
   return (
     <div className={styles.pagination}>
-      <button
+      <button className={styles.back}
         onClick={() => handlePageChange(currentPage - 1)}
         disabled={currentPage === 1} // Disable "ย้อนกลับ" when on the first page
       >
         ย้อนกลับ
       </button>
       <span>Page {currentPage} of {totalPages}</span>
-      <button
+      <button className={styles.next}
         onClick={() => handlePageChange(currentPage + 1)}
         disabled={currentPage === totalPages} // Disable "ถัดไป" when on the last page
       >

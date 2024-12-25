@@ -50,22 +50,27 @@ const menuItems = [
     ],
   },
   {
-    title: "ใบรับรอง",
+    title: "เกษตรกร",
     list: [
       {
-        title: "จัดการผู้ใช้",
+        title: "ตรวจสอบคำขอเป็นเกษตรกร",
         path: "/municipality-dashboard/users",
         icon: <MdSupervisedUserCircle />,
       },
       {
+        title: "ข้อมูลเกษตรกรในระบบ",
+        path: "/municipality-dashboard/manage_farmer",
+        icon: <MdGroups />,
+      },
+    ],
+  },
+  {
+    title: "ใบรับรอง",
+    list: [
+      {
         title: "จัดการชนิดของสินค้า",
         path: "/municipality-dashboard/manage-type",
         icon: <MdLocalOffer />,
-      },
-      {
-        title: "ตรวจสอบใบรับรอง",
-        path: "/municipality-dashboard/certificate",
-        icon: <MdAssignment />,
       },
       {
         title: "จัดการมาตราฐาน",
@@ -73,10 +78,12 @@ const menuItems = [
         icon: <MdGavel />,
       },
       {
-        title: "จัดการเกษตกร",
-        path: "/municipality-dashboard/manage_farmer",
-        icon: <MdGroups />,
+        title: "ตรวจสอบใบรับรอง",
+        path: "/municipality-dashboard/certificate",
+        icon: <MdAssignment />,
       },
+      
+     
     ],
   },
   {
@@ -92,6 +99,7 @@ const menuItems = [
         path: "/municipality-dashboard/help",
         icon: <MdHelpCenter />,
       },
+      
     ],
   },
 ];

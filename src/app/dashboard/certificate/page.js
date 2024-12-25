@@ -8,13 +8,24 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+
+const Loading = () => {
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen">
+      <div className="w-12 h-12 border-4 border-t-green-500 border-r-green-500 border-b-green-200 border-l-green-200 rounded-full animate-spin"></div>
+      <p className="mt-4 text-gray-600">กำลังโหลดข้อมูล...</p>
+    </div>
+  );
+};
+
 const Certificate = () => {
   const [certificates, setCertificates] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const { data: session, status } = useSession();
   const router = useRouter();
-  const userId = session.user.id;
-
-
+  const userId = session?.user?.id;
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   useEffect(() => {
     if (status === 'authenticated' && userId) {
@@ -38,12 +49,10 @@ const Certificate = () => {
         } catch (error) {
           console.error("Failed to fetch certificates:", error);
         }
-      };
+      };   
       fetchCertificates();
     }
-
-
-  }, [router, session]);
+  }, [router, session, userId]);
 
   const handleDelete = async (id) => {
     if (confirm("Are you sure you want to delete this certificate?")) {
@@ -55,20 +64,82 @@ const Certificate = () => {
         if (response.ok) {
           toast.success("ลบใบรับรองแล้ว");
           setCertificates(certificates.filter((cert) => cert.id !== id));
+          
+          // Check if we need to adjust current page after deletion
+          const remainingItems = certificates.length - 1;
+          const newMaxPage = Math.ceil(remainingItems / itemsPerPage);
+          if (currentPage > newMaxPage && newMaxPage > 0) {
+            setCurrentPage(newMaxPage);
+          }
         } else {
           toast.error("ไม่สามารถลบใบรับรองได้");
         }
       } catch (error) {
-        console.error("ไม่สามารถลบใบรับรองได้:", error);
+        console.error("Failed to delete certificate:", error);
       }
     }
   };
 
+  // ฟังก์ชันสำหรับจัดการการค้นหา
+  const handleSearch = (searchValue) => {
+    setSearchQuery(searchValue);
+    setCurrentPage(1); // รีเซ็ตหน้าเมื่อมีการค้นหาใหม่
+  };
+
+  // กรองข้อมูลตามการค้นหา
+  const filteredCertificates = certificates.filter((certificate) => {
+    const searchLower = searchQuery.toLowerCase();
+    return (
+      certificate.type.toLowerCase().includes(searchLower) ||
+      certificate.variety.toLowerCase().includes(searchLower)
+    );
+  });
+
+  // Calculate pagination
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentCertificates = filteredCertificates.slice(indexOfFirstItem, indexOfLastItem);
+  const totalItems = filteredCertificates.length;
+
+  // Handle page change
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
+  // ฟังก์ชันสำหรับจัดการการค้นหา
+  const handleSearch = (searchValue) => {
+    setSearchQuery(searchValue);
+    setCurrentPage(1); // รีเซ็ตหน้าเมื่อมีการค้นหาใหม่
+  };
+
+  // กรองข้อมูลตามการค้นหา
+  const filteredCertificates = certificates.filter((certificate) => {
+    const searchLower = searchQuery.toLowerCase();
+    return (
+      certificate.type.toLowerCase().includes(searchLower) ||
+      certificate.variety.toLowerCase().includes(searchLower)
+    );
+  });
+
+  // Calculate pagination
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentCertificates = filteredCertificates.slice(indexOfFirstItem, indexOfLastItem);
+  const totalItems = filteredCertificates.length;
+
+  // Handle page change
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
   return (
     <div className={styles.container}>
-      <h1 className="text-2xl ">ใบรับรองทั้งหมด</h1><br></br>
+      <h1 className="text-2xl ">ลงทะเบียนใบรับรอง</h1><br></br>
       <div className={styles.top}>
-        <Search placeholder="ค้นหาใบรับรอง..." />
+        <Search 
+          placeholder="ค้นหาใบรับรอง..." 
+          onSearch={handleSearch}
+        />
         <Link href="/dashboard/certificate/add">
           <button className={styles.addButton}>เพิ่มใบรับรอง</button>
         </Link>
@@ -84,39 +155,35 @@ const Certificate = () => {
             <td>สถานะ</td>
             <td>รายงาน</td>
             <td></td>
-
           </tr>
         </thead>
         <tbody>
-          {certificates.length > 0 ? (
-            certificates.map((certificate, index) => {
-              const standards = JSON.parse(certificate.standards); // Parse standards if needed
+          {currentCertificates.length > 0 ? (
+            currentCertificates.map((certificate, index) => {
+              const standards = JSON.parse(certificate.standards);
               return (
                 <tr key={certificate.id}>
-                  <td>{index + 1}</td>
+                  <td>{indexOfFirstItem + index + 1}</td>
                   <td>{certificate.type}</td>
                   <td>{certificate.variety}</td>
                   <td>
                     <div className={styles.standardsContainer}>
                       {Array.isArray(standards) && standards.length > 0
                         ? standards.map((standard, idx) => (
-                          <Image
-                            key={idx}
-                            src={standard.logo}
-                            alt={standard.name}
-                            width={40}
-                            height={40}
-                          />
-                        ))
+                            <Image
+                              key={idx}
+                              src={standard.logo}
+                              alt={standard.name}
+                              width={40}
+                              height={40}
+                            />
+                          ))
                         : "ไม่มี"}
                     </div>
                   </td>
                   <td>{certificate.productionQuantity}</td>
                   <td>
-                    <span
-                      className={`${styles.status} ${styles[certificate.status]
-                        }`}
-                    >
+                    <span className={`${styles.status} ${styles[certificate.status]}`}>
                       {certificate.status}
                     </span>
                   </td>
@@ -146,13 +213,17 @@ const Certificate = () => {
             })
           ) : (
             <tr>
-              <td colSpan={7}>ไม่พบข้อมูล</td>
+              <td colSpan={8}>ไม่พบข้อมูลที่ค้นหา</td>
             </tr>
           )}
         </tbody>
       </table>
-
-      <Pagination />
+      <Pagination 
+        currentPage={currentPage}
+        totalItems={totalItems}
+        itemsPerPage={itemsPerPage}
+        onPageChange={handlePageChange}
+      />
     </div>
   );
 };
