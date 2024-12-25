@@ -12,7 +12,7 @@ export const authOptions = {
       CredentialsProvider({
         name: 'Credentials',
         credentials: {
-          email: { label: 'Phone or Email ', type: 'text', placeholder: 'john@doe.com' },
+          email: { label: 'Email ', type: 'text', placeholder: 'john@doe.com' },
           password: { label: 'Password', type: 'password' },
         },
         async authorize(credentials, req) {
@@ -60,22 +60,39 @@ export const authOptions = {
     updateAge: 24 * 60 * 60, // 1 day in seconds
       strategy: 'jwt',
     },
+    cookies: {
+      sessionToken: {
+        name: process.env.NODE_ENV === "production"
+          ? "__Secure-next-auth.session-token"
+          : "next-auth.session-token",
+        options: {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          path: "/",
+        },
+      },
+    },
+    debug: true,
     callbacks: {
       jwt: async ({ token, user }) => {
         if (user) {
-          token.id = user.id
-          token.role = user.role
+          token.id = user.id;
+          token.role = user.role;
           token.phone = user.phone;
         }
-        return token
+        console.log("JWT Callback Token:", token);  // ตรวจสอบว่า token ถูกต้อง
+        return token;
       },
       session: async ({ session, token }) => {
-        if (session.user) {
-          session.user.id = token.id
-          session.user.role = token.role
-          session.user.phone = token.phone
+        console.log("Session Callback Token:", token); // เพิ่ม log เพื่อตรวจสอบว่า token ถูกส่งมาหรือไม่
+        if (token) {
+          session.user.id = token.id;
+          session.user.role = token.role;
+          session.user.phone = token.phone;
         }
-        return session
+        console.log("Session Callback Session:", session);  // ตรวจสอบว่า session ถูกต้อง
+        return session;
       }
     },
     secret: process.env.NEXTAUTH_SECRET,

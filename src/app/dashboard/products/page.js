@@ -42,7 +42,7 @@ const Product = () => {
 
 
   const fetchProducts = async (page = 1) => {
-    setLoading(false); // Set loading to true when fetching starts
+    setLoading(true); // Set loading to true when fetching starts
     try {
       const response = await fetch(`/api/users/${session.user.id}/product/get?query=${query}&sortOrder=${sortOrder}&page=${page}&pageSize=${pageSize}`);
       if (!response.ok) {
@@ -67,6 +67,7 @@ const Product = () => {
 
         setProducts(formattedData); // Set the formatted products
         setTotalItems(data.totalItems); // Extract totalItems directly from the response
+        setLoading(false);
       } else {
         console.error("Invalid product data:", data);
       }
@@ -114,7 +115,7 @@ const Product = () => {
       router.push("/login");
     }
 
-    if (status === "authenticated" && session?.user?.id) {
+    if (status === "authenticated" && session.user && session?.user?.id) {
       fetchTotalCount(); // First fetch total count
       fetchProducts(page); // Then fetch products
     }

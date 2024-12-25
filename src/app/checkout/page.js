@@ -1,15 +1,16 @@
-// This file should be a server component to use `getServerSession`
+"use client";
 import CheckoutClient from "@/components/checkout/CheckoutClient";
-import { getServerSession } from "next-auth/next";
-import { redirect } from "next/navigation";
-import { authOptions } from "../api/auth/[...nextauth]/route"; // Adjust path if necessary
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
-export default async function CheckoutPage() {
-  const session = await getServerSession(authOptions);
-
-  if (!session || !session.user) {
-    // Redirect to login if no session or user found
-    redirect("/login");
+export default function CheckoutPage() {
+  const { data: session, status } = useSession();
+  const router = useRouter()
+  if (status === 'unauthenticated') {
+    console.log("No session found, redirecting to login...");
+    Router.push("/login");
+  } else {
+    console.log("Session found:", session);
   }
 
   const userId = session.user.id;

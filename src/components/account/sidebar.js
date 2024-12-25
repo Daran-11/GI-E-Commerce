@@ -51,9 +51,6 @@ const Sidebar = ({ isOpen, toggleDrawer }) => {
               <li className="mb-2">
                 <Link href="/account/user/purchases">การสั่งซื้อ</Link>
               </li>
-              <li className="mb-2">
-                <Link href="/account/settings">ตั้งค่า</Link>
-              </li>
             </ul>            
         </div>
 

@@ -1,14 +1,12 @@
 // components/Navbar.js
 "use client";
 import { useSession } from "next-auth/react";
-import { usePathname } from "next/navigation";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import Notification from "../notification/notification"; // Import the Notification component
-import { MdNotifications, MdOutlineChat, MdPublic, MdSearch } from "react-icons/md";
-import styles from './navbar.module.css'
 
 const Navbar = () => {
-  const { data: session } = useSession();
+  const { data: session , status } = useSession();
   const pathname = usePathname();
 
   // Define a mapping of pathnames to Thai titles
@@ -31,7 +29,7 @@ const Navbar = () => {
       <div className="flex items-center space-x-4">
         <Notification />
         <div className="flex items-center space-x-2">
-          {session ? (
+          {session.user.id && status==='authenticated' ? (
             <>
               <Image
                 className="rounded-full object-cover"
