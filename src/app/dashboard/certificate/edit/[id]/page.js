@@ -157,6 +157,10 @@ const EditCertificate = ({ params }) => {
     }
   };
 
+  const handleCancel = () => {
+    router.push("/dashboard/certificate/");
+  };
+
   const handleStandardChange = (standard, checked) => {
     setFormData((prev) => ({
       ...prev,
@@ -294,15 +298,11 @@ const EditCertificate = ({ params }) => {
         {error && (
           <div className="bg-red-50 border-red-500 p-4 my-4 rounded-lg">
             <div className="text-red-700">
-              <p className="font-bold">
-                รายงานจากเทศบาล
-              </p>
+              <p className="font-bold">รายงานจากเทศบาล</p>
               <p className="ml-3">{error}</p>
             </div>
           </div>
         )}
-
-        
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="form-container">
@@ -471,6 +471,13 @@ const EditCertificate = ({ params }) => {
           </div>
 
           <div className="button-group">
+            <button
+              type="button"
+              onClick={handleCancel}
+              className="button-cancel"
+            >
+              ยกเลิก
+            </button>
             <button type="submit" className="button-submit">
               บันทึกข้อมูล
             </button>

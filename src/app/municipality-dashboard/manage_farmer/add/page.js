@@ -9,8 +9,8 @@ const AddUsers = ({ UsersId }) => {
   const [certificates, setCertificates] = useState([{ type: "", variety: "", standardName: "", certificateNumber: "", approvalDate: "" }]);
   const [standards, setStandards] = useState([]);
   const [standardsInfo, setStandardsInfo] = useState({});
-  const [types, setTypes] = useState([]); // เพิ่ม state สำหรับเก็บข้อมูลชนิด
-  const [selectedTypes, setSelectedTypes] = useState({}); // เก็บ selected type สำหรับแต่ละ certificate
+  const [types, setTypes] = useState([]);
+  const [selectedTypes, setSelectedTypes] = useState({});
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const router = useRouter();
@@ -35,7 +35,6 @@ const AddUsers = ({ UsersId }) => {
         setTypes(typesData);
         setStandards(standardsData);
         
-        // สร้าง object ที่เก็บ certificationInfo ของแต่ละมาตรฐาน
         const infoMap = {};
         standardsData.forEach(standard => {
           infoMap[standard.name] = standard.certificationInfo;
@@ -75,7 +74,7 @@ const AddUsers = ({ UsersId }) => {
         },
         body: JSON.stringify({
           id: UsersId,
-          farmerNameApprove: `${firstName} ${lastName}`.trim(), // รวมชื่อและนามสกุล
+          farmerNameApprove: `${firstName} ${lastName}`.trim(),
           certificates: certificates.map(cert => ({
             type: cert.type,
             variety: cert.variety,
@@ -85,7 +84,6 @@ const AddUsers = ({ UsersId }) => {
           })),
         }),
       });
-
 
       if (res.ok) {
         router.push("/municipality-dashboard/manage_farmer");
@@ -97,13 +95,16 @@ const AddUsers = ({ UsersId }) => {
     }
   };
 
+  const handleCancel = () => {
+    router.push("/municipality-dashboard/manage_farmer");
+  };
+
   const handleAddCertificate = () => {
     setCertificates([...certificates, { type: "", variety: "", standardName: "", certificateNumber: "", approvalDate: "" }]);
   };
 
   const handleRemoveCertificate = (index) => {
     setCertificates(certificates.filter((_, i) => i !== index));
-    // ลบ selected type สำหรับ certificate ที่ถูกลบ
     const newSelectedTypes = { ...selectedTypes };
     delete newSelectedTypes[index];
     setSelectedTypes(newSelectedTypes);
@@ -113,7 +114,6 @@ const AddUsers = ({ UsersId }) => {
     const newCertificates = [...certificates];
     
     if (field === 'type') {
-      // เมื่อเปลี่ยนชนิด ให้เก็บ selected type และรีเซ็ตค่าพันธุ์
       const selectedType = types.find(t => t.type === value);
       setSelectedTypes(prev => ({
         ...prev,
@@ -122,7 +122,7 @@ const AddUsers = ({ UsersId }) => {
       newCertificates[index] = {
         ...newCertificates[index],
         type: value,
-        variety: '' // รีเซ็ตค่าพันธุ์
+        variety: ''
       };
     } else {
       newCertificates[index] = {
@@ -140,9 +140,9 @@ const AddUsers = ({ UsersId }) => {
 
   return (
     <div className={styles.container}>
-    <h1 className="text-2xl ">เพิ่มรายชื่อเกษตรกร</h1><br></br>
+      <h1 className="text-2xl">เพิ่มรายชื่อเกษตรกร</h1><br></br>
       <form onSubmit={handleSubmit} className={styles.form}>
-      <div className={styles.nameFieldContainer}>
+        <div className={styles.nameFieldContainer}>
           <div className={styles.certificateField}>
             <label className={styles.formLabel} htmlFor="firstName">ชื่อ</label>
             <input
@@ -272,6 +272,9 @@ const AddUsers = ({ UsersId }) => {
         </button>
 
         <div className={styles.buttonContainer}>
+          <button type="button" onClick={handleCancel} className={styles.cancelButton}>
+            ยกเลิก
+          </button>
           <button type="submit" className={styles.Submitbutton}>
             {UsersId ? "อัปเดตเกษตรกร" : "บันทึกข้อมูล"}
           </button>
