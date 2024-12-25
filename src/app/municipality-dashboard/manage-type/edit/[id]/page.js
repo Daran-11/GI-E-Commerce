@@ -111,7 +111,7 @@ const EditTypePage = ({ params }) => {
 
   return (
     <div className={styles.container}>
-      <h1 className="text-2xl ">เเก้ไขชนิดเเละสายพันธุ์</h1><br></br>
+      <h1 className="text-2xl ">เเก้ไขชนิดสินค้า</h1><br></br>
 
       {error && (
         <div className={styles.error}>

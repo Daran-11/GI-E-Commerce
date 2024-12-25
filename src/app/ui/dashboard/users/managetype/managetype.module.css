@@ -105,5 +105,5 @@
 .noData {
     text-align: center;
     color: var(--textSoft);
-    font-style: italic;
+    color: black;
 }

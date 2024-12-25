@@ -61,7 +61,7 @@
   }
 
   .Submitbutton {
-    background-color: #4CAF50; /* Example background color */
+    background-color: #4378FF; /* Example background color */
     color: white;
     border: none;
     padding: 10px 20px;
@@ -71,7 +71,7 @@
   }
   
   .Submitbutton:hover {
-    background-color: #45a049; /* Darker color on hover */
+    background-color: #4378FF; /* Darker color on hover */
   }
 
 
