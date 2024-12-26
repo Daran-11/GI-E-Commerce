@@ -26,8 +26,8 @@ function ConfirmDeliveryButton({ orderId, userId, productId }) {
 
       const data = await response.json();
       if (data.success) {
-
         setShowRating(true); // Show rating form after confirmation
+        window.location.reload();
         toast.success("ขอบคุณที่ใช้บริการ อย่าลืมให้คะแนนสินค้าของเรา")
       } else {
         toast.error('เกิดข้อผิดพลาด: ' + data.error);

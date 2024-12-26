@@ -10,6 +10,7 @@ export async function POST(request) {
   try {
     const { orderId, userId } = await request.json();
     console.log("orderId: ", orderId);
+
     // Retrieve the order to get the farmer's information
     const order = await prisma.order.findUnique({
       where: { id: parseInt(orderId) },
@@ -20,6 +21,7 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Order not found' }, { status: 404 });
     }
     console.log("order is ", order);
+
     // Retrieve the farmer's default bank account
     const bankAccount = await prisma.bankAccount.findFirst({
       where: {
@@ -38,17 +40,16 @@ export async function POST(request) {
     }
 
     console.log("recipient is ", bankAccount.recipientId);
-    console.log("price is ", Math.floor(order.totalPrice * 100))
+    console.log("price is ", Math.floor(order.totalPrice * 100));
+
     // Perform the Omise transfer to the farmer's recipient ID
     const transfer = await omise.transfers.create({
       amount: Math.floor(order.totalPrice * 100), // Omise uses satangs, so multiply by 100
       recipient: bankAccount.recipientId,
     });
 
-
-
     // Update the order status in the database to 'Completed' and 'Delivered'
-    await prisma.order.update({
+    const updatedOrder = await prisma.order.update({
       where: { id: parseInt(orderId) },
       data: {
         status: 'Completed',
@@ -56,15 +57,16 @@ export async function POST(request) {
       },
     });
 
+    // Create a history record synchronized with the updated order data
     await prisma.history.create({
       data: {
-        orderId: order.id,
-        userId: order.userId,
-        farmerId: order.farmerId,
-        totalPrice: order.totalPrice,
-        status: order.status,
-        paymentStatus: order.paymentStatus,
-        deliveryStatus: order.deliveryStatus,
+        orderId: updatedOrder.id,
+        userId: updatedOrder.userId,
+        farmerId: updatedOrder.farmerId,
+        totalPrice: updatedOrder.totalPrice,
+        status: updatedOrder.status,
+        paymentStatus: updatedOrder.paymentStatus,
+        deliveryStatus: updatedOrder.deliveryStatus,
         completedAt: new Date(), // Manually set the completion time
       },
     });
@@ -74,4 +76,4 @@ export async function POST(request) {
     console.error('Error confirming receipt and transferring funds:', error);
     return NextResponse.json({ error: 'Failed to confirm receipt' }, { status: 500 });
   }
-} 
+}
