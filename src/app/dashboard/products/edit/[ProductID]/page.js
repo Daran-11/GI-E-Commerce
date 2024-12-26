@@ -421,6 +421,8 @@ const EditProductDialog = ({ open, onClose, ProductID, onSuccess }) => {
               </Grid>
             </Grid>
           </Grid>
+          </form>
+          </DialogContent>
           <DialogActions>
           <div className='w-[80%] text-sm'>
             <h1 className='font-bold'>**หมายเหตุเกี่ยวกับค่าธรรมเนียม:**       กรุณาคำนวณต้นทุนและกำไรที่คุณต้องการก่อนตั้งราคาขายสินค้า</h1>
@@ -437,8 +439,7 @@ const EditProductDialog = ({ open, onClose, ProductID, onSuccess }) => {
             </Button>
           </div>
           </DialogActions>
-        </form>
-      </DialogContent>
+
     </Dialog>
   );
 };

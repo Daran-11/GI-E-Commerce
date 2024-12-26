@@ -40,9 +40,6 @@ const Sidebar = ({ isOpen, toggleDrawer }) => {
                       <Link href="/account/user/profile">ข้อมูลของฉัน</Link>
                     </li>
                     <li className="mb-2">
-                      <Link href="/account/user/bank-accounts">บัญชีธนาคาร</Link>
-                    </li>
-                    <li className="mb-2">
                       <Link href="/account/user/addresses">ทีอยู่</Link>
                     </li>
                   </ul>
