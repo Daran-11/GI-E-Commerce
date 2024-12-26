@@ -28,7 +28,7 @@ export default function Login() {
         return false
       }
     
-      router.push('/')
+      window.location.href = '/'; // Redirect to the home page after login
 
     } catch (error) {
       setError("Unable to connect to server");
@@ -42,34 +42,51 @@ export default function Login() {
         <link rel="icon" href="/favicon.ico" />
       
       
-      <form onSubmit={handleSubmit} className="bg-white p-10 rounded-lg shadow-lg flex flex-col items-center">
-        <h2 className="text-4xl font-light mb-6">GI Pineapple :)</h2>
-        <input 
-          className="textbox mb-4 p-3 w-64 text-center rounded-lg border border-gray-300 outline-none focus:border-teal-500 transition" 
-          value={identifier}
-          placeholder="กรอกอีเมล หรือ เบอร์โทร" 
-          onChange={(e) => setIdentifier(e.target.value)}
-          required
-        />
-        <input 
-          className="textbox mb-6 p-3 w-64 text-center rounded-lg border border-gray-300 outline-none focus:border-teal-500 transition" 
-          type="password" 
-          value={password}
-          placeholder="กรอกรหัสผ่าน" 
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <button 
-          className="btn-submit h-[50px] p-3 w-64 bg-teal-500 text-white rounded-lg cursor-pointer hover:bg-teal-600 transition" 
-          type="submit" 
-          value="Login"
-          onClick={handleSubmit}
-          >
-            
-          เข้าสู่ระบบ
+      <form onSubmit={handleSubmit} className="bg-white p-10 w-[400px] items-center rounded-lg shadow-lg flex flex-col">
+        <div className='mb-4 w-full'>
+          <h2 className="text-4xl text-[#535353] text-center pb-2 border-b-2 mb-2 ">เข้าสู่ระบบ </h2>
 
-        </button>
-        {error && <div className='bg-red-500 text-sm text-white py-1 px-3'>{error}</div>}
+        </div>
+        <div className='w-full px-2'>
+          <h3>อีเมล</h3>
+          <input 
+            className="textbox mb-4 p-2 w-full  text-start rounded-3xl border border-gray-300 outline-none  transition" 
+            value={identifier}
+            placeholder="กรอกอีเมล หรือ เบอร์โทร" 
+            onChange={(e) => setIdentifier(e.target.value)}
+            required
+          />          
+        </div>
+        <div className='w-full px-2'>
+          <h3>รหัสผ่าน</h3>
+          <input 
+            className="textbox  w-full  mb-4 p-2  text-start rounded-3xl border border-gray-300 outline-none transition" 
+            type="password" 
+            value={password}
+            placeholder="กรอกรหัสผ่าน" 
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />          
+        </div>
+
+        <div className='flex items-start'>
+          <button 
+            className="btn-submit mt-2 w-[130px] h-[40px] p-2 rounded-3xl bg-[#4eac14] text-white cursor-pointer hover:bg-[#4eac14] hover:opacity-70 transition focus:ring-2 focus:ring-offset-2 focus:ring-[#4eac14]" 
+            type="submit" 
+            value="Login"
+            onClick={handleSubmit}
+            >
+              
+            เข้าสู่ระบบ
+
+          </button>          
+        </div>
+        <div className='flex mt-4 items-center justify-center space-x-2 w-full '>
+            <p className=''>ยังไม่มีบัญชี? </p>
+            <a className='text-blue-500' href="/register">สมัครเลย!</a>          
+        </div>
+
+        {error && <div className='pt-5 text-red-500 text-sm py-1 px-3'>{error}</div>}
       </form>
     </div>
   )

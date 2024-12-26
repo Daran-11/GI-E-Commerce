@@ -7,14 +7,14 @@ import {
   DropdownMenu,
   PopoverTrigger,
 } from "@nextui-org/react";
-import { signOut, useSession } from "next-auth/react";
+import { signOut } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import SearchBar from "./searchbar";
 
-export const Navbar = () => {
-  const { data: session, status } = useSession();
+export const Navbar = ({session}) => {
+
   const currentPath = usePathname();
   const { cartItemCount } = useCart();
   const activePaths = [
@@ -137,7 +137,7 @@ export const Navbar = () => {
                 </Link>
               </li>
 
-              {status === "unauthenticated" && (
+              {!session &&  (
                 <li>
                   <Link
                     href="/register"
@@ -182,7 +182,7 @@ export const Navbar = () => {
                 </span>
               </li>
 
-              {session?.user?.role === "farmer" && session.user && status === 'authenticated' && (
+              {session?.user?.role === "farmer" && session && (
                 <li>
                   <Link
                     href="/dashboard"
@@ -212,7 +212,7 @@ export const Navbar = () => {
               )}
             </div>
 
-            {status === "authenticated" && session?.user ? (
+            { session?.user ? (
               <div className="relative inline-block text-left">
                 <Dropdown placement="top-end" showArrow={true}>
                   <PopoverTrigger>
@@ -320,7 +320,7 @@ export const Navbar = () => {
                     เกี่ยวกับเรา
                   </Link>
                 </li>
-                {status === "unauthenticated" && (
+                {session.user.id && session && (
                   <li>
                     <Link
                       href="/register"
@@ -367,7 +367,7 @@ export const Navbar = () => {
                     </span>
                   </Link>
                 </li>
-                {session?.user?.role === "farmer" && (
+                {session?.user?.role  === "farmer" && session.user.id && (
                   <li>
                     <Link
                       href="/dashboard"
@@ -398,7 +398,7 @@ export const Navbar = () => {
                     </Link>
                   </li>
                 )}
-                {status === "authenticated" && session?.user ? (
+                {session?.user ? (
                   <>
                     <li>
                       <Link

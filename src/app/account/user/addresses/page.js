@@ -1,23 +1,14 @@
-'use client'
+"use server";
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import AddressManagement from '@/components/AddressManagement';
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
-export default function Addresses() {
-
-    const { data: session, status } = useSession()
-    const router = useRouter()
-
-    useEffect(() => {
-        if (status === 'unauthenticated') {
-          router.push('/login')
-        }
-      }, [status, router])
-
+import { getServerSession } from 'next-auth';
+export default async function Addresses() {
+  const session = await getServerSession(authOptions);
+  console.log("session",session)
   return (
     <div className='w-full h-screen bg-white rounded-xl p-6'>
       <p className='page-header'> ที่อยู่จัดส่ง</p>
-          <AddressManagement/>          
+          <AddressManagement session={session}/>          
         
 
         

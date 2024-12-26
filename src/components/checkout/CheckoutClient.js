@@ -1,14 +1,12 @@
 "use client";
 import AddressManagement from "@/components/AddressManagement";
-import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import useSWR from "swr";
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
-export default function CheckoutClient({ userId }) {
-  const { data: session, status } = useSession();
+export default function CheckoutClient({ userId , session }) {
   const router = useRouter();
   const [selectedItems, setSelectedItems] = useState([]);
   const [error, setError] = useState("");
@@ -132,6 +130,7 @@ export default function CheckoutClient({ userId }) {
         <h1 className="text-4xl pb-2 border-b-2 mb-5">เช็คเอาท์</h1>
         <h1 className="text-2xl mb-2">ที่อยู่สำหรับจัดส่ง</h1>
         <AddressManagement 
+        session={session}
         onLoad={handleAddressManagementLoad} 
         onSave={refetchCheckoutData} 
         onUpdateAddress={() => setAddressUpdated(prev => !prev)} />
