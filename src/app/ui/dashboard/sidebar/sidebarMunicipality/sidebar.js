@@ -53,6 +53,11 @@ const menuItems = [
     title: "เกษตรกร",
     list: [
       {
+        title: "ตรวจสอบคำขอเป็นเกษตรกร",
+        path: "municipality-dashboard/users/account",
+        icon: <MdSupervisedUserCircle />,
+      },
+      {
         title: "ข้อมูลเกษตรกรในระบบ",
         path: "/municipality-dashboard/manage_farmer",
         icon: <MdGroups />,
