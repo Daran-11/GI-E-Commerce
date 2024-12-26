@@ -6,106 +6,147 @@ import Pagination from "@/app/ui/dashboard/pagination/pagination";
 import Search from "@/app/ui/dashboard/search/search";
 
 export default function UsersPage() {
- const [users, setUsers] = useState([]);
- const [loading, setLoading] = useState(true);
- const [error, setError] = useState(null);
- const [currentPage, setCurrentPage] = useState(1);
- const [searchQuery, setSearchQuery] = useState("");
- const itemsPerPage = 10;
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState("");
+  const itemsPerPage = 10;
 
- useEffect(() => {
-   async function fetchUsers() {
-     try {
-       const response = await fetch("/api/approve_farmer"); 
-       if (!response.ok) throw new Error("Failed to fetch");
-       const data = await response.json();
-       setUsers(data);
-     } catch (err) {
-       setError(err.message);
-     } finally {
-       setLoading(false);
-     }
-   }
-   fetchUsers();
- }, []);
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch("/api/approve_farmer", {
+        cache: 'no-store',
+        headers: {
+          'Pragma': 'no-cache',
+          'Cache-Control': 'no-cache'
+        }
+      });
 
- const handleSearch = (value) => {
-   setSearchQuery(value);
-   setCurrentPage(1);
- };
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
- const filteredUsers = users.filter((user) => {
-   const searchLower = searchQuery.toLowerCase();
-   return (
-     user.email?.toLowerCase().includes(searchLower) ||
-     user.name?.toLowerCase().includes(searchLower) ||
-     user.phone?.toLowerCase().includes(searchLower) || 
-     user.Farmer?.farmerName?.toLowerCase().includes(searchLower)
-   );
- });
+      const data = await response.json();
+      setUsers(data);
+      setError(null);
+    } catch (err) {
+      console.error("Failed to fetch users:", err);
+      setError("ไม่สามารถโหลดข้อมูลได้ กรุณาลองใหม่อีกครั้ง");
+    } finally {
+      setLoading(false);
+    }
+  };
 
- const currentUsers = filteredUsers.slice(
-   (currentPage - 1) * itemsPerPage,
-   currentPage * itemsPerPage
- );
+  useEffect(() => {
+    fetchUsers();
+    // กำหนด interval สำหรับ refresh ข้อมูลทุก 30 วินาที
+    const interval = setInterval(fetchUsers, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
- if (loading) return (
-   <div className="flex flex-col items-center justify-center min-h-screen">
-     <div className="w-12 h-12 border-4 border-t-green-500 border-r-green-500 border-b-green-200 border-l-green-200 rounded-full animate-spin"></div>
-     <p className="mt-4 text-gray-600">กำลังโหลดข้อมูล...</p>
-   </div>
- );
+  const handleSearch = (value) => {
+    setSearchQuery(value);
+    setCurrentPage(1);
+  };
 
- if (error) return (
-   <div className="text-center text-red-500 p-4">Error: {error}</div>
- );
+  const filteredUsers = users.filter((user) => {
+    const searchLower = searchQuery.toLowerCase();
+    return (
+      user.email?.toLowerCase().includes(searchLower) ||
+      user.name?.toLowerCase().includes(searchLower) ||
+      user.phone?.toLowerCase().includes(searchLower) ||
+      user.Farmer?.farmerName?.toLowerCase().includes(searchLower)
+    );
+  });
 
- return (
-   <div className={styles.container}>
-     <h1 className="text-2xl">ตรวจสอบคำขอเป็นเกษตรกร</h1>
-     <br />
-     <div className={styles.top}>
-       <Search placeholder="ค้นหา..." onSearch={handleSearch} />
-       <Link href="/municipality-dashboard/users/account">
-         <span className={styles.addButton}>บัญชีคำขอทั้งหมด</span>
-       </Link>
-     </div>
+  const currentUsers = filteredUsers.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
-     <table className={styles.table}>
-       <thead>
-         <tr>
-           <td>#</td>
-           <td>ชื่อเกษตรกร</td>
-           <td>อีเมล</td>
-           <td>เบอร์โทรศัพท์</td>
-           <td>การจัดการ</td>
-         </tr>
-       </thead>
-       <tbody>
-         {currentUsers.map((user, index) => (
-           <tr key={user.id}>
-             <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
-             <td>{user.Farmer?.farmerName || '-'}</td>
-             <td>{user.email || '-'}</td>
-             <td>{user.phone || '-'}</td>
-             <td>
-               <Link href={`/municipality-dashboard/users/${user.id}`}>
-                 <span className={`${styles.button} ${styles.checkButton}`}>
-                   ตรวจสอบ
-                 </span>
-               </Link>
-             </td>
-           </tr>
-         ))}
-       </tbody>
-     </table>
+  if (loading) return (
+    <div className="flex flex-col items-center justify-center min-h-screen">
+      <div className="w-12 h-12 border-4 border-t-green-500 border-r-green-500 border-b-green-200 border-l-green-200 rounded-full animate-spin"></div>
+      <p className="mt-4 text-gray-600">กำลังโหลดข้อมูล...</p>
+    </div>
+  );
 
-     <Pagination
-       currentPage={currentPage}
-       totalItems={filteredUsers.length}
-       itemsPerPage={itemsPerPage}
-       onPageChange={setCurrentPage}
-     />
-   </div>
- );
+  if (error) return (
+    <div className="text-center text-red-500 p-4">
+      <p>{error}</p>
+      <button 
+        onClick={fetchUsers}
+        className="mt-4 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+      >
+        ลองใหม่อีกครั้ง
+      </button>
+    </div>
+  );
+
+  return (
+    <div className={styles.container}>
+      <h1 className="text-2xl">ตรวจสอบคำขอเป็นเกษตรกร</h1>
+      <br />
+      <div className={styles.top}>
+        <Search placeholder="ค้นหา..." onSearch={handleSearch} />
+        <Link href="/municipality-dashboard/users/account">
+          <span className={styles.addButton}>บัญชีคำขอทั้งหมด</span>
+        </Link>
+      </div>
+
+      {filteredUsers.length === 0 ? (
+        <div className="text-center py-8 text-gray-500">
+          ไม่พบข้อมูลคำขอที่รอการอนุมัติ
+        </div>
+      ) : (
+        <>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <td>#</td>
+                <td>ชื่อเกษตรกร</td>
+                <td>อีเมล</td>
+                <td>เบอร์โทรศัพท์</td>
+                <td>วันที่ขอสมัคร</td>
+                <td>การจัดการ</td>
+              </tr>
+            </thead>
+            <tbody>
+              {currentUsers.map((user, index) => (
+                <tr key={user.id}>
+                  <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
+                  <td>{user.Farmer?.farmerName || '-'}</td>
+                  <td>{user.email || '-'}</td>
+                  <td>{user.phone || '-'}</td>
+                  <td>
+                    {user.createdAt ? new Date(user.createdAt).toLocaleDateString('th-TH', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    }) : '-'}
+                  </td>
+                  <td>
+                    <Link href={`/municipality-dashboard/users/${user.id}`}>
+                      <span className={`${styles.button} ${styles.checkButton}`}>
+                        ตรวจสอบ
+                      </span>
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          <Pagination
+            currentPage={currentPage}
+            totalItems={filteredUsers.length}
+            itemsPerPage={itemsPerPage}
+            onPageChange={setCurrentPage}
+          />
+        </>
+      )}
+    </div>
+  );
 }
