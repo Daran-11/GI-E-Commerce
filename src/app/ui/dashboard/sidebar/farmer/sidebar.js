@@ -1,8 +1,8 @@
 "use client";
-import { usePathname } from "next/navigation";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
+import { FaBackspace } from "react-icons/fa";
 import {
-  MdAnalytics,
   MdAttachMoney,
   MdDashboard,
   MdHelpCenter,
@@ -13,7 +13,6 @@ import {
   MdShoppingBag,
   MdSupervisedUserCircle
 } from "react-icons/md";
-import { FaBackspace } from "react-icons/fa";
 import MenuLink from "./menuLink/menuLink";
 
 // Define the menu items
@@ -54,7 +53,7 @@ const menuItems = [
   {
     title: "ผู้ใช้",
     list: [
-      { title: "ช่องทางชำระเงิน", path: "/dashboard/chennel", icon: <MdMoney /> },
+      { title: "ช่องทางรับเงิน", path: "/dashboard/payment-method", icon: <MdMoney /> },
       { title: "การตั้งค่า", path: "/dashboard/settings", icon: <MdOutlineSettings /> },
       { title: "ช่วยเหลือ", path: "/dashboard/help", icon: <MdHelpCenter /> },
     ],

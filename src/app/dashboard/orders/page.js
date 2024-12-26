@@ -356,6 +356,7 @@ export default function IncomingOrders() {
                         color="primary"
                       >
                         <div className="border-2 text-sm md:px-2 py-1 rounded-xl">
+                          <a>{qrCode.qrcodeId}</a>
                           <DownloadIcon /> QR Code
                         </div>
                       </IconButton>

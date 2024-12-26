@@ -16,6 +16,9 @@ export async function GET(request, { params }) {
 
   const bankAccounts = await prisma.bankAccount.findMany({
     where: { userId: parseInt(params.userId) },
+    include: {
+      bank: true, // ดึงข้อมูล bank ที่สัมพันธ์มาด้วย
+    },
   });
 
   // Fetch recipient status from Omise for each bank account

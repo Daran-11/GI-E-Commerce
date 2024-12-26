@@ -96,7 +96,7 @@ const menuItems = [
       { title: 'จัดการสินค้า', path: '/dashboard/products', icon: <MdShoppingBag /> },
       { title: 'จัดการคำสั่งซื้อ', path: '/dashboard/orders', icon: <MdPeople /> },
       { title: 'ประวัติการขาย', path: '/dashboard/transactions', icon: <MdAttachMoney /> },
-      { title: 'ช่องทางชำระเงิน', path: '/dashboard/chennel', icon: <MdMoney /> },
+      { title: "ช่องทางรับเงิน", path: "/dashboard/payment-method", icon: <MdMoney /> },
     ],
   },
   {
