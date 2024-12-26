@@ -1,4 +1,4 @@
-"use client";
+"use client"
 import styles from "@/app/ui/dashboard/products/products.module.css";
 import Search from "@/app/ui/dashboard/search/search";
 import VisibilityRoundedIcon from '@mui/icons-material/VisibilityRounded';
