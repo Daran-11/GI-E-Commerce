@@ -62,7 +62,7 @@ export default async function UsersByRolePage() {
 
   return (
     <div className={styles.container}>
-    <h1 className="text-2xl ">บัญชีคำขอเป็นเกษตรกรทั้งหมด</h1><br></br>
+    <h1 className="text-2xl ">บัญชีเกษตรกร</h1><br></br>
       <table className={styles.table}>
         <thead>
           <tr>
