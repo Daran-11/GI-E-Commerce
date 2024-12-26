@@ -1,13 +1,11 @@
 'use client';
 import Pagination from "@/app/ui/dashboard/pagination/pagination";
 import Search from "@/app/ui/dashboard/search/search";
-import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import styles from "../../ui/dashboard/users/users.module.css";
 
 export default function UsersPage() {
-  const { data: session, status } = useSession();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -15,57 +13,38 @@ export default function UsersPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const itemsPerPage = 10;
 
-  // Function to fetch users
   const fetchUsers = async () => {
     try {
+      setLoading(true);
       const response = await fetch("/api/approve_farmer", {
-        method: 'GET',
-        headers: {
-          'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache',
-        },
         cache: 'no-store',
-        next: { revalidate: 0 }
+        headers: {
+          'Pragma': 'no-cache',
+          'Cache-Control': 'no-cache'
+        }
       });
 
       if (!response.ok) {
-        throw new Error("Failed to fetch");
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
-      console.log("Fetched data:", data);
       setUsers(data);
+      setError(null);
     } catch (err) {
-      console.error("Fetch error:", err);
-      setError(err.message);
+      console.error("Failed to fetch users:", err);
+      setError("ไม่สามารถโหลดข้อมูลได้ กรุณาลองใหม่อีกครั้ง");
     } finally {
       setLoading(false);
     }
   };
 
-  // Initial fetch when component mounts
   useEffect(() => {
-    if (status === "authenticated" && session) {
-      fetchUsers();
-    }
-  }, [session, status]);
-
-  // Set up polling to refresh data periodically
-  useEffect(() => {
-    if (status === "authenticated" && session) {
-      const intervalId = setInterval(() => {
-        fetchUsers();
-      }, 30000); // Poll every 30 seconds
-
-      return () => clearInterval(intervalId);
-    }
-  }, [session, status]);
-
-  // Handle manual refresh
-  const handleRefresh = () => {
-    setLoading(true);
     fetchUsers();
-  };
+    // กำหนด interval สำหรับ refresh ข้อมูลทุก 30 วินาที
+    const interval = setInterval(fetchUsers, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleSearch = (value) => {
     setSearchQuery(value);
@@ -96,28 +75,20 @@ export default function UsersPage() {
 
   if (error) return (
     <div className="text-center text-red-500 p-4">
-      Error: {error}
+      <p>{error}</p>
       <button 
-        onClick={handleRefresh}
-        className="ml-4 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+        onClick={fetchUsers}
+        className="mt-4 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
       >
-        ลองใหม่
+        ลองใหม่อีกครั้ง
       </button>
     </div>
   );
 
   return (
     <div className={styles.container}>
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl">ตรวจสอบคำขอเป็นเกษตรกร</h1>
-        <button 
-          onClick={handleRefresh}
-          className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-        >
-          รีเฟรช
-        </button>
-      </div>
-      
+      <h1 className="text-2xl">ตรวจสอบคำขอเป็นเกษตรกร</h1>
+      <br />
       <div className={styles.top}>
         <Search placeholder="ค้นหา..." onSearch={handleSearch} />
         <Link href="/municipality-dashboard/users/account">
@@ -125,41 +96,57 @@ export default function UsersPage() {
         </Link>
       </div>
 
-      <table className={styles.table}>
-        <thead>
-          <tr>
-            <td>#</td>
-            <td>ชื่อเกษตรกร</td>
-            <td>อีเมล</td>
-            <td>เบอร์โทรศัพท์</td>
-            <td>การจัดการ</td>
-          </tr>
-        </thead>
-        <tbody>
-          {currentUsers.map((user, index) => (
-            <tr key={user.id}>
-              <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
-              <td>{user.Farmer?.farmerName || '-'}</td>
-              <td>{user.email || '-'}</td>
-              <td>{user.phone || '-'}</td>
-              <td>
-                <Link href={`/municipality-dashboard/users/${user.id}`}>
-                  <span className={`${styles.button} ${styles.checkButton}`}>
-                    ตรวจสอบ
-                  </span>
-                </Link>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      {filteredUsers.length === 0 ? (
+        <div className="text-center py-8 text-gray-500">
+          ไม่พบข้อมูลคำขอที่รอการอนุมัติ
+        </div>
+      ) : (
+        <>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <td>#</td>
+                <td>ชื่อเกษตรกร</td>
+                <td>อีเมล</td>
+                <td>เบอร์โทรศัพท์</td>
+                <td>วันที่ขอสมัคร</td>
+                <td>การจัดการ</td>
+              </tr>
+            </thead>
+            <tbody>
+              {currentUsers.map((user, index) => (
+                <tr key={user.id}>
+                  <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
+                  <td>{user.Farmer?.farmerName || '-'}</td>
+                  <td>{user.email || '-'}</td>
+                  <td>{user.phone || '-'}</td>
+                  <td>
+                    {user.createdAt ? new Date(user.createdAt).toLocaleDateString('th-TH', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    }) : '-'}
+                  </td>
+                  <td>
+                    <Link href={`/municipality-dashboard/users/${user.id}`}>
+                      <span className={`${styles.button} ${styles.checkButton}`}>
+                        ตรวจสอบ
+                      </span>
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
 
-      <Pagination
-        currentPage={currentPage}
-        totalItems={filteredUsers.length}
-        itemsPerPage={itemsPerPage}
-        onPageChange={setCurrentPage}
-      />
+          <Pagination
+            currentPage={currentPage}
+            totalItems={filteredUsers.length}
+            itemsPerPage={itemsPerPage}
+            onPageChange={setCurrentPage}
+          />
+        </>
+      )}
     </div>
   );
 }
