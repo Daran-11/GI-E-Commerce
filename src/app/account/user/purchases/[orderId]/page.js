@@ -127,10 +127,14 @@ function OrderDetails({ params }) {
   };
 
   if (status === 'loading' || loading) {
-    return <div className="flex flex-col items-center justify-center min-h-screen">
-      <div className="w-12 h-12 border-4 border-t-green-500 border-r-green-500 border-b-green-200 border-l-green-200 rounded-full animate-spin"></div>
-      <p className="mt-4 text-gray-600">กำลังโหลดข้อมูล...</p>
-    </div>;
+    return  <div className='w-full h-screen bg-white rounded-xl p-6'>
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <div className="w-12 h-12 border-4 border-t-green-500 border-r-green-500 border-b-green-200 border-l-green-200 rounded-full animate-spin"></div>
+        <p className="mt-4 text-gray-600">กำลังโหลดข้อมูล...</p>
+      </div>;
+
+    </div>
+
   }
 
   if (error) {
@@ -147,22 +151,14 @@ function OrderDetails({ params }) {
     : deliveryStatuses.length - 1; // Default to the last step if the status is not found
 
   return (
-    <div className="w-full h-screen bg-white p-6 rounded-xl">
-      <h1>ข้อมูลคำสั่งซื้อ</h1>
-      <div className="order-summary mb-6">
-        <p><strong>หมายเลขคำสั่งซื้อ:</strong> {orderDetails.id}</p>
-        <p><strong>ผู้ขาย:</strong> {orderDetails.farmer.farmerName}</p>
-        <p><strong>สถานะ:</strong> {deliveryStatusTranslations[orderDetails.deliveryStatus]}</p>
-        <p><strong>รวมทั้งสิ้น</strong> {orderDetails.totalPrice} บาท</p>
-        <p><strong>ที่อยู่จัดส่ง:</strong> {orderDetails.addressText}</p>
-        <p><strong>บริการขนส่ง:</strong> {orderDetails.delivery?.deliveryService?.name || (
-          <span className="text-gray-300">ไม่พบข้อมูลในตอนนี้</span>
-        )} </p>
-        <p><strong>รหัสพัสดุ:</strong> {orderDetails.delivery?.trackingNum || (
-          <span className="text-gray-300">ไม่พบข้อมูลในตอนนี้</span>
-        )} </p>
+    <div className="w-full h-screen p-6 rounded-xl space-y-7 ">
 
-        {/* Progress bar */}
+      <div className='bg-white p-6 rounded-xl'>
+        <div className='flex justify-between border-b-2 items-center'>       
+          <h1 className=' text-2xl md:text-4xl text-[#535353] pb-1  mb-1'>ข้อมูลคำสั่งซื้อ</h1>
+          <p className='text-xl'>รหัสคำสั่งซื้อ: {orderDetails.id}</p>
+        </div>
+
         <div className="progress-bar-container my-4   ">
           <div className='relative '>
             {/* Progress Bar Line */}
@@ -177,8 +173,6 @@ function OrderDetails({ params }) {
               }}
             ></div>
           </div>
-
-
           {/* Circles */}
           <div className="relative z-10 flex justify-between items-between mb-4">
             {deliveryStatuses.map((status, index) => (
@@ -187,15 +181,34 @@ function OrderDetails({ params }) {
                   className={` w-8 h-8 rounded-full flex mx-auto   ${index <= currentStepIndex ? 'bg-[#4eac14]' : 'bg-gray-300'
                     }`}
                 >
-
                 </div>
-
                 <p className=" mt-5 text-sm">{deliveryStatusTranslations[status]}</p>
               </div>
             ))}
           </div>
         </div>
-        <h2>รายละเอียดสินค้า</h2>
+
+
+        <p><a className='text-lg'>ผู้ขาย:</a> {orderDetails.farmer.farmerName}</p>
+        <p><a className='text-lg'>สถานะ:</a> {deliveryStatusTranslations[orderDetails.deliveryStatus]}</p>
+      </div>
+
+        <div className="bg-white w-full h-fit p-6 rounded-xl">
+          <p className="text-3xl border-b-2 pb-2 mb-3 text-[#535353]">การขนส่ง</p>
+          <p className='pb-2'><a className='text-lg'>ที่อยู่สำหรับจัดส่ง: </a>{orderDetails.addressText}</p>
+          <p><a className='text-lg'>ชื่อผู้ให้บริการขนส่ง: </a> {orderDetails.delivery?.deliveryService?.name  || (
+                <span className="text-gray-300">อยู่ระหว่างดำเนินการ</span>
+              )} </p>
+          <p><a className='text-lg'>รหัสพัสดุ: </a> {orderDetails.delivery?.trackingNum || (
+                <span className="text-gray-300">อยู่ระหว่างดำเนินการ</span>
+              )} </p>
+
+        </div>
+
+
+    
+        <div className='bg-white w-full h-fit p-6  rounded-xl '>
+        <p className="text-3xl border-b-2 pb-2 mb-3 text-[#535353]">รายละเอียดสินค้า</p>
         <table className="min-w-full table-auto border-collapse border border-gray-200 mt-4">
           <thead>
             <tr className="bg-gray-100">
@@ -251,7 +264,7 @@ function OrderDetails({ params }) {
               </td>
             </tr>
           </tfoot>
-        </table>
+        </table>  
         {/* Conditionally render the button based on deliveryStatus */}
         {orderDetails.deliveryStatus === 'Shipped' && (
           <div className='w-full h-fit flex justify-end mt-5'>
@@ -261,7 +274,11 @@ function OrderDetails({ params }) {
             onDeliverySuccess={handleDeliverySuccess} 
              />
           </div>
-        )}
+        )}                       
+        </div>
+
+
+
 
         {/* Review Modal */}
         <Modal open={isReviewModalOpen} onClose={closeReviewModal}>
@@ -291,7 +308,7 @@ function OrderDetails({ params }) {
           </Box>
         </Modal>
       </div>
-    </div>
+   
   );
 }
 
