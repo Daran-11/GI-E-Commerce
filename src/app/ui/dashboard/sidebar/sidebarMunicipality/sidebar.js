@@ -58,7 +58,7 @@ const menuItems = [
         icon: <MdSupervisedUserCircle />,
       },
       {
-        title: "ข้อมูลเกษตรกรในระบบ",
+        title: "จัดการมาตรฐานเกษตรกร",
         path: "/municipality-dashboard/manage_farmer",
         icon: <MdGroups />,
       },
