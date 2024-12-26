@@ -1,4 +1,4 @@
-"use client";
+"use server";
 import { getServerSession } from 'next-auth';
 import SessionProvider from '../../components/SessionProvider';
 import { authOptions } from '../api/auth/[...nextauth]/route';
@@ -6,7 +6,7 @@ import Navbar from "../ui/dashboard/navbar/navbar";
 import Sidebar from "../ui/dashboard/sidebar/admin/sidebar";
 
 
-const Layout = ({ children }) => {
+export default async function Layout({ children }) {
   const session = await getServerSession(authOptions);
   return (
     <div>
@@ -24,5 +24,3 @@ const Layout = ({ children }) => {
     </div>
   )
 }
-
-export default Layout
