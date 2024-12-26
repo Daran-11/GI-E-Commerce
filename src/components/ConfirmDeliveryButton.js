@@ -2,16 +2,15 @@ import { Box, Button, Modal, Typography } from '@mui/material';
 import { useState } from 'react';
 import { toast } from 'react-toastify';
 
-function ConfirmDeliveryButton({ orderId, userId, productId }) {
+function ConfirmDeliveryButton({ orderId, userId, productId, onDeliverySuccess }) {
   const [open, setOpen] = useState(false);
-  const [showRating, setShowRating] = useState(false);
   const [rating, setRating] = useState(0);
   const [review, setReview] = useState('');
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
     setOpen(false);
-    setShowRating(false);
+
   };
 
   const handleConfirmDelivery = async () => {
@@ -26,8 +25,8 @@ function ConfirmDeliveryButton({ orderId, userId, productId }) {
 
       const data = await response.json();
       if (data.success) {
-
-        setShowRating(true); // Show rating form after confirmation
+        onDeliverySuccess(orderId);
+        setOpen(false);
         toast.success("ขอบคุณที่ใช้บริการ อย่าลืมให้คะแนนสินค้าของเรา")
       } else {
         toast.error('เกิดข้อผิดพลาด: ' + data.error);
@@ -38,28 +37,6 @@ function ConfirmDeliveryButton({ orderId, userId, productId }) {
     }
   };
 
-  const handleRatingSubmit = async () => {
-    try {
-      const response = await fetch(`/api/rating-reviews`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ userId, productId, rating, review }),
-      });
-
-      const data = await response.json();
-      if (data.success) {
-        toast.success('ขอบคุณสำหรับการรีวิวของท่าน!');
-        //handleClose();
-      } else {
-        toast.error('เกิดข้อผิดพลาด: ' + data.error);
-      }
-    } catch (error) {
-      console.error('Error submitting rating:', error);
-      toast.error('ไม่สามารถส่งรีวิวได้');
-    }
-  };
 
   return (
     <>
