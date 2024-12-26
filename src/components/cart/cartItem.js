@@ -4,8 +4,8 @@ import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import QuantityHandler from "../quantityhandler";
 import { toast } from "react-toastify";
+import QuantityHandler from "../quantityhandler";
 
 export default function CartItem({ initialItems }) {
   const { cartItems, setCartItems, removeItemFromCart, updateItemQuantity } = useCart();
@@ -62,6 +62,10 @@ export default function CartItem({ initialItems }) {
       if (selectedItemData.length > 0) {
         localStorage.setItem('selectedItems', JSON.stringify(selectedItemData));
         console.log("selected item is: ", selectedItems)
+        if(!session) {
+          toast.warn("โปรดเข้าสู้ระบบก่อนสั่งซื้อ")
+          router.push('/login');
+        }
         router.push('/checkout');
       } else {
         toast.error("สินค้าที่เลือกไม่มีในตะกร้า");

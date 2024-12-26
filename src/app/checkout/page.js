@@ -13,7 +13,7 @@ export default async function CheckoutPage() {
     console.log("Session found:", session);
   }
 
-  const userId = session.user.id;
+  const userId = session?.user?.id;
 
   return (
     <div>

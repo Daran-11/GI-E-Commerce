@@ -27,4 +27,3 @@ const session = await getServerSession(authOptions);
   );
 };
 
-export default Layout;
