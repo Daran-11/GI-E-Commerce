@@ -1,11 +1,13 @@
 // components/Layout.js
-"use client";
-import { useSession } from "next-auth/react";
+"use server";
+import { getServerSession } from 'next-auth';
 import SessionProvider from '../../components/SessionProvider';
+import { authOptions } from '../api/auth/[...nextauth]/route';
 import Navbar from "../ui/dashboard/navbar/navbar";
 import Sidebar from "../ui/dashboard/sidebar/farmer/sidebar";
-const Layout = ({ children }) => {
-  const { data: session } = useSession();
+
+export default async function Layout({ children }) {
+const session = await getServerSession(authOptions);
   const isAdmin = session?.user?.role === "admin";
 
   return (

@@ -1,23 +1,23 @@
 "use client";
 
-import Link from 'next/link';
-import { useSession } from 'next-auth/react';
-import { useEffect, useState } from 'react';
-import { useRouter } from "next/navigation";
-import styles from "@/app/ui/dashboard/products/products.module.css";
 import Pagination from "@/app/ui/dashboard/pagination/pagination";
-import Button from "@mui/material/Button";
-import IconButton from '@mui/material/IconButton';
-import Tooltip from '@mui/material/Tooltip';
+import styles from "@/app/ui/dashboard/products/products.module.css";
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import Button from "@mui/material/Button";
 import CircularProgress from '@mui/material/CircularProgress';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
+import IconButton from '@mui/material/IconButton';
 import TextField from '@mui/material/TextField';
+import Tooltip from '@mui/material/Tooltip';
+import { useSession } from 'next-auth/react';
+import Link from 'next/link';
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from 'react';
 import { toast } from "react-toastify";
 const Users = () => {
   const { data: session, status } = useSession();
@@ -49,7 +49,7 @@ const Users = () => {
   const handleDelete = async (userId) => {
     if (window.confirm("Are you sure you want to delete this user?")) {
       try {
-        const response = await fetch(`/api/users/${userId}`, {
+        const response = await fetch(`/api/users/delete/${userId}`, {
           method: "DELETE",
           headers: {
             "Content-Type": "application/json",
@@ -58,6 +58,7 @@ const Users = () => {
 
         if (response.ok) {
           setUsers(users.filter(user => user.id !== userId));
+          toast.success("ลบผู้ใช้สำเร็จ");
         } else {
           toast.error("ไม่สามารถลบผู้ใช้ได้");
         }

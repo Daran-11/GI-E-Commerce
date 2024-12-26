@@ -8,6 +8,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+
 const Loading = () => {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen">
@@ -27,12 +28,14 @@ const Certificate = () => {
   const itemsPerPage = 10;
 
   useEffect(() => {
-    if (status === 'authenticated' && userId) {
+    if (status === "authenticated" && userId) {
       console.log("authenticated");
       const fetchCertificates = async () => {
         try {
           console.log("User ID being sent to API:", userId);
-          const response = await fetch(`/api/certificate/add?UsersId=${userId}`);
+          const response = await fetch(
+            `/api/certificate/add?UsersId=${userId}`
+          );
           const data = await response.json();
 
           console.log("Fetched data:", data);
@@ -45,7 +48,7 @@ const Certificate = () => {
         } catch (error) {
           console.error("Failed to fetch certificates:", error);
         }
-      };   
+      };
       fetchCertificates();
     }
   }, [router, session, userId]);
@@ -60,8 +63,7 @@ const Certificate = () => {
         if (response.ok) {
           toast.success("ลบใบรับรองแล้ว");
           setCertificates(certificates.filter((cert) => cert.id !== id));
-          
-          // Check if we need to adjust current page after deletion
+
           const remainingItems = certificates.length - 1;
           const newMaxPage = Math.ceil(remainingItems / itemsPerPage);
           if (currentPage > newMaxPage && newMaxPage > 0) {
@@ -107,12 +109,10 @@ const Certificate = () => {
 
   return (
     <div className={styles.container}>
-      <h1 className="text-2xl ">ลงทะเบียนใบรับรอง</h1><br></br>
+      <h1 className="text-2xl ">ลงทะเบียนใบรับรอง</h1>
+      <br></br>
       <div className={styles.top}>
-        <Search 
-          placeholder="ค้นหาใบรับรอง..." 
-          onSearch={handleSearch}
-        />
+        <Search placeholder="ค้นหาใบรับรอง..." onSearch={handleSearch} />
         <Link href="/dashboard/certificate/add">
           <button className={styles.addButton}>เพิ่มใบรับรอง</button>
         </Link>
@@ -133,7 +133,9 @@ const Certificate = () => {
         <tbody>
           {currentCertificates.length > 0 ? (
             currentCertificates.map((certificate, index) => {
-              const standards = JSON.parse(certificate.standards);
+              const standards = Array.isArray(certificate.standards)
+                ? certificate.standards
+                : JSON.parse(certificate.standards || "[]");
               return (
                 <tr key={certificate.id}>
                   <td>{indexOfFirstItem + index + 1}</td>
@@ -156,7 +158,11 @@ const Certificate = () => {
                   </td>
                   <td>{certificate.productionQuantity}</td>
                   <td>
-                    <span className={`${styles.status} ${styles[certificate.status]}`}>
+                    <span
+                      className={`${styles.status} ${
+                        styles[certificate.status]
+                      }`}
+                    >
                       {certificate.status}
                     </span>
                   </td>
@@ -169,12 +175,15 @@ const Certificate = () => {
                     <div className={styles.standardsContainer}>
                       {certificate.status === "ไม่ผ่านการรับรอง" ? (
                         <div className={styles.buttons}>
-                          <button
-                            className={`${styles.button} ${styles.view}`}
-                            onClick={() => handleDelete(certificate.id)}
+                          <Link
+                            href={`/dashboard/certificate/edit/${certificate.id}`}
                           >
-                            ลบใบรับรอง
-                          </button>
+                            <button
+                              className={`${styles.button} ${styles.view}`}
+                            >
+                              แก้ไขใบรับรอง
+                            </button>
+                          </Link>
                         </div>
                       ) : (
                         <span></span>
@@ -191,7 +200,7 @@ const Certificate = () => {
           )}
         </tbody>
       </table>
-      <Pagination 
+      <Pagination
         currentPage={currentPage}
         totalItems={totalItems}
         itemsPerPage={itemsPerPage}
