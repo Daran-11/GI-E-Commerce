@@ -2,7 +2,6 @@
 import AddressManagement from "@/components/AddressManagement";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { toast } from "react-toastify";
 import useSWR from "swr";
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
@@ -43,8 +42,7 @@ export default function CheckoutClient({ userId , session }) {
 
 
     if(!session) {
-      toast.alert("โปรดเข้าสู้ระบบก่อนเช็คเอาท์")
-      router.push('/');
+      router.push('/login');
     }
 
   // ใช้ SWR ดึงข้อมูลที่อยู่จาก API
