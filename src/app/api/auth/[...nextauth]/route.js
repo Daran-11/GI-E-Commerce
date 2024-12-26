@@ -86,7 +86,7 @@ export const authOptions = {
       },
       session: async ({ session, token }) => {
         console.log("Session Callback Token:", token); // เพิ่ม log เพื่อตรวจสอบว่า token ถูกส่งมาหรือไม่
-        if (token) {
+        if (token && session.user) {
           session.user.id = token.id;
           session.user.role = token.role;
           session.user.phone = token.phone;
