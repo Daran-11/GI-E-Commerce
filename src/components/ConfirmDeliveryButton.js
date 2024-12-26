@@ -25,8 +25,9 @@ function ConfirmDeliveryButton({ orderId, userId, productId, onDeliverySuccess }
 
       const data = await response.json();
       if (data.success) {
-        onDeliverySuccess(orderId);
+        onDeliverySuccess(orderId);        
         setOpen(false);
+        window.location.reload();
         toast.success("ขอบคุณที่ใช้บริการ อย่าลืมให้คะแนนสินค้าของเรา")
       } else {
         toast.error('เกิดข้อผิดพลาด: ' + data.error);
