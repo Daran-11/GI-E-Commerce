@@ -63,7 +63,7 @@ export default function CartItem({ initialItems }) {
         localStorage.setItem('selectedItems', JSON.stringify(selectedItemData));
         console.log("selected item is: ", selectedItems)
         if(!session) {
-          toast.warn("โปรดเข้าสู้ระบบก่อนสั่งซื้อ")
+          toast.warn("โปรดเข้าสู่ระบบก่อนสั่งซื้อ")
           router.push('/login');
         }
         router.push('/checkout');

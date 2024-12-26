@@ -197,7 +197,13 @@ export default function PurchasesPageClient({session}) {
 
 
                     <td className='cart-data text-right pr-5'>
-                      <p className="text-lg text-blue-500 ">{deliveryStatusTranslations[order.deliveryStatus]}</p>
+                    <p
+                      className={`text-lg ${
+                        order.deliveryStatus === 'Delivered' ? 'text-green-500' : 'text-blue-500'
+                      }`}
+                    >
+                      {deliveryStatusTranslations[order.deliveryStatus]}
+                    </p>
 
                       <p className='text-xl'>{order.totalPrice} บาท</p> {/* Assuming totalPrice is available in order */}
                     </td>

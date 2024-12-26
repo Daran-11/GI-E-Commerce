@@ -227,6 +227,7 @@ const AddProductDialog = ({ open, onClose, onAddProduct }) => {
     <Dialog open={open} onClose={handleClose} PaperComponent={CustomPaper} maxWidth="lg">
       <DialogTitle>เพิ่มสินค้าใหม่</DialogTitle>
       <DialogContent>
+
         <form onSubmit={(e) => { e.preventDefault(); handleSubmit(onSubmit)(); }}>
           <Grid container spacing={2}>
             <Grid item xs={12} sm={7}>
@@ -567,11 +568,22 @@ const AddProductDialog = ({ open, onClose, onAddProduct }) => {
           </Grid>
         </form>
       </DialogContent>
-      <DialogActions>
+      <DialogActions >
+      <div className='w-[80%] text-sm'>
+            <h1 className='font-bold'>**หมายเหตุเกี่ยวกับค่าธรรมเนียม:**       กรุณาคำนวณต้นทุนและกำไรที่คุณต้องการก่อนตั้งราคาขายสินค้า</h1>
+      Opn payments ที่ระบบเราใช้ในการชำระเงิน จะหักค่าธรรมเนียมการชำระเงิน 3.65% จากราคาขายสินค้าของคุณ ตัวอย่างเช่น:
+      <p>- หากคุณตั้งราคาขายสินค้าไว้ที่ 100 บาท จะมีค่าธรรมเนียม 3.65 บาท</p>
+      <p>- จำนวนเงินที่คุณจะได้รับหลังหักค่าธรรมเนียมคือ 96.35 บาท</p>
+
+
+      </div>
+      <div className='flex w-[20%] space-x-5 justify-end'>
         <Button onClick={handleClose} color="error" variant="contained">ยกเลิก</Button>
         <Button onClick={(e) => { e.preventDefault(); handleSubmit(onSubmit)(); }} color="success" variant="contained" >
           เพิ่มสินค้า
-        </Button>
+        </Button>        
+      </div>
+
       </DialogActions>
     </Dialog>
   );

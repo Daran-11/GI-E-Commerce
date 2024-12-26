@@ -14,15 +14,15 @@ const Card = dynamic(() => import("../ui/dashboard/card/card"),
 
 const Chart = dynamic(() => import("../ui/dashboard/chart/chart"))
 const Transactions = dynamic(() => import("../ui/dashboard/transactions/transactions"))
-
+const FarmerProfit = dynamic(() => import("../../components/FarmerProfit"))
 
 const Dashboard = () => {
   return (
     <div className={styles.wrapper}>
       <div className={styles.main}>
         <div className={styles.cards}>
-          <Card />
-          <Card />
+        <FarmerProfit/>
+
           <Card />
         </div>
         <div>
