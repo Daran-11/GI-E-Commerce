@@ -32,13 +32,11 @@ function OrderDetails({ params }) {
   const [userReviews, setUserReviews] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/login');
-    }
 
-    if (status === 'authenticated' && session?.user?.id && orderId) {
+
+   
       const fetchOrderDetails = async () => {
         try {
           const response = await fetch(`/api/users/${session.user.id}/purchases/${orderId}`);
@@ -67,11 +65,20 @@ function OrderDetails({ params }) {
         }
       };
 
+    useEffect(() => {
+        if (status === 'unauthenticated') {
+          router.push('/login');
+      }
+      if (status === 'authenticated' && session?.user?.id && orderId) {
+
       fetchOrderDetails();
     }
   }, [status, session, router, orderId]);
 
 
+  const handleDeliverySuccess = async (orderId) => {
+    fetchOrderDetails();
+  }
 
   const submitReview = async () => {
     try {
@@ -108,8 +115,9 @@ function OrderDetails({ params }) {
     setRating(rate);
   };
 
-  const openReviewModal = (productId) => {
-    setSelectedProductId(productId);
+  const openReviewModal = (product) => {
+    setSelectedProductId(product.ProductID);
+    setSelectedProduct(product); // เก็บข้อมูลผลิตภัณฑ์ใน state
     setReviewModalOpen(true);
   };
 
@@ -200,14 +208,16 @@ function OrderDetails({ params }) {
           </thead>
           <tbody>
             {orderDetails.orderItems.map((item) => (
+
               <tr key={item.id} className="text-center">
                 <td className="border border-gray-300 px-2 py-2 text-start">
                   {item.product.ProductName}
                   {item.product.ProductType}
-                  {orderDetails.farmer.farmerName}
+                  
+                  <p>ผู้ขาย{orderDetails.farmer.farmerName}</p>
                   {orderDetails.deliveryStatus === 'Delivered' && !userReviews.includes(item.product.ProductID) && (
                     <div>
-                      <button onClick={() => openReviewModal(item.product.ProductID)} className="text-blue-600 underline">
+                      <button onClick={() => openReviewModal(item.product)} className="text-blue-600 underline">
                         เขียนรีวิว
                       </button>
                     </div>
@@ -216,7 +226,8 @@ function OrderDetails({ params }) {
 
                 </td>
                 <td className="border border-gray-300 px-2 py-2">
-                  {item.product.ProductType}
+                  {item.product.ProductType} 
+
                 </td>
                 <td className="border border-gray-300 px-4 py-2">
                   {item.quantity}
@@ -244,25 +255,37 @@ function OrderDetails({ params }) {
         {/* Conditionally render the button based on deliveryStatus */}
         {orderDetails.deliveryStatus === 'Shipped' && (
           <div className='w-full h-fit flex justify-end mt-5'>
-            <ConfirmDeliveryButton orderId={orderDetails.id} userId={session.user.id} />
+            <ConfirmDeliveryButton 
+            orderId={orderDetails.id}
+            userId={session.user.id} 
+            onDeliverySuccess={handleDeliverySuccess} 
+             />
           </div>
         )}
 
         {/* Review Modal */}
         <Modal open={isReviewModalOpen} onClose={closeReviewModal}>
           <Box className="p-6 bg-white rounded-lg shadow-lg mx-auto mt-20 max-w-md">
-            <h2 className="text-lg font-semibold mb-4">ให้คะแนนสินค้า</h2>
+            <h2 className="text-3xl mb-4">ให้คะแนนสินค้า</h2>
+            {selectedProduct && (
+              <div className="mb-4">
+                
+                <p><strong>ชื่อสินค้า:</strong> {selectedProduct.ProductName}</p>
+                <p><strong>ประเภทสินค้า:</strong> {selectedProduct.ProductType}</p>
+                <p><strong>ผู้ขาย:</strong> {orderDetails.farmer.farmerName}</p>
+              </div>
+            )}
             <Rating onClick={handleRating} ratingValue={rating} allowHover={true} size={30} />
             <TextField
               fullWidth
               multiline
               rows={3}
-              label="Review (optional)"
+              label="เขียนรีวิว (ไม่บังคับ)"
               value={review}
               onChange={(e) => setReview(e.target.value)}
               sx={{ mt: 2 }}
             />
-            <div className="mt-4">
+            <div className="mt-4 w-full flex justify-end">
               <Button variant="contained" color="primary" onClick={submitReview}>ยืนยัน</Button>
             </div>
           </Box>

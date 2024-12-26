@@ -27,7 +27,7 @@ const Navbar = ({session}) => {
       <div className="flex items-center space-x-4">
         <Notification />
         <div className="flex items-center space-x-2">
-          {session.user.id ?(
+          {session?.user?.id ?(
             <>
               <Image
                 className="rounded-full object-cover"

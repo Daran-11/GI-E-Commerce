@@ -320,7 +320,7 @@ export const Navbar = ({session}) => {
                     เกี่ยวกับเรา
                   </Link>
                 </li>
-                {session.user.id && session && (
+                {!session && (
                   <li>
                     <Link
                       href="/register"
@@ -367,7 +367,7 @@ export const Navbar = ({session}) => {
                     </span>
                   </Link>
                 </li>
-                {session?.user?.role  === "farmer" && session.user.id && (
+                {session?.user?.role  === "farmer" && session && (
                   <li>
                     <Link
                       href="/dashboard"

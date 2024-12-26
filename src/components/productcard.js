@@ -86,7 +86,8 @@ const ProductCard = ({products}) => {
 
                                   return (
              
-                                      <div className='flex space-x-3 mt-1 justify-center items-center' key={cert.certificate.id} >
+                                      <div className='flex  mt-1 ' key={cert.certificate.id} >
+                                        <div className='hidden lg:flex space-x-3 justify-center items-center'>
                                         {standardsObj.map((standard, index) => (
                                           <div className="" key={index}>
                                             <Tooltip title={`มาตรฐานการรับรอง ${standard.name} รหัส ${standard.certNumber}`} arrow>
@@ -105,7 +106,30 @@ const ProductCard = ({products}) => {
 
                                           </div>
                                         ))}
+                                        </div>
+                                        <div className='lg:hidden flex justify-start items-center pb-1'>
+                                        {standardsObj.map((standard, index) => (
+                                          <div className="" key={index}>
+                                            <Tooltip title={`มาตรฐานการรับรอง ${standard.name} รหัส ${standard.certNumber}`} arrow>
+                                            <div>
+                                            <Image
+                                            key={index}
+                                            src={standard.logo}
+                                            alt={standard.name}
+                                            width={30}
+                                            height={30}
+                                          />
+                                                                    
+                                            </div>
+                                                                                 
+                                            </Tooltip> 
+
+                                          </div>
+                                        ))}
+                                        </div>
+
                                       </div>
+                                      
                                
                                   );
                                 } catch (error) {

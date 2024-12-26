@@ -2,7 +2,6 @@
 
 import { Html5QrcodeScanner } from "html5-qrcode";
 import { Camera } from "lucide-react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -91,17 +90,9 @@ export default function TracePage() {
         {/* Header Section */}
         <div className="text-center pt-12 md:pt-16 pb-8 md:pb-12">
           {/* Logo */}
-          <div className="relative h-[90px] w-[250px] mt-4 md:mt-0 -ml-6 md:ml-0 mb-8 md:mb-0 mx-auto md:mx-0">
-            <Image
-              src="/logo/logo.png"
-              alt="GI PLATFORM"
-              fill
-              priority
-              className="object-contain"
-            />
-          </div>
 
-          <h1 className="text-xl md:text-2xl font-bold text-gray-800 mb-3 md:mb-4">
+
+          <h1 className="pt-20 text-xl md:text-2xl font-bold text-gray-800 mb-3 md:mb-4">
             ระบบตรวจสอบย้อนกลับ
           </h1>
           <p className="text-sm md:text-base text-gray-600 max-w-2xl mx-auto px-4 md:px-0">
