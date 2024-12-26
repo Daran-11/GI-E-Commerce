@@ -87,7 +87,7 @@ export async function GET(req, { params }) {
     try {
       const history = await prisma.history.findMany({
         where: {
-          farmerId: parseInt(userId),
+          farmerId: parseInt(farmer.id),
         },
         orderBy: { completedAt: 'desc' }, // Sort by completion time
         include: {
