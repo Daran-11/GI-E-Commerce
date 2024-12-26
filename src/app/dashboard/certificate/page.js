@@ -34,15 +34,14 @@ const Certificate = () => {
           console.log("User ID being sent to API:", userId);
           const response = await fetch(`/api/certificate/add?UsersId=${userId}`);
           const data = await response.json();
-      
+
           console.log("Fetched data:", data);
-      
+
           if (Array.isArray(data)) {
             setCertificates(data);
           } else {
             console.error("Fetched data is not an array:", data);
           }
-      
         } catch (error) {
           console.error("Failed to fetch certificates:", error);
         }
@@ -95,7 +94,10 @@ const Certificate = () => {
   // Calculate pagination
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentCertificates = filteredCertificates.slice(indexOfFirstItem, indexOfLastItem);
+  const currentCertificates = filteredCertificates.slice(
+    indexOfFirstItem,
+    indexOfLastItem
+  );
   const totalItems = filteredCertificates.length;
 
   // Handle page change
