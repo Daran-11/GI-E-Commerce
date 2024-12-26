@@ -26,6 +26,15 @@ export async function POST(request) {
 
         const hashedPassword = await bcrypt.hashSync(password, 10);
 
+        // Check if phone number is already used
+        const existingPhoneUser = await prisma.user.findUnique({
+            where: { phone },
+        });
+
+        if (existingPhoneUser) {
+            return new Response(JSON.stringify({ error: 'เบอร์โทรศัพท์นี้ถูกใช้ไปแล้ว' }), { status: 400 });
+        }        
+
         const user = await prisma.user.create({
             data: {
                 name,

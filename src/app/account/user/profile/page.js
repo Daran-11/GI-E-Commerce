@@ -39,7 +39,7 @@ export default function Profile() {
         </div>
         <div className="flex w-fit h-fit">
           <div className="w-full h-fit">
-            <p>ขื่อ <b>{session.user.name}!</b></p>
+            <p>ชื่อผู้ใช้ <b>{session.user.name}!</b></p>
             <p>อีเมล {session.user.email}</p>
             <p>เบอร์โทร: {session.user.phone || 'กำลังโหลดข้อมูล...'}</p>
             <button

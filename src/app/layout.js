@@ -8,6 +8,7 @@ import { ToastContainer } from 'react-toastify'; // Import ToastContainer
 import 'react-toastify/dist/ReactToastify.css'; // Import Toastify styles
 import ClientLayout from '../components/ClientLayout';
 import SessionProvider from '../components/SessionProvider';
+import { authOptions } from './api/auth/[...nextauth]/route';
 import './globals.css';
 
 
@@ -20,7 +21,7 @@ const prompt = Prompt({
 
 export default async function RootLayout({ children }) {
 
-  const session = await getServerSession();
+  const session = await getServerSession(authOptions);
 
 
   return (

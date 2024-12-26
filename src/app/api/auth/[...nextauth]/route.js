@@ -41,7 +41,7 @@ export const authOptions = {
                 role: user.role,
               };
             } else {
-              throw new Error('Invalid email or password');
+              throw new Error('อีเมล เบอร์โทร หรือ รหัสผ่านไม่ถูกต้อง');
             }
           } catch (error) {
             if (error.message.includes("Can't reach database server")) {
@@ -57,7 +57,7 @@ export const authOptions = {
           // Set session timeout (maxAge) to 30 days (in seconds)
     maxAge: 30 * 24 * 60 * 60, // 30 days in seconds
     // Set session update interval (updateAge) to 1 day (in seconds)
-    updateAge: 24 * 60 * 60, // 1 day in seconds
+    updateAge: 10, // รีเฟรชทุก 10 วินาที
       strategy: 'jwt',
     },
     cookies: {

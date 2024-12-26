@@ -1,7 +1,6 @@
 "use client";
 
 import { CircularProgress } from "@mui/material";
-import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
@@ -9,8 +8,7 @@ import useSWR from "swr";
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
-export default function AddressManagement({ onSave, onLoad, onSuccess }) {
-  const { data: session, status } = useSession();
+export default function AddressManagement({session , onSave, onLoad, onSuccess }) {
   const router = useRouter();
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [addressForm, setAddressForm] = useState({
@@ -25,22 +23,25 @@ export default function AddressManagement({ onSave, onLoad, onSuccess }) {
 
   const [isFormVisible, setIsFormVisible] = useState(false);
   
-  
+  const userId = session?.user?.id
+  console.log("user id ",userId)
 
   // Fetch addresses using SWR
   const { data: addresses, mutate: mutateAddresses, isLoading, error } = useSWR(
-    status === "authenticated" && session.user && session?.user?.id ? `/api/users/${session.user.id}/addresses` : null,
+    session && session?.user?.id ? `/api/users/${session.user.id}/addresses` : null,
     fetcher,
     { revalidateOnFocus: false } // ป้องกันการ re-fetch ขณะเปลี่ยนแท็บ
   );
 
+
+
     // Effect to trigger refetch when session status changes
     useEffect(() => {
-      if (status === "authenticated" && session?.user?.id && session.user ) {
+      if ( session) {
         // Refetch addresses when session becomes authenticated
         mutateAddresses();
       }
-    }, [status,  session, mutateAddresses]); // Re-run the effect when status or session changes
+    }, [ session, mutateAddresses]); // Re-run the effect when status or session changes
 
   useEffect(() => {
     // เรียก onLoad เมื่อ component โหลดเสร็จ
@@ -51,12 +52,6 @@ export default function AddressManagement({ onSave, onLoad, onSuccess }) {
 
 
 
-
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/login')
-    }
-  }, [status, router])
 
 
 
@@ -241,7 +236,7 @@ export default function AddressManagement({ onSave, onLoad, onSuccess }) {
   };
 
 
-  if (isLoading || status === 'loading') {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen w-screen fixed top-0 left-0 bg-white bg-opacity-80 z-50">
         <CircularProgress />

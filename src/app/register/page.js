@@ -1,13 +1,13 @@
 "use client"
-import Image from "next/image";
+import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import {
-   validateConfirmPassword,
-   validateEmail,
-   validateName,
-   validatePassword,
-   validatePhone
+    validateConfirmPassword,
+    validateEmail,
+    validateName,
+    validatePassword,
+    validatePhone
 } from '../../components/formValidation';
 
 export default function RegisterPage() {
@@ -23,6 +23,7 @@ export default function RegisterPage() {
    const [passwordError, setPasswordError] = useState("");
    const [confirmPasswordError, setConfirmPasswordError] = useState("");
    const [phoneError, setPhoneError] = useState("");
+   const [identifier, setIdentifier] = useState('')
    const [successMessage, setSuccessMessage] = useState("");
    const [error, setError] = useState("");
    const router = useRouter();
@@ -64,13 +65,20 @@ export default function RegisterPage() {
            });
 
            const data = await res.json();
-
+            //เมื่อสมัครสมาชิกผ่าน จะ แสดงข้อความสำเร็จ ล้าง error แล้วล็อคอินเข้าระบบอัตโนมัติ
            if (res.ok) {
                setSuccessMessage('สมัครสมาชิกสำเร็จ');
                setError('');
-               setTimeout(() => {
-                   router.push('/');
-               }, 3000);
+               setIdentifier(email);
+               
+               const result = await signIn('credentials',{
+                redirect: false,
+                identifier: email,  // Use email as the identifier for login
+                password,
+              })
+
+                window.location.href = '/'; // Redirect to the home page after login
+
            } else {
                setSuccessMessage('');
                setError(data.error || 'เกิดข้อผิดพลาดระหว่างการสมัครสมาชิก');
@@ -117,7 +125,7 @@ export default function RegisterPage() {
        <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
            <div className="sm:mx-auto sm:w-full sm:max-w-md">
               
-               <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+               <h2 className="mt-6 text-center text-3xl text-[#4eac14] ">
                    สมัครสมาชิก
                </h2>
            </div>
@@ -135,7 +143,7 @@ export default function RegisterPage() {
                                    name="firstName"
                                    value={firstName}
                                    onChange={handleChange}
-                                   className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 ${
+                                   className={`mt-1 block indent-2 w-full rounded-3xl p-1 border border-gray-400 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 ${
                                        firstNameError ? 'border-red-500' : ''
                                    }`}
                                    required
@@ -144,7 +152,7 @@ export default function RegisterPage() {
                            </div>
 
                            <div className="w-1/2">
-                               <label className="block text-sm font-medium text-gray-700">
+                               <label className="block indent-2 text-sm font-medium text-gray-700">
                                    นามสกุล <span className="text-red-500">*</span>
                                </label>
                                <input
@@ -152,7 +160,7 @@ export default function RegisterPage() {
                                    name="lastName"
                                    value={lastName}
                                    onChange={handleChange}
-                                   className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 ${
+                                   className={`mt-1 block indent-2 w-full rounded-3xl p-1 border border-gray-400  shadow-sm focus:border-indigo-500 focus:ring-indigo-500 ${
                                        lastNameError ? 'border-red-500' : ''
                                    }`}
                                    required
@@ -170,7 +178,7 @@ export default function RegisterPage() {
                                name="email"
                                value={email}
                                onChange={handleChange}
-                               className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 ${
+                               className={`mt-1 block indent-2 w-full rounded-3xl p-1 border border-gray-400 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 ${
                                    emailError ? 'border-red-500' : ''
                                }`}
                                required
@@ -187,7 +195,7 @@ export default function RegisterPage() {
                                name="password"
                                value={password}
                                onChange={handleChange}
-                               className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 ${
+                               className={`mt-1 block indent-2 w-full rounded-3xl p-1 border border-gray-400  shadow-sm focus:border-indigo-500 focus:ring-indigo-500 ${
                                    passwordError ? 'border-red-500' : ''
                                }`}
                                required
@@ -204,7 +212,7 @@ export default function RegisterPage() {
                                name="confirmPassword"
                                value={confirmPassword}
                                onChange={handleChange}
-                               className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 ${
+                               className={`mt-1 block indent-2 w-full rounded-3xl p-1 border border-gray-400  shadow-sm focus:border-indigo-500 focus:ring-indigo-500 ${
                                    confirmPasswordError ? 'border-red-500' : ''
                                }`}
                                required
@@ -222,7 +230,7 @@ export default function RegisterPage() {
                                value={phone}
                                onChange={handleChange}
                                maxLength={10}
-                               className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 ${
+                               className={`mt-1 block indent-2 w-full rounded-3xl p-1 border border-gray-400  shadow-sm focus:border-indigo-500 focus:ring-indigo-500 ${
                                    phoneError ? 'border-red-500' : ''
                                }`}
                                required
