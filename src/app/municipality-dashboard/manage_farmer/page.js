@@ -123,7 +123,7 @@ const ManageFarmer = () => {
 
  return (
    <div className={styles.container}>
-     <h1 className="text-2xl ">ข้อมูลเกษตรกรในระบบ</h1><br></br>
+     <h1 className="text-2xl ">จัดการมาตรฐานเกษตรกร</h1><br></br>
      <div className={styles.top}>
        <Search 
          placeholder="ค้นหาเกษตรกร..." 
