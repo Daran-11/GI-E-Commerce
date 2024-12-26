@@ -1,10 +1,11 @@
-import prisma from '../../../../../lib/prisma';
+import prisma from "../../../../../lib/prisma";
 
 export async function GET(request, { params }) {
  try {
    const user = await prisma.user.findFirst({
      where: { 
        id: Number(params.id),
+       role: 'customer',
        Farmer: {
          some: {}
        }
@@ -31,6 +32,14 @@ export async function GET(request, { params }) {
        headers: { 'Content-Type': 'application/json' }
      });
    }
+
+    // Check if the user's role is 'farmer'
+    if (user.role === 'farmer') {
+      return new Response(JSON.stringify({ message: 'User is already a farmer' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }   
 
    const formattedUser = {
      id: user.id,
@@ -59,52 +68,64 @@ export async function GET(request, { params }) {
 }
 
 export async function PUT(request, { params }) {
- try {
-   const user = await prisma.user.update({
-     where: {
-       id: Number(params.id)
-     },
-     data: {
-       role: 'farmer'
-     },
-     include: {
-       Farmer: {
-         select: {
-           farmerName: true, 
-           address: true,
-           sub_district: true,
-           district: true,
-           province: true,
-           zip_code: true,
-           phone: true,
-           contactLine: true
-         }
-       }
-     }
-   });
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: Number(params.id) }
+    });
 
-   const formattedUser = {
-     id: user.id,
-     email: user.email,
-     name: user.name,
-     phone: user.phone,
-     role: user.role,
-     Farmer: user.Farmer[0]
-   };
+    // Check if the user's role is already 'farmer'
+    if (!user || user.role === 'farmer') {
+      return new Response(JSON.stringify({ message: 'User is already a farmer or not found' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
 
-   return new Response(JSON.stringify(formattedUser), {
-     status: 200,
-     headers: { 'Content-Type': 'application/json' }
-   });
+    const updatedUser = await prisma.user.update({
+      where: {
+        id: Number(params.id)
+      },
+      data: {
+        role: 'farmer'
+      },
+      include: {
+        Farmer: {
+          select: {
+            farmerName: true, 
+            address: true,
+            sub_district: true,
+            district: true,
+            province: true,
+            zip_code: true,
+            phone: true,
+            contactLine: true
+          }
+        }
+      }
+    });
 
- } catch (error) {
-   console.error('Error:', error);
-   return new Response(JSON.stringify({
-     message: 'เกิดข้อผิดพลาด',
-     error: error.message
-   }), {
-     status: 500,
-     headers: { 'Content-Type': 'application/json' }
-   });
- }
+    const formattedUser = {
+      id: updatedUser.id,
+      email: updatedUser.email,
+      name: updatedUser.name,
+      phone: updatedUser.phone,
+      role: updatedUser.role,
+      Farmer: updatedUser.Farmer[0] || null
+    };
+
+    return new Response(JSON.stringify(formattedUser), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    });
+
+  } catch (error) {
+    console.error('Error:', error);
+    return new Response(JSON.stringify({
+      message: 'เกิดข้อผิดพลาด',
+      error: error.message
+    }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
 }
