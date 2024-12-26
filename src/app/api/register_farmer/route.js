@@ -64,7 +64,38 @@ export async function POST(request) {
       });
     }
 
-    // If no existing farmer found, create a new one
+    // Check if the farmer name already exists in farmer table
+    const existingFarmerName = await prisma.farmer.findFirst({
+      where: {
+        farmerName: farmerName,
+      },
+    });
+
+    if (existingFarmerName) {
+      return new Response(JSON.stringify({ message: 'ชื่อเกษตรกรนี้มีในระบบแล้ว กรุณาตรวจสอบข้อมูล' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Check if the farmer name exists in manage_farmer table
+    const approvedFarmer = await prisma.manage_farmer.findFirst({
+      where: {
+        farmerNameApprove: farmerName,
+      },
+    });
+
+    if (!approvedFarmer) {
+      return new Response(JSON.stringify({ 
+        message: 'ไม่พบข้อมูลของผู้ใช้ในฐานข้อมูลของเทศบาล โปรดติดต่อเทศบาล',
+        status: 'not_found'
+      }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    // If farmer is found in manage_farmer and name is not duplicate, create new farmer record
     const farmer = await prisma.farmer.create({
       data: {
         farmerName,
@@ -79,10 +110,20 @@ export async function POST(request) {
       },
     });
 
-    return new Response(JSON.stringify(farmer), {
+    // Update user role to farmer
+    await prisma.user.update({
+      where: { id: userId },
+      data: { role: 'farmer' }
+    });
+
+    return new Response(JSON.stringify({
+      message: 'สมัครเป็นเกษตรกรสำเร็จ',
+      data: farmer
+    }), {
       status: 201,
       headers: { 'Content-Type': 'application/json' },
     });
+
   } catch (error) {
     console.error('Error:', error);
     return new Response(JSON.stringify({ 
