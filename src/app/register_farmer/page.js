@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { getSession } from "next-auth/react";
-import AddressRegisterFarmer from "@/components/AddressRegisterFarmer"; // ปรับ path ตามโครงสร้างโปรเจค
+import AddressRegisterFarmer from "@/components/AddressRegisterFarmer";
 
 export default function RegisterFarmer() {
   const [firstName, setFirstName] = useState("");
@@ -23,6 +23,8 @@ export default function RegisterFarmer() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const [isAddressComplete, setIsAddressComplete] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [notFoundError, setNotFoundError] = useState(false);
 
   const handleAddressChange = (addressData, isComplete) => {
     setIsAddressComplete(isComplete);
@@ -88,28 +90,11 @@ export default function RegisterFarmer() {
     return true;
   };
 
-  const [success, setSuccess] = useState(false);
-
-  const handleAddressSelect = async () => {
-    // รอให้ที่อยู่ถูกบันทึกและได้รับการอัพเดท
-    try {
-      const res = await fetch(`/api/users/${formData.userId}/addresses?default=true`);
-      if (res.ok) {
-        const addresses = await res.json();
-        const defaultAddress = addresses.find(addr => addr.isDefault);
-        if (defaultAddress) {
-          setSelectedAddress(defaultAddress);
-        }
-      }
-    } catch (error) {
-      console.error("Failed to fetch default address:", error);
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setSuccess(false);
+    setNotFoundError(false);
   
     if (!validateForm()) {
       return;
@@ -117,13 +102,11 @@ export default function RegisterFarmer() {
   
     setLoading(true);
     try {
-      // สร้าง object ข้อมูลใหม่แทนการใช้ formData โดยตรง
       const submitData = {
         farmerName: `${firstName} ${lastName}`.trim(),
         userId: formData.userId,
         phone: formData.phone,
         contactLine: formData.contactLine,
-        // ข้อมูลที่อยู่
         address: formData.address,
         sub_district: formData.sub_district,
         district: formData.district,
@@ -131,7 +114,6 @@ export default function RegisterFarmer() {
         zip_code: formData.zip_code
       };
   
-      // ตรวจสอบข้อมูลก่อนส่ง
       if (!submitData.address || !submitData.sub_district || 
           !submitData.district || !submitData.province || 
           !submitData.zip_code) {
@@ -153,6 +135,8 @@ export default function RegisterFarmer() {
         setTimeout(() => {
           router.push("/");
         }, 3000);
+      } else if (response.status === 404) {
+        setNotFoundError(true);
       } else {
         setError(data.message || "เกิดข้อผิดพลาดในการลงทะเบียน");
       }
@@ -175,6 +159,64 @@ export default function RegisterFarmer() {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-2xl">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
           <form className="space-y-6" onSubmit={handleSubmit}>
+            {/* Success Message */}
+            {success && (
+              <div className="rounded-md bg-green-50 p-4 mb-4">
+                <div className="flex">
+                  <div className="flex-shrink-0">
+                    <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div className="ml-3">
+                    <p className="text-sm font-medium text-green-800">
+                      สมัครเป็นเกษตรกรสำเร็จ
+                    </p>
+                    <p className="mt-2 text-sm text-green-700">
+                      ระบบจะพาคุณกลับไปยังหน้าหลักในอีก 3 วินาที
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Not Found Error */}
+            {notFoundError && (
+              <div className="rounded-md bg-yellow-50 p-4 mb-4">
+                <div className="flex">
+                  <div className="flex-shrink-0">
+                    <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div className="ml-3">
+                    <p className="text-sm font-medium text-yellow-800">
+                      ไม่พบข้อมูลในฐานข้อมูลเทศบาล
+                    </p>
+                    <p className="mt-2 text-sm text-yellow-700">
+                      ไม่พบข้อมูลของผู้ใช้ในฐานข้อมูลของเทศบาล โปรดติดต่อเทศบาล
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* General Error */}
+            {error && !notFoundError && (
+              <div className="rounded-md bg-red-50 p-4 mb-4">
+                <div className="flex">
+                  <div className="flex-shrink-0">
+                    <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div className="ml-3">
+                    <p className="text-sm font-medium text-red-800">{error}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* ส่วนชื่อ-นามสกุล */}
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               <div>
@@ -248,42 +290,6 @@ export default function RegisterFarmer() {
                 />
               </div>
             </div>
-
-            {/* แสดงข้อความสำเร็จและข้อผิดพลาด */}
-            {success && (
-              <div className="rounded-md bg-green-50 p-4 mb-4">
-                <div className="flex">
-                  <div className="flex-shrink-0">
-                    <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <div className="ml-3">
-                    <h3 className="text-sm font-medium text-green-800">
-                      ลงทะเบียนสำเร็จ กรุณารอการอนุมัติจากเทศบาล
-                    </h3>
-                    <div className="mt-2 text-sm text-green-700">
-                      ระบบจะพาคุณกลับไปยังหน้าหลักในอีก 3 วินาที
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {error && (
-              <div className="rounded-md bg-red-50 p-4">
-                <div className="flex">
-                  <div className="flex-shrink-0">
-                    <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <div className="ml-3">
-                    <h3 className="text-sm font-medium text-red-800">{error}</h3>
-                  </div>
-                </div>
-              </div>
-            )}
 
             <div className="flex justify-center">
               <button
