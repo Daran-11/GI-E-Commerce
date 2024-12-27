@@ -30,6 +30,7 @@ export default async function ProductDetails({ params }) {
       Description:true,
       Details:true,
       images: true,
+      HarvestedAt: true,
       certificates: {
         include: {
           certificate: {

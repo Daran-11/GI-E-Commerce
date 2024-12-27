@@ -7,12 +7,12 @@ import {
   DropdownMenu,
   PopoverTrigger,
 } from "@nextui-org/react";
+import { ShoppingBasket } from "lucide-react";
 import { signOut } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import SearchBar from "./searchbar";
-
 export const Navbar = ({session}) => {
 
   const currentPath = usePathname();
@@ -92,9 +92,29 @@ export const Navbar = ({session}) => {
 
         {/* Hamburger Icon */}
         <div ref={toggleButtonRef} className="lg:hidden flex items-center">
+        <Link
+          href="/cart"
+          className={`relative flex items-center ${
+            currentPath === "/cart"
+              ? "text-[#4EAC14] block mr-2 py-2"
+              : "block py-2 mr-2 text-gray-700 hover:bg-gray-100"
+          }`}
+        >
+          {/* Icon */}
+          <ShoppingBasket size={30} />  
+
+          {/* Cart Item Count */}
+          <span
+            className={`absolute top-0 right-0 transform translate-x-0 -translate-y-1 text-white text-xs flex items-center justify-center w-5 h-5 rounded-full ${
+              cartItemCount >= 1 ? "bg-[#4EAC14]" : "bg-[#a8a8a8]"
+            }`}
+          >
+            {cartItemCount}
+          </span>
+        </Link>
           <button onClick={toggleMenu}>
             <svg
-              className="w-6 h-6 text-[#595959]"
+              className="w-7 h-7 text-[#595959]"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -108,6 +128,7 @@ export const Navbar = ({session}) => {
               />
             </svg>
           </button>
+
         </div>
 
         {/* Regular Menu (shown on large screens) */}
@@ -164,22 +185,25 @@ export const Navbar = ({session}) => {
                 </Link>
               </li>
               <li>
-                <Link
-                  href="/cart"
-                  className={
-                    currentPath === "/cart"
-                      ? "text-[#4EAC14]"
-                      : "text-[#595959]"
-                  }
-                >
-                  ตะกร้า
-                </Link>
-                <span
-                  className={`text-white text-base rounded-full ml-1 px-2 ${cartItemCount >= 1 ? "bg-[#4EAC14]" : "bg-[#a8a8a8]"
-                    }`}
-                >
-                  {cartItemCount}
-                </span>
+              <Link
+              href="/cart"
+              className={`relative flex items-center ${
+                currentPath === "/cart"
+                  ? "text-[#4EAC14] block mr-2 py-2"
+                  : "block text-[#535353] py-2 mr-2  hover:bg-gray-100"
+              }`}
+            >
+              {/* Icon */}
+              <ShoppingBasket size={30}  />  
+              {/* Cart Item Count */}
+              <span
+                className={`absolute top-0 right-0 transform translate-x-2 translate-y-1 text-white text-xs flex items-center justify-center w-5 h-5 rounded-full ${
+                  cartItemCount >= 1 ? "bg-[#4EAC14]" : "bg-[#a8a8a8]"
+                }`}
+              >
+                {cartItemCount}
+              </span>
+            </Link>
               </li>
 
               {session?.user?.role === "farmer" && session && (
@@ -341,31 +365,15 @@ export const Navbar = ({session}) => {
                   href="/trace"
                   className={
                     currentPath === "/trace"
-                      ? "text-[#4EAC14]"
-                      : "text-[#595959]"
+                        ? "text-[#4EAC14] block px-4 py-2 "
+                        : "block  px-4 py-2  text-gray-700 hover:bg-gray-100"
                   }
                 >
                   ตรวจสอบสินค้า
                 </Link>
               </li>
                 <li>
-                  <Link
-                    href="/cart"
-                    className={
-                      currentPath === "/cart"
-                        ? "text-[#4EAC14] block px-4 py-2 "
-                        : "block  px-4 py-2  text-gray-700 hover:bg-gray-100"
-                    }
-                    onClick={toggleMenu}
-                  >
-                    ตะกร้า
-                    <span
-                      className={`text-white text-base rounded-full ml-1 px-2 ${cartItemCount >= 1 ? "bg-[#4EAC14]" : "bg-[#a8a8a8]"
-                        }`}
-                    >
-                      {cartItemCount}
-                    </span>
-                  </Link>
+
                 </li>
                 {session?.user?.role  === "farmer" && session && (
                   <li>

@@ -35,7 +35,7 @@ const FarmerProfit = () => {
   }
 
   if (!profitData) {
-    return <div>Loading...</div>;
+    return <div className='bg-white w-[40%] p-6'>กำลังโหลด...</div>;
   }
 
   return (

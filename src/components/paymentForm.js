@@ -159,12 +159,12 @@ const handleExpiryDateChange = (e) => {
 
 
   return (
-    <div className="top-container flex justify-center border-2 w-[500px] lg:w-[500px] h-[600px] rounded-2xl shadow-lg ">
-    <div className="w-[400px] sm:[320px]  md:[350px]">
+    <div className="max-w-[90%] mt-[120px] md:mt-[150px] ml-auto mr-auto   flex justify-center bg-white border-2 w-[450px] lg:max-w-[60%] h-[600px] rounded-2xl shadow-lg ">
+    <div className="w-[90%] sm:[320px]  md:[350px]">
     
     <form onSubmit={handleSubmit} className="mt-[80px] mx-4">
       <div className="flex">
-        <div className="text-5xl text-gray-800 mb-1">
+        <div className="text-5xl text-[#4eac14] mb-1">
           ชำระเงิน
         </div>     
       </div>
