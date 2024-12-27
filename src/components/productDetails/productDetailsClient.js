@@ -1,12 +1,13 @@
 "use client";
 import { useCart } from "@/context/cartContext";
+import { ShoppingBasket } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { Rating } from "react-simple-star-rating";
 import { toast } from "react-toastify";
-import { formatDateToThaiBuddhist } from "../../../utils/formatDate";
+import DateComponent from "../../../utils/formatDate";
 import Breadcrumb from "../BreadCrumb";
 import EmblaCarousel from "../EmblaCarousel";
 
@@ -159,6 +160,8 @@ export default function ProductDetailsClient({ product, totalReviewsCount, Produ
     }
   };
 
+
+  
   return (
     <div className="flex flex-col w-[95%] sm:w-[85%] lg:w-[60%] ml-auto mr-auto mt-[120px]">
       <div className="w-full h-[45px] bg-white rounded-2xl mb-[20px] pl-2 flex items-center">
@@ -166,14 +169,12 @@ export default function ProductDetailsClient({ product, totalReviewsCount, Produ
       </div>
 
       <div className="detail flex justify-center md:justify-start">
-        <div className="hidden lg:flex">
-        
+        <div className="hidden lg:flex">   
           <EmblaCarousel images={product.images || []} />
         </div>
 
+
         {/*replace with Embla carousel here*/}
-
-
         <div className="w-full h-fit  bg-white lg:ml-[15px] rounded-2xl p-6">
           <div className="text-[#535353]">
             <div className="lg:hidden flex justify-center">
@@ -184,7 +185,6 @@ export default function ProductDetailsClient({ product, totalReviewsCount, Produ
               <p className="text-xl"> ผู้ขาย {product.farmer.farmerName} </p>
             </div>
             <div className="flex w-full text-[#767676] text-xl">
-
               <div className="mr-5 flex justify-start items-center">
                 <Rating
                   readonly
@@ -195,86 +195,46 @@ export default function ProductDetailsClient({ product, totalReviewsCount, Produ
                 />
                 <p className="text-sm">{avgRating} / 5</p>
               </div>
-
               <p className="hidden md:flex"> ขายแล้ว {totalOrderAmount} กิโลกรัม</p>
-
             </div>
-            <p className="text-[#4eac14] text-[35px] lg:mb-2 lg:mt-2">
-              {Number(product.Price).toLocaleString()} บาท/กิโล
+            <p className="text-[#4eac14] text-[35px] lg:mb-1 lg:mt-2">
+              {Number(product.Price).toLocaleString()} บาท/กิโลกรัม
             </p>
-            <div className="space-y-2 md:space-y-4 w-full  text-[#767676] text-[20px] mb-5">
-              <div className="lg:w-fit">
-                <div>
-                  {product.certificates.map((cert) => {
-                    // Ensure certificate exists and has the 'certificate' property
-                    if (cert.certificate && cert.certificate.standards) {
-                      const standards = cert.certificate.standards; // This is the JSON field
-
-                      try {
-                        // Assuming standards is a JSON string, parse it if necessary
-                        const standardsObj = JSON.parse(standards);
-                        console.log("standardsObj :", standardsObj)
-
-              return (
-                <div key={cert.certificate.id}>
-                  <div>
-                    {standardsObj.map((standard, index) => (
-                      <div className="flex space-x-3 mb-2 justify-start items-center" key={index}>
-                        <div>
-                            
-                        <Image
-                        key={index}
-                        src={standard.logo}
-                        alt={standard.name}
-                        width={50}
-                        height={50}
-                      />                          
-                        </div>
-                      <div>
-                        <p className="text-sm">ทะเบียน: {standard.certNumber}</p>                        
-                      </div>
-                      <div> 
-                        <p className="text-sm">วันที่รับรอง: {standard.certDate}</p>                        
-                      </div>
-
-
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        );
-                      } catch (error) {
-                        console.error('Error parsing standards:', error);
-                        return <div>Invalid standards data</div>;
-                      }
-                    } else {
-                      // If no standards found for the certificate
-                      return (
-                        <div key={cert.certificate ? cert.certificate.id : 'no-id'}>
-                          No standards found for this certificate.
-                        </div>
-                      );
-                    }
-                  })}
-                </div>
-                <div className="w-[250px]">คำอธิบาย</div>
-                <div className="w-full text-[#535353]">{product.Description}</div>
-
+            <div className="space-y-2 md:space-y-4 w-full   text-[22px] mb-5">
+              <div className="lg:w-full">
+              <div className="w-[250px] font-medium ">คำอธิบาย</div>
+                <div className="w-full text-[#535353] text-base">{product.Description}</div>
               </div>
-              <div className="w-fit">
-                <div className="w-[250px]">ช่องทางติดต่อ</div>
-                <div className="w-full text-[#535353]">{product.farmer.contactLine}</div>
+              
+              <div>
+                <div className="flex items-center">
+                  <div className="w-fit font-medium  text-base mr-2">ช่องทางติดต่อ:</div>
+                  <div className="w-fit text-[#535353] text-base">{product.farmer.contactLine}</div>
+                </div> 
+
+                {/* แสดงวันที่เก็บเกี่ยว */}
+                {product.HarvestedAt && (
+                  <div className="flex items-center">
+                    <span className="w-fit text-base mr-2">วันที่เก็บเกี่ยว:</span>
+                    <span className="w-fit text-base ">
+                      <DateComponent date={product.HarvestedAt}/>
+                    </span>
+                  </div>
+                )}                               
               </div>
-              <div className="w-fit">
-                <div className="w-fit">จำนวน(กิโล)</div>
+
+
+
+
+              <div className="w-full border-t-2 pt-3">
+                <div className="w-fit">เลือกจำนวน(กิโลกรัม)</div>
                 <div className="w-fit flex items-center">
 
-
                   <div className='flex items-center w-fit '>
-                    <button className='btn w-10 h-10 text-3xl md:text-2xl md:border-2  rounded-full  text-center' onClick={decrement}>
+                    <button className='btn w-10 h-10 text-3xl md:text-2xl  border border-gray-400 md:border-2  rounded-full  text-center focus:border-2  focus:border-[#4eac14]' onClick={decrement}>
                       -
                     </button>
-                    <div className='items-center justify-center'>
+                    <div className='items-center justify-center mx-2 md:mx-0'>
                       <input
                         type="number"
                         className="w-4 h-5 lg:w-8 lg:h-10 lg:mx-1 text-center appearance-none"
@@ -285,37 +245,92 @@ export default function ProductDetailsClient({ product, totalReviewsCount, Produ
                         max={product.Amount}
                       />
                     </div>
-                    <button className='btn w-10 h-10 text-3xl md:text-2xl md:border-2 rounded-full' onClick={increment}>
+                    <button className='btn w-10 h-10 text-3xl md:text-2xl border border-gray-400 md:border-2 rounded-full  focus:border-2  focus:border-[#4eac14]' onClick={increment}>
                       +
                     </button>
                   </div>
-
-
-
-                  <p className="ml-3 text-[#535353]">มีสินค้า {product.Amount} กิโลกรัม</p>
+                  <p className="ml-3 text-[#535353] text-base">มีสินค้า {product.Amount} กิโลกรัม</p>
                 </div>
               </div>
             </div>
 
-            <div className='flex justify-between md:justify-start'>
+            <div className='flex justify-between md:justify-start space-x-2 md:space-x-3'>
               <button
-                className='action-button bg-[#4EAC14] rounded-xl text-white w-[150px] h-[50px] font-light plausible-event-name=Addcart'
+                className='action-button btn-submit mt-2 w-[130px] h-[40px] p-2 bg-[#4eac14] text-white cursor-pointer hover:bg-[#4eac14] hover:opacity-70 transition focus:ring-2 focus:ring-offset-2 focus:ring-[#4eac14] plausible-event-name=Addcart'
                 onClick={buyNow}>
                 ซื้อเลย
               </button>
 
               <button
-                className='action-button ml-4 text-[#4EAC14] border-2  border-gray-500 rounded-xl plausible-event-name=Addcart '
+                className='action-button mt-2 flex items-center pr-2 !w-[200px] h-[40px] p-2 cursor-pointer border-2 rounded-3xl border-[#4eac14] text-[#4eac14]  focus:ring-2 focus:ring-offset-2 hover:opacity-70 focus:ring-[#4eac14] hover:underline plausible-event-name=Addcart '
                 onClick={addToCart}>
-                เพิ่มในตะกร้า
+                <ShoppingBasket/>
+                <p className="pl-2">เพิ่มไปยังตะกร้า</p>
               </button>
             </div>
           </div>
         </div>
       </div>
 
+        <div className="Certificate text-[#535353] bg-white rounded-2xl mt-5 p-4">
+            <h1 className="text-2xl mb-2">มาตรฐาน</h1>
+            {product.certificates.map((cert) => {
+                // Ensure certificate exists and has the 'certificate' property
+                if (cert.certificate && cert.certificate.standards) {
+                    const standards = cert.certificate.standards; // This is the JSON field
+                    try {
+                    // Assuming standards is a JSON string, parse it if necessary
+                        const standardsObj = JSON.parse(standards);
+                    return (
+                        <div className="w-full md:flex justify-start " key={cert.certificate.id}>
+                            {standardsObj.map((standard, index) => (
+                                <div className="flex  p-2 w-full border-2 rounded-xl space-x-3 mb-3 m-2" key={index}>
+                                    <div className="flex justify-start w-fit items-center">
+                                        <div>                               
+                                            <Image
+                                            key={index}
+                                            src={standard.logo}
+                                            alt={standard.name}
+                                            width={80}
+                                            height={80}
+                                            />                          
+                                        </div>
+                                        <div className="pl-1  justify-between w-full text-base">
+                                            <h1>มาตรฐาน: {standard.name}</h1>
+                                            <div className=" w-fit">ทะเบียน: {standard.certNumber}</div>
+                                            <div className="flex items-center text-base">
+                                            <p className=" mr-2">วันที่รับรอง </p>         
+                                            <div className="">
+                                            <DateComponent date={standard.certDate}/>       
+                                            </div>
+                                                                        
+                                            </div>
+
+                                                                    
+                                        </div>                               
+                                    </div>
+                                </div>
+                                ))}
+                        </div>
+                            );
+                        } catch (error) {
+                        console.error('Error parsing standards:', error);
+                        return <div>Invalid standards data</div>;
+                        }
+                    } else {
+                        // If no standards found for the certificate
+                        return (
+                        <div key={cert.certificate ? cert.certificate.id : 'no-id'}>
+                            No standards found for this certificate.
+                        </div>
+                        );
+                    }})
+            }
+
+        </div>
+
       <div className='text-[#535353] bg-white rounded-2xl mt-5 p-4'>
-        <p className='text-2xl'>รายละเอียด</p>
+        <p className='text-2xl mb-2'>รายละเอียด</p>
         {product.Details ? (
           <p className="mt-2">{product.Details}</p>
         ) : (
@@ -333,7 +348,9 @@ export default function ProductDetailsClient({ product, totalReviewsCount, Produ
 
               <div className="flex items-center">
                 <Rating readonly initialValue={review.rating} size={20} iconsCount={5} />
-                <p className="ml-2 text-sm text-gray-500">{formatDateToThaiBuddhist(review.createdAt)}</p>
+                <p className="ml-2 text-sm text-gray-500">                      
+                  <DateComponent date={review.createdAt}/>
+                  </p>
               </div>
               <p className='text-[#2b2b2b]'>{review.user.name}</p>
               <p className="mt-2">{review.review}</p>

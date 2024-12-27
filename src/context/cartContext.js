@@ -51,7 +51,7 @@ export const CartProvider = ({ children }) => {
 
 
   useEffect(() => {
-    if (status ==='authenticated') {
+    if (status ==='authenticated' && session) {
       syncCartWithServer(session);
       fetchCartItems();
     } 
@@ -64,24 +64,27 @@ export const CartProvider = ({ children }) => {
   // ใส่ตัวเช็คว่าจำนวนจะเกินไหมใน syncCartwithServer
   const syncCartWithServer = async (session) => {
     const localCart = JSON.parse(localStorage.getItem('cart')) || [];
+    console.log("Local Cart before sync:", localCart);
     if (!localCart.length) return; // ถ้าไม่มีสินค้าก็ไม่ต้องซิงค์
-    for (const item of localCart) 
-      
-      {
-      await fetch('/api/auth/cart/add', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.token}`,
-        },
-        body: JSON.stringify(item),
-      });
+    for (const item of localCart) {
+      try {
+        console.log(`Syncing productId: ${item.productId}, quantity: ${item.quantity}`);
+        await fetch('/api/auth/cart/add', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(item),
+        });
+      } catch (error) {
+        console.error(`Failed to sync item with productId: ${item.productId}`, error);
+      }
     }
 
     localStorage.removeItem('cart');
 
     // Fetch updated cart items from server
-    if (status === 'authenticated') {
+    if (status === 'authenticated' && session) {
       const response = await fetch('/api/auth/cart', {
         headers: {
           'Cache-Control': 'no-cache',
@@ -90,6 +93,7 @@ export const CartProvider = ({ children }) => {
 
       if (response.ok) {
         const data = await response.json();
+        console.log("Cart data from server after sync:", data);
         setCartItems(data); // Update state with server data
         console.log("synced with server finished, cartItems:",cartItems);
         const uniqueItemsCount = new Set(data.map(item => item.productId)).size;

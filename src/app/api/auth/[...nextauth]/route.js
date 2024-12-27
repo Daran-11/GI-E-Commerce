@@ -81,17 +81,14 @@ export const authOptions = {
           token.role = user.role;
           token.phone = user.phone;
         }
-        console.log("JWT Callback Token:", token);  // ตรวจสอบว่า token ถูกต้อง
         return token;
       },
       session: async ({ session, token }) => {
-        console.log("Session Callback Token:", token); // เพิ่ม log เพื่อตรวจสอบว่า token ถูกส่งมาหรือไม่
         if (token && session.user) {
           session.user.id = token.id;
           session.user.role = token.role;
           session.user.phone = token.phone;
         }
-        console.log("Session Callback Session:", session);  // ตรวจสอบว่า session ถูกต้อง
         return session;
       }
     },

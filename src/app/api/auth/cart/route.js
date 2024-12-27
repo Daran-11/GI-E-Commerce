@@ -38,7 +38,7 @@ export async function GET(req) {
       quantity: item.quantity,
       imageUrl: item.product.images?.[0]?.imageUrl,
     }));
-
+    console.log("cart items before sending to frontend:",flatCartItems)
     return NextResponse.json(flatCartItems);
   } catch (error) {
     console.error('Failed to fetch cart items:', error);
