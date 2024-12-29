@@ -76,7 +76,7 @@ export default function SearchBar() {
   };
 
   return (
-    <div>
+    <div className=''>
       <form onSubmit={handleSearch}>
         <div className="relative w-full h-full flex items-center">
           {/* Search Input */}
@@ -85,7 +85,7 @@ export default function SearchBar() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="ลองค้นหา...สับปะรด "
-            className="w-full pl-5 pt-2 pb-2 border-2 border-[#d4d4d4] focus:outline-none focus:ring-2 focus:ring-[#4EAC14] focus:border-transparent rounded-3xl"
+            className="w-full pl-5 pt-2 pb-2 border-2  focus:outline-none focus:ring-2 focus:ring-[#4EAC14] focus:border-transparent rounded-3xl"
           />
           {/* Search Button */}
           <button type="submit" className="absolute border-l-2 right-2 pl-2 pr-2">
@@ -111,7 +111,7 @@ export default function SearchBar() {
       </form>
       {/* Suggestions */}
       {suggestions.length > 0 && (
-        <ul className="absolute mt-1 bg-white border border-gray-200 w-[80%]  md:w-[25%] rounded-3xl">
+        <ul className="absolute mt-1 bg-white border border-gray-200 w-[80%] z-50  md:w-[25%] rounded-3xl shadow-lg">
           {suggestions.map((suggestion, index) => (
             <li
               key={index}

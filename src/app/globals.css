@@ -107,7 +107,7 @@
 }
 
 .dropdown-item {
-  @apply pb-2 text-left hover:text-[#4EAC14];
+  @apply pb-2 text-left hover:underline;
 }
 
 .icon-hover {

@@ -223,13 +223,9 @@ export default function ProductDetailsClient({ product, totalReviewsCount, Produ
                 )}                               
               </div>
 
-
-
-
               <div className="w-full border-t-2 pt-3">
                 <div className="w-fit">เลือกจำนวน(กิโลกรัม)</div>
                 <div className="w-fit flex items-center">
-
                   <div className='flex items-center w-fit '>
                     <button className='btn w-10 h-10 text-3xl md:text-2xl  border border-gray-400 md:border-2  rounded-full  text-center focus:border-2  focus:border-[#4eac14]' onClick={decrement}>
                       -
@@ -252,6 +248,7 @@ export default function ProductDetailsClient({ product, totalReviewsCount, Produ
                   <p className="ml-3 text-[#535353] text-base">มีสินค้า {product.Amount} กิโลกรัม</p>
                 </div>
               </div>
+
             </div>
 
             <div className='flex justify-between md:justify-start space-x-2 md:space-x-3'>
@@ -284,7 +281,7 @@ export default function ProductDetailsClient({ product, totalReviewsCount, Produ
                     return (
                         <div className="w-full md:flex justify-start " key={cert.certificate.id}>
                             {standardsObj.map((standard, index) => (
-                                <div className="flex  p-2 w-full border-2 rounded-xl space-x-3 mb-3 m-2" key={index}>
+                                <div className="flex  p-3 w-full h-[100px]  shadow-xl rounded-xl space-x-3 mb-3 m-2" key={index}>
                                     <div className="flex justify-start w-fit items-center">
                                         <div>                               
                                             <Image
@@ -295,7 +292,7 @@ export default function ProductDetailsClient({ product, totalReviewsCount, Produ
                                             height={80}
                                             />                          
                                         </div>
-                                        <div className="pl-1  justify-between w-full text-base">
+                                        <div className="pl-3  justify-between w-full text-base">
                                             <h1>มาตรฐาน: {standard.name}</h1>
                                             <div className=" w-fit">ทะเบียน: {standard.certNumber}</div>
                                             <div className="flex items-center text-base">
