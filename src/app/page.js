@@ -1,5 +1,6 @@
 "use client";
 
+import SearchBar from "@/components/searchbar";
 import debounce from "lodash.debounce"; // Import lodash debounce
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from "react";
@@ -87,56 +88,80 @@ export default function Home() {
 
   return (
     <div className=''>
-      <div className="w-[95%] md:w-[80%] m-auto mt-[100px] md:mt-5 md:p-6 rounded-xl">
-        <div className="hidden md:block image bg-pineapple w-auto h-[300px] mt-[50px] lg:h-[250px] bg-no-repeat bg-cover bg-scroll bg-center rounded-xl"></div>
-        <div className="mb-5 md:mt-5 bg-white p-2 md:p-6 rounded-xl">
-          ค้นหาจากราคา
-          <div className="flex gap-2 md:gap-4 items-center ">
-            {/* Min Price Input */}
-            <input
-              type="number"
-              placeholder="30"
-              onChange={handleMinPriceChange}
-              className="border p-2 w-full md:w-[250px] rounded-xl"
-            />
-            <a className='text-center'>-</a>
-            {/* Max Price Input */}
-            <input
-              type="number"
-              placeholder="100 บาท"
-              onChange={handleMaxPriceChange}
-              className="border p-2 w-full md:w-[250px] rounded-xl"
-            />
+         <div className="hidden md:block image bg-pineapple w-auto h-[300px] mt-[50px] lg:h-[250px] bg-no-repeat bg-cover bg-scroll bg-center "></div>
+      <div className="w-[95%] md:w-[80%] m-auto mt-[50px] md:mt-2 md:p-3 rounded-xl">
+     
+        
+        
+        <div className="pb-5 mt-[120px] md:mt-0 rounded-xl ">
+        <div className="w-fit bg-white flex m-auto p-3 rounded-xl">
+          <div className="flex justify-center items-center gap-x-4 ">
+            <div className="  hidden md:block md:ml-2 w-full  2xl:w-[800px]  xl:w-[450px] lg:w-[300px] md:w-[300px]">
+            <h1>ค้นหา</h1>
+              <SearchBar />              
+            </div>
+            <div className="">
+                <h2>หาจากช่วงราคา</h2>
+                <div className="flex gap-2 md:gap-2 items-center ">
+              
+                {/* Min Price Input */}
+                <input
+                  type="number"
+                  placeholder="30"
+                  onChange={handleMinPriceChange}
+                  className="border p-2 w-full md:w-[100px] rounded-3xl"
+                />
+                <a className='text-center'>-</a>
+                {/* Max Price Input */}
+                <input
+                  type="number"
+                  placeholder="100 บาท"
+                  onChange={handleMaxPriceChange}
+                  className="border p-2 w-full md:w-[100px] rounded-3xl"
+                />
+              </div>              
+              </div>
+
           </div>
+        </div>
+
+
+          <div>
+
+          </div>
+ 
+
+
+
           {/* Sorting Buttons */}
-          <div className="mt-5 flex gap-1 md:gap-4">
+          <div className="mt-5 flex justify-center gap-1 md:gap-4">
             <button
               onClick={() => handleSortChange('')}
-              className={`btn p-1 md:p-2 hover:outline outline-2 outline-[#4eac14] rounded-xl ${sortBy === '' ? 'bg-[#4eac14] text-white' : 'bg-[#f1f1f1]'}`}
+              className={`btn p-1 md:p-2 hover:outline outline-2 outline-[#4eac14] rounded-xl ${sortBy === '' ? 'bg-[#4eac14] text-white' : 'bg-[#ffffff]'}`}
             >
               ทั้งหมด 😯
             </button>
             <button
               onClick={() => handleSortChange('newest')}
-              className={`btn p-1 md:p-2 hover:outline outline-2 outline-[#4eac14] rounded-xl ${sortBy === 'newest' ? 'bg-[#4eac14] text-white' : 'bg-[#f1f1f1]'}`}
+              className={`btn p-1 md:p-2 hover:outline outline-2 outline-[#4eac14] rounded-xl ${sortBy === 'newest' ? 'bg-[#4eac14] text-white' : 'bg-[#ffffff]'}`}
             >
               สับปะรดมาใหม่ 🍍
             </button>
             <button
               onClick={() => handleSortChange('oldest')}
-              className={`btn p-1 md:p-2 hover:outline outline-2 outline-[#4eac14] rounded-xl ${sortBy === 'oldest' ? 'bg-[#4eac14] text-white' : 'bg-[#f1f1f1]'}`}
+              className={`btn p-1 md:p-2 hover:outline outline-2 outline-[#4eac14] rounded-xl ${sortBy === 'oldest' ? 'bg-[#4eac14] text-white' : 'bg-[#ffffff]'}`}
             >
               สับปะรดรุ่นเก๋า 🕰️
             </button>
             <button
               onClick={() => handleSortChange('highest-review')}
-              className={`btn p-1 md:p-2 hover:outline outline-2 outline-[#4eac14] rounded-xl ${sortBy === 'highest-review' ? 'bg-[#4eac14] text-white' : 'bg-[#f1f1f1]'}`}
+              className={`btn p-1 md:p-2 hover:outline outline-2 outline-[#4eac14] rounded-xl ${sortBy === 'highest-review' ? 'bg-[#4eac14] text-white' : 'bg-[#ffffff]'}`}
             >
               รีวิวปังที่สุด ⭐️
             </button>
             <button
               onClick={() => handleSortChange('lowest-review')}
-              className={`btn p-1 md:p-2 hover:outline outline-2 outline-[#4eac14] rounded-xl ${sortBy === 'lowest-review' ? 'bg-[#4eac14] text-white' : 'bg-[#f1f1f1]'}`}
+              className={`btn p-1 md:p-2 hover:outline outline-2 outline-[#4eac14] rounded-xl ${sortBy === 'lowest-review' ? 'bg-[#4eac14] text-white' : 'bg-[#ffffff]'}`}
             >
               รีวิวเบาๆ 🤔
             </button>

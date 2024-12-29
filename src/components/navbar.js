@@ -79,25 +79,27 @@ export const Navbar = ({session}) => {
         </a>
       </div>
 
-      <div className="header flex gap-x-5 md:gap-x-0 w-[95%] 2xl:w-[80%] justify-between m-auto pt-[5px] md:pt-[20px] pb-[15px]">
+      <div className="header flex gap-x-2 md:gap-x-0 xl:gap-x-4 w-[95%] 2xl:w-[80%] justify-between m-auto pt-[5px] md:pt-[20px] pb-[15px]">
         <div className="hidden md:flex items-center">
           <div className=" lg:w-[150px]  xl:w-[200px] lg:pl-4 text-lg w-fit sm:text-xl xl:text-2xl text-[#4EAC14]">
             <a href="/">GI Pineapple</a>
           </div>
+
         </div>
 
-        <div className="md:ml-2 w-full 2xl:w-[650px] xl:w-[500px] lg:w-[400px] md:w-[600px]">
+        <div className="md:hidden md:ml-2 w-full  2xl:w-[600px]  xl:w-[450px] lg:w-[300px] md:w-[400px]">
           <SearchBar />
-        </div>
+          </div>
 
         {/* Hamburger Icon */}
-        <div ref={toggleButtonRef} className="lg:hidden flex items-center">
+        <div ref={toggleButtonRef} className="lg:hidden flex items-center gap-x-2">
+          
         <Link
           href="/cart"
           className={`relative flex items-center ${
             currentPath === "/cart"
               ? "text-[#4EAC14] block mr-2 py-2"
-              : "block py-2 mr-2 text-gray-700 hover:bg-gray-100"
+              : "block py-2 mr-2 text-gray-700  "
           }`}
         >
           {/* Icon */}
@@ -134,13 +136,11 @@ export const Navbar = ({session}) => {
         {/* Regular Menu (shown on large screens) */}
         <div className="hidden lg:flex items-center">
           <ul className="menulist flex xl:gap-x-3 text-[#595959]">
-            <div className="flex items-center gap-x-6 text-base w-full">
+            <div className="pl-2 flex items-center md:gap-x-4 xl:gap-x-6 text-base w-full">
               <li>
                 <Link
                   href="/"
-                  className={
-                    currentPath === "/" ? "text-[#4EAC14]" : "text-[#595959]"
-                  }
+                  className={currentPath === "/" ? "text-[#4EAC14]" : "text-[#595959] hover:underline"}
                 >
                   หน้าแรก
                 </Link>
@@ -151,7 +151,7 @@ export const Navbar = ({session}) => {
                   className={
                     currentPath === "/about"
                       ? "text-[#4EAC14]"
-                      : "text-[#595959]"
+                      : "text-[#595959] hover:underline"
                   }
                 >
                   เกี่ยวกับเรา
@@ -162,10 +162,7 @@ export const Navbar = ({session}) => {
                 <li>
                   <Link
                     href="/register"
-                    className={
-                      currentPath === "/register"
-                        ? "text-[#4EAC14]"
-                        : "text-[#595959]"
+                    className={currentPath === "/register"? "text-[#4EAC14]": "text-[#595959] hover:underline"
                     }
                   >
                     สมัครสมาชิก
@@ -175,22 +172,44 @@ export const Navbar = ({session}) => {
 <li>
                 <Link
                   href="/trace"
-                  className={
-                    currentPath === "/trace"
-                      ? "text-[#4EAC14]"
-                      : "text-[#595959]"
+                  className={currentPath === "/trace"? "text-[#4EAC14]": "text-[#595959] hover:underline"
                   }
                 >
                   ตรวจสอบสินค้า
                 </Link>
               </li>
-              <li>
+
+
+              {session?.user?.role === "farmer" && session && (
+                <li>
+                  <Link
+                    href="/dashboard"
+                    className={
+                      currentPath === "/dashboard"? "text-[#4EAC14]": "text-[#595959] hover:underline"
+                    }
+                  >
+                    แดชบอร์ดเกษตรกร
+                  </Link>
+                </li>
+              )}
+              {session?.user?.role === "municipal" && (
+                <li>
+                  <Link
+                    href="/municipality-dashboard"
+                    className={currentPath === "/municipality-dashboard" ? "text-[#4EAC14]": "text-[#595959] hover:underline"
+                    }
+                  >
+                    แดชบอร์ดเจ้าหน้าที่
+                  </Link>
+                </li>
+              )}
+                            <li>
               <Link
               href="/cart"
               className={`relative flex items-center ${
                 currentPath === "/cart"
                   ? "text-[#4EAC14] block mr-2 py-2"
-                  : "block text-[#535353] py-2 mr-2  hover:bg-gray-100"
+                  : "block text-[#535353] py-2 mr-2 hover:drop-shadow-lg "
               }`}
             >
               {/* Icon */}
@@ -205,39 +224,10 @@ export const Navbar = ({session}) => {
               </span>
             </Link>
               </li>
-
-              {session?.user?.role === "farmer" && session && (
-                <li>
-                  <Link
-                    href="/dashboard"
-                    className={
-                      currentPath === "/dashboard"
-                        ? "text-[#4EAC14]"
-                        : "text-[#595959]"
-                    }
-                  >
-                    แดชบอร์ดเกษตรกร
-                  </Link>
-                </li>
-              )}
-              {session?.user?.role === "municipal" && (
-                <li>
-                  <Link
-                    href="/municipality-dashboard"
-                    className={
-                      currentPath === "/municipality-dashboard"
-                        ? "text-[#4EAC14]"
-                        : "text-[#595959]"
-                    }
-                  >
-                    แดชบอร์ดเจ้าหน้าที่
-                  </Link>
-                </li>
-              )}
             </div>
 
             { session?.user ? (
-              <div className="relative inline-block text-left">
+              <div className="flex items-center relative text-left">
                 <Dropdown placement="top-end" showArrow={true}>
                   <PopoverTrigger>
                     <Button
@@ -434,7 +424,7 @@ export const Navbar = ({session}) => {
                         ลงทะเบียนเกษตรกร
                       </Link>
                     </li>
-                    <li className="text-red-400 block  px-4 py-2   hover:bg-gray-100">
+                    <li className="text-red-400 block  px-4 py-2   hover:bg-gray-100 hover:underline ">
                       <button
                         onClick={() => {
                           signOut({ callbackUrl: "/" });

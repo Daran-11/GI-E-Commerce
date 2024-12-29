@@ -45,42 +45,43 @@ const Transactions = () => {
     <div className={styles.container}>
       <h2 className={styles.title}>ธุรกรรมล่าสุด</h2>
       <div className={styles.chart}>
-      <table className="min-w-full border-collapse border border-gray-200">
-        <thead>
-          <tr>
-            <th className="border border-gray-300 p-2">Charge ID</th>
-            <th className="border border-gray-300 p-2">Description</th>
-            <th className="border border-gray-300 p-2">Amount</th>
-            <th className="border border-gray-300 p-2">Currency</th>
-            <th className="border border-gray-300 p-2">Created At</th>
-          </tr>
-        </thead>
-        <tbody>
-          {charges.length > 0 ? (
-            charges.map((charge) => (
-              <tr key={charge.id}>
-                <td className="border border-gray-300 p-2">{charge.id}</td>
-                <td className="border border-gray-300 p-2">{charge.description}</td>
-                <td className="border border-gray-300 p-2">{charge.amount / 100} {charge.currency}</td>
-                <td className="border border-gray-300 p-2">{charge.currency}</td>
-                <td className="border border-gray-300 p-2">{new Date(charge.created_at).toLocaleDateString('th-TH', {
-          year: '2-digit',
-          month: 'short',
-          day: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit',
-        })}</td>
-              </tr>
-            ))
-          ) : (
-            <tr>
-              <td colSpan="5" className="border border-gray-300 p-2 text-center">
-                No charges available.
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+      <table className="min-w-full border-collapse border border-gray-200 rounded-lg overflow-hidden">
+  <thead className="bg-gray-100">
+    <tr>
+      <th className="border border-gray-300 p-2">Charge ID</th>
+      <th className="border border-gray-300 p-2">Description</th>
+      <th className="border border-gray-300 p-2">Amount</th>
+      <th className="border border-gray-300 p-2">Currency</th>
+      <th className="border border-gray-300 p-2">Created At</th>
+    </tr>
+  </thead>
+  <tbody>
+    {charges.length > 0 ? (
+      charges.map((charge) => (
+        <tr key={charge.id} className="even:bg-gray-50">
+          <td className="border border-gray-300 p-2">{charge.id}</td>
+          <td className="border border-gray-300 p-2">{charge.description}</td>
+          <td className="border border-gray-300 p-2">{charge.amount / 100}</td>
+          <td className="border border-gray-300 p-2">{charge.currency}</td>
+          <td className="border border-gray-300 p-2">{new Date(charge.created_at).toLocaleDateString('th-TH', {
+            year: '2-digit',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+          })}</td>
+        </tr>
+      ))
+    ) : (
+      <tr>
+        <td colSpan="5" className="border border-gray-300 p-2 text-center">
+          No charges available.
+        </td>
+      </tr>
+    )}
+  </tbody>
+</table>
+
         <ResponsiveContainer width="100%" height={300}>
           <AreaChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
             <defs>
