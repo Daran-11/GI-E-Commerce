@@ -88,87 +88,6 @@ export async function POST(request) {
         })),
       });
 
-      // สร้าง QR Code สำหรับแต่ละ item
-      for (const item of items) {
-        try {
-          // ดึงข้อมูล farmer
-          const farmer = await prisma.farmer.findUnique({
-            where: { id: farmerId },
-            select: { id: true, userId: true }
-          });
-
-          if (!farmer) {
-            throw new Error(`Farmer not found with ID ${farmerId}`);
-          }
-
-          // ดึงข้อมูล ProductCertificate และ Certificate
-          const productCertificate = await prisma.productCertificate.findFirst({
-            where: {
-              productId: item.productId
-            },
-            include: {
-              certificate: true
-            }
-          });
-
-          // สร้าง QR Code ID
-          const farmerIdPadded = farmer.id.toString().padStart(4, '0');
-          const varietyCode = productCertificate?.certificate?.variety?.toLowerCase() === 'นางแล' ? 'PN' : 
-                             productCertificate?.certificate?.variety?.toLowerCase() === 'ภูแล' ? 'PP' : 'XX';
-          const productIdPadded = item.productId.toString().padStart(5, '0');
-          
-          // สร้าง base qrcodeId
-          let qrcodeId = `${farmerIdPadded}${varietyCode}${productIdPadded}`;
-          
-          // ตรวจสอบว่ามี QR Code นี้อยู่แล้วหรือไม่
-          let existingQRCode = await prisma.qR_Code.findUnique({
-            where: { qrcodeId: qrcodeId }
-          });
-          
-          // ถ้ามีอยู่แล้ว ให้เพิ่มตัวเลขต่อท้าย
-          let counter = 1;
-          while (existingQRCode) {
-            qrcodeId = `${farmerIdPadded}${varietyCode}${productIdPadded}-${counter}`;
-            existingQRCode = await prisma.qR_Code.findUnique({
-              where: { qrcodeId: qrcodeId }
-            });
-            counter++;
-          }
-
-          // สร้าง QR Code
-          const qrCodeData = {
-            qrcodeId,
-            farmer: {
-              connect: { id: farmer.id }
-            },
-            order: {
-              connect: { id: order.id }
-            },
-            product: {
-              connect: { ProductID: item.productId }
-            },
-            user: {
-              connect: { id: farmer.userId }
-            }
-          };
-
-          // เพิ่ม certificate ถ้ามี
-          if (productCertificate) {
-            qrCodeData.certificate = {
-              connect: { id: productCertificate.certificateId }
-            };
-          }
-
-          await prisma.qR_Code.create({
-            data: qrCodeData
-          });
-
-        } catch (error) {
-          console.error('Error creating QR code:', error);
-          throw error; // ส่งต่อ error เพื่อให้ transaction rollback
-        }
-      }
-
       // Update product amounts
       for (const item of items) {
         await prisma.product.update({
@@ -176,6 +95,9 @@ export async function POST(request) {
           data: {
             Amount: {
               decrement: item.quantity
+            },
+            soldCount: {
+              increment: item.quantity
             }
           }
         });
