@@ -283,7 +283,6 @@ model QR_Code {
   qrcodeId      String?   @unique       // nullable
   farmerId      Int       @default(1)   
   certificateId Int?                    // nullable
-  orderId       Int?                    // nullable
   productId     Int?                    // nullable
   userId        Int?                    // nullable
   createdAt     DateTime   @default(now())
@@ -291,7 +290,6 @@ model QR_Code {
   // Relations ครบถ้วน
   farmer      Farmer       @relation(fields: [farmerId], references: [id])
   certificate Certificate? @relation(fields: [certificateId], references: [id])
-  order       Order?      @relation(fields: [orderId], references: [id])
   product     Product?    @relation(fields: [productId], references: [ProductID])
   user        User?       @relation(fields: [userId], references: [id])
 }
