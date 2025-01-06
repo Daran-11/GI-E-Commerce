@@ -131,7 +131,6 @@ model Order {
   reviews    RatingReview[] // Relation to RatingReview table
   delivery   Delivery_Detail?
   orderItems OrderItem[] // Relation to OrderItem table (1-to-many)
-  qrCodes QR_Code[]
   History History[]
 }
 
@@ -285,6 +284,7 @@ model QR_Code {
   certificateId Int?                    // nullable
   productId     Int?                    // nullable
   userId        Int?                    // nullable
+  orderId       Int?
   createdAt     DateTime   @default(now())
 
   // Relations ครบถ้วน
