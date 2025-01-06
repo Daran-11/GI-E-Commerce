@@ -97,17 +97,11 @@ export default function IncomingOrders() {
 
   const handleDownloadQRCode = async (qrcodeId) => {
     try {
-      console.log("Downloading QR code for ID:", qrcodeId); // Debug log
-
+      console.log("Downloading QR code for ID:", qrcodeId);
       const response = await fetch(`/api/downloadqrcode?qrcodeId=${qrcodeId}`);
-      if (!response.ok) {
-        console.error("Download failed with status:", response.status); // Debug log
-        throw new Error("Failed to generate QR code");
-      }
+      if (!response.ok) throw new Error("Failed to generate QR code");
 
       const blob = await response.blob();
-      console.log("Received blob:", blob); // Debug log
-
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -137,22 +131,23 @@ export default function IncomingOrders() {
       if (!res.ok) throw new Error("Failed to fetch orders");
       const data = await res.json();
 
-      console.log("Orders before QR codes:", data); // Debug log
+      console.log("Orders before QR codes:", data);
 
-      // เพิ่ม QR codes ข้อมูล
+      // ดึงข้อมูล QR codes สำหรับแต่ละ order
       const ordersWithQRCodes = await Promise.all(
         data.map(async (order) => {
+          // ดึง QR codes ที่เกี่ยวข้องกับสินค้าในออเดอร์นี้
           const qrCodesRes = await fetch(
             `/api/users/${userId}/farmer/orders/${order.id}/qrcodes`
           );
           if (!qrCodesRes.ok) throw new Error("Failed to fetch QR codes");
           const qrCodes = await qrCodesRes.json();
-          console.log(`QR codes for order ${order.id}:`, qrCodes); // Debug log
+          console.log(`QR codes for order ${order.id}:`, qrCodes);
           return { ...order, qrCodes };
         })
       );
 
-      console.log("Final orders with QR codes:", ordersWithQRCodes); // Debug log
+      console.log("Orders with QR codes:", ordersWithQRCodes);
       setOrders(ordersWithQRCodes);
     } catch (error) {
       console.error(error);
