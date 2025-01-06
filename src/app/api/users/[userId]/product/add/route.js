@@ -5,13 +5,12 @@ import { NextResponse } from "next/server";
 import path from "path";
 import prisma from "../../../../../../../lib/prisma";
 
-// Initialize Google Cloud Storage client
+// Initialize Google Cloud Storage
 const storage = new Storage({
-  keyFile: process.env.GOOGLE_APPLICATION_CREDENTIALS, // ระบุพาธของไฟล์ service account
+  keyFile: process.env.GOOGLE_APPLICATION_CREDENTIALS,
 });
-const bucketName = 'gipineapple'; // เปลี่ยนเป็นชื่อของ bucket ของคุณ
+const bucketName = 'gipineapple';
 
-// Helper function to handle file uploads to Google Cloud Storage
 async function handleFileUpload(file) {
   try {
     if (!file) {
@@ -19,23 +18,18 @@ async function handleFileUpload(file) {
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
-
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
     const filename = file.name.replace(/\.[^/.]+$/, "") + "-" + uniqueSuffix + path.extname(file.name);
-
+    
     const blob = storage.bucket(bucketName).file(filename);
     const blobStream = blob.createWriteStream();
-
-    // Pipe the buffer to Google Cloud Storage
-    blobStream.end(buffer);
-
-    // Return the file's public URL
+    
     await new Promise((resolve, reject) => {
       blobStream.on('finish', resolve);
       blobStream.on('error', reject);
+      blobStream.end(buffer);
     });
 
-    // Generate the public URL for the uploaded file
     return `https://storage.googleapis.com/${bucketName}/${filename}`;
   } catch (error) {
     console.error("Error in file upload:", error);
@@ -47,9 +41,6 @@ export async function POST(request, { params }) {
   const session = await getServerSession({ request, ...authOptions });
   const { userId } = params;
 
-  console.log('Checking session for adding product:', session); // Debug session
-  console.log('User ID:', session?.user?.id); // Debug user ID
-
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
@@ -58,21 +49,18 @@ export async function POST(request, { params }) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
-  // Fetch the farmer data using the userId
   const farmer = await prisma.farmer.findUnique({
     where: { userId: parseInt(userId) }
   });
 
   if (!farmer) {
-    console.log("Farmer data not found in Farmer table");
-    return NextResponse.json({ error: 'Farmer profile not found for this user.' }, { status: 404 });
+    return NextResponse.json({ error: 'Farmer profile not found' }, { status: 404 });
   }
 
   try {
-    // Parse form data
     const formData = await request.formData();
 
-    // Extract fields from formData
+    // รับข้อมูลจาก form
     const ProductName = formData.get("ProductName");
     const ProductType = formData.get("ProductType");
     const Price = formData.get("Price");
@@ -84,28 +72,19 @@ export async function POST(request, { params }) {
     const Details = formData.get("Details");
     const Certificates = formData.getAll("Certificates");
 
-    // Ensure Certificates is an array of integers
+    // แปลง certificates
     let certificateIds = [];
     if (Certificates.length === 1 && typeof Certificates[0] === "string") {
-      certificateIds = Certificates[0].split(',').map((id) => parseInt(id.trim()));
+      certificateIds = Certificates[0].split(',').map(id => parseInt(id.trim()));
     } else {
-      certificateIds = Certificates.map((id) => parseInt(id.trim()));
+      certificateIds = Certificates.map(id => parseInt(id.trim()));
     }
+    certificateIds = certificateIds.filter(id => !isNaN(id));
 
-    certificateIds = certificateIds.filter((id) => !isNaN(id));
-
-    console.log("Parsed certificate IDs:", certificateIds);
-
-
-
-    // แปลงวันปลูกให้เป็นรูปบบ ISO ก่่อน
-    const isoHarvestedAt = new Date(HarvestedAt).toISOString();
-        
-    // Handle multiple image files
+    // จัดการรูปภาพ
     const imageFiles = formData.getAll("images");
     const imageUrls = [];
 
-    // Handle file uploads for each image
     for (const imageFile of imageFiles) {
       if (imageFile && imageFile.size > 0) {
         const imageUrl = await handleFileUpload(imageFile);
@@ -113,50 +92,76 @@ export async function POST(request, { params }) {
       }
     }
 
-    // Create the new product in the database
-    const product = await prisma.product.create({
-      data: {
-        ProductName,
-        ProductType,
-        Description: Description,
-        Price: parseFloat(Price),
-        Amount: parseInt(Amount, 10),
-        Cost: parseInt(Cost, 10),
-        status,
-        farmerId: farmer.id,
-        Details,
-        HarvestedAt: isoHarvestedAt,
-      },
+    // สร้างสินค้าด้วย transaction
+    const [product, certificate] = await prisma.$transaction(async (tx) => {
+      // สร้างสินค้า
+      const newProduct = await tx.product.create({
+        data: {
+          ProductName,
+          ProductType,
+          Description,
+          Price: parseFloat(Price),
+          Amount: parseInt(Amount),
+          Cost: parseInt(Cost),
+          status,
+          farmerId: farmer.id,
+          Details,
+          HarvestedAt: new Date(HarvestedAt),
+        },
+      });
+
+      // เพิ่มรูปภาพ
+      if (imageUrls.length > 0) {
+        await tx.productImage.createMany({
+          data: imageUrls.map(url => ({
+            imageUrl: url,
+            productId: newProduct.ProductID,
+          })),
+        });
+      }
+
+      // เชื่อมโยงใบรับรอง
+      if (certificateIds.length > 0) {
+        await tx.productCertificate.createMany({
+          data: certificateIds.map(certificateId => ({
+            productId: newProduct.ProductID,
+            certificateId: certificateId,
+          })),
+        });
+      }
+
+      // ดึงข้อมูลใบรับรอง
+      const productCertificate = certificateIds.length > 0 
+        ? await tx.productCertificate.findFirst({
+            where: { productId: newProduct.ProductID },
+            include: { certificate: true }
+          })
+        : null;
+
+      // สร้าง QR Code ID
+      const farmerIdPadded = farmer.id.toString().padStart(4, '0');
+      const varietyCode = productCertificate?.certificate?.variety?.toLowerCase() === 'นางแล' ? 'PN' : 
+                         productCertificate?.certificate?.variety?.toLowerCase() === 'ภูแล' ? 'PP' : 'XX';
+      const productIdPadded = newProduct.ProductID.toString().padStart(5, '0');
+      
+      const qrcodeId = `${farmerIdPadded}${varietyCode}${productIdPadded}`;
+
+      // สร้าง QR Code
+      await tx.qR_Code.create({
+        data: {
+          qrcodeId,
+          farmerId: farmer.id,
+          certificateId: productCertificate?.certificateId,
+          productId: newProduct.ProductID,
+          userId: farmer.userId
+        }
+      });
+
+      return [newProduct, productCertificate];
     });
 
-    // Add the associated images in the ProductImage model
-    if (imageUrls.length > 0) {
-      const imagePromises = imageUrls.map((url) =>
-        prisma.productImage.create({
-          data: {
-            imageUrl: url,
-            productId: product.ProductID,
-          },
-        })
-      );
-      await Promise.all(imagePromises);
-    }
-
-    // Link the product to certificates
-    if (certificateIds.length > 0) {
-      const productCertificatePromises = certificateIds.map((certificateId) =>
-        prisma.productCertificate.create({
-          data: {
-            productId: product.ProductID,
-            certificateId: certificateId,
-          },
-        })
-      );
-      await Promise.all(productCertificatePromises);
-    }
-
-    console.log("Product added successfully:", product);
     return NextResponse.json(product, { status: 201 });
+
   } catch (error) {
     console.error("Failed to add product:", error);
     return NextResponse.json(

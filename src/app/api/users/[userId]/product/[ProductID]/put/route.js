@@ -2,173 +2,153 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { Storage } from "@google-cloud/storage";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
-import path from "path";
 import prisma from "../../../../../../../../lib/prisma";
 
-// Initialize Google Cloud Storage client
+// Initialize Google Cloud Storage
 const storage = new Storage({
-  keyFile: process.env.GOOGLE_APPLICATION_CREDENTIALS, // ระบุพาธของไฟล์ service account
+ keyFile: process.env.GOOGLE_APPLICATION_CREDENTIALS,
 });
-const bucketName = 'gipineapple'; // เปลี่ยนเป็นชื่อของ bucket ของคุณ
-
-
-async function handleFileUpload(file) {
-  try {
-    if (!file) {
-      throw new Error("No file uploaded");
-    }
-
-    const buffer = Buffer.from(await file.arrayBuffer());
-
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    const filename = file.name.replace(/\.[^/.]+$/, "") + "-" + uniqueSuffix + path.extname(file.name);
-
-    const blob = storage.bucket(bucketName).file(filename);
-    const blobStream = blob.createWriteStream();
-
-    // Pipe the buffer to Google Cloud Storage
-    blobStream.end(buffer);
-
-    // Return the file's public URL
-    await new Promise((resolve, reject) => {
-      blobStream.on('finish', resolve);
-      blobStream.on('error', reject);
-    });
-
-    // Generate the public URL for the uploaded file
-    return `https://storage.googleapis.com/${bucketName}/${filename}`;
-  } catch (error) {
-    console.error("Error in file upload:", error);
-    throw error;
-  }
-}
+const bucketName = 'gipineapple';
 
 // Helper function to delete file from Google Cloud Storage
 async function deleteFileFromCloudStorage(imageUrl) {
-  try {
-    const fileName = imageUrl.split('/').pop(); // Extract the file name from the URL
-    const file = storage.bucket(bucketName).file(fileName);
-
-    // Delete the file from the bucket
-    await file.delete();
-    console.log(`File deleted from cloud storage: ${imageUrl}`);
-  } catch (error) {
-    console.error("Error deleting file from Google Cloud Storage:", error);
-    throw error;
-  }
+ try {
+   const fileName = imageUrl.split('/').pop();
+   const file = storage.bucket(bucketName).file(fileName);
+   await file.delete();
+   console.log(`File deleted from cloud storage: ${imageUrl}`);
+ } catch (error) {
+   console.error("Error deleting file from Google Cloud Storage:", error);
+   throw error;
+ }
 }
 
 export async function PUT(request, { params }) {
-  const session = await getServerSession({ request, ...authOptions });
-  const { userId, ProductID } = params;
+ const session = await getServerSession({ request, ...authOptions });
+ const { userId, ProductID } = params;
 
-  if (!session) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+ if (!session) {
+   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+ }
 
-  if (session.user.id !== parseInt(userId) && session.user.role !== "farmer") {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-  }
+ if (session.user.id !== parseInt(userId) && session.user.role !== "farmer") {
+   return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+ }
 
-  // Fetch the farmer data using the userId
-  const farmer = await prisma.farmer.findUnique({
-    where: { userId: parseInt(userId) },
-  });
+ // Fetch farmer data
+ const farmer = await prisma.farmer.findUnique({
+   where: { userId: parseInt(userId) },
+ });
 
-  if (!farmer) {
-    return NextResponse.json({ error: 'Farmer profile not found for this user.' }, { status: 404 });
-  }
+ if (!farmer) {
+   return NextResponse.json({ error: 'Farmer profile not found for this user.' }, { status: 404 });
+ }
 
-  const existingProduct = await prisma.product.findUnique({
-    where: {
-      ProductID: parseInt(ProductID, 10),
-      farmer: { userId: parseInt(userId) },
-    },
-    include: { images: true },
-  });
+ try {
+   const formData = await request.formData();
+   const ProductName = formData.get("ProductName");
+   const ProductType = formData.get("ProductType");
+   const Price = formData.get("Price");
+   const Cost = formData.get("Cost");
+   const Amount = formData.get("Amount");
+   const status = formData.get("status");
+   const Description = formData.get("Description");
+   const Details = formData.get("Details");
+   const Certificates = formData.getAll("Certificates");
 
-  if (!existingProduct) {
-    return NextResponse.json({ error: 'Product not found for this user.' }, { status: 404 });
-  }
+   // Parse certificate IDs
+   let certificateIds = [];
+   if (Certificates.length === 1 && typeof Certificates[0] === "string") {
+     certificateIds = Certificates[0].split(',').map(id => parseInt(id.trim()));
+   } else {
+     certificateIds = Certificates.map(id => parseInt(id.trim()));
+   }
+   certificateIds = certificateIds.filter(id => !isNaN(id));
 
-  try {
-    const formData = await request.formData();
-    const id = formData.get("ProductID");
-    const ProductName = formData.get("ProductName");
-    const ProductType = formData.get("ProductType");
-    const Price = formData.get("Price");
-    const Cost = formData.get("Cost");
-    const Amount = formData.get("Amount");
-    const status = formData.get("status");
-    const Description = formData.get("Description");
-    const newImageFiles = formData.getAll("images");
-    const imagesToDelete = formData.getAll("imagesToDelete");
-    const Details = formData.get("Details");
+   const [product, certificate] = await prisma.$transaction(async (tx) => {
+     // Update the product
+     const updatedProduct = await tx.product.update({
+       where: { ProductID: parseInt(ProductID) },
+       data: {
+         ProductName,
+         ProductType,
+         Description,
+         Price: parseFloat(Price),
+         Cost: parseFloat(Cost),
+         Amount: parseFloat(Amount),
+         Details,
+         status,
+       },
+     });
 
-    console.log("imagesToDelete is ",imagesToDelete)
+     // Update certificates if provided
+     if (certificateIds.length > 0) {
+       // Remove existing certificates
+       await tx.productCertificate.deleteMany({
+         where: { productId: parseInt(ProductID) }
+       });
 
-    if (!ProductName || !ProductType || !Price || !Cost || !Amount) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
-    }
+       // Add new certificates
+       await tx.productCertificate.createMany({
+         data: certificateIds.map(certificateId => ({
+           productId: parseInt(ProductID),
+           certificateId: certificateId,
+         })),
+       });
+     }
 
-    // Handle image deletions from Google Cloud Storage
-    if (imagesToDelete.length > 0) {
-      const deletePromises = imagesToDelete.map(async (imageUrl) => {
-        // Call the function to delete file from Google Cloud Storage
-        await deleteFileFromCloudStorage(imageUrl);
-      });
-      await Promise.all(deletePromises);
+     // Get updated certificate information
+     const productCertificate = certificateIds.length > 0
+       ? await tx.productCertificate.findFirst({
+           where: { productId: parseInt(ProductID) },
+           include: { certificate: true }
+         })
+       : null;
 
-      // Delete the image records from the database
-      await prisma.productImage.deleteMany({
-        where: { imageUrl: { in: imagesToDelete } },
-      });
-    }
+     // Update QR Code
+     const farmerIdPadded = farmer.id.toString().padStart(4, '0');
+     const varietyCode = productCertificate?.certificate?.variety?.toLowerCase() === 'นางแล' ? 'PN' :
+                        productCertificate?.certificate?.variety?.toLowerCase() === 'ภูแล' ? 'PP' : 'XX';
+     const productIdPadded = ProductID.toString().padStart(5, '0');
+     const qrcodeId = `${farmerIdPadded}${varietyCode}${productIdPadded}`;
 
-    // Handle new image uploads (to Google Cloud Storage)
-    let newImageUrls = [];
-    if (newImageFiles.length > 0) {
-      const uploadPromises = newImageFiles.map(async (file) => {
-        return await handleFileUpload(file); // Assume this function uploads files to Google Cloud Storage
-      });
-      newImageUrls = await Promise.all(uploadPromises);
-    }
+     // Find existing QR Code
+     const existingQRCode = await tx.qR_Code.findFirst({
+       where: { productId: parseInt(ProductID) }
+     });
 
-    // Combine existing images with new ones, avoiding duplicates
-    const existingImageUrls = existingProduct.images.map(image => image.imageUrl);
-    const allImageUrls = [...new Set([...existingImageUrls, ...newImageUrls])];
+     if (existingQRCode) {
+       // Update existing QR Code
+       await tx.qR_Code.update({
+         where: { id: existingQRCode.id },
+         data: {
+           qrcodeId,
+           certificateId: productCertificate?.certificateId || null
+         }
+       });
+     } else {
+       // Create new QR Code if not exists
+       await tx.qR_Code.create({
+         data: {
+           qrcodeId,
+           farmerId: farmer.id,
+           certificateId: productCertificate?.certificateId || null,
+           productId: parseInt(ProductID),
+           userId: farmer.userId
+         }
+       });
+     }
 
-    // Update the product in the database
-    const updatedProduct = await prisma.product.update({
-      where: { ProductID: parseInt(id, 10) },
-      data: {
-        ProductName,
-        ProductType,
-        Description,
-        Price: parseFloat(Price),
-        Cost: parseFloat(Cost),
-        Amount: parseFloat(Amount),
-        Details,
-        status,
-      },
-    });
+     return [updatedProduct, productCertificate];
+   });
 
-    // Handle new images for productImage model
-    if (newImageUrls.length > 0) {
-      await prisma.productImage.createMany({
-        data: newImageUrls.map(url => ({
-          imageUrl: url,
-          productId: parseInt(id, 10),
-        })),
-      });
-    }
+   return NextResponse.json(product, { status: 200 });
 
-    return NextResponse.json(updatedProduct, { status: 200 });
-  } catch (error) {
-    console.error("Failed to update product:", error);
-    return NextResponse.json(
-      { error: "Failed to update product" },
-      { status: 500 }
-    );
-  }
+ } catch (error) {
+   console.error("Failed to update product:", error);
+   return NextResponse.json(
+     { error: "Failed to update product" },
+     { status: 500 }
+   );
+ }
 }
