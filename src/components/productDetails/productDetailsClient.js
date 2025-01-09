@@ -22,8 +22,29 @@ export default function ProductDetailsClient({ product, totalReviewsCount, Produ
   const [hasMore, setHasMore] = useState(true);
   const [avgRating, setAvgRating] = useState(0);
   const [totalOrderAmount, setTotalOrderAmount] = useState(0);
+  const [qrCodeData, setQrCodeData] = useState(null);
 
+  // Add useEffect for fetching QR Code data
+  useEffect(() => {
+    const fetchQRCode = async () => {
+      try {
+        const res = await fetch(`/api/product/${product.ProductID}/qrcode`);
+        const data = await res.json();
+        
+        if (res.ok) {
+          setQrCodeData(data);
+        } else {
+          console.error("Failed to fetch QR code data");
+        }
+      } catch (error) {
+        console.error("Error loading QR code:", error);
+      }
+    };
 
+    if (product.ProductID) {
+      fetchQRCode();
+    }
+  }, [product.ProductID]);
 
   const addToCart = async () => {
     try {
@@ -122,8 +143,7 @@ export default function ProductDetailsClient({ product, totalReviewsCount, Produ
 
   const handleQuantityChange = (newQuantity) => {
     if (newQuantity > 0 && newQuantity <= product.Amount)
-      console.log('newQuantity', newQuantity);
-    setQuantity(newQuantity);
+      setQuantity(newQuantity);
   };
 
   const handleInputChange = (e) => {
@@ -149,7 +169,6 @@ export default function ProductDetailsClient({ product, totalReviewsCount, Produ
 
   const increment = () => {
     if (quantity < product.Amount) {
-      console.log("+ triggered")
       handleQuantityChange(quantity + 1);
     }
   };
@@ -160,30 +179,34 @@ export default function ProductDetailsClient({ product, totalReviewsCount, Produ
     }
   };
 
-
-  
   return (
     <div className="flex flex-col w-[95%] sm:w-[85%] lg:w-[60%] ml-auto mr-auto mt-[120px]">
+      {/* Breadcrumb */}
       <div className="w-full h-[45px] bg-white rounded-2xl mb-[20px] pl-2 flex items-center">
         <Breadcrumb />
       </div>
 
       <div className="detail flex justify-center md:justify-start">
+        {/* Desktop Carousel */}
         <div className="hidden lg:flex">   
           <EmblaCarousel images={product.images || []} />
         </div>
 
-
-        {/*replace with Embla carousel here*/}
-        <div className="w-full h-fit  bg-white lg:ml-[15px] rounded-2xl p-6">
+        {/* Product Details */}
+        <div className="w-full h-fit bg-white lg:ml-[15px] rounded-2xl p-6">
           <div className="text-[#535353]">
+            {/* Mobile Carousel */}
             <div className="lg:hidden flex justify-center">
               <EmblaCarousel images={product.images || []} />
             </div>
+
+            {/* Product Info */}
             <div className="text-[#535353]">
-              <p className=" text-4xl lg:text-5xl">{product.ProductName} {product.ProductType}</p>
-              <p className="text-xl"> ผู้ขาย {product.farmer.farmerName} </p>
+              <p className="text-4xl lg:text-5xl">{product.ProductName} {product.ProductType}</p>
+              <p className="text-xl">ผู้ขาย {product.farmer.farmerName}</p>
             </div>
+
+            {/* Rating and Sales */}
             <div className="flex w-full text-[#767676] text-xl">
               <div className="mr-5 flex justify-start items-center">
                 <Rating
@@ -195,42 +218,73 @@ export default function ProductDetailsClient({ product, totalReviewsCount, Produ
                 />
                 <p className="text-sm">{avgRating} / 5</p>
               </div>
-              <p className="hidden md:flex"> ขายแล้ว {totalOrderAmount} กิโลกรัม</p>
+              <p className="hidden md:flex">ขายแล้ว {totalOrderAmount} กิโลกรัม</p>
             </div>
+
+            {/* Price */}
             <p className="text-[#4eac14] text-[35px] lg:mb-1 lg:mt-2">
               {Number(product.Price).toLocaleString()} บาท/กิโลกรัม
             </p>
-            <div className="space-y-2 md:space-y-4 w-full   text-[22px] mb-5">
+
+            {/* Product Details */}
+            <div className="space-y-2 md:space-y-4 w-full text-[22px] mb-5">
               <div className="lg:w-full">
-              <div className="w-[250px] font-medium ">คำอธิบาย</div>
+                <div className="w-[250px] font-medium">คำอธิบาย</div>
                 <div className="w-full text-[#535353] text-base">{product.Description}</div>
               </div>
-              
-              <div>
-                <div className="flex items-center">
-                  <div className="w-fit font-medium  text-base mr-2">ช่องทางติดต่อ:</div>
-                  <div className="w-fit text-[#535353] text-base">{product.farmer.contactLine}</div>
-                </div> 
 
-                {/* แสดงวันที่เก็บเกี่ยว */}
+              <div>
+                {/* Contact */}
+                <div className="flex items-center">
+                  <div className="w-fit font-medium text-base mr-2">ช่องทางติดต่อ:</div>
+                  <div className="w-fit text-[#535353] text-base">{product.farmer.contactLine}</div>
+                </div>
+
+                {/* Harvest Date */}
                 {product.HarvestedAt && (
                   <div className="flex items-center">
                     <span className="w-fit text-base mr-2">วันที่เก็บเกี่ยว:</span>
-                    <span className="w-fit text-base ">
+                    <span className="w-fit text-base">
                       <DateComponent date={product.HarvestedAt}/>
                     </span>
                   </div>
-                )}                               
+                )}
+
+                {/* Traceability */}
+                <div className="flex items-center">
+                  <div className="w-fit font-medium text-base mr-2">ตรวจสอบย้อนกลับสินค้า:</div>
+                  {qrCodeData ? (
+                    <div className="flex flex-col items-start">
+                      <a
+                        href={`/trace/traceback?code=${qrCodeData.qrcodeId}&type=${qrCodeData.varietyCode}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[#4eac14] hover:underline text-base"
+                      >
+                        คลิกเพื่อตรวจสอบ
+                      </a>
+                     
+                    </div>
+                  ) : (
+                    <div className="w-fit text-[#535353] text-base">
+                      ไม่มีข้อมูลการตรวจสอบย้อนกลับ
+                    </div>
+                  )}
+                </div>
               </div>
 
+              {/* Quantity Selection */}
               <div className="w-full border-t-2 pt-3">
                 <div className="w-fit">เลือกจำนวน(กิโลกรัม)</div>
                 <div className="w-fit flex items-center">
-                  <div className='flex items-center w-fit '>
-                    <button className='btn w-10 h-10 text-3xl md:text-2xl  border border-gray-400 md:border-2  rounded-full  text-center focus:border-2  focus:border-[#4eac14]' onClick={decrement}>
+                  <div className="flex items-center w-fit">
+                    <button 
+                      className="btn w-10 h-10 text-3xl md:text-2xl border border-gray-400 md:border-2 rounded-full text-center focus:border-2 focus:border-[#4eac14]"
+                      onClick={decrement}
+                    >
                       -
                     </button>
-                    <div className='items-center justify-center mx-2 md:mx-0'>
+                    <div className="items-center justify-center mx-2 md:mx-0">
                       <input
                         type="number"
                         className="w-4 h-5 lg:w-8 lg:h-10 lg:mx-1 text-center appearance-none"
@@ -241,26 +295,30 @@ export default function ProductDetailsClient({ product, totalReviewsCount, Produ
                         max={product.Amount}
                       />
                     </div>
-                    <button className='btn w-10 h-10 text-3xl md:text-2xl border border-gray-400 md:border-2 rounded-full  focus:border-2  focus:border-[#4eac14]' onClick={increment}>
+                    <button 
+                      className="btn w-10 h-10 text-3xl md:text-2xl border border-gray-400 md:border-2 rounded-full focus:border-2 focus:border-[#4eac14]"
+                      onClick={increment}
+                    >
                       +
                     </button>
                   </div>
                   <p className="ml-3 text-[#535353] text-base">มีสินค้า {product.Amount} กิโลกรัม</p>
                 </div>
               </div>
-
             </div>
 
-            <div className='flex justify-between md:justify-start space-x-2 md:space-x-3'>
+            {/* Action Buttons */}
+            <div className="flex justify-between md:justify-start space-x-2 md:space-x-3">
               <button
-                className='action-button btn-submit mt-2 w-[130px] h-[40px] p-2 bg-[#4eac14] text-white cursor-pointer hover:bg-[#4eac14] hover:opacity-70 transition focus:ring-2 focus:ring-offset-2 focus:ring-[#4eac14] plausible-event-name=Addcart'
-                onClick={buyNow}>
+                className="action-button btn-submit mt-2 w-[130px] h-[40px] p-2 bg-[#4eac14] text-white cursor-pointer hover:bg-[#4eac14] hover:opacity-70 transition focus:ring-2 focus:ring-offset-2 focus:ring-[#4eac14]"
+                onClick={buyNow}
+              >
                 ซื้อเลย
               </button>
-
               <button
-                className='action-button mt-2 flex items-center pr-2 !w-[200px] h-[40px] p-2 cursor-pointer border-2 rounded-3xl border-[#4eac14] text-[#4eac14]  focus:ring-2 focus:ring-offset-2 hover:opacity-70 focus:ring-[#4eac14] hover:underline plausible-event-name=Addcart '
-                onClick={addToCart}>
+                className="action-button mt-2 flex items-center pr-2 !w-[200px] h-[40px] p-2 cursor-pointer border-2 rounded-3xl border-[#4eac14] text-[#4eac14] focus:ring-2 focus:ring-offset-2 hover:opacity-70 focus:ring-[#4eac14] hover:underline"
+                onClick={addToCart}
+              >
                 <ShoppingBasket/>
                 <p className="pl-2">เพิ่มไปยังตะกร้า</p>
               </button>
@@ -268,66 +326,59 @@ export default function ProductDetailsClient({ product, totalReviewsCount, Produ
           </div>
         </div>
       </div>
-
-        <div className="Certificate text-[#535353] bg-white rounded-2xl mt-5 p-4">
-            <h1 className="text-2xl mb-2">มาตรฐาน</h1>
-            {product.certificates.map((cert) => {
-                // Ensure certificate exists and has the 'certificate' property
-                if (cert.certificate && cert.certificate.standards) {
-                    const standards = cert.certificate.standards; // This is the JSON field
-                    try {
-                    // Assuming standards is a JSON string, parse it if necessary
-                        const standardsObj = JSON.parse(standards);
-                    return (
-                        <div className="w-full md:flex justify-start " key={cert.certificate.id}>
-                            {standardsObj.map((standard, index) => (
-                                <div className="flex  p-3 w-full h-[100px]  shadow-xl rounded-xl space-x-3 mb-3 m-2" key={index}>
-                                    <div className="flex justify-start w-fit items-center">
-                                        <div>                               
-                                            <Image
-                                            key={index}
-                                            src={standard.logo}
-                                            alt={standard.name}
-                                            width={80}
-                                            height={80}
-                                            />                          
-                                        </div>
-                                        <div className="pl-3  justify-between w-full text-base">
-                                            <h1>มาตรฐาน: {standard.name}</h1>
-                                            <div className=" w-fit">ทะเบียน: {standard.certNumber}</div>
-                                            <div className="flex items-center text-base">
-                                            <p className=" mr-2">วันที่รับรอง </p>         
-                                            <div className="">
-                                            <DateComponent date={standard.certDate}/>       
-                                            </div>
-                                                                        
-                                            </div>
-
-                                                                    
-                                        </div>                               
-                                    </div>
-                                </div>
-                                ))}
+{/* Certificates */}
+<div className="Certificate text-[#535353] bg-white rounded-2xl mt-5 p-4">
+        <h1 className="text-2xl mb-2">มาตรฐาน</h1>
+        {product.certificates.map((cert) => {
+          if (cert.certificate && cert.certificate.standards) {
+            const standards = cert.certificate.standards;
+            try {
+              const standardsObj = JSON.parse(standards);
+              return (
+                <div className="w-full md:flex justify-start" key={cert.certificate.id}>
+                  {standardsObj.map((standard, index) => (
+                    <div className="flex p-3 w-full h-[100px] shadow-xl rounded-xl space-x-3 mb-3 m-2" key={index}>
+                      <div className="flex justify-start w-fit items-center">
+                        <div>
+                          <Image
+                            src={standard.logo}
+                            alt={standard.name}
+                            width={80}
+                            height={80}
+                          />
                         </div>
-                            );
-                        } catch (error) {
-                        console.error('Error parsing standards:', error);
-                        return <div>Invalid standards data</div>;
-                        }
-                    } else {
-                        // If no standards found for the certificate
-                        return (
-                        <div key={cert.certificate ? cert.certificate.id : 'no-id'}>
-                            No standards found for this certificate.
+                        <div className="pl-3 justify-between w-full text-base">
+                          <h1>มาตรฐาน: {standard.name}</h1>
+                          <div className="w-fit">ทะเบียน: {standard.certNumber}</div>
+                          <div className="flex items-center text-base">
+                            <p className="mr-2">วันที่รับรอง</p>
+                            <div>
+                              <DateComponent date={standard.certDate}/>
+                            </div>
+                          </div>
                         </div>
-                        );
-                    }})
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              );
+            } catch (error) {
+              console.error('Error parsing standards:', error);
+              return <div>Invalid standards data</div>;
             }
+          } else {
+            return (
+              <div key={cert.certificate ? cert.certificate.id : 'no-id'}>
+                No standards found for this certificate.
+              </div>
+            );
+          }
+        })}
+      </div>
 
-        </div>
-
-      <div className='text-[#535353] bg-white rounded-2xl mt-5 p-4'>
-        <p className='text-2xl mb-2'>รายละเอียด</p>
+      {/* Product Details */}
+      <div className="text-[#535353] bg-white rounded-2xl mt-5 p-4">
+        <p className="text-2xl mb-2">รายละเอียด</p>
         {product.Details ? (
           <p className="mt-2">{product.Details}</p>
         ) : (
@@ -335,6 +386,7 @@ export default function ProductDetailsClient({ product, totalReviewsCount, Produ
         )}
       </div>
 
+      {/* Reviews */}
       <div className="text-[#535353] w-full h-fit bg-white mt-6 p-4 rounded-2xl">
         <div className="w-full flex justify-between items-center">
           <h3 className="text-2xl mb-2">รีวิวสินค้า</h3>
@@ -342,19 +394,18 @@ export default function ProductDetailsClient({ product, totalReviewsCount, Produ
         {reviews.length > 0 ? (
           reviews.map((review) => (
             <div key={review.id} className="bg-white p-4 rounded-lg shadow mb-4">
-
               <div className="flex items-center">
                 <Rating readonly initialValue={review.rating} size={20} iconsCount={5} />
-                <p className="ml-2 text-sm text-gray-500">                      
+                <p className="ml-2 text-sm text-gray-500">
                   <DateComponent date={review.createdAt}/>
-                  </p>
+                </p>
               </div>
-              <p className='text-[#2b2b2b]'>{review.user.name}</p>
+              <p className="text-[#2b2b2b]">{review.user.name}</p>
               <p className="mt-2">{review.review}</p>
             </div>
           ))
         ) : (
-          <p className=" text-gray-500">ยังไม่มีรีวิวในสินค้านี้</p>
+          <p className="text-gray-500">ยังไม่มีรีวิวในสินค้านี้</p>
         )}
         {hasMore && (
           <button
@@ -365,24 +416,6 @@ export default function ProductDetailsClient({ product, totalReviewsCount, Produ
           </button>
         )}
       </div>
-      <style jsx>{`
-        /* Chrome, Safari, Edge, Opera */
-        input[type='number']::-webkit-outer-spin-button,
-        input[type='number']::-webkit-inner-spin-button {
-          -webkit-appearance: none;
-          margin: 0;
-        }
-
-        /* Firefox */
-        input[type='number'] {
-          -moz-appearance: textfield;
-        }
-      `}</style>
     </div>
   );
 }
-
-
-
-
-
