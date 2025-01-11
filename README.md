@@ -41,6 +41,7 @@ This project is a E-commerce tool designed for selling GI product. It helps user
 ## Technologies Used
 - Next.js
 - React
+- Prisma
 - Tailwind CSS
 - Omise
 - Plausible track
