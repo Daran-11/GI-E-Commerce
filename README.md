@@ -20,17 +20,17 @@ This project is a E-commerce tool designed for selling GI product. It helps user
 
 ## Usage
 
-  User
+ **User**
 1. Open the app in your browser at `http://localhost:3000`.
 2. Log in or create an account to access features.
 3. register to farmer at the hamburger and need the municipal to accept your request **
 
- Farmer 
+ **Farmer**
 1. You can access the dashboard on top-right of the navbar if you gain access as a farmer role
 
- MUNICIPAL ***need to change role in database***
+ **MUNICIPAL** *need to change role in database*
 
- ADMIN ***need to change role in database***
+ **ADMIN** *need to change role in database*
 
 ## Features
 - Product Tracability
