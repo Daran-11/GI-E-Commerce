@@ -38,3 +38,5 @@ next-env.d.ts
 
 .env
 src/app/Login/page.js
+
+prisma/migrations/
