@@ -40,3 +40,6 @@ next-env.d.ts
 src/app/Login/page.js
 
 prisma/migrations/
+
+
+credentials/*.json
