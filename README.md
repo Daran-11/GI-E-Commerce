@@ -34,8 +34,11 @@ This project is a E-commerce tool designed for selling GI product. It helps user
 
 ## Features
 - Product Tracability
-- dashboard 
-- notification 
+- Product Management
+- Order Management
+- Analytics Dashboard
+- Payment Integration 
+- Notification 
 - Progress tracking
 
 ## Technologies Used
