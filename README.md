@@ -48,8 +48,8 @@ This project is a E-commerce tool designed for selling GI product. It helps user
 
 ## Contact
 For questions or feedback, contact 
-[6431503022@lamduan.mfu.ac.th] Daranphop
-[6431503027@lamduan.mfu.ac.th] Thanatorn
-[6431503021@lamduan.mfu.ac.th] Natthaphong
-[6431503063@lamduan.mfu.ac.th] Saran
-[6431503029@lamduan.mfu.ac.th] Thanapat
+- [6431503022@lamduan.mfu.ac.th] Daranphop
+- [6431503027@lamduan.mfu.ac.th] Thanatorn
+- [6431503021@lamduan.mfu.ac.th] Natthaphong
+- [6431503063@lamduan.mfu.ac.th] Saran
+- [6431503029@lamduan.mfu.ac.th] Thanapat
