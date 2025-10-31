@@ -1,0 +1,18 @@
+
+DATABASE_URL="mysql://user:password@localhost:3306/database"
+NEXTAUTH_SECRET="your-secret-here"
+NEXTAUTH_URL="http://localhost:3000/"
+
+# Plausible Analytics
+NEXT_PUBLIC_PLAUSIBLE_SITE_ID="your-site-id"
+NEXT_PUBLIC_PLAUSIBLE_API_KEY="your-api-key"
+
+# Payment Gateway
+NEXT_PUBLIC_OMISE_PUBLIC_KEY="your-public-key"
+OMISE_SECRET_KEY="your-secret-key"
+
+# Google Cloud
+GOOGLE_APPLICATION_CREDENTIALS="./credentials/your-credentials.json"
+
+# JWT
+JWT_SECRET="your-secret-key-here"
