@@ -6,7 +6,7 @@ This project is a E-commerce tool designed for selling GI product. It helps user
 ## Installation
 1. Clone the repository:
    ```bash
-   git clone https://gitlab.com/golddlogz78/gi-pineapple.git
+   git clone https://github.com/Daran-11/GI-E-Commerce.git
 
 2. cd project-name
 
@@ -34,6 +34,7 @@ This project is a E-commerce tool designed for selling GI product. It helps user
 
 ## Features
 - Product Tracability
+- Product Listing
 - Product Management
 - Order Management
 - Analytics Dashboard
