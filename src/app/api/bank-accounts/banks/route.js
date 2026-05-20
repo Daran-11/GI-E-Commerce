@@ -1,6 +1,14 @@
 import prisma from "../../../../../lib/prisma";
 
 export async function GET() {
-    const banks = await prisma.bank.findMany(); // ดึงข้อมูลธนาคารทั้งหมด
+  try {
+    const banks = await prisma.bank.findMany();
     return new Response(JSON.stringify(banks), { status: 200 });
+  } catch (error) {
+    console.error("Error fetching banks:", error);
+    return new Response(
+      JSON.stringify({ error: "Unable to fetch banks" }),
+      { status: 500 }
+    );
   }
+}

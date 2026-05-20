@@ -1,29 +1,35 @@
 import { NextResponse } from 'next/server';
-import prisma from '../../../../../../lib/prisma'; // เชื่อมต่อ Prisma
+import prisma from '../../../../../../lib/prisma';
 
 export async function PATCH(req, { params }) {
-  const { userId } = params;
-  const { id } = await req.json();
+  try {
+    const { userId } = params;
+    const { id } = await req.json();
 
-  // ค้นหาบัญชีที่ต้องการอัปเดต
-  const account = await prisma.bankAccount.findUnique({
-    where: { id },
-  });
+    const account = await prisma.bankAccount.findUnique({
+      where: { id },
+    });
 
-  if (!account) {
-    return NextResponse.json({ message: 'Account not found' }, { status: 404 });
+    if (!account) {
+      return NextResponse.json({ message: 'Account not found' }, { status: 404 });
+    }
+
+    await prisma.bankAccount.updateMany({
+      where: { userId: parseInt(userId), isDefault: true },
+      data: { isDefault: false },
+    });
+
+    const updatedAccount = await prisma.bankAccount.update({
+      where: { id },
+      data: { isDefault: true },
+    });
+
+    return NextResponse.json(updatedAccount);
+  } catch (error) {
+    console.error("Error setting default bank account:", error);
+    return NextResponse.json(
+      { error: "Unable to set default bank account" },
+      { status: 500 }
+    );
   }
-
-  // อัปเดตบัญชีที่เลือกให้เป็นบัญชีหลัก
-  await prisma.bankAccount.updateMany({
-    where: { userId: parseInt(userId), isDefault: true },
-    data: { isDefault: false }, // ตั้งบัญชีหลักเป็น false ก่อน
-  });
-
-  const updatedAccount = await prisma.bankAccount.update({
-    where: { id },
-    data: { isDefault: true },
-  });
-
-  return NextResponse.json(updatedAccount);
 }
