@@ -2,7 +2,7 @@
 
 import { CartProvider } from '@/context/cartContext';
 import { usePathname } from 'next/navigation';
-import Footer from './Footer';
+import Footer from './footer';
 import NavbarWrapper from './NavbarWrapper';
 
 
