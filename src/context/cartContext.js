@@ -1,230 +1,319 @@
 "use client";
 import { useSession } from 'next-auth/react';
 import { createContext, useContext, useEffect, useState } from 'react';
+import { mockProducts } from "../../lib/mockData";
 
 const CartContext = createContext();
+
+const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK_DATA === 'true';
+
+// ---- Mock cart store (in-memory, resets on page refresh) ----
+let mockCart = [];
+
+const mockCartActions = {
+  getCart: () => mockCart,
+
+  addItem: (item) => {
+    const existing = mockCart.find(i => i.productId === item.productId);
+    const product = mockProducts.find(p => p.ProductID === item.productId);
+    const maxAmount = product?.Amount ?? Infinity;
+
+    if (existing) {
+      const newQty = existing.quantity + item.quantity;
+      if (newQty <= maxAmount) existing.quantity = newQty;
+    } else {
+      mockCart.push({ ...item });
+    }
+    return [...mockCart];
+  },
+
+  removeItem: (productId) => {
+    mockCart = mockCart.filter(i => i.productId !== productId);
+    return [...mockCart];
+  },
+
+  updateQuantity: (productId, newQuantity) => {
+    const item = mockCart.find(i => i.productId === productId);
+    const product = mockProducts.find(p => p.ProductID === productId);
+    const maxAmount = product?.Amount ?? Infinity;
+
+    if (item && newQuantity <= maxAmount) item.quantity = newQuantity;
+    return [...mockCart];
+  },
+};
+// ---- End mock cart store ----
 
 export const CartProvider = ({ children }) => {
   const { data: session, status } = useSession();
   const [cartItems, setCartItems] = useState([]);
   const [cartItemCount, setCartItemCount] = useState(0);
 
+  const updateCount = (items) => {
+    const unique = new Set(items.map(i => i.productId)).size;
+    setCartItemCount(Math.min(unique, 99));
+  };
+
   let isFetching = false;
-    const fetchCartItems = async () => {
-      if (isFetching) return; // หากกำลัง fetch อยู่แล้ว ให้หยุดทำงาน
-      isFetching = true;
-      try {
-      if (status === 'authenticated' ) {
-        console.log("authenticated fetching cart")
-        const response = await fetch('/api/auth/cart', {
-          headers: {
-            'Cache-Control': 'max-age=120',
-          },
-        });
-        if (response.ok) {
-          const data = await response.json();
-          setCartItems(data);         
-          const uniqueItemsCount = new Set(data.map(item => item.productId)).size;
-          setCartItemCount(Math.min(uniqueItemsCount, 99));
+  const fetchCartItems = async () => {
+    if (isFetching) return;
+    isFetching = true;
+
+    try {
+      // Mock fallback — no DB, no login needed
+      if (USE_MOCK) {
+        const items = mockCartActions.getCart();
+        setCartItems(items);
+        updateCount(items);
+        return;
+      }
+
+      if (status === 'authenticated') {
+        try {
+          const response = await fetch('/api/auth/cart', {
+            headers: { 'Cache-Control': 'max-age=120' },
+          });
+          if (response.ok) {
+            const data = await response.json();
+            setCartItems(data);
+            updateCount(data);
+          }
+        } catch {
+          // DB unreachable — fall back to localStorage
+          console.warn('Cart API unavailable, falling back to localStorage');
+          const localCart = JSON.parse(localStorage.getItem('cart')) || [];
+          setCartItems(localCart);
+          updateCount(localCart);
         }
       } else {
         const localCart = JSON.parse(localStorage.getItem('cart')) || [];
         setCartItems(localCart);
-        const uniqueItemsCount = new Set(localCart.map(item => item.productId)).size;
-        setCartItemCount(Math.min(uniqueItemsCount, 99));
+        updateCount(localCart);
       }
-      } finally {
-        isFetching = false;
-      }
-    };
-
-    const clearCartItems = async (productId) => {
-      const response = await fetch('/api/auth/cart/delete', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ productId }),
-      });
-      if (response.ok) {
-        await fetchCartItems(); // Refresh cart after deletion
-      }
-    };
-
+    } finally {
+      isFetching = false;
+    }
+  };
 
   useEffect(() => {
-    if (status ==='authenticated' && session) {
-      syncCartWithServer(session);
-      fetchCartItems();
-    } 
-    if (status ==='unauthenticated' && !session) {
+    if (status === 'authenticated' && session) {
+      if (!USE_MOCK) syncCartWithServer(session);
       fetchCartItems();
     }
-
+    if (status === 'unauthenticated' && !session) {
+      fetchCartItems();
+    }
   }, [status]);
 
-  // ใส่ตัวเช็คว่าจำนวนจะเกินไหมใน syncCartwithServer
   const syncCartWithServer = async (session) => {
+    if (USE_MOCK) return;
     const localCart = JSON.parse(localStorage.getItem('cart')) || [];
-    console.log("Local Cart before sync:", localCart);
-    if (!localCart.length) return; // ถ้าไม่มีสินค้าก็ไม่ต้องซิงค์
+    if (!localCart.length) return;
+
     for (const item of localCart) {
       try {
-        console.log(`Syncing productId: ${item.productId}, quantity: ${item.quantity}`);
         await fetch('/api/auth/cart/add', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(item),
         });
       } catch (error) {
-        console.error(`Failed to sync item with productId: ${item.productId}`, error);
+        console.error(`Failed to sync item ${item.productId}:`, error);
       }
     }
 
     localStorage.removeItem('cart');
 
-    // Fetch updated cart items from server
     if (status === 'authenticated' && session) {
-      const response = await fetch('/api/auth/cart', {
-        headers: {
-          'Cache-Control': 'no-cache',
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log("Cart data from server after sync:", data);
-        setCartItems(data); // Update state with server data
-        console.log("synced with server finished, cartItems:",cartItems);
-        const uniqueItemsCount = new Set(data.map(item => item.productId)).size;
-        setCartItemCount(Math.min(uniqueItemsCount, 99)); // Update count
+      try {
+        const response = await fetch('/api/auth/cart', {
+          headers: { 'Cache-Control': 'no-cache' },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setCartItems(data);
+          updateCount(data);
+        }
+      } catch {
+        console.warn('Sync fetch failed, keeping local state');
       }
     }
   };
 
   const addItemToCart = async (item) => {
+    // Mock fallback
+    if (USE_MOCK) {
+      const updated = mockCartActions.addItem(item);
+      setCartItems(updated);
+      updateCount(updated);
+      return;
+    }
 
     if (status === 'authenticated') {
-      const response = await fetch('/api/auth/cart/add', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(item),
-      });
-
-      if (!response.ok) {
-        console.error('Failed to add item to cart on server:', await response.text());
-        return;
-      }
-
-
-      if (response.ok) {
-        setCartItems(prevItems => {
-          const updatedItems = [...prevItems];
-          const existingItemIndex = updatedItems.findIndex(i => i.productId === item.productId);
-
-          if (existingItemIndex !== -1) {
-            const existingItem = updatedItems[existingItemIndex];
-            const newQuantity = existingItem.quantity + item.quantity;
-
-            if (newQuantity <= existingItem.productAmount) {
-              updatedItems[existingItemIndex] = { ...existingItem, quantity: newQuantity };
-            }
-          } else {
-            updatedItems.push(item);
-          }
-
-          const uniqueItems = new Set(updatedItems.map(i => i.productId)).size;
-          setCartItemCount(Math.min(uniqueItems, 99));
-          return updatedItems;
+      try {
+        const response = await fetch('/api/auth/cart/add', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(item),
         });
-      }
-      if (status === 'authenticated') {
-        syncCartWithServer(session);
+
+        if (response.ok) {
+          setCartItems(prev => {
+            const updated = [...prev];
+            const idx = updated.findIndex(i => i.productId === item.productId);
+            if (idx !== -1) {
+              const newQty = updated[idx].quantity + item.quantity;
+              if (newQty <= updated[idx].productAmount)
+                updated[idx] = { ...updated[idx], quantity: newQty };
+            } else {
+              updated.push(item);
+            }
+            updateCount(updated);
+            return updated;
+          });
+        }
+      } catch {
+        // DB down — fall back to localStorage
+        console.warn('Add to cart API failed, using localStorage');
+        const localCart = JSON.parse(localStorage.getItem('cart')) || [];
+        const existing = localCart.find(i => i.productId === item.productId);
+        if (existing) {
+          const newQty = existing.quantity + item.quantity;
+          if (newQty <= item.productAmount) existing.quantity = newQty;
+        } else {
+          localCart.push(item);
+        }
+        localStorage.setItem('cart', JSON.stringify(localCart));
+        setCartItems(localCart);
+        updateCount(localCart);
       }
     } else {
       const localCart = JSON.parse(localStorage.getItem('cart')) || [];
-      const existingItem = localCart.find(i => i.productId === item.productId);
-
-      if (existingItem) {
-        const newQuantity = existingItem.quantity + item.quantity;
-
-        if (newQuantity <= item.productAmount) {
-          existingItem.quantity = newQuantity;
-          console.log("existing item updated");
-        }
+      const existing = localCart.find(i => i.productId === item.productId);
+      if (existing) {
+        const newQty = existing.quantity + item.quantity;
+        if (newQty <= item.productAmount) existing.quantity = newQty;
       } else {
-        localCart.push(item); // Add new item
+        localCart.push(item);
       }
-
       localStorage.setItem('cart', JSON.stringify(localCart));
       setCartItems(localCart);
-      const uniqueItems = new Set(localCart.map(i => i.productId)).size;
-      setCartItemCount(Math.min(uniqueItems, 99));
+      updateCount(localCart);
     }
   };
 
   const removeItemFromCart = (productId) => {
+    // Mock fallback
+    if (USE_MOCK) {
+      const updated = mockCartActions.removeItem(productId);
+      setCartItems(updated);
+      updateCount(updated);
+      return;
+    }
+
     if (status === 'authenticated') {
-      console.log("authenticated for item cart deletion");
       fetch('/api/auth/cart/delete', {
         method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ productId }),
-      }).then((response) => {
-        if (response.ok) {
-          localStorage.removeItem('cart');
-          setCartItems(prevItems => prevItems.filter(item => item.productId !== productId));
-          setCartItemCount(prevCount => prevCount - 1);
-        }
-      });
+      })
+        .then(response => {
+          if (response.ok) {
+            setCartItems(prev => {
+              const updated = prev.filter(i => i.productId !== productId);
+              updateCount(updated);
+              return updated;
+            });
+          }
+        })
+        .catch(() => {
+          // DB down — remove from localStorage
+          const localCart = JSON.parse(localStorage.getItem('cart')) || [];
+          const updated = localCart.filter(i => i.productId !== productId);
+          localStorage.setItem('cart', JSON.stringify(updated));
+          setCartItems(updated);
+          updateCount(updated);
+        });
     } else {
-      console.log("delete cart items without login");
       const localCart = JSON.parse(localStorage.getItem('cart')) || [];
-      const updatedCart = localCart.filter(item => item.productId !== productId);
-      localStorage.setItem('cart', JSON.stringify(updatedCart));
-      setCartItems(updatedCart);
-      setCartItemCount(updatedCart.length);
+      const updated = localCart.filter(i => i.productId !== productId);
+      localStorage.setItem('cart', JSON.stringify(updated));
+      setCartItems(updated);
+      updateCount(updated);
     }
   };
 
   const updateItemQuantity = (productId, newQuantity) => {
+    // Mock fallback
+    if (USE_MOCK) {
+      const updated = mockCartActions.updateQuantity(productId, newQuantity);
+      setCartItems(updated);
+      return;
+    }
+
     if (status === 'authenticated') {
       fetch('/api/auth/cart/update', {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ productId, quantity: newQuantity }),
-      }).then((response) => {
-        if (response.ok) {
-          console.log('set new cart update')
-          setCartItems(prevItems => {
-            return prevItems.map(item =>
-              item.productId === productId ? { ...item, quantity: newQuantity } : item
+      })
+        .then(response => {
+          if (response.ok) {
+            setCartItems(prev =>
+              prev.map(i => i.productId === productId ? { ...i, quantity: newQuantity } : i)
             );
-          });
-        }
-      });
+          }
+        })
+        .catch(() => {
+          const localCart = JSON.parse(localStorage.getItem('cart')) || [];
+          const item = localCart.find(i => i.productId === productId);
+          if (item && newQuantity <= item.productAmount) {
+            const updated = localCart.map(i =>
+              i.productId === productId ? { ...i, quantity: newQuantity } : i
+            );
+            localStorage.setItem('cart', JSON.stringify(updated));
+            setCartItems(updated);
+          }
+        });
     } else {
       const localCart = JSON.parse(localStorage.getItem('cart')) || [];
       const item = localCart.find(i => i.productId === productId);
-
       if (item && newQuantity <= item.productAmount) {
-        const updatedCart = localCart.map(i =>
+        const updated = localCart.map(i =>
           i.productId === productId ? { ...i, quantity: newQuantity } : i
         );
-        localStorage.setItem('cart', JSON.stringify(updatedCart));
-        setCartItems(updatedCart);
+        localStorage.setItem('cart', JSON.stringify(updated));
+        setCartItems(updated);
       }
     }
   };
 
+  const clearCartItems = async (productId) => {
+    if (USE_MOCK) {
+      const updated = mockCartActions.removeItem(productId);
+      setCartItems(updated);
+      updateCount(updated);
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/auth/cart/delete', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId }),
+      });
+      if (response.ok) await fetchCartItems();
+    } catch {
+      removeItemFromCart(productId);
+    }
+  };
+
   return (
-    <CartContext.Provider value={{ cartItems, cartItemCount, setCartItems, setCartItemCount, addItemToCart, removeItemFromCart, updateItemQuantity, clearCartItems  }}>
+    <CartContext.Provider value={{
+      cartItems, cartItemCount,
+      setCartItems, setCartItemCount,
+      addItemToCart, removeItemFromCart,
+      updateItemQuantity, clearCartItems,
+    }}>
       {children}
     </CartContext.Provider>
   );

@@ -54,7 +54,7 @@ export default function page() {
         <div className='w-fit h-[600px] lg:space-x-14 flex items-center justify-end'>
           <div className='flex justify-start w-max'>
             <Image
-              src="/uploads/GI.png" // เส้นทางของไฟล์ในโฟลเดอร์ public
+              src="/certificates/GI.png" // เส้นทางของไฟล์ในโฟลเดอร์ public
               alt="ตัวอย่างรูปภาพ"
           
               width={400}
