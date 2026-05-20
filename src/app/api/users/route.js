@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import prisma from "../../../../lib/prisma";
 
+export const dynamic = 'force-dynamic';
 // GET Multiple Users Data
 export async function GET(req) {
     const session = await getServerSession({ req, ...authOptions });
