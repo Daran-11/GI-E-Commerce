@@ -1,7 +1,7 @@
 "use client";
 
 import SearchBar from "@/components/searchbar";
-import { mockProducts } from "@/lib/mockData";
+import { mockProducts } from "../../lib/mockData";
 import debounce from "lodash.debounce";
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from "react";
