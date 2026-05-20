@@ -1,30 +1,34 @@
 "use client";
 
 import SearchBar from "@/components/searchbar";
-import debounce from "lodash.debounce"; // Import lodash debounce
+import { mockProducts } from "@/lib/mockData";
+import debounce from "lodash.debounce";
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from "react";
 import ProductCard from "../components/productcard";
-import Skeleton from "../components/Skeleton"; // Import your Skeleton component
+import Skeleton from "../components/Skeleton";
 
 async function fetchProducts(sortBy = '') {
   console.log('Fetching products...');
   try {
     const res = await fetch(`/api/product?sortBy=${sortBy}`);
     if (!res.ok) {
-      return { error: 'ไม่สามารถเชื่อมต่อข้อมูลได้ในขณะนี้' };
+      console.log('Database unavailable, using mock data');
+      return { products: mockProducts, error: null, isMockData: true };
     }
     const products = await res.json();
-    return { products, error: null };
+    return { products, error: null, isMockData: false };
   } catch (error) {
-    return { products: [], error: 'ไม่พบข้อมูล' };
+    console.error('Error fetching products:', error);
+    return { products: mockProducts, error: null, isMockData: true };
   }
 }
 
 export default function Home() {
   const [products, setProducts] = useState([]);
   const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true); // Add loading state
+  const [loading, setLoading] = useState(true);
+  const [isMockData, setIsMockData] = useState(false);
   const searchParams = useSearchParams();
   const query = searchParams.get('query');
   const router = useRouter();
@@ -32,17 +36,17 @@ export default function Home() {
   const [maxPrice, setMaxPrice] = useState('');
   const [sortBy, setSortBy] = useState('');
 
-  // Fetch products whenever sortBy changes
   useEffect(() => {
     const loadProducts = async () => {
-      setLoading(true); // Start loading
-      const { products, error } = await fetchProducts(sortBy);
+      setLoading(true);
+      const { products, error, isMockData } = await fetchProducts(sortBy);
       if (error) {
         setError(error);
       } else {
         setProducts(products);
+        setIsMockData(isMockData);
       }
-      setLoading(false); // End loading
+      setLoading(false);
     };
 
     loadProducts();
@@ -168,17 +172,21 @@ export default function Home() {
           </div>
         </div>
         <div>
-          {loading ? ( // Conditional rendering based on loading state
-          <div className='p-4'>             
-          <Skeleton />
-          </div>
-
+          {loading ? (
+            <div className='p-4'>
+              <Skeleton />
+            </div>
           ) : error ? (
             <div className="alert alert-error justify-center flex items-center text-gray-500">
               <p>{error}</p>
             </div>
           ) : (
-            <div className="bg-gray-100 p-4 rounded-lg"> {/* Background div for ProductCard */}
+            <div className="bg-gray-100 p-4 rounded-lg">
+              {isMockData && (
+                <div className="bg-yellow-100 border border-yellow-400 text-yellow-800 px-4 py-3 rounded mb-4">
+                  ⚠️ แสดงข้อมูลตัวอย่าง - ฐานข้อมูลไม่พร้อมใช้งาน (Demo Data)
+                </div>
+              )}
               <ProductCard products={filteredProducts} />
             </div>
           )}
