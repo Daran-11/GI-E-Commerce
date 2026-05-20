@@ -3,6 +3,8 @@ import { NextResponse } from 'next/server';
 import prisma from '../../../../../lib/prisma';
 import { authOptions } from '../../auth/[...nextauth]/route';
 
+export const dynamic = 'force-dynamic';
+
 export async function PUT(request, { params }) {
   const { id } = params;
   const { addressLine, provinceId, amphoeId, tambonId, postalCode, isDefault } = await request.json();
