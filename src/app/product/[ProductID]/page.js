@@ -1,92 +1,107 @@
 import ProductDetailsClient from '@/components/productDetails/productDetailsClient';
 import prisma from '../../../../lib/prisma';
+import { getMockProduct, getMockProductParams } from '../../../../lib/mockData';
 
 export const revalidate = 30
 
 export async function generateStaticParams() {
-  const products = await prisma.product.findMany({
-    select: {
-      ProductID: true,
-      
-    },
-  });
+  try {
+    const products = await prisma.product.findMany({
+      select: {
+        ProductID: true,
+      },
+    });
 
-  return products.map((Product) => ({
-    ProductID: Product.ProductID.toString(),
-  }));
+    return products.map((Product) => ({
+      ProductID: Product.ProductID.toString(),
+    }));
+  } catch (error) {
+    console.log('Database unavailable during build, using mock data');
+    return getMockProductParams();
+  }
 }
 
 export default async function ProductDetails({ params }) {
-  const product = await prisma.product.findUnique({
-    where: {
-      ProductID: parseInt(params.ProductID, 10),
-    },
-    select: {
-      ProductID: true,
-      ProductName: true,
-      ProductType: true,
-      Amount: true,
-      Price: true,
-      Description:true,
-      Details:true,
-      images: true,
-      HarvestedAt: true,
-      certificates: {
-        include: {
-          certificate: {
-            select: {
-              id: true,
-              standards: true, // Include standards JSON field
-              createdAt: true,
-              updatedAt: true,
+  let product = null;
+  let totalReviewsCount = 0;
+
+  try {
+    product = await prisma.product.findUnique({
+      where: {
+        ProductID: parseInt(params.ProductID, 10),
+      },
+      select: {
+        ProductID: true,
+        ProductName: true,
+        ProductType: true,
+        Amount: true,
+        Price: true,
+        Description:true,
+        Details:true,
+        images: true,
+        HarvestedAt: true,
+        certificates: {
+          include: {
+            certificate: {
+              select: {
+                id: true,
+                standards: true,
+                createdAt: true,
+                updatedAt: true,
+              },
+            },
+          },
+        },
+        farmer: {
+          select: {
+            id:true,
+            farmerName: true,
+            province: true,
+            contactLine: true,
+          },
+        },
+        reviews: {
+          take: 5,
+          select: {
+            id: true,
+            rating: true,
+            review: true,
+            createdAt: true,
+            user: {
+              select: {
+                id: true,
+                name: true,
+              }
             },
           },
         },
       },
-      farmer: {
-        select: {
-          id:true,
-          farmerName: true,  // Select specific fields from the Farmer model
-          province: true,
-          contactLine: true,  // You can include more fields as needed
+    });
+
+    if (product) {
+      totalReviewsCount = await prisma.ratingReview.count({
+        where: {
+          productId:  parseInt(params.ProductID, 10),
         },
-      },
-      reviews: {
-        take: 5, // Limit the number of reviews fetched initially
-        select: {
-          id: true,
-          rating: true,
-          review: true,
-          createdAt: true,
-          user: {
-            select: {
-              id: true,
-              name: true, // Fetch the user who wrote the review
-            }
-          },
-        },
-      },
-    },
-  });
+      });
+    }
+  } catch (error) {
+    console.error('Database error, attempting to use mock data:', error);
+    product = getMockProduct(parseInt(params.ProductID, 10));
+    if (product) {
+      totalReviewsCount = product.reviews.length;
+    }
+  }
 
   if (!product) {
     return <p>Product not found</p>;
   }
 
-    // Count the total number of reviews (for load more functionality)
-    const totalReviewsCount = await prisma.ratingReview.count({
-      where: {
-        productId:  parseInt(params.ProductID, 10),
-      },
-    });
-
   return (
-
-      <div >
-        <ProductDetailsClient product={product}
-          ProductID = {product.ProductID}
-         totalReviewsCount={totalReviewsCount} />
-      </div>
-
+    <div >
+      <ProductDetailsClient product={product}
+        ProductID = {product.ProductID}
+       totalReviewsCount={totalReviewsCount} />
+    </div>
   );
 }
